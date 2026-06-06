@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans;
+  }
+  * {
+    @apply box-border;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-400;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+  .btn-success {
+    @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+  .card-header {
+    @apply flex items-center justify-between mb-6 pb-4 border-b border-gray-100;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1.5;
+  }
+  .form-input {
+    @apply w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all;
+  }
+  .form-select {
+    @apply form-input bg-white cursor-pointer;
+  }
+  .form-textarea {
+    @apply form-input resize-y min-h-[100px];
+  }
+  .form-error {
+    @apply text-red-500 text-xs mt-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-success {
+    @apply badge bg-green-100 text-green-800;
+  }
+  .badge-danger {
+    @apply badge bg-red-100 text-red-800;
+  }
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-800;
+  }
+  .badge-info {
+    @apply badge bg-blue-100 text-blue-800;
+  }
+
+  .table-container {
+    @apply overflow-x-auto rounded-xl border border-gray-200;
+  }
+  .table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+  .table th {
+    @apply px-4 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50;
+  }
+  .table td {
+    @apply px-4 py-3.5 text-sm text-gray-700 whitespace-nowrap;
+  }
+  .table tr:hover td {
+    @apply bg-gray-50;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+  }
+  .sidebar-link-active {
+    @apply sidebar-link bg-primary-50 text-primary-700 hover:bg-primary-50;
+  }
+}
+
+/* ── Rich text editor content ────────────────────────────────── */
+.rte-content:empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+.rte-content h1 { font-size: 1.5rem; font-weight: 700; margin: 0.5rem 0; }
+.rte-content h2 { font-size: 1.25rem; font-weight: 700; margin: 0.5rem 0; }
+.rte-content h3 { font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; }
+.rte-content p { margin: 0.25rem 0; }
+.rte-content ul { list-style: disc; padding-left: 1.5rem; margin: 0.25rem 0; }
+.rte-content ol { list-style: decimal; padding-left: 1.5rem; margin: 0.25rem 0; }
+.rte-content a { color: #2563eb; text-decoration: underline; }
+.rte-content blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 0.75rem;
+  color: #4b5563;
+  margin: 0.5rem 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }
+
+/* ── Shimmer skeleton animation ─────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Page content fade-in ────────────────────────────────────── */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-page-in {
+  animation: page-in 0.22s ease-out both;
+}
+
+/* ── Top progress bar sweep ──────────────────────────────────── */
+@keyframes progress-bar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.animate-progress-bar {
+  transform-origin: left center;
+  animation: progress-bar 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── AppLoader / initial-loader dots ─────────────────────────── */
+@keyframes app-dot {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%       { opacity: 1;    transform: scale(1.3); }
+}
+.animate-app-dot {
+  animation: app-dot 1.2s ease-in-out infinite;
+}

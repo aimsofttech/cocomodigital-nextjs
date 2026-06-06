@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+cocoma-node-backend/node_modules/
+cocoma-react-admin/node_modules/
+
+# Environment files
+.env
+cocoma-node-backend/.env
+
+# Logs
+logs/
+cocoma-node-backend/logs/
+*.log
+npm-debug.log*
+
+# Build output
+cocoma-react-admin/dist/
+
+# OS
+.DS_Store
+Thumbs.db

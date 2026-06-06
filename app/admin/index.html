@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cocoma Digital — Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- ── Initial page-load CSS loader (shown BEFORE any JS runs) ── -->
+    <style id="ail-styles">
+      #ail {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        opacity: 1;
+        transition: opacity 0.35s ease;
+      }
+      #ail.ail-hide { opacity: 0; pointer-events: none; }
+
+      .ail-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .ail-icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        background: #2563eb;
+        border-radius: 0.625rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.125rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+      .ail-wordmark {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: #111827;
+        letter-spacing: -0.02em;
+      }
+      .ail-wordmark span { color: #2563eb; }
+
+      .ail-dots {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+      }
+      .ail-dot {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 9999px;
+        background: #2563eb;
+        opacity: 0.25;
+        animation: ail-pulse 1.2s ease-in-out infinite;
+      }
+      .ail-dot:nth-child(1) { animation-delay: 0s; }
+      .ail-dot:nth-child(2) { animation-delay: 0.2s; }
+      .ail-dot:nth-child(3) { animation-delay: 0.4s; }
+
+      @keyframes ail-pulse {
+        0%, 100% { opacity: 0.25; transform: scale(0.8); }
+        50%       { opacity: 1;    transform: scale(1.25); }
+      }
+
+      .ail-tagline {
+        margin-top: -0.75rem;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        letter-spacing: 0.04em;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Pure-CSS branded loader — visible before React hydrates -->
+    <div id="ail">
+      <div class="ail-brand">
+        <div class="ail-icon">C</div>
+        <div class="ail-wordmark">Cocoma <span>Digital</span></div>
+      </div>
+      <div class="ail-dots">
+        <div class="ail-dot"></div>
+        <div class="ail-dot"></div>
+        <div class="ail-dot"></div>
+      </div>
+      <p class="ail-tagline">Loading admin panel&hellip;</p>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

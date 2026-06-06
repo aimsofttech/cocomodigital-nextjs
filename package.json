@@ -1,0 +1,21 @@
+{
+  "name": "cocoma-admin-api",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "app/api",
+    "app/admin"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"API,ADMIN\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run dev -w @cocoma/api\" \"npm run dev -w @cocoma/admin\"",
+    "dev:api": "npm run dev -w @cocoma/api",
+    "dev:admin": "npm run dev -w @cocoma/admin",
+    "build": "npm run build -w @cocoma/admin",
+    "start": "npm run start -w @cocoma/api",
+    "seed": "npm run seed -w @cocoma/api",
+    "install:all": "npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

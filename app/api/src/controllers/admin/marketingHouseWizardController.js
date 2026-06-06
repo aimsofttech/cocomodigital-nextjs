@@ -1,0 +1,114 @@
+const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
+const MarketingHouseItem = require('../../models/MarketingHouseItem');
+const MarketingHouseImage = require('../../models/MarketingHouseImage');
+const MarketingHouseStatics = require('../../models/MarketingHouseStatics');
+const MarketingHousePerformance = require('../../models/MarketingHousePerformance');
+const MarketingHousePreLaunchActivity = require('../../models/MarketingHousePreLaunchActivity');
+const MarketingHouseIdeaStrategyPlanning = require('../../models/MarketingHouseIdeaStrategyPlanning');
+const { generateSlug } = require('../../utils/helpers');
+const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
+
+// Wizard stores state server-side in the session equivalent using a temp store per user
+// In Node.js we use a simple in-memory store per user session (identified by JWT user id)
+const wizardStore = {};
+
+const storeStep1 = async (req, res) => {
+  const userId = req.user._id.toString();
+  const { marketing_house_category_id, marketing_house_title, marketing_house_video_url, marketing_house_description } = req.body;
+
+  const slug = generateSlug(marketing_house_title);
+  const ytId = marketing_house_video_url ? getYoutubeVideoId(marketing_house_video_url) : null;
+  let thumbnailKey = null;
+  if (ytId && !req.file) {
+    thumbnailKey = await uploadYoutubeThumbnailToS3(
+      `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+      `${ytId}_${Date.now()}`,
+      'marketing_thumbnails'
+    );
+  }
+
+  wizardStore[userId] = {
+    step1: {
+      marketing_house_category_id,
+      marketing_house_title,
+      marketing_house_slug: slug,
+      marketing_house_video_url,
+      marketing_house_youtube_id: ytId || '',
+      marketing_house_thumbnail: req.file ? (req.file.key || req.file.path) : thumbnailKey,
+      marketing_house_description,
+    },
+  };
+
+  res.json({ status: 'success', message: 'Step 1 saved', data: wizardStore[userId].step1 });
+};
+
+const storeStep2 = async (req, res) => {
+  const userId = req.user._id.toString();
+  if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
+  wizardStore[userId].step2 = req.body;
+  res.json({ status: 'success', message: 'Step 2 saved' });
+};
+
+const storeStep3 = async (req, res) => {
+  const userId = req.user._id.toString();
+  if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
+  wizardStore[userId].step3 = req.body;
+  res.json({ status: 'success', message: 'Step 3 saved' });
+};
+
+const storeStep4 = async (req, res) => {
+  const userId = req.user._id.toString();
+  if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
+  wizardStore[userId].step4 = req.body;
+  res.json({ status: 'success', message: 'Step 4 saved' });
+};
+
+const storeStep5 = async (req, res) => {
+  const userId = req.user._id.toString();
+  if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
+  wizardStore[userId].step5 = req.body;
+  res.json({ status: 'success', message: 'Step 5 saved' });
+};
+
+const storeStep6 = async (req, res) => {
+  const userId = req.user._id.toString();
+  if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
+  wizardStore[userId].step6 = req.body;
+  res.json({ status: 'success', message: 'Step 6 saved' });
+};
+
+const storeStep7 = async (req, res) => {
+  const userId = req.user._id.toString();
+  if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
+
+  const data = wizardStore[userId];
+  const item = await MarketingHouseItem.create({ ...data.step1, user_id: req.user._id, status: 0 });
+
+  // Create related records from other steps
+  if (data.step2?.statics) {
+    for (const s of data.step2.statics) {
+      await MarketingHouseStatics.create({ ...s, marketing_house_item_id: item._id, user_id: req.user._id });
+    }
+  }
+  if (data.step3?.performance) {
+    for (const p of data.step3.performance) {
+      await MarketingHousePerformance.create({ ...p, marketing_house_item_id: item._id, user_id: req.user._id });
+    }
+  }
+  if (data.step4?.pre_launch) {
+    for (const p of data.step4.pre_launch) {
+      await MarketingHousePreLaunchActivity.create({ ...p, marketing_house_item_id: item._id, user_id: req.user._id });
+    }
+  }
+  if (data.step5?.idea_strategy) {
+    for (const idea of data.step5.idea_strategy) {
+      await MarketingHouseIdeaStrategyPlanning.create({ ...idea, marketing_house_item_id: item._id, user_id: req.user._id });
+    }
+  }
+
+  delete wizardStore[userId];
+
+  res.status(201).json({ status: 'success', message: 'Marketing house item created via wizard', data: item });
+};
+
+module.exports = { storeStep1, storeStep2, storeStep3, storeStep4, storeStep5, storeStep6, storeStep7 };

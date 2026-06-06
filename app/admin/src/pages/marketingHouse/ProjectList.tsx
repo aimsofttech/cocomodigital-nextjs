@@ -1,0 +1,37 @@
+import { useCrud } from '@/hooks/useCrud';
+import CrudListPage from '@/components/ui/CrudListPage';
+import StatusToggle from '@/components/ui/StatusToggle';
+import toast from 'react-hot-toast';
+import { marketingHouseProjectApi } from '@/services/adminApi';
+import ProjectForm from './ProjectForm';
+
+export default function ProjectList() {
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseProjectApi);
+
+  const handleStatusChange = async (id: string, newStatus: number) => {
+    try {
+      await marketingHouseProjectApi.update(id, { status: newStatus });
+      toast.success('Status updated successfully');
+      fetchAll();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update status');
+    }
+  };
+
+  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  const columns = [
+    { key: 'banner_title_template_id', label: 'Banner Template', sortable: true },
+    { key: 'book_call_template_id', label: 'Book Call Template', sortable: true },
+    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
+  ];
+  return (
+    <CrudListPage title="Marketing Projects" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Projects' }]}
+      columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
+      renderModal={({ id, onSuccess, onCancel }) => <ProjectForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Project' : 'Add Marketing Project'}
+      modalSize="lg" onRefresh={fetchAll} />
+  );
+}

@@ -1,0 +1,17 @@
+{
+  "name": "cocoma-mysql-to-mongodb-migration",
+  "version": "1.0.0",
+  "description": "Migrates all MySQL data from cocma_digital_db into MongoDB cocoma_digital_db",
+  "main": "migrate.js",
+  "scripts": {
+    "migrate": "node migrate.js",
+    "verify": "node verify.js",
+    "migrate:dry-run": "node migrate.js --dry-run"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.8.4",
+    "mysql2": "^3.11.3"
+  }
+}
