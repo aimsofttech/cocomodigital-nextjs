@@ -30,6 +30,7 @@ const MarketingCategoryList = lazy(() => import('@/pages/marketingHouse/Category
 const MarketingCategoryForm = lazy(() => import('@/pages/marketingHouse/CategoryForm'));
 const MarketingItemList = lazy(() => import('@/pages/marketingHouse/ItemList'));
 const MarketingItemForm = lazy(() => import('@/pages/marketingHouse/ItemForm'));
+const MarketingHighlightsList = lazy(() => import('@/pages/marketingHouse/HighlightsList'));
 const MarketingImageList = lazy(() => import('@/pages/marketingHouse/ImageList'));
 const MarketingImageForm = lazy(() => import('@/pages/marketingHouse/ImageForm'));
 const MarketingStaticsList = lazy(() => import('@/pages/marketingHouse/StaticsList'));
@@ -215,6 +216,7 @@ export default function App() {
           <Route path="marketing/category/add" element={<MarketingCategoryForm />} />
           <Route path="marketing/category/edit/:id" element={<MarketingCategoryForm />} />
           <Route path="marketing/item" element={<MarketingItemList />} />
+          <Route path="marketing/highlights" element={<MarketingHighlightsList />} />
           <Route path="marketing/item/add" element={<MarketingItemForm />} />
           <Route path="marketing/item/edit/:id" element={<MarketingItemForm />} />
           <Route path="marketing/item/:itemId/images" element={<MarketingImageList />} />

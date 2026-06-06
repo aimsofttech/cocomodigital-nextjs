@@ -1,4 +1,4 @@
-import { useCrud } from '@/hooks/useCrud';
+import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
@@ -7,7 +7,7 @@ import { marketingHouseCommunityProgramItemApi } from '@/services/adminApi';
 import CommunityProgramItemForm from './CommunityProgramItemForm';
 
 export default function CommunityProgramItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseCommunityProgramItemApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseCommunityProgramItemApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {

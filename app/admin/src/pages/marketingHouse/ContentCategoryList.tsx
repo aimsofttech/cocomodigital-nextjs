@@ -1,4 +1,4 @@
-import { useCrud } from '@/hooks/useCrud';
+import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
@@ -6,7 +6,7 @@ import { marketingHouseContentCategoryApi } from '@/services/adminApi';
 import ContentCategoryForm from './ContentCategoryForm';
 
 export default function ContentCategoryList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseContentCategoryApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseContentCategoryApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {

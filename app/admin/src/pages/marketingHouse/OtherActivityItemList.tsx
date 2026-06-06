@@ -1,4 +1,4 @@
-import { useCrud } from '@/hooks/useCrud';
+import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
@@ -7,7 +7,7 @@ import { marketingHouseOtherActivityItemApi } from '@/services/adminApi';
 import OtherActivityItemForm from './OtherActivityItemForm';
 
 export default function OtherActivityItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseOtherActivityItemApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseOtherActivityItemApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {

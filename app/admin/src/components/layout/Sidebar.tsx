@@ -45,6 +45,7 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Categories',       path: '/marketing/category',         icon: TagIcon },
       { label: 'Items',            path: '/marketing/item',             icon: ListBulletIcon },
+      { label: 'Highlights',       path: '/marketing/highlights',       icon: StarIcon },
       { label: 'Projects',         path: '/marketing/project',          icon: RocketLaunchIcon },
       { label: 'Form Submissions', path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
       { label: 'Wizard',           path: '/marketing/wizard',           icon: SparklesIcon },

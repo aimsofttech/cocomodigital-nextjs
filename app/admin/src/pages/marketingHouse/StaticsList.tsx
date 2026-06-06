@@ -1,4 +1,4 @@
-import { useCrud } from '@/hooks/useCrud';
+import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
@@ -6,7 +6,7 @@ import { marketingHouseStaticsApi } from '@/services/adminApi';
 import StaticsForm from './StaticsForm';
 
 export default function StaticsList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseStaticsApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseStaticsApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {

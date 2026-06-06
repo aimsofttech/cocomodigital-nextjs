@@ -1,4 +1,4 @@
-import { useCrud } from '@/hooks/useCrud';
+import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
@@ -7,7 +7,7 @@ import { marketingHouseContentCarouselApi } from '@/services/adminApi';
 import ContentCarouselForm from './ContentCarouselForm';
 
 export default function ContentCarouselList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseContentCarouselApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseContentCarouselApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {

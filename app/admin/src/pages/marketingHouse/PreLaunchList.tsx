@@ -1,4 +1,4 @@
-import { useCrud } from '@/hooks/useCrud';
+import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
@@ -7,7 +7,7 @@ import { marketingHousePreLaunchApi } from '@/services/adminApi';
 import PreLaunchForm from './PreLaunchForm';
 
 export default function PreLaunchList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHousePreLaunchApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHousePreLaunchApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {

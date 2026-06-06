@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -5,6 +6,22 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { marketingHouseItemApi } from '@/services/adminApi';
 import ItemForm from './ItemForm';
+
+// Sub-modules reachable from a marketing item (each has full CRUD + status via API).
+const NAV_LINKS: { label: string; segment: string }[] = [
+  { label: 'Highlights',        segment: 'statics' },
+  { label: 'Poster Media',      segment: 'images' },
+  { label: 'Ideas Strategy',    segment: 'idea-strategy' },
+  { label: 'Prelaunch',         segment: 'pre-launch' },
+  { label: 'Performance',       segment: 'performance' },
+  { label: 'Other Act. Cat.',   segment: 'other-activity-category' },
+  { label: 'Other Act. Items',  segment: 'other-activity-item' },
+  { label: 'Content Category',  segment: 'content-category' },
+  { label: 'Content Items',     segment: 'content-item' },
+  { label: 'Content Carousel',  segment: 'content-carousel' },
+  { label: 'Continuity Cat.',   segment: 'community-program' },
+  { label: 'Continuity Items',  segment: 'community-program-item' },
+];
 
 export default function ItemList() {
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseItemApi);
@@ -27,6 +44,21 @@ export default function ItemList() {
     { key: 'year', label: 'Year', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
+    {
+      key: 'navigate', label: 'Navigate To', render: (row: any) => (
+        <div className="flex flex-wrap gap-1 max-w-md">
+          {NAV_LINKS.map((l) => (
+            <Link
+              key={l.segment}
+              to={`/marketing/item/${row._id}/${l.segment}`}
+              className="px-2 py-1 rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100 text-xs font-medium whitespace-nowrap transition-colors"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      ),
+    },
   ];
   return (
     <CrudListPage title="Marketing Items" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Items' }]}

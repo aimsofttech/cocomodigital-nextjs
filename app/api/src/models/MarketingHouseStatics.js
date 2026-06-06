@@ -2,7 +2,7 @@
 
 const marketingHouseStaticsSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
-  marketing_house_item_id: { type: mongoose.Schema.Types.Mixed, required: true },
+  marketing_house_item_id: { type: mongoose.Schema.Types.Mixed, default: null },
   statics_title: { type: String, trim: true },
   statics_value: { type: String, trim: true },
   statics_description: { type: String, trim: true },
