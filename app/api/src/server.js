@@ -75,6 +75,7 @@ const adminPageRoutes = require('./routes/admin/page');
 const adminContactUsRoutes = require('./routes/admin/contactUs');
 const adminFreeConsultationRoutes = require('./routes/admin/freeConsultation');
 const adminFaqRoutes = require('./routes/admin/faq');
+const adminMarketingFaqRoutes = require('./routes/admin/marketingHouseFaq');
 const adminGroupServiceItemFaqRoutes = require('./routes/admin/groupServiceItemFaq');
 const adminWhatsappTemplateRoutes = require('./routes/admin/whatsappTemplate');
 const adminAdminPostRoutes = require('./routes/admin/adminPost');
@@ -152,6 +153,7 @@ app.use(`${adminBase}/marketing-house/content-item`, adminMarketingContentItemRo
 app.use(`${adminBase}/marketing-house/content-carousel`, adminMarketingContentCarouselRoutes);
 app.use(`${adminBase}/marketing-house/community-program`, adminMarketingCommunityProgramRoutes);
 app.use(`${adminBase}/marketing-house/community-program-item`, adminMarketingCommunityProgramItemRoutes);
+app.use(`${adminBase}/marketing-house/faq`, adminMarketingFaqRoutes);
 app.use(`${adminBase}/marketing-house/project`, adminMarketingProjectRoutes);
 app.use(`${adminBase}/marketing-house/form`, adminMarketingFormRoutes);
 app.use(`${adminBase}/marketing-house/wizard`, adminMarketingWizardRoutes);

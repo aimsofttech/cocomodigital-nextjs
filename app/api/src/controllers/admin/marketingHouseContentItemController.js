@@ -1,12 +1,40 @@
 ﻿const MarketingHouseContentCreatedItem = require('../../models/MarketingHouseContentCreatedItem');
+const MarketingHouseItem = require('../../models/MarketingHouseItem');
+const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
+const MarketingHouseContentCreatedCategory = require('../../models/MarketingHouseContentCreatedCategory');
 const createCrudController = require('./crudFactory');
 const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
 const { parseCsvOrExcel } = require('../../utils/helpers');
 
 const base = createCrudController(MarketingHouseContentCreatedItem, {
-  imageFields: ['image'],
+  imageFields: ['item_image'],
+  searchFields: ['item_title', 'title'],
   defaultSort: { display_order: 1 },
   parentField: 'marketing_house_item_id',
+  // Resolve related names (record → item → category) plus the linked content
+  // category. The item lookup surfaces the item's category id via `extract`,
+  // which the category lookup then resolves to a name. Applied to list + show.
+  lookups: [
+    {
+      localField: 'marketing_house_item_id',
+      model: MarketingHouseItem,
+      nameField: ['title', 'marketing_house_title'],
+      as: 'marketing_house_item_name',
+      extract: { marketing_house_category_id: 'marketing_house_category_id' },
+    },
+    {
+      localField: 'marketing_house_category_id',
+      model: MarketingHouseCategory,
+      nameField: ['category_name', 'name'],
+      as: 'marketing_house_category_name',
+    },
+    {
+      localField: 'content_created_category_id',
+      model: MarketingHouseContentCreatedCategory,
+      nameField: ['category_name', 'name'],
+      as: 'content_created_category_name',
+    },
+  ],
 });
 
 const storeWithYoutube = async (req, res) => {

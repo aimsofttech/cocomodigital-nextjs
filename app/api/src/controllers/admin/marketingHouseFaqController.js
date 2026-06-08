@@ -1,16 +1,16 @@
-﻿const MarketingHouseIdeaStrategyPlanning = require('../../models/MarketingHouseIdeaStrategyPlanning');
+const Faq = require('../../models/Faq');
 const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const createCrudController = require('./crudFactory');
 
-module.exports = createCrudController(MarketingHouseIdeaStrategyPlanning, {
-  imageFields: ['idea_image'],
-  searchFields: ['idea_title', 'title'],
+// FAQs live in a shared `faqs` collection (also used by template FAQs). This
+// controller scopes the listing to FAQs linked to a marketing item, and resolves
+// the related item/category into readable names (record → item → category).
+module.exports = createCrudController(Faq, {
+  searchFields: ['question', 'answer'],
   defaultSort: { display_order: 1 },
   parentField: 'marketing_house_item_id',
-  // Resolve the related item/category into readable names (highlight → item →
-  // category): the item lookup surfaces the item's category id via `extract`,
-  // which the category lookup then resolves to a name. Applied to list + show.
+  baseFilter: { marketing_house_item_id: { $ne: null } },
   lookups: [
     {
       localField: 'marketing_house_item_id',

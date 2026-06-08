@@ -57,6 +57,7 @@ export const marketingHouseCommunityProgramItemApi = {
     api.post(`${BASE}/marketing-house/community-program-item/bulk-upload`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 export const marketingHouseProjectApi = createCrudService('marketing-house/project');
+export const marketingHouseFaqApi = createCrudService('marketing-house/faq');
 export const marketingFormApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/marketing-house/form`, { params }),
   markRead: (id: string) => api.put(`${BASE}/marketing-house/form/${id}/mark-read`),

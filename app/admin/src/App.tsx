@@ -33,6 +33,17 @@ const MarketingItemForm = lazy(() => import('@/pages/marketingHouse/ItemForm'));
 const MarketingHighlightsList = lazy(() => import('@/pages/marketingHouse/HighlightsList'));
 const MarketingImageList = lazy(() => import('@/pages/marketingHouse/ImageList'));
 const MarketingImageForm = lazy(() => import('@/pages/marketingHouse/ImageForm'));
+const MarketingPosterMediaList = lazy(() => import('@/pages/marketingHouse/PosterMediaList'));
+const MarketingIdeaStrategyPlanningList = lazy(() => import('@/pages/marketingHouse/IdeaStrategyPlanningList'));
+const MarketingPreLaunchActivityList = lazy(() => import('@/pages/marketingHouse/PreLaunchActivityList'));
+const MarketingPerformanceModuleList = lazy(() => import('@/pages/marketingHouse/PerformanceModuleList'));
+const MarketingOtherActivityCategoryModuleList = lazy(() => import('@/pages/marketingHouse/OtherActivityCategoryModuleList'));
+const MarketingOtherActivityItemModuleList = lazy(() => import('@/pages/marketingHouse/OtherActivityItemModuleList'));
+const MarketingContentCategoryModuleList = lazy(() => import('@/pages/marketingHouse/ContentCategoryModuleList'));
+const MarketingContentItemModuleList = lazy(() => import('@/pages/marketingHouse/ContentItemModuleList'));
+const MarketingCommunityProgramModuleList = lazy(() => import('@/pages/marketingHouse/CommunityProgramModuleList'));
+const MarketingCommunityProgramItemModuleList = lazy(() => import('@/pages/marketingHouse/CommunityProgramItemModuleList'));
+const MarketingFaqList = lazy(() => import('@/pages/marketingHouse/MarketingFaqList'));
 const MarketingStaticsList = lazy(() => import('@/pages/marketingHouse/StaticsList'));
 const MarketingStaticsForm = lazy(() => import('@/pages/marketingHouse/StaticsForm'));
 const MarketingPerformanceList = lazy(() => import('@/pages/marketingHouse/PerformanceList'));
@@ -217,6 +228,17 @@ export default function App() {
           <Route path="marketing/category/edit/:id" element={<MarketingCategoryForm />} />
           <Route path="marketing/item" element={<MarketingItemList />} />
           <Route path="marketing/highlights" element={<MarketingHighlightsList />} />
+          <Route path="marketing/poster-media" element={<MarketingPosterMediaList />} />
+          <Route path="marketing/idea-strategy-planning" element={<MarketingIdeaStrategyPlanningList />} />
+          <Route path="marketing/pre-launch-activity" element={<MarketingPreLaunchActivityList />} />
+          <Route path="marketing/performance" element={<MarketingPerformanceModuleList />} />
+          <Route path="marketing/other-activity-category" element={<MarketingOtherActivityCategoryModuleList />} />
+          <Route path="marketing/other-activity-item" element={<MarketingOtherActivityItemModuleList />} />
+          <Route path="marketing/content-category" element={<MarketingContentCategoryModuleList />} />
+          <Route path="marketing/content-item" element={<MarketingContentItemModuleList />} />
+          <Route path="marketing/community-program" element={<MarketingCommunityProgramModuleList />} />
+          <Route path="marketing/community-program-item" element={<MarketingCommunityProgramItemModuleList />} />
+          <Route path="marketing/faq" element={<MarketingFaqList />} />
           <Route path="marketing/item/add" element={<MarketingItemForm />} />
           <Route path="marketing/item/edit/:id" element={<MarketingItemForm />} />
           <Route path="marketing/item/:itemId/images" element={<MarketingImageList />} />

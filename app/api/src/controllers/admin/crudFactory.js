@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { buildS3Url, deleteManyFromS3 } = require('../../utils/s3Upload');
 const { paginateQuery, generateSlug } = require('../../utils/helpers');
 
@@ -77,6 +78,80 @@ const buildS3Fields = (doc, mediaFields) => {
 const buildS3FieldsArray = (docs, mediaFields) =>
   docs.map((d) => buildS3Fields(d, mediaFields));
 
+// Pick the first non-empty value among a list of candidate field names.
+const pickName = (rec, nameFields) => {
+  for (const f of nameFields) {
+    const v = rec[f];
+    if (v !== null && v !== undefined && v !== '') return v;
+  }
+  return null;
+};
+
+// Resolve related records and attach their display name onto each document.
+// `lookups` is an array of:
+//   { localField, model, foreignField = '_id', nameField, as, extract }
+// `nameField` may be a single field name or an array of candidate field names
+// (the first non-empty one is used — handy when records are stored with
+// inconsistent field names, e.g. `title` vs `marketing_house_title`).
+// `extract` (optional) is a map of { relatedField: targetField } that copies
+// additional fields from the joined record onto each document. Because lookups
+// run sequentially over the same objects, a later lookup can use a field
+// surfaced by `extract` as its `localField` — enabling chained joins
+// (e.g. image → item → category).
+// For every lookup we batch-load the referenced records in a single query
+// (no N+1), then map each document's foreign key to the related name under `as`.
+// Documents whose key is empty or unmatched get `as` = null.
+const applyLookups = async (docs, lookups) => {
+  const objs = docs.map((d) => (d && d.toObject ? d.toObject() : { ...d }));
+  if (!lookups.length || !objs.length) return objs;
+
+  for (const { localField, model, foreignField = '_id', nameField, as, extract = null } of lookups) {
+    const nameFields = Array.isArray(nameField) ? nameField : [nameField];
+    const extractEntries = extract ? Object.entries(extract) : [];
+    const selectFields = [foreignField, ...nameFields, ...extractEntries.map(([src]) => src)];
+
+    const ids = [
+      ...new Set(
+        objs
+          .map((o) => o[localField])
+          .filter((v) => v !== null && v !== undefined && v !== '')
+          .map(String)
+      ),
+    ];
+
+    const recByKey = new Map();
+    if (ids.length) {
+      // When matching on _id, drop anything that isn't a castable ObjectId so a
+      // single bad value can't throw and break the whole listing.
+      const queryIds =
+        foreignField === '_id'
+          ? ids.filter((id) => mongoose.Types.ObjectId.isValid(id))
+          : ids;
+      if (queryIds.length) {
+        const related = await model
+          .find({ [foreignField]: { $in: queryIds } })
+          .select(selectFields.join(' '))
+          .lean();
+        related.forEach((r) => recByKey.set(String(r[foreignField]), r));
+      }
+    }
+
+    objs.forEach((o) => {
+      const key = o[localField] != null && o[localField] !== '' ? String(o[localField]) : null;
+      const rec = key ? recByKey.get(key) : null;
+      o[as] = rec ? pickName(rec, nameFields) : null;
+      // Only fill an extracted field when the related record supplies a value, so
+      // a value already present on the document (e.g. a directly-stored id) is
+      // preserved as a fallback rather than clobbered with null.
+      extractEntries.forEach(([src, target]) => {
+        if (rec && rec[src] != null && rec[src] !== '') o[target] = rec[src];
+      });
+    });
+  }
+
+  return objs;
+};
+
 const createCrudController = (Model, options = {}) => {
   const {
     imageFields = [],
@@ -89,6 +164,12 @@ const createCrudController = (Model, options = {}) => {
     // slug is derived from (otherwise auto-detected from name/title fields).
     slug = true,
     slugSource = null,
+    // Optional related-record name resolution applied to index/show responses.
+    // See `applyLookups` for the shape of each entry.
+    lookups = [],
+    // Optional always-on filter merged into every index query. Use to scope a
+    // shared collection to a subset (e.g. only FAQs linked to a marketing item).
+    baseFilter = {},
   } = options;
 
   // All fields that may hold S3 references (images + videos), de-duplicated.
@@ -102,7 +183,7 @@ const createCrudController = (Model, options = {}) => {
       const status = req.query.status;
       const parentId = req.query[parentField] || req.params[parentField];
 
-      let filter = {};
+      let filter = { ...baseFilter };
       if (parentField && parentId) filter[parentField] = parentId;
       if (status !== undefined && status !== '') filter.status = parseInt(status);
       if (search && searchFields.length) {
@@ -110,7 +191,8 @@ const createCrudController = (Model, options = {}) => {
       }
 
       const result = await paginateQuery(Model, filter, { page, limit, sort: defaultSort });
-      const data = buildS3FieldsArray(result.data, mediaFields);
+      let data = buildS3FieldsArray(result.data, mediaFields);
+      if (lookups.length) data = await applyLookups(data, lookups);
 
       res.json({ status: 'success', data, pagination: result.pagination });
     },
@@ -118,7 +200,9 @@ const createCrudController = (Model, options = {}) => {
     show: async (req, res) => {
       const doc = await Model.findById(req.params.id);
       if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
-      res.json({ status: 'success', data: buildS3Fields(doc, mediaFields) });
+      let data = buildS3Fields(doc, mediaFields);
+      if (lookups.length) data = (await applyLookups([data], lookups))[0];
+      res.json({ status: 'success', data });
     },
 
     store: async (req, res) => {
