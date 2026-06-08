@@ -2,7 +2,7 @@
 
 const jobApplicantSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
-  job_list_id: { type: mongoose.Schema.Types.Mixed, required: true },
+  job_list_id: { type: mongoose.Schema.Types.ObjectId, ref: 'JobList', required: true },
   applicant_name: { type: String, required: true, trim: true },
   applicant_email: { type: String, required: true, trim: true, lowercase: true },
   applicant_phone: { type: String, trim: true },

@@ -2,7 +2,7 @@
 
 const jobListSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
-  job_category_id: { type: mongoose.Schema.Types.Mixed, default: null },
+  job_category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'JobCategory', default: null },
   job_title: { type: String, required: true, trim: true },
   job_slug: { type: String, trim: true, unique: true },
   job_description: { type: String, trim: true },

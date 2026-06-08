@@ -2,9 +2,9 @@
 
 const blogItemSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
-  blog_category_id: { type: mongoose.Schema.Types.Mixed, required: true },
-  blog_sub_category_id: { type: mongoose.Schema.Types.Mixed, default: null },
-  author_template_id: { type: mongoose.Schema.Types.Mixed, default: null },
+  blog_category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'BlogCategory', required: true },
+  blog_sub_category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'BlogSubCategory', default: null },
+  author_template_id: { type: mongoose.Schema.Types.ObjectId, ref: 'AuthorTemplate', default: null },
   blog_title: { type: String, required: true, trim: true },
   blog_slug: { type: String, trim: true, unique: true },
   blog_thumbnail: { type: String, default: null },

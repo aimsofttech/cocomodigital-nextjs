@@ -2,7 +2,7 @@
 
 const marketingHouseItemSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
-  marketing_house_category_id: { type: mongoose.Schema.Types.Mixed, required: true },
+  marketing_house_category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'MarketingHouseCategory', required: true },
   marketing_house_title: { type: String, required: true, trim: true },
   marketing_house_slug: { type: String, trim: true, unique: true },
   marketing_house_thumbnail: { type: String, default: null },

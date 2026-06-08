@@ -78,6 +78,16 @@ const buildS3Fields = (doc, mediaFields) => {
 const buildS3FieldsArray = (docs, mediaFields) =>
   docs.map((d) => buildS3Fields(d, mediaFields));
 
+// Internal fields that must never be exposed in API responses. `_legacy_fks`
+// holds the pre-migration numeric foreign keys (kept in the DB for reversibility).
+const INTERNAL_FIELDS = ['_legacy_fks'];
+const stripInternal = (d) => {
+  if (!d) return d;
+  const o = d.toObject ? d.toObject() : d;       // ensure a plain, mutable object
+  INTERNAL_FIELDS.forEach((f) => { if (f in o) delete o[f]; });
+  return o;
+};
+
 // Pick the first non-empty value among a list of candidate field names.
 const pickName = (rec, nameFields) => {
   for (const f of nameFields) {
@@ -184,7 +194,15 @@ const createCrudController = (Model, options = {}) => {
       const parentId = req.query[parentField] || req.params[parentField];
 
       let filter = { ...baseFilter };
-      if (parentField && parentId) filter[parentField] = parentId;
+      if (parentField && parentId) {
+        // FK fields may hold a real ObjectId (post-migration) or a string id
+        // (legacy / admin-written). Match either representation so listings work
+        // regardless of how the reference is stored.
+        const pid = String(parentId);
+        filter[parentField] = mongoose.Types.ObjectId.isValid(pid)
+          ? { $in: [pid, new mongoose.Types.ObjectId(pid)] }
+          : pid;
+      }
       if (status !== undefined && status !== '') filter.status = parseInt(status);
       if (search && searchFields.length) {
         filter.$or = searchFields.map((f) => ({ [f]: { $regex: search, $options: 'i' } }));
@@ -193,6 +211,7 @@ const createCrudController = (Model, options = {}) => {
       const result = await paginateQuery(Model, filter, { page, limit, sort: defaultSort });
       let data = buildS3FieldsArray(result.data, mediaFields);
       if (lookups.length) data = await applyLookups(data, lookups);
+      data = data.map(stripInternal);
 
       res.json({ status: 'success', data, pagination: result.pagination });
     },
@@ -202,6 +221,7 @@ const createCrudController = (Model, options = {}) => {
       if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
       let data = buildS3Fields(doc, mediaFields);
       if (lookups.length) data = (await applyLookups([data], lookups))[0];
+      data = stripInternal(data);
       res.json({ status: 'success', data });
     },
 

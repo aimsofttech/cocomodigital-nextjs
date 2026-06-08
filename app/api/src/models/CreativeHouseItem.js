@@ -2,7 +2,7 @@
 
 const creativeHouseItemSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
-  creative_house_category_id: { type: mongoose.Schema.Types.Mixed, required: true },
+  creative_house_category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'CreativeHouseCategory', required: true },
   creative_house_title: { type: String, required: true, trim: true },
   creative_house_slug: { type: String, trim: true, unique: true },
   creative_house_thumbnail: { type: String, default: null },
