@@ -5,6 +5,9 @@ const createCrudController = require('./crudFactory');
 
 module.exports = createCrudController(MarketingHousePerformance, {
   imageFields: ['performance_image'],
+  // Uploaded video is an S3 asset (build URL on read, clean from S3 on replace/
+  // delete). `performance_video_url` is a plain external link.
+  videoFields: ['performance_upload_video_url'],
   searchFields: ['performance_title', 'title'],
   defaultSort: { display_order: 1 },
   parentField: 'marketing_house_item_id',

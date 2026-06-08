@@ -112,12 +112,14 @@ export default function PreLaunchActivityForm({ onSuccess, onCancel, editId, loc
           </div>
         </div>
       )}
-      <div>
-        <label className="form-label">Activity Title <span className="text-red-500">*</span></label>
-        <input {...register('activity_title', { required: 'Required' })} className="form-input" />
-        {errors.activity_title && <p className="form-error">{String(errors.activity_title.message)}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Activity Title <span className="text-red-500">*</span></label>
+          <input {...register('activity_title', { required: 'Required' })} className="form-input" />
+          {errors.activity_title && <p className="form-error">{String(errors.activity_title.message)}</p>}
+        </div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div><label className="form-label">Description</label><textarea {...register('activity_description')} className="form-textarea" /></div>
       <ImageUpload name="activity_image" label="Activity Image" uploadType="image" folder="marketing-house" value={watch('activity_image')} onChange={(url) => setValue('activity_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

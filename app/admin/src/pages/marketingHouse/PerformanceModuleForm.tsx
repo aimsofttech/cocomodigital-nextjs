@@ -15,7 +15,16 @@ export default function PerformanceModuleForm({ onSuccess, onCancel, editId, loc
   const [categories, setCategories] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
   const [lockedName, setLockedName] = useState('');
+  // Video can be provided as an external URL or an uploaded file.
+  const [videoTab, setVideoTab] = useState<'url' | 'upload'>('url');
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
+
+  // Switch video input method, clearing the other field so only one is submitted.
+  const switchVideoTab = (tab: 'url' | 'upload') => {
+    setVideoTab(tab);
+    if (tab === 'url') setValue('performance_upload_video_url', '');
+    else setValue('performance_video_url', '');
+  };
 
   const selectedCategory = watch('marketing_house_category_id');
 
@@ -37,6 +46,7 @@ export default function PerformanceModuleForm({ onSuccess, onCancel, editId, loc
           marketing_house_category_id: rec.marketing_house_category_id ? String(rec.marketing_house_category_id) : '',
           marketing_house_item_id: rec.marketing_house_item_id ? String(rec.marketing_house_item_id) : '',
         });
+        if (rec.performance_upload_video_url) setVideoTab('upload');
       }).catch(() => toast.error('Failed to load'));
     }
   }, [editId]);
@@ -65,9 +75,12 @@ export default function PerformanceModuleForm({ onSuccess, onCancel, editId, loc
     if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
     const fd = new FormData();
     fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['performance_title', 'performance_video_url', 'performance_description', 'performance_image', 'slug', 'display_order', 'status'].forEach((k) => {
+    ['performance_title', 'performance_description', 'performance_image', 'slug', 'display_order', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
+    // Always send both video fields (empty allowed) so switching/clearing persists.
+    fd.append('performance_video_url', formData.performance_video_url ?? '');
+    fd.append('performance_upload_video_url', formData.performance_upload_video_url ?? '');
     try {
       if (isEdit && editId) await marketingHousePerformanceApi.update(editId, fd);
       else await marketingHousePerformanceApi.create(fd);
@@ -115,9 +128,24 @@ export default function PerformanceModuleForm({ onSuccess, onCancel, editId, loc
           <input {...register('performance_title', { required: 'Required' })} className="form-input" />
           {errors.performance_title && <p className="form-error">{String(errors.performance_title.message)}</p>}
         </div>
-        <div><label className="form-label">Video URL</label><input {...register('performance_video_url')} className="form-input" placeholder="https://youtube.com/..." /></div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
+      {/* Video: external URL or uploaded file */}
+      <div>
+        <label className="form-label">Video <span className="text-gray-400 font-normal">(Optional — choose one method)</span></label>
+        <div className="flex gap-2 mb-2">
+          <button type="button" onClick={() => switchVideoTab('url')}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium ${videoTab === 'url' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600'}`}>Video URL</button>
+          <button type="button" onClick={() => switchVideoTab('upload')}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium ${videoTab === 'upload' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600'}`}>Upload Video</button>
+        </div>
+        {videoTab === 'url' ? (
+          <input {...register('performance_video_url')} className="form-input" placeholder="https://youtube.com/..." />
+        ) : (
+          <ImageUpload name="performance_upload_video_url" label="Upload Video (MP4, WEBM, OGG)" uploadType="video" folder="marketing-house"
+            value={watch('performance_upload_video_url')} onChange={(url) => setValue('performance_upload_video_url', url)} />
+        )}
+      </div>
       <div><label className="form-label">Description</label><textarea {...register('performance_description')} className="form-textarea" /></div>
       <ImageUpload name="performance_image" label="Performance Image" uploadType="image" folder="marketing-house" value={watch('performance_image')} onChange={(url) => setValue('performance_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
