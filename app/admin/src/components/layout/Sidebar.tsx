@@ -191,7 +191,7 @@ function NavGroup({ item, level = 0 }: NavGroupProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`sidebar-link w-full justify-between ${
+        className={`sidebar-link w-full justify-between ${indent} ${
           isChildActive ? 'text-primary-700 bg-primary-50' : ''
         }`}
       >
@@ -207,7 +207,7 @@ function NavGroup({ item, level = 0 }: NavGroupProps) {
       {/* Child list with smooth height animation */}
       <div
         className={`overflow-hidden transition-all duration-200 ${
-          open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+          open ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="mt-0.5 space-y-0.5 pl-2 pb-1">
