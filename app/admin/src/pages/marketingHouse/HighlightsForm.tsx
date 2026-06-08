@@ -1,39 +1,99 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { marketingHouseStaticsApi } from '@/services/adminApi';
+import { marketingHouseStaticsApi, marketingHouseItemApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import toast from 'react-hot-toast';
 
-interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; }
+interface Props {
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  editId?: string;
+  /** When set (navigated from a Marketing Item), the item is preselected and locked. */
+  lockedItemId?: string;
+}
 
-export default function HighlightsForm({ onSuccess, onCancel, editId }: Props = {}) {
+const itemLabel = (it: any) => it?.title || it?.marketing_house_title || it?.marketing_house_slug || it?._id || '';
+
+export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItemId }: Props = {}) {
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   const isModal = Boolean(onSuccess ?? onCancel);
   const id = isModal ? editId : paramId;
   const isEdit = Boolean(id);
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<any>();
+  const [items, setItems] = useState<any[]>([]);
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
 
+  // Marketing items for the dropdown (and to resolve the locked item's name).
+  useEffect(() => {
+    marketingHouseItemApi.getAll({ limit: 500 }).then(({ data }) => setItems(data.data || [])).catch(() => {});
+  }, []);
+
+  // Load the highlight on edit; otherwise seed the locked item id on create.
   useEffect(() => {
     if (isEdit && id) {
       marketingHouseStaticsApi.getOne(id).then(({ data }) => {
-        reset({ ...data.data, status: String(data.data.status) });
+        const rec = data.data || {};
+        reset({
+          ...rec,
+          status: String(rec.status ?? 1),
+          marketing_house_item_id: rec.marketing_house_item_id ?? lockedItemId ?? '',
+        });
       }).catch(() => toast.error('Failed to load'));
+    } else if (lockedItemId) {
+      setValue('marketing_house_item_id', lockedItemId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const onSubmit = async (data: any) => {
+  // Keep the locked value applied (e.g. opening the add modal).
+  useEffect(() => {
+    if (lockedItemId) setValue('marketing_house_item_id', lockedItemId);
+  }, [lockedItemId, setValue]);
+
+  const onSubmit = async (formData: any) => {
+    // Always carry the relationship; force the locked id when present.
+    const payload = { ...formData };
+    if (lockedItemId) payload.marketing_house_item_id = lockedItemId;
     try {
-      if (isEdit && id) await marketingHouseStaticsApi.update(id, data);
-      else await marketingHouseStaticsApi.create(data);
+      if (isEdit && id) await marketingHouseStaticsApi.update(id, payload);
+      else await marketingHouseStaticsApi.create(payload);
       toast.success(isEdit ? 'Updated successfully' : 'Created successfully');
       if (onSuccess) onSuccess(); else navigate(-1);
-    } catch (err: any) { toast.error(err.response?.data?.message || 'Operation failed'); }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Operation failed');
+    }
   };
+
+  const selectedId = watch('marketing_house_item_id');
+  const lockedName = itemLabel(items.find((it) => String(it._id) === String(lockedItemId))) || lockedItemId;
 
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {/* Marketing Item relationship */}
+      <div>
+        <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
+        {lockedItemId ? (
+          <>
+            <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName} disabled readOnly />
+            {/* Keep the value in submitted form state even though the select is hidden. */}
+            <input type="hidden" {...register('marketing_house_item_id')} />
+            <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
+          </>
+        ) : (
+          <>
+            <select {...register('marketing_house_item_id', { required: 'Required' })} className="form-select">
+              <option value="">Select Marketing Item</option>
+              {items.map((it: any) => <option key={it._id} value={it._id}>{itemLabel(it)}</option>)}
+            </select>
+            {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
+            {selectedId && !items.some((it) => String(it._id) === String(selectedId)) && (
+              <p className="mt-1 text-xs text-amber-600">Currently linked item is not in the list (legacy reference): {String(selectedId)}</p>
+            )}
+          </>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Name <span className="text-red-500">*</span></label>

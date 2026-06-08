@@ -61,7 +61,11 @@ export default function ItemList() {
             {targets.map((t) => (
               <Link
                 key={t.segment}
-                to={`/marketing/item/${row._id}/${t.segment}`}
+                // Highlights routes to its dedicated listing page, scoping by the
+                // item via a query param; other targets use the item-nested route.
+                to={t.segment === 'statics'
+                  ? `/marketing/highlights?marketingHouseItemId=${row._id}`
+                  : `/marketing/item/${row._id}/${t.segment}`}
                 title={typeof t.count === 'number' ? `${t.label}: ${t.count} record(s)` : t.label}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100 text-xs font-medium whitespace-nowrap transition-colors"
               >

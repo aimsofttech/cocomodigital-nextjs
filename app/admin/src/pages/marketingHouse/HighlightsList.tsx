@@ -1,12 +1,35 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
-import { marketingHouseStaticsApi } from '@/services/adminApi';
+import { marketingHouseStaticsApi, marketingHouseItemApi } from '@/services/adminApi';
 import HighlightsForm from './HighlightsForm';
 
 export default function HighlightsList() {
+  // When navigated from a Marketing Item, the item id arrives as a query param
+  // and scopes the whole page (list + create/edit) to that item.
+  const [searchParams] = useSearchParams();
+  const itemId = searchParams.get('marketingHouseItemId') || '';
+  const [itemName, setItemName] = useState('');
+
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseStaticsApi);
+
+  // Apply (or clear) the marketing-item server filter whenever the URL id changes.
+  // Sent to the API as `marketing_house_item_id`, which the statics controller
+  // uses as its parent filter.
+  useEffect(() => {
+    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+  }, [itemId, setFilterParams]);
+
+  // Best-effort fetch of the item title for breadcrumb / title context.
+  useEffect(() => {
+    if (!itemId) { setItemName(''); return; }
+    marketingHouseItemApi.getOne(itemId)
+      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .catch(() => setItemName(''));
+  }, [itemId]);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -18,6 +41,11 @@ export default function HighlightsList() {
     }
   };
 
+  // Merge the locked item filter with any status filter the user toggles, so the
+  // item scope is never lost when other filters change.
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'name', label: 'Name', sortable: true },
@@ -27,12 +55,17 @@ export default function HighlightsList() {
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
+
+  const breadcrumbs = itemId
+    ? [{ label: 'Marketing House' }, { label: 'Items', path: '/marketing/item' }, { label: itemName || 'Item' }, { label: 'Highlights' }]
+    : [{ label: 'Marketing House' }, { label: 'Highlights' }];
+
   return (
-    <CrudListPage title="Highlights" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Highlights' }]}
+    <CrudListPage title={itemName ? `Highlights — ${itemName}` : 'Highlights'} breadcrumbs={breadcrumbs}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
-      renderModal={({ id, onSuccess, onCancel }) => <HighlightsForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <HighlightsForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Highlight' : 'Add Highlight'}
       modalSize="lg" onRefresh={fetchAll} />
   );
