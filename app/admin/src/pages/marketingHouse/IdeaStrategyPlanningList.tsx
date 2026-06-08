@@ -1,13 +1,36 @@
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
-import { marketingHouseIdeaStrategyApi } from '@/services/adminApi';
+import { marketingHouseIdeaStrategyApi, marketingHouseItemApi } from '@/services/adminApi';
 import IdeaStrategyPlanningForm from './IdeaStrategyPlanningForm';
 
 export default function IdeaStrategyPlanningList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseIdeaStrategyApi);
+  const [searchParams] = useSearchParams();
+  const itemId = searchParams.get('marketingHouseItemId') || '';
+  const [itemName, setItemName] = useState('');
+
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(marketingHouseIdeaStrategyApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+  }, [itemId, setFilterParams]);
+
+  useEffect(() => {
+    if (!itemId) { setItemName(''); return; }
+    marketingHouseItemApi.getOne(itemId)
+      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .catch(() => setItemName(''));
+  }, [itemId]);
+
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -29,12 +52,12 @@ export default function IdeaStrategyPlanningList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Idea Strategy Planning" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Idea Strategy Planning' }]}
+    <CrudListPage title={itemName ? `Idea Strategy Planning — ${itemName}` : 'Idea Strategy Planning'} breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Idea Strategy Planning' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
-      renderModal={({ id, onSuccess, onCancel }) => <IdeaStrategyPlanningForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <IdeaStrategyPlanningForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Idea Strategy Planning' : 'Add Idea Strategy Planning'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }

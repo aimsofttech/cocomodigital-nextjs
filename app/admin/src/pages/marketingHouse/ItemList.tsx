@@ -10,6 +10,31 @@ import ItemForm from './ItemForm';
 // Navigation target shape returned by the API per item (label + live record count).
 type NavTarget = { label: string; segment: string; count?: number | null };
 
+// Each navigation segment maps to its dedicated sidebar page; clicking a target
+// opens that page scoped to the item via the `marketingHouseItemId` query param
+// (same pattern as Marketing Items → Highlights).
+const SEGMENT_ROUTE: Record<string, string> = {
+  'statics': '/marketing/highlights',
+  'images': '/marketing/poster-media',
+  'idea-strategy': '/marketing/idea-strategy-planning',
+  'pre-launch': '/marketing/pre-launch-activity',
+  'performance': '/marketing/performance',
+  'other-activity-category': '/marketing/other-activity-category',
+  'other-activity-item': '/marketing/other-activity-item',
+  'content-category': '/marketing/content-category',
+  'content-item': '/marketing/content-item',
+  'content-carousel': '/marketing/content-carousel',
+  'community-program': '/marketing/community-program',
+  'community-program-item': '/marketing/community-program-item',
+};
+
+const targetHref = (segment: string, itemId: string) => {
+  const base = SEGMENT_ROUTE[segment];
+  return base
+    ? `${base}?marketingHouseItemId=${itemId}`
+    : `/marketing/item/${itemId}/${segment}`; // fallback to the item-nested route
+};
+
 // Fallback list used only when the API does not return a `navigation` array
 // (e.g. older payload or counts unavailable). The canonical source is the
 // backend, which derives targets + counts from the sub-module collections.
@@ -61,11 +86,9 @@ export default function ItemList() {
             {targets.map((t) => (
               <Link
                 key={t.segment}
-                // Highlights routes to its dedicated listing page, scoping by the
-                // item via a query param; other targets use the item-nested route.
-                to={t.segment === 'statics'
-                  ? `/marketing/highlights?marketingHouseItemId=${row._id}`
-                  : `/marketing/item/${row._id}/${t.segment}`}
+                // Route to the target's dedicated page, scoped to this item via
+                // the marketingHouseItemId query param.
+                to={targetHref(t.segment, row._id)}
                 title={typeof t.count === 'number' ? `${t.label}: ${t.count} record(s)` : t.label}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100 text-xs font-medium whitespace-nowrap transition-colors"
               >

@@ -4,15 +4,16 @@ import { marketingHouseOtherActivityCategoryApi, marketingHouseCategoryApi, mark
 import SlugField from '@/components/ui/SlugField';
 import toast from 'react-hot-toast';
 
-interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; }
+interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; lockedItemId?: string; }
 
 // Item records expose their name under `title` (or legacy `marketing_house_title`).
 const itemName = (it: any) => it.title || it.marketing_house_title || 'Untitled';
 
-export default function OtherActivityCategoryModuleForm({ onSuccess, onCancel, editId }: Props = {}) {
+export default function OtherActivityCategoryModuleForm({ onSuccess, onCancel, editId, lockedItemId }: Props = {}) {
   const isEdit = Boolean(editId);
   const [categories, setCategories] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
+  const [lockedName, setLockedName] = useState('');
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
 
   const selectedCategory = watch('marketing_house_category_id');
@@ -47,10 +48,20 @@ export default function OtherActivityCategoryModuleForm({ onSuccess, onCancel, e
       .catch(() => toast.error('Failed to load items'));
   }, [selectedCategory]);
 
-  const categoryReg = register('marketing_house_category_id', { required: 'Required' });
+  // When locked to a specific item, force the field value and resolve its name.
+  useEffect(() => {
+    if (!lockedItemId) return;
+    setValue('marketing_house_item_id', lockedItemId);
+    marketingHouseItemApi.getOne(lockedItemId)
+      .then(({ data }) => setLockedName(data.data?.title || data.data?.marketing_house_title || lockedItemId))
+      .catch(() => setLockedName(lockedItemId));
+  }, [lockedItemId, setValue]);
+
+  const categoryReg = register('marketing_house_category_id', lockedItemId ? {} : { required: 'Required' });
 
   const onSubmit = async (formData: any) => {
-    if (!formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
+    if (lockedItemId) formData.marketing_house_item_id = lockedItemId;
+    if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
     const payload = {
       marketing_house_item_id: formData.marketing_house_item_id,
       category_name: formData.category_name,
@@ -68,28 +79,37 @@ export default function OtherActivityCategoryModuleForm({ onSuccess, onCancel, e
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="form-label">Marketing Category <span className="text-red-500">*</span></label>
-          <select
-            {...categoryReg}
-            onChange={(e) => { categoryReg.onChange(e); setValue('marketing_house_item_id', ''); }}
-            className="form-select"
-          >
-            <option value="">Select category</option>
-            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
-          </select>
-          {errors.marketing_house_category_id && <p className="form-error">{String(errors.marketing_house_category_id.message)}</p>}
-        </div>
+      {lockedItemId ? (
         <div>
           <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
-          <select {...register('marketing_house_item_id', { required: 'Required' })} className="form-select" disabled={!selectedCategory}>
-            <option value="">{selectedCategory ? 'Select item' : 'Select a category first'}</option>
-            {items.map((it: any) => <option key={it._id} value={it._id}>{itemName(it)}</option>)}
-          </select>
-          {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
+          <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly />
+          <input type="hidden" {...register('marketing_house_item_id')} />
+          <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
         </div>
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="form-label">Marketing Category <span className="text-red-500">*</span></label>
+            <select
+              {...categoryReg}
+              onChange={(e) => { categoryReg.onChange(e); setValue('marketing_house_item_id', ''); }}
+              className="form-select"
+            >
+              <option value="">Select category</option>
+              {categories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
+            </select>
+            {errors.marketing_house_category_id && <p className="form-error">{String(errors.marketing_house_category_id.message)}</p>}
+          </div>
+          <div>
+            <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
+            <select {...register('marketing_house_item_id', { required: 'Required' })} className="form-select" disabled={!selectedCategory}>
+              <option value="">{selectedCategory ? 'Select item' : 'Select a category first'}</option>
+              {items.map((it: any) => <option key={it._id} value={it._id}>{itemName(it)}</option>)}
+            </select>
+            {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
+          </div>
+        </div>
+      )}
       <div>
         <label className="form-label">Category Name <span className="text-red-500">*</span></label>
         <input {...register('category_name', { required: 'Required' })} className="form-input" />

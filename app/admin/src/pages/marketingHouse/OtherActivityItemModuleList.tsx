@@ -1,13 +1,39 @@
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
-import { marketingHouseOtherActivityItemApi } from '@/services/adminApi';
+import { marketingHouseOtherActivityItemApi, marketingHouseItemApi } from '@/services/adminApi';
 import OtherActivityItemModuleForm from './OtherActivityItemModuleForm';
 
 export default function OtherActivityItemModuleList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseOtherActivityItemApi);
+  // When navigated from a Marketing Item, the item id arrives as a query param
+  // and scopes the whole page (list + create/edit) to that item.
+  const [searchParams] = useSearchParams();
+  const itemId = searchParams.get('marketingHouseItemId') || '';
+  const [itemName, setItemName] = useState('');
+
+  // Seed the filter on first render so the initial fetch is already scoped.
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(marketingHouseOtherActivityItemApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+
+  // Re-apply the filter only when the URL id actually changes. Skipped on mount
+  // since it's already seeded.
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+  }, [itemId, setFilterParams]);
+
+  // Best-effort fetch of the item title for title context.
+  useEffect(() => {
+    if (!itemId) { setItemName(''); return; }
+    marketingHouseItemApi.getOne(itemId)
+      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .catch(() => setItemName(''));
+  }, [itemId]);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -18,6 +44,11 @@ export default function OtherActivityItemModuleList() {
       toast.error(err.response?.data?.message || 'Failed to update status');
     }
   };
+
+  // Merge the locked item filter with any status filter the user toggles, so the
+  // item scope is never lost when other filters change.
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
@@ -31,11 +62,11 @@ export default function OtherActivityItemModuleList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Other Activities Items" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Other Activities Items' }]}
+    <CrudListPage title={itemName ? `Other Activities Items — ${itemName}` : 'Other Activities Items'} breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Other Activities Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
-      renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemModuleForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Other Activity Item' : 'Add Other Activity Item'}
       modalSize="lg" onRefresh={fetchAll} />
   );

@@ -43,6 +43,7 @@ const MarketingContentCategoryModuleList = lazy(() => import('@/pages/marketingH
 const MarketingContentItemModuleList = lazy(() => import('@/pages/marketingHouse/ContentItemModuleList'));
 const MarketingCommunityProgramModuleList = lazy(() => import('@/pages/marketingHouse/CommunityProgramModuleList'));
 const MarketingCommunityProgramItemModuleList = lazy(() => import('@/pages/marketingHouse/CommunityProgramItemModuleList'));
+const MarketingContentCarouselModuleList = lazy(() => import('@/pages/marketingHouse/ContentCarouselModuleList'));
 const MarketingFaqList = lazy(() => import('@/pages/marketingHouse/MarketingFaqList'));
 const MarketingStaticsList = lazy(() => import('@/pages/marketingHouse/StaticsList'));
 const MarketingStaticsForm = lazy(() => import('@/pages/marketingHouse/StaticsForm'));
@@ -236,6 +237,7 @@ export default function App() {
           <Route path="marketing/other-activity-item" element={<MarketingOtherActivityItemModuleList />} />
           <Route path="marketing/content-category" element={<MarketingContentCategoryModuleList />} />
           <Route path="marketing/content-item" element={<MarketingContentItemModuleList />} />
+          <Route path="marketing/content-carousel" element={<MarketingContentCarouselModuleList />} />
           <Route path="marketing/community-program" element={<MarketingCommunityProgramModuleList />} />
           <Route path="marketing/community-program-item" element={<MarketingCommunityProgramItemModuleList />} />
           <Route path="marketing/faq" element={<MarketingFaqList />} />
