@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
@@ -14,12 +14,16 @@ export default function HighlightsList() {
   const itemId = searchParams.get('marketingHouseItemId') || '';
   const [itemName, setItemName] = useState('');
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseStaticsApi);
+  // Seed the filter on first render so the initial (and only) fetch is already
+  // scoped to the item — no wasted unfiltered request.
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(marketingHouseStaticsApi, true, itemId ? { marketing_house_item_id: itemId } : {});
 
-  // Apply (or clear) the marketing-item server filter whenever the URL id changes.
-  // Sent to the API as `marketing_house_item_id`, which the statics controller
-  // uses as its parent filter.
+  // Re-apply the filter only when the URL id actually changes (e.g. navigating
+  // between items without a remount). Skipped on mount since it's already seeded.
+  const firstRun = useRef(true);
   useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
     setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
   }, [itemId, setFilterParams]);
 

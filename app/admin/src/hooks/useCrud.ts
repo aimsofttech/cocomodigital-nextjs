@@ -35,7 +35,7 @@ interface UseCrudReturn<T> {
   setFilterParams: (params: Record<string, any>) => void;
 }
 
-export function useCrud<T = any>(service: CrudService, autoFetch = true): UseCrudReturn<T> {
+export function useCrud<T = any>(service: CrudService, autoFetch = true, initialFilter: Record<string, any> = {}): UseCrudReturn<T> {
   const [data, setData] = useState<T[]>([]);
   const [item, setItem] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,7 +43,9 @@ export function useCrud<T = any>(service: CrudService, autoFetch = true): UseCru
   const [pagination, setPagination] = useState<PaginationState | null>(null);
   const [search, setSearchValue] = useState('');
   const [page, setPageValue] = useState(1);
-  const [filterParams, setFilterParamsState] = useState<Record<string, any>>({});
+  // Seed the filter so the very first fetch is already scoped — avoids an extra
+  // unfiltered request when the page is scoped by a URL param.
+  const [filterParams, setFilterParamsState] = useState<Record<string, any>>(initialFilter);
 
   // Stable string key so useEffect doesn't fire on object reference equality
   const filterKey = useMemo(() => JSON.stringify(filterParams), [filterParams]);
