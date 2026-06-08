@@ -50,9 +50,8 @@ export default function ContentItemModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'item_image', label: 'Image', render: (row: any) => <ImageCell src={row.item_image || row.image} alt={row.item_title} /> },
-    { key: 'item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.item_video_url} thumbnail={row.item_image || row.image} /> },
-    { key: 'item_title', label: 'Title', sortable: true, render: (row: any) => row.item_title || row.title || '—' },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.item_image} alt="content" /> },
+    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.url || row.upload_video_url || row.item_video_url} thumbnail={row.image || row.item_image} /> },
     { key: 'content_created_category_name', label: 'Content Category', render: (row: any) => row.content_created_category_name || '—' },
     { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
     { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || '—' },
@@ -66,6 +65,6 @@ export default function ContentItemModuleList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <ContentItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Item' : 'Add Content Item'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }

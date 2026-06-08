@@ -4,7 +4,6 @@ import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
-import { ImageCell } from '@/components/ui/MediaCell';
 import { marketingHouseCommunityProgramApi, marketingHouseItemApi } from '@/services/adminApi';
 import CommunityProgramModuleForm from './CommunityProgramModuleForm';
 
@@ -51,8 +50,8 @@ export default function CommunityProgramModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'category_image', label: 'Image', render: (row: any) => <ImageCell src={row.category_image} alt={row.category_name} /> },
-    { key: 'category_name', label: 'Program Name', sortable: true, render: (row: any) => row.category_name || '—' },
+    { key: 'community_program_category_name', label: 'Category Name', sortable: true, render: (row: any) => row.community_program_category_name || row.category_name || '—' },
+    { key: 'community_program_category_description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block text-sm text-gray-600">{row.community_program_category_description || '—'}</span> },
     { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
     { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || '—' },
     { key: 'display_order', label: 'Order', sortable: true },

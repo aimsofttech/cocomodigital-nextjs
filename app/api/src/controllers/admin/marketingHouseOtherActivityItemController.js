@@ -6,7 +6,9 @@ const createCrudController = require('./crudFactory');
 const { getYoutubeVideoId } = require('../../utils/s3Upload');
 
 const base = createCrudController(MarketingHouseOtherActivityItem, {
-  imageFields: ['item_image'],
+  // Up to 4 uploaded images: build S3 URLs on read; reconcile/delete from S3 on
+  // replace/delete. (`item_image` kept for any legacy single-image records.)
+  imageFields: ['item_image', 'image1', 'image2', 'image3', 'image4'],
   searchFields: ['item_title', 'title'],
   defaultSort: { display_order: 1 },
   parentField: 'marketing_house_item_id',
@@ -28,7 +30,8 @@ const base = createCrudController(MarketingHouseOtherActivityItem, {
       as: 'marketing_house_category_name',
     },
     {
-      localField: 'other_activity_category_id',
+      // The linked activity category is stored as `marketing_house_other_activity_category_id`.
+      localField: 'marketing_house_other_activity_category_id',
       model: MarketingHouseOtherActivityCategory,
       nameField: ['category_name', 'name'],
       as: 'other_activity_category_name',

@@ -33,6 +33,7 @@ export default function ContentCategoryModuleForm({ onSuccess, onCancel, editId,
         reset({
           ...rec,
           status: String(rec.status),
+          navigate_to: rec.navigate_to != null && rec.navigate_to !== '' ? String(rec.navigate_to) : '',
           marketing_house_category_id: rec.marketing_house_category_id ? String(rec.marketing_house_category_id) : '',
           marketing_house_item_id: rec.marketing_house_item_id ? String(rec.marketing_house_item_id) : '',
         });
@@ -66,7 +67,7 @@ export default function ContentCategoryModuleForm({ onSuccess, onCancel, editId,
     const payload = {
       marketing_house_item_id: formData.marketing_house_item_id,
       category_name: formData.category_name,
-      navigate_to: formData.navigate_to,
+      navigate_to: formData.navigate_to ? Number(formData.navigate_to) : undefined,
       slug: formData.slug,
       display_order: formData.display_order,
       status: formData.status,
@@ -112,13 +113,27 @@ export default function ContentCategoryModuleForm({ onSuccess, onCancel, editId,
           </div>
         </div>
       )}
-      <div>
-        <label className="form-label">Category Name <span className="text-red-500">*</span></label>
-        <input {...register('category_name', { required: 'Required' })} className="form-input" />
-        {errors.category_name && <p className="form-error">{String(errors.category_name.message)}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Category Name <span className="text-red-500">*</span></label>
+          <input {...register('category_name', { required: 'Required' })} className="form-input" />
+          {errors.category_name && <p className="form-error">{String(errors.category_name.message)}</p>}
+        </div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <div><label className="form-label">Navigate To (URL)</label><input {...register('navigate_to')} className="form-input" placeholder="e.g. /page-path" /></div>
+      <div>
+        <label className="form-label">Navigate To</label>
+        <div className="flex flex-wrap items-center gap-6 mt-1">
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input type="radio" value="1" {...register('navigate_to')} className="w-4 h-4 text-primary-600 focus:ring-primary-500" />
+            <span className="text-sm text-gray-700">Content Items</span>
+          </label>
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input type="radio" value="2" {...register('navigate_to')} className="w-4 h-4 text-primary-600 focus:ring-primary-500" />
+            <span className="text-sm text-gray-700">Content Items Carousels</span>
+          </label>
+        </div>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

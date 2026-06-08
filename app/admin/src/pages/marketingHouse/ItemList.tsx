@@ -23,9 +23,9 @@ const SEGMENT_ROUTE: Record<string, string> = {
   'other-activity-item': '/marketing/other-activity-item',
   'content-category': '/marketing/content-category',
   'content-item': '/marketing/content-item',
-  'content-carousel': '/marketing/content-carousel',
   'community-program': '/marketing/community-program',
   'community-program-item': '/marketing/community-program-item',
+  'faq': '/marketing/faq',
 };
 
 const targetHref = (segment: string, itemId: string) => {
@@ -48,9 +48,9 @@ const NAV_LINKS: NavTarget[] = [
   { label: 'Other Act. Items', segment: 'other-activity-item' },
   { label: 'Content Category', segment: 'content-category' },
   { label: 'Content Items', segment: 'content-item' },
-  { label: 'Content Carousel', segment: 'content-carousel' },
   { label: 'Continuity Cat.', segment: 'community-program' },
   { label: 'Continuity Items', segment: 'community-program-item' },
+  { label: 'FAQ', segment: 'faq' },
 ];
 
 export default function ItemList() {

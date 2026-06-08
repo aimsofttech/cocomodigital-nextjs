@@ -50,9 +50,9 @@ export default function CommunityProgramItemModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'item_image', label: 'Image', render: (row: any) => <ImageCell src={row.item_image || row.community_program_item_video_thumbnail} alt={row.item_title} /> },
-    { key: 'item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.item_video_url} thumbnail={row.item_image || row.community_program_item_video_thumbnail} /> },
-    { key: 'item_title', label: 'Title', sortable: true, render: (row: any) => row.item_title || row.title || '—' },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.community_program_item_video_thumbnail || row.item_image} alt="continuity" /> },
+    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.community_program_item_video_url || row.community_program_item_video_file || row.item_video_url} thumbnail={row.community_program_item_video_thumbnail || row.item_image} /> },
+    { key: 'description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block">{row.community_program_item_description || row.item_title || row.title || '—'}</span> },
     { key: 'community_program_category_name', label: 'Continuity Category', render: (row: any) => row.community_program_category_name || '—' },
     { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
     { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || '—' },
@@ -66,6 +66,6 @@ export default function CommunityProgramItemModuleList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <CommunityProgramItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Continuity Item' : 'Add Continuity Item'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { marketingHouseCommunityProgramApi, marketingHouseCategoryApi, marketingHouseItemApi } from '@/services/adminApi';
-import ImageUpload from '@/components/ui/ImageUpload';
 import SlugField from '@/components/ui/SlugField';
 import toast from 'react-hot-toast';
 
@@ -65,9 +64,11 @@ export default function CommunityProgramModuleForm({ onSuccess, onCancel, editId
     if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
     const fd = new FormData();
     fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['category_name', 'category_image', 'slug', 'display_order', 'status'].forEach((k) => {
+    ['community_program_category_name', 'community_program_category_description', 'slug', 'display_order', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
+    // The model requires `category_name`; keep it in sync with the real field.
+    if (formData.community_program_category_name) fd.append('category_name', formData.community_program_category_name);
     try {
       if (isEdit && editId) await marketingHouseCommunityProgramApi.update(editId, fd);
       else await marketingHouseCommunityProgramApi.create(fd);
@@ -109,13 +110,18 @@ export default function CommunityProgramModuleForm({ onSuccess, onCancel, editId
           </div>
         </div>
       )}
-      <div>
-        <label className="form-label">Program Name <span className="text-red-500">*</span></label>
-        <input {...register('category_name', { required: 'Required' })} className="form-input" />
-        {errors.category_name && <p className="form-error">{String(errors.category_name.message)}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Category Name <span className="text-red-500">*</span></label>
+          <input {...register('community_program_category_name', { required: 'Required' })} className="form-input" />
+          {errors.community_program_category_name && <p className="form-error">{String(errors.community_program_category_name.message)}</p>}
+        </div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <ImageUpload name="category_image" label="Program Image" uploadType="image" folder="marketing-house" value={watch('category_image')} onChange={(url) => setValue('category_image', url)} />
+      <div>
+        <label className="form-label">Description</label>
+        <textarea {...register('community_program_category_description')} className="form-textarea" rows={4} />
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

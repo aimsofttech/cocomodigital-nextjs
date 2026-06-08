@@ -52,8 +52,8 @@ export default function OtherActivityItemModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'item_image', label: 'Image', render: (row: any) => <ImageCell src={row.item_image || row.image} alt={row.item_title} /> },
-    { key: 'item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.item_video_url} thumbnail={row.item_image || row.image} /> },
+    { key: 'image1', label: 'Image', render: (row: any) => <ImageCell src={row.image1 || row.image2 || row.image3 || row.image4 || row.item_image} alt="activity" /> },
+    { key: 'video1', label: 'Video', render: (row: any) => <VideoCell src={row.video1 || row.video2 || row.video3 || row.video4 || row.item_video_url} thumbnail={row.image1 || row.image2 || row.item_image} /> },
     { key: 'item_title', label: 'Title', sortable: true, render: (row: any) => row.item_title || row.title || '—' },
     { key: 'other_activity_category_name', label: 'Activity Category', render: (row: any) => row.other_activity_category_name || '—' },
     { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
@@ -68,6 +68,6 @@ export default function OtherActivityItemModuleList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Other Activity Item' : 'Add Other Activity Item'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }

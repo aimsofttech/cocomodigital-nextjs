@@ -21,9 +21,9 @@ const NAV_TARGETS = [
   { segment: 'other-activity-item',     label: 'Other Act. Items', model: require('../../models/MarketingHouseOtherActivityItem') },
   { segment: 'content-category',        label: 'Content Category', model: require('../../models/MarketingHouseContentCreatedCategory') },
   { segment: 'content-item',            label: 'Content Items',    model: require('../../models/MarketingHouseContentCreatedItem') },
-  { segment: 'content-carousel',        label: 'Content Carousel', model: require('../../models/MarketingHouseContentCreatedItemCarousel') },
   { segment: 'community-program',       label: 'Continuity Cat.',  model: require('../../models/MarketingHouseCommunityProgramCategory') },
   { segment: 'community-program-item',  label: 'Continuity Items', model: require('../../models/MarketingHouseCommunityProgramCategoryItem') },
+  { segment: 'faq',                     label: 'FAQ',              model: require('../../models/Faq') },
 ];
 
 // Compute the record count per navigation target for every item on the page and

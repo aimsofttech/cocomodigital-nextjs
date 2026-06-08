@@ -8,7 +8,10 @@ const { parseCsvOrExcel } = require('../../utils/helpers');
 
 const base = createCrudController(MarketingHouseCommunityProgramCategoryItem, {
   imageFields: ['item_image', 'community_program_item_video_thumbnail'],
-  searchFields: ['item_title', 'title'],
+  // Uploaded video file is an S3 asset (build URL on read, clean on replace/delete).
+  // `community_program_item_video_url` is a plain external link.
+  videoFields: ['community_program_item_video_file'],
+  searchFields: ['community_program_item_description', 'item_title', 'title'],
   defaultSort: { display_order: 1 },
   parentField: 'marketing_house_item_id',
   // Resolve related names (record → item → category) plus the linked continuity
@@ -32,7 +35,8 @@ const base = createCrudController(MarketingHouseCommunityProgramCategoryItem, {
     {
       localField: 'community_program_category_id',
       model: MarketingHouseCommunityProgramCategory,
-      nameField: ['category_name', 'name'],
+      // The category's name is stored as `community_program_category_name`.
+      nameField: ['community_program_category_name', 'category_name', 'name'],
       as: 'community_program_category_name',
     },
   ],

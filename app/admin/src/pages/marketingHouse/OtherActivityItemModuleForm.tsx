@@ -44,7 +44,7 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
           status: String(rec.status),
           marketing_house_category_id: rec.marketing_house_category_id ? String(rec.marketing_house_category_id) : '',
           marketing_house_item_id: rec.marketing_house_item_id ? String(rec.marketing_house_item_id) : '',
-          other_activity_category_id: rec.other_activity_category_id ? String(rec.other_activity_category_id) : '',
+          marketing_house_other_activity_category_id: rec.marketing_house_other_activity_category_id ? String(rec.marketing_house_other_activity_category_id) : '',
         });
       }).catch(() => toast.error('Failed to load'));
     }
@@ -85,8 +85,14 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
     if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
     const fd = new FormData();
     fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['other_activity_category_id', 'item_title', 'item_description', 'item_video_url', 'item_image', 'slug', 'display_order', 'status'].forEach((k) => {
+    ['marketing_house_other_activity_category_id', 'item_title', 'item_description', 'slug', 'display_order', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
+    });
+    // Up to 4 image (uploaded) + video (URL) pairs — always send (empty allowed)
+    // so clearing a slot persists; the backend reconciles removed images from S3.
+    [1, 2, 3, 4].forEach((n) => {
+      fd.append(`image${n}`, formData[`image${n}`] ?? '');
+      fd.append(`video${n}`, formData[`video${n}`] ?? '');
     });
     try {
       if (isEdit && editId) await marketingHouseOtherActivityItemApi.update(editId, fd);
@@ -98,58 +104,80 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {lockedItemId ? (
+      {!lockedItemId && (
         <div>
-          <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
-          <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly />
-          <input type="hidden" {...register('marketing_house_item_id')} />
-          <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="form-label">Marketing Category <span className="text-red-500">*</span></label>
-            <select
-              {...categoryReg}
-              onChange={(e) => { categoryReg.onChange(e); setValue('marketing_house_item_id', ''); setValue('other_activity_category_id', ''); }}
-              className="form-select"
-            >
-              <option value="">Select category</option>
-              {categories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
-            </select>
-            {errors.marketing_house_category_id && <p className="form-error">{String(errors.marketing_house_category_id.message)}</p>}
-          </div>
-          <div>
-            <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
-            <select
-              {...itemReg}
-              onChange={(e) => { itemReg.onChange(e); setValue('other_activity_category_id', ''); }}
-              className="form-select"
-              disabled={!selectedCategory}
-            >
-              <option value="">{selectedCategory ? 'Select item' : 'Select a category first'}</option>
-              {items.map((it: any) => <option key={it._id} value={it._id}>{itemName(it)}</option>)}
-            </select>
-            {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
-          </div>
+          <label className="form-label">Marketing Category <span className="text-red-500">*</span></label>
+          <select
+            {...categoryReg}
+            onChange={(e) => { categoryReg.onChange(e); setValue('marketing_house_item_id', ''); setValue('marketing_house_other_activity_category_id', ''); }}
+            className="form-select"
+          >
+            <option value="">Select category</option>
+            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
+          </select>
+          {errors.marketing_house_category_id && <p className="form-error">{String(errors.marketing_house_category_id.message)}</p>}
         </div>
       )}
-      <div>
-        <label className="form-label">Activity Category</label>
-        <select {...register('other_activity_category_id')} className="form-select" disabled={!selectedItem}>
-          <option value="">{selectedItem ? 'Select activity category' : 'Select an item first'}</option>
-          {activityCategories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
-        </select>
+      {/* Marketing Item + Activity Category in a row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
+          {lockedItemId ? (
+            <>
+              <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly />
+              <input type="hidden" {...register('marketing_house_item_id')} />
+              <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
+            </>
+          ) : (
+            <>
+              <select
+                {...itemReg}
+                onChange={(e) => { itemReg.onChange(e); setValue('marketing_house_other_activity_category_id', ''); }}
+                className="form-select"
+                disabled={!selectedCategory}
+              >
+                <option value="">{selectedCategory ? 'Select item' : 'Select a category first'}</option>
+                {items.map((it: any) => <option key={it._id} value={it._id}>{itemName(it)}</option>)}
+              </select>
+              {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
+            </>
+          )}
+        </div>
+        <div>
+          <label className="form-label">Activity Category</label>
+          <select {...register('marketing_house_other_activity_category_id')} className="form-select" disabled={!selectedItem}>
+            <option value="">{selectedItem ? 'Select activity category' : 'Select an item first'}</option>
+            {activityCategories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
+          </select>
+        </div>
       </div>
-      <div>
-        <label className="form-label">Item Title <span className="text-red-500">*</span></label>
-        <input {...register('item_title', { required: 'Required' })} className="form-input" />
-        {errors.item_title && <p className="form-error">{String(errors.item_title.message)}</p>}
+      {/* Item Title + Slug in a row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Item Title <span className="text-red-500">*</span></label>
+          <input {...register('item_title', { required: 'Required' })} className="form-input" />
+          {errors.item_title && <p className="form-error">{String(errors.item_title.message)}</p>}
+        </div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div><label className="form-label">Description</label><textarea {...register('item_description')} className="form-textarea" /></div>
-      <div><label className="form-label">Video URL</label><input {...register('item_video_url')} className="form-input" placeholder="https://youtube.com/..." /></div>
-      <ImageUpload name="item_image" label="Item Image" uploadType="image" folder="marketing-house" value={watch('item_image')} onChange={(url) => setValue('item_image', url)} />
+      {/* Up to 4 images (uploaded) each paired with an optional video link */}
+      {[1, 2, 3, 4].map((n) => (
+        <div key={n} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ImageUpload
+            name={`image${n}`}
+            label={`Image ${n} (JPG, PNG, JPEG, GIF — 583px x 580px)`}
+            uploadType="image"
+            folder="marketing-house"
+            value={watch(`image${n}`)}
+            onChange={(url) => setValue(`image${n}`, url)}
+          />
+          <div>
+            <label className="form-label">Video {n} <span className="text-gray-400 font-normal">(YouTube, Vimeo, or any direct video link)</span></label>
+            <input {...register(`video${n}`)} className="form-input" placeholder="Paste video URL here (optional)" />
+          </div>
+        </div>
+      ))}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

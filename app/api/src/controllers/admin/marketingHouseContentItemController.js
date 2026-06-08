@@ -7,7 +7,10 @@ const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s
 const { parseCsvOrExcel } = require('../../utils/helpers');
 
 const base = createCrudController(MarketingHouseContentCreatedItem, {
-  imageFields: ['item_image'],
+  imageFields: ['image', 'item_image'],
+  // Uploaded video is an S3 asset (build URL on read, clean from S3 on replace/
+  // delete). `url` is a plain external video link.
+  videoFields: ['upload_video_url'],
   searchFields: ['item_title', 'title'],
   defaultSort: { display_order: 1 },
   parentField: 'marketing_house_item_id',
@@ -29,7 +32,8 @@ const base = createCrudController(MarketingHouseContentCreatedItem, {
       as: 'marketing_house_category_name',
     },
     {
-      localField: 'content_created_category_id',
+      // The linked content category is stored as `marketing_house_content_created_category_id`.
+      localField: 'marketing_house_content_created_category_id',
       model: MarketingHouseContentCreatedCategory,
       nameField: ['category_name', 'name'],
       as: 'content_created_category_name',
@@ -38,17 +42,19 @@ const base = createCrudController(MarketingHouseContentCreatedItem, {
 });
 
 const storeWithYoutube = async (req, res) => {
-  if (req.body.item_video_url) {
-    const ytId = getYoutubeVideoId(req.body.item_video_url);
+  // The content item's video URL is stored in `url`; auto-derive a thumbnail into
+  // `image` only when no image was supplied.
+  if (req.body.url) {
+    const ytId = getYoutubeVideoId(req.body.url);
     if (ytId) {
       req.body.item_youtube_id = ytId;
-      if (!req.file) {
+      if (!req.file && !req.body.image) {
         const thumbKey = await uploadYoutubeThumbnailToS3(
           `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
           `${ytId}_${Date.now()}`,
           'content_thumbnails'
         );
-        if (thumbKey) req.body.item_image = thumbKey;
+        if (thumbKey) req.body.image = thumbKey;
       }
     }
   }
@@ -76,9 +82,9 @@ const bulkUpload = async (req, res) => {
       }
       const item = await MarketingHouseContentCreatedItem.create({
         marketing_house_item_id: req.body.marketing_house_item_id,
-        item_video_url: videoUrl,
+        url: videoUrl,
         item_youtube_id: ytId || '',
-        item_image: thumbnailKey,
+        image: thumbnailKey,
         display_order,
         status,
         user_id: req.user._id,
