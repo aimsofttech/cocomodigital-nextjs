@@ -70,6 +70,7 @@ export async function GET(
 
   const where = parseWhere(sp);
   const limit = Number(sp.get("limit")) || 100;
+  const page = Number(sp.get("page")) || undefined;
   const sort = sp.get("sort") ?? undefined;
 
   /* Single-doc lookup by slug. findBySlug uses the collection's detail
@@ -89,6 +90,7 @@ export async function GET(
   const result = await findCollection(collection, {
     where: hasWhere ? (where as Record<string, unknown>) : undefined,
     limit,
+    page,
     sort,
   });
   return NextResponse.json(result);

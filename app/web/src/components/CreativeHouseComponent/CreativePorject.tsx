@@ -9,7 +9,7 @@ import PlayBtn from "../common/PlayBtn/PlayBtn";
 import EditLink from "../Edit-Link/Edit-Link";
 import { ADMIN_URL } from "../../utils/constant";
 
-const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItemCount = 0 }) => {
+const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItemCount = 0, inPageFilter = false }) => {
   const topScrollToCards = useRef(null);
   /* Skip the loading skeleton when we hydrated with server-fetched items. */
   const [loading, setLoading] = useState(initialItems.length === 0);
@@ -30,7 +30,13 @@ const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItem
      creative-house API to a category that doesn't exist → empty
      grid. Native useParams returns {} for non-dynamic routes, so
      slug is undefined here unless the route actually has a slug. */
-  const { slug } = useNextParams() as { slug?: string };
+  /* In-page filter (e.g. /work/content-created): clicking a category
+     filters on the same page via local state instead of navigating to
+     /creative-house/<slug>. On the route pages we still read the slug
+     from the URL. */
+  const [activeCategory, setActiveCategory] = useState("");
+  const { slug: routeSlug } = useNextParams() as { slug?: string };
+  const slug = inPageFilter ? activeCategory : routeSlug;
   const limit = 20;
   const offset = (currentPage - 1) * limit;
   const totalPages = Math.ceil(filteredItemCount / limit);
@@ -98,6 +104,14 @@ const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItem
     return () => clearTimeout(getData);
   };
 
+  /* In-page category select — toggles the active category (click the
+     active one again to clear) and resets to page 1. No navigation. */
+  const handleCategorySelect = (catSlug: string) => {
+    setActiveCategory((prev) => (prev === catSlug ? "" : catSlug));
+    setCurrentPage(1);
+    setUserInteracted(true);
+  };
+
   return (
     <div className="creative-house-creative-project-main-wrapper mt-4">
       <div className="creative-house-creative-project-main">
@@ -105,6 +119,8 @@ const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItem
           categories={creativeCategory}
           currentCategory={slug}
           searchTextChangeHandler={searchTextChangeHandler}
+          inPage={inPageFilter}
+          onSelect={handleCategorySelect}
         />
         {loading && (
           <div
@@ -150,6 +166,8 @@ const FilterBar = ({
   categories,
   currentCategory,
   searchTextChangeHandler,
+  inPage = false,
+  onSelect,
 }) => {
   // Single layout at every viewport — pills wrap to multiple rows
   // on phones (was hidden behind a horizontal slick slider so users
@@ -165,17 +183,33 @@ const FilterBar = ({
       </div>
       <div className="creative-house-filter-search-wrapper">
         <div className="SliderCustom-width">
-          {categories?.map((category, index) => (
-            <Link
-              key={index}
-              to={`/creative-house/${category?.slug}`}
-              className={`creative-house-category-btn inline-flex items-center justify-center rounded-md border border-transparent font-medium transition focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 ${
-                currentCategory === category?.slug ? "border-black bg-black text-white hover:bg-neutral-800" : "border-black bg-transparent text-black hover:bg-black hover:text-white"
-              }`}
-            >
-              {category?.creative_house_category_name}
-            </Link>
-          ))}
+          {categories?.map((category, index) => {
+            const isActive = currentCategory === category?.slug;
+            const className = `creative-house-category-btn inline-flex items-center justify-center rounded-md border font-medium transition focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 ${
+              isActive
+                ? "border-black bg-[#fff000] text-black hover:bg-[#f4e600]"
+                : "border-black bg-transparent text-black hover:bg-black hover:text-white"
+            }`;
+            return inPage ? (
+              <button
+                key={index}
+                type="button"
+                onClick={() => onSelect?.(category?.slug)}
+                className={className}
+                aria-pressed={isActive}
+              >
+                {category?.creative_house_category_name}
+              </button>
+            ) : (
+              <Link
+                key={index}
+                to={`/creative-house/${category?.slug}`}
+                className={className}
+              >
+                {category?.creative_house_category_name}
+              </Link>
+            );
+          })}
         </div>
         <div className="creative-house-search-input-wrapper">
           <input
@@ -211,19 +245,21 @@ const VideoGrid = ({ videos }) => {
                   Previously the <a> had no position context, so the
                   play btn anchored to <body> and rendered at random
                   viewport coords. */}
-              <Link to={`/creatives/${item?.slug}`} className="block relative">
+              <Link
+                to={`/creatives/${item?.slug}`}
+                className="block relative w-full aspect-video overflow-hidden rounded-t bg-neutral-200"
+              >
                 <Image
                   src={
                     item?.creative_house_thumbnail?.startsWith("http")
                       ? item?.creative_house_thumbnail
                       : `https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/${item?.creative_house_thumbnail}`
                   }
-                  className="w-full rounded-t object-cover"
+                  className="object-cover"
                   alt={item?.creative_house_video_title || "Creative thumbnail"}
-                  width={600}
-                  height={400}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   priority={index < 4}
-                  style={{ width: "100%", height: "auto" }}
                 />
                 {(item?.creative_house_upload_video_url ||
                   item?.creative_house_video_url) && <PlayBtn />}

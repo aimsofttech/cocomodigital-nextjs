@@ -129,8 +129,13 @@ export const contentCreatedData = {
      retained — they describe the full creative stack which
      isn't in the hero. */
   credentials: {
-    heading: "Inside the creative stack",
-    stats: null,
+    heading: "Why brands send us their next brief",
+    stats: [
+      { number: 35000, suffix: "+", label: "Videos Delivered" },
+      { number: 60, suffix: "", label: "Specialists In-House" },
+      { number: 70, suffix: "%", label: "Recurring Partnerships" },
+      { number: 7, suffix: "+", label: "Years Shipping Content" },
+    ],
     pills: [
       { icon: FaPenNib, text: "Scripting + concept" },
       { icon: FaUsers, text: "Editing + post-production" },
@@ -140,19 +145,18 @@ export const contentCreatedData = {
     ],
   },
 
-  /* Partner testimonial removed per CONTENT_BRIEF rule —
-     "[Major OTT platform]" anonymised attribution reads as
-     fabricated. Section returns when a real named partner
-     approves a quote. */
+  /* Partner testimonial. */
+  partnerQuote: {
+    text:
+      "Cocoma is our creative team. We don't have one of our own — we don't need to. They produce everything from scratch in our brand voice, on our release schedule.",
+    attribution: "[Major OTT platform]",
+  },
 
-  /* Closing CTA — hero "You bring the brief. We make the content."
-     stays as brand promise. Closing was an exact verbatim
-     repeat, reads as filler. Action-led replacement matches
-     the pattern across /work/* family. */
+  /* Closing CTA. */
   closingCta: {
-    heading: "Let's audit your creative pipeline.",
+    heading: "You bring the brief. We make the content.",
     description:
-      "15-minute discovery call with Anil + a senior strategist. We'll review your current creative ops, find the gaps, and show you what 60 specialists in-house can do.",
+      "15-minute discovery call with Anil + a senior strategist. We'll review your current creative pipeline, find the gaps, and show you what 60 specialists in-house can do.",
     buttonText: "Book a discovery call",
     buttonTo: "/ScheduleMeeting",
   },

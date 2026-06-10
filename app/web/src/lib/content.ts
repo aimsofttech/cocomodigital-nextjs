@@ -39,6 +39,8 @@ interface FetchOpts {
   depth?: number;
   /** Limit. Default 100. */
   limit?: number;
+  /** 1-based page for paginated lists. */
+  page?: number;
   /** Sort field. Pass with leading "-" for descending. */
   sort?: string;
 }
@@ -77,6 +79,24 @@ const listResult = <T>(docs: T[], limit?: number): FindResult<T> => {
     page: 1,
     totalPages: 1,
     hasNextPage: false,
+  };
+};
+
+/** Paginate an adapted doc array (1-based page) with real totals. */
+const pagedResult = <T>(
+  docs: T[],
+  limit?: number,
+  page?: number,
+): FindResult<T> => {
+  const lim = typeof limit === "number" && limit > 0 ? limit : docs.length || 1;
+  const pg = typeof page === "number" && page > 0 ? page : 1;
+  const start = (pg - 1) * lim;
+  return {
+    docs: docs.slice(start, start + lim),
+    totalDocs: docs.length,
+    page: pg,
+    totalPages: Math.max(1, Math.ceil(docs.length / lim)),
+    hasNextPage: start + lim < docs.length,
   };
 };
 
@@ -232,6 +252,8 @@ const fetchServiceCategories = (revalidate?: number) =>
 
 interface WhereClause {
   category?: { equals?: unknown; not_equals?: unknown };
+  "category.slug"?: { equals?: unknown };
+  title?: { contains?: unknown; like?: unknown };
 }
 
 /* ── Brand + Author adapters ─────────────────────────────────── */
@@ -603,6 +625,22 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       return listResult((data ?? []).map(adaptBookCall), opts.limit);
     },
   },
+  "creative-categories": {
+    list: async (opts) => {
+      const cats = await apiGet<MongoCreativeCategory[]>("/creative", {
+        revalidate: opts.revalidate,
+      });
+      const docs = (cats ?? []).map((c) => ({
+        id: c._id,
+        name: c.creative_house_category_name,
+        creative_house_category_name: c.creative_house_category_name,
+        slug: c.creative_house_category_slug,
+        creative_house_category_slug: c.creative_house_category_slug,
+        order: c.display_order,
+      }));
+      return listResult(docs, opts.limit);
+    },
+  },
   "creative-house-items": {
     list: async (opts) => {
       const cats = await apiGet<MongoCreativeCategory[]>("/creative", {
@@ -617,8 +655,21 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       if (where?.category?.equals !== undefined) {
         items = items.filter((s) => s.category.id === where.category!.equals);
       }
+      const catSlug = where?.["category.slug"]?.equals;
+      if (catSlug !== undefined) {
+        items = items.filter((s) => s.category?.slug === catSlug);
+      }
+      const titleQ = (where?.title?.contains ?? where?.title?.like) as
+        | string
+        | undefined;
+      if (titleQ) {
+        const q = String(titleQ).toLowerCase();
+        items = items.filter((s) =>
+          String(s.title ?? "").toLowerCase().includes(q),
+        );
+      }
       items.sort(byOrder);
-      return listResult(items, opts.limit);
+      return pagedResult(items, opts.limit, opts.page);
     },
   },
   "marketing-house-items": {

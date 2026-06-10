@@ -45,24 +45,20 @@ export default function ContentCreated({
        featuredOnHomepage and NOT "Our Other Services"). Match. */
     const fetchCreativeHouseDetails = async () => {
       try {
-        const res = await fetch(
-          "/content-api/service-categories?limit=50&depth=0",
-          { headers: { Accept: "application/json" } },
-        );
+        /* Filter rail = the creative-house categories (Videos 16:9,
+           Shorts & Reels, Trailers, Promo, Thumbnails, … Vlogs), the
+           same taxonomy the /creative-house grid filters by. */
+        const res = await fetch("/content-api/creative-categories?limit=50", {
+          headers: { Accept: "application/json" },
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const body = await res.json();
-        const creativeCategory = (body.docs || [])
-          .filter(
-            (c: any) =>
-              !c.featuredOnHomepage &&
-              c.category_name !== "Our Other Services",
-          )
-          .map((c: any) => ({
-            id: c.id,
-            creative_house_category_name: c.category_name,
-            creative_house_category_slug: c.slug,
-            slug: c.slug,
-          }));
+        const creativeCategory = (body.docs || []).map((c: any) => ({
+          id: c.id,
+          creative_house_category_name: c.creative_house_category_name || c.name,
+          creative_house_category_slug: c.slug,
+          slug: c.slug,
+        }));
         setCreativeHouseDetails({ creativeCategory });
       } catch (err: any) {
         setIsError(err?.message);
@@ -189,6 +185,7 @@ export default function ContentCreated({
             creativeCategory={creativeHouseDetails?.creativeCategory}
             initialItems={initialItems}
             initialItemCount={initialItemCount}
+            inPageFilter
           />
 
           {/* ============= 4. METHODOLOGY ============= */}
