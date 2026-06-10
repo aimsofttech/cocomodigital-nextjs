@@ -1,0 +1,24 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          port: 22
+          key: ${{ secrets.SSHKEY }}
+          debug: true
+          script: |
+            cd /www/wwwroot/cocomadigital.com
+            chmod +x ./.scripts/deploy.sh
+            ./.scripts/deploy.sh

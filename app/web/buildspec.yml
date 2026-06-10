@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18  # Specify the specific Node.js version
+    commands:
+      - echo Installing Node.js and npm
+
+  pre_build:
+    commands:
+      - echo "Configuring AWS CLI..."
+      - aws configure set default.region $AWS_REGION
+      - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+      - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+      - echo Installing project dependencies
+      - npm install  # Install project dependencies
+
+  build:
+    commands:
+      - echo Building the React app
+      - npm run build  # Build the React app
+
+  post_build:
+    commands:
+      - echo Copying build artifacts to S3
+      - set -x
+      - aws s3 sync build/ s3://cocoma-digital-website/  # Replace with your S3 bucket details
+      - set +x

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#FFF000" />
+
+  <!-- Default site metadata. Per-route titles + descriptions are
+       overridden client-side via Next.js metadata (Next.js metadata).
+       These act as the fallback for any route that doesn't supply
+       its own, AND as the initial HTML the SPA serves before
+       hydration — important for crawlers that don't run JS. -->
+  <title>Cocoma Digital — India's leading YouTube &amp; social media growth studio</title>
+  <meta name="description" content="60-person Mumbai studio building YouTube channels, social audiences, and entertainment brands. Founded 2019. Recurring partnerships, in-house team, founder-led discovery calls." />
+  <meta name="keywords" content="YouTube growth agency India, social media marketing Mumbai, Bollywood YouTube marketing, OTT platform marketing, music label social strategy, entertainment content studio India" />
+
+  <!-- Open Graph (Facebook, LinkedIn, WhatsApp link previews) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Cocoma Digital" />
+  <meta property="og:title" content="Cocoma Digital — India's leading YouTube &amp; social media growth studio" />
+  <meta property="og:description" content="60-person Mumbai studio building YouTube channels, social audiences, and entertainment brands." />
+  <meta property="og:url" content="https://cocomadigital.com" />
+  <meta property="og:image" content="https://cocomadigital.com/Images/og-cover.jpg" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Cocoma Digital — India's leading YouTube &amp; social media growth studio" />
+  <meta name="twitter:description" content="60-person Mumbai studio building YouTube channels, social audiences, and entertainment brands." />
+  <meta name="twitter:image" content="https://cocomadigital.com/Images/og-cover.jpg" />
+
+  <!-- Canonical is set per-route via Next.js metadata (Next.js metadata).
+       NOT defined here as a static fallback — Next.js metadata
+       APPENDS instead of replacing static <link>s, which would
+       double-up the canonical and confuse Google. Pages without
+       Next.js metadata wired in will fall back to the URL itself,
+       which is what Google does anyway. -->
+
+  <!-- Sitewide structured data — Organization + LocalBusiness +
+       WebSite. Renders in the initial HTML so crawlers without
+       JS still see who Cocoma is, where it's based, and how to
+       contact it. Page-specific schemas (Service, FAQPage,
+       BreadcrumbList, Article) are injected per-route via
+       Next.js metadata. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://cocomadigital.com/#organization",
+        "name": "Cocoma Digital",
+        "legalName": "Cocoma Digital Private Limited",
+        "url": "https://cocomadigital.com",
+        "logo": "https://cocomadigital.com/Images/app_logo.svg",
+        "description": "India's leading YouTube & social media growth studio. 60-person Mumbai team building entertainment-first content for Bollywood, OTT platforms, music labels and global brands.",
+        "foundingDate": "2019",
+        "founder": {
+          "@type": "Person",
+          "name": "Anil Mahato",
+          "jobTitle": "Founder",
+          "worksFor": { "@id": "https://cocomadigital.com/#organization" }
+        },
+        "sameAs": [
+          "https://in.linkedin.com/company/cocomadigital",
+          "https://www.instagram.com/cocomadigital/",
+          "https://www.youtube.com/channel/UCP3vqjxVD4VlLxDWiKeq1Mg"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "25, Maa Sharda Villa, Near St. Blaise Church, Amboli, Andheri West",
+          "addressLocality": "Mumbai",
+          "addressRegion": "Maharashtra",
+          "postalCode": "400058",
+          "addressCountry": "IN"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "hello@cocomadigital.com",
+          "contactType": "customer support",
+          "availableLanguage": ["English", "Hindi"]
+        },
+        "knowsAbout": [
+          "YouTube channel growth",
+          "YouTube content strategy",
+          "Social media marketing",
+          "Video editing",
+          "Title launch campaigns",
+          "OTT platform marketing",
+          "Music label marketing",
+          "Bollywood marketing",
+          "Entertainment branding",
+          "Content operations"
+        ]
+      },
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://cocomadigital.com/#local-business",
+        "name": "Cocoma Digital",
+        "image": "https://cocomadigital.com/Images/app_logo.svg",
+        "url": "https://cocomadigital.com",
+        "email": "hello@cocomadigital.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "25, Maa Sharda Villa, Near St. Blaise Church, Amboli, Andheri West",
+          "addressLocality": "Mumbai",
+          "addressRegion": "Maharashtra",
+          "postalCode": "400058",
+          "addressCountry": "IN"
+        },
+        "priceRange": "$$",
+        "areaServed": [
+          { "@type": "Country", "name": "India" },
+          { "@type": "Country", "name": "United States" },
+          { "@type": "Country", "name": "United Kingdom" },
+          { "@type": "Country", "name": "Singapore" },
+          { "@type": "Country", "name": "Australia" }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://cocomadigital.com/#website",
+        "url": "https://cocomadigital.com",
+        "name": "Cocoma Digital",
+        "publisher": { "@id": "https://cocomadigital.com/#organization" },
+        "inLanguage": "en-IN"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Favicon + Apple touch + manifest -->
+  <link rel="icon" href="%PUBLIC_URL%/Images/app_logo.svg" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/Images/app_logo.svg" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5X9QP0SM3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+
+  gtag('js', new Date());
+
+  gtag('config', 'G-Z5X9QP0SM3', {
+    page_path: window.location.pathname,
+  });
+</script>
+
+  <!-- Chatlyfy AI Chat Widget removed per Anil — replaced site-wide
+       by direct contact paths (header BOOK CALL, ContactPromo, the
+       FloatingCallChip on single-video pages, the /contact-us page
+       quick-channel cards). To re-enable, restore the line below.
+       <script src="https://chatlyfy.com/widget/chatlyfy-widget-loader.js" data-bot-id="9af98992-4456-4548-b6f8-2bcb0ad3eaca"></script>
+  -->
+
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+</body>
+
+</html>

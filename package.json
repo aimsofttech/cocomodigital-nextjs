@@ -7,9 +7,10 @@
     "app/admin"
   ],
   "scripts": {
-    "dev": "concurrently -n \"API,ADMIN\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run dev -w @cocoma/api\" \"npm run dev -w @cocoma/admin\"",
+    "dev": "concurrently -n \"API,ADMIN,WEB\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm run dev -w @cocoma/api\" \"npm run dev -w @cocoma/admin\" \"npm run dev:web\"",
     "dev:api": "npm run dev -w @cocoma/api",
     "dev:admin": "npm run dev -w @cocoma/admin",
+    "dev:web": "cd app/web && npm run dev",
     "build": "npm run build -w @cocoma/admin",
     "start": "npm run start -w @cocoma/api",
     "seed": "npm run seed -w @cocoma/api",

@@ -1,0 +1,57 @@
+{
+  "name": "comoma-digital",
+  "version": "0.1.1",
+  "private": true,
+  "homepage": "https://site.cocomadigital.com",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/node": "^25.6.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "aos": "^2.3.4",
+    "canvas-confetti": "^1.9.4",
+    "dompurify": "^3.2.3",
+    "eslint-config-next": "^16.2.6",
+    "moment": "^2.30.1",
+    "next": "^16.2.6",
+    "prettier": "^3.8.3",
+    "react": "^19.2.6",
+    "react-calendar": "^5.1.0",
+    "react-dom": "^19.2.6",
+    "react-fast-marquee": "^1.6.5",
+    "react-icons": "^5.3.0",
+    "react-player": "^2.16.1",
+    "react-responsive": "^10.0.1",
+    "react-slick": "^0.30.2",
+    "react-toastify": "^11.0.5",
+    "resend": "^6.12.3",
+    "sharp": "^0.34.0",
+    "slick-carousel": "^1.8.1",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "dev": "next dev --webpack -p 3000",
+    "dev:turbo": "next dev --turbo -p 3000",
+    "devsafe": "next dev --webpack -p 3000",
+    "start": "next start -p 3000",
+    "prebuild": "tsx scripts/generate-blog-manifest.ts",
+    "build": "next build",
+    "blog": "tsx scripts/generate-blog-manifest.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
+  },
+  "eslintConfig": {
+    "extends": [
+      "next/core-web-vitals"
+    ]
+  },
+  "devDependencies": {
+    "@types/react-slick": "^0.23.13",
+    "eslint": "^9.0.0",
+    "gray-matter": "^4.0.3",
+    "marked": "^11.2.0",
+    "tsx": "^4.21.0"
+  }
+}
