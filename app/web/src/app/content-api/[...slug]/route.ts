@@ -13,7 +13,7 @@
  * POST /content-api/<lead-collection>   → proxied to the Express API
  */
 import { NextRequest, NextResponse } from "next/server";
-import { findCollection, getGlobal } from "@/src/lib/content";
+import { findBySlug, findCollection, getGlobal } from "@/src/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -72,12 +72,12 @@ export async function GET(
   const limit = Number(sp.get("limit")) || 100;
   const sort = sp.get("sort") ?? undefined;
 
-  /* Single-doc lookup by slug: fetch the list and match on slug
-     (every adapter exposes a `slug` field). */
+  /* Single-doc lookup by slug. findBySlug uses the collection's detail
+     endpoint when it has one (e.g. services → group-service, with the
+     top banner), else matches the list on slug. */
   const slugEq = where.slug?.equals;
   if (slugEq) {
-    const r = await findCollection<Slugged>(collection, { limit: 2000, sort });
-    const doc = r.docs.find((d) => d?.slug === slugEq);
+    const doc = await findBySlug<Slugged>(collection, slugEq, {});
     return NextResponse.json(
       doc
         ? { ...emptyList, docs: [doc], totalDocs: 1, totalPages: 1, limit }

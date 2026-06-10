@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const ServiceCategory = require('../../models/ServiceCategory');
 const ServiceItem = require('../../models/ServiceItem');
 const GroupServiceCategory = require('../../models/GroupServiceCategory');
@@ -31,16 +32,59 @@ const groupService = async (req, res) => {
   const serviceItem = await ServiceItem.findOne({ service_slug, status: 1 });
   if (!serviceItem) return res.status(404).json({ status: 'error', message: 'Service not found' });
 
-  const categories = await GroupServiceCategory.find({ service_item_id: serviceItem._id, status: 1 }).sort({ display_order: 1 });
+  const categories = await GroupServiceCategory.find({
+    status: 1,
+    explore_our_service_item_id: { $in: [serviceItem._id, String(serviceItem._id)] },
+  }).sort({ display_order: 1 });
   const result = [];
   for (const cat of categories) {
-    const items = await GroupServiceItem.find({ group_service_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
+    const catKeys = [cat._id, String(cat._id)];
+    // Items can be linked two ways: directly on the item
+    // (group_service_category_id) or via the group_service_category_item
+    // join table. Union both so every section shows all its services.
+    const directItems = await GroupServiceItem.find({
+      status: 1,
+      group_service_category_id: { $in: catKeys },
+    });
+    const joinRows = await mongoose.connection
+      .collection('group_service_category_item')
+      .find({ group_service_category_id: { $in: catKeys } })
+      .toArray();
+    const joinItemIds = joinRows.map((j) => j.group_service_item_id).filter(Boolean);
+    const joinItems = joinItemIds.length
+      ? await GroupServiceItem.find({ status: 1, _id: { $in: joinItemIds } })
+      : [];
+    const byId = new Map();
+    for (const i of [...directItems, ...joinItems]) byId.set(String(i._id), i);
+    const items = Array.from(byId.values()).sort(
+      (a, b) => (a.display_order || 0) - (b.display_order || 0),
+    );
     result.push({
       ...cat.toObject(),
       items: items.map((i) => ({ ...i.toObject(), group_service_item_thumbnail: buildUrl(i.group_service_item_thumbnail) })),
     });
   }
-  res.json({ status: 'success', data: { service: serviceItem, categories: result } });
+
+  // Top banner(s) for this service page — prefer the banner linked to
+  // this exact service item; fall back to its category's banner.
+  let banners = await GroupTopBanner.find({
+    status: 1,
+    explore_our_service_item_id: { $in: [serviceItem._id, String(serviceItem._id)] },
+  }).sort({ display_order: 1 });
+  if (banners.length === 0 && serviceItem.service_category_id) {
+    banners = await GroupTopBanner.find({
+      status: 1,
+      explore_our_service_category_id: {
+        $in: [serviceItem.service_category_id, String(serviceItem.service_category_id)],
+      },
+    }).sort({ display_order: 1 });
+  }
+  const top_banner = banners.map((b) => ({
+    ...b.toObject(),
+    group_banner_img: buildUrl(b.group_banner_img),
+  }));
+
+  res.json({ status: 'success', data: { service: serviceItem, categories: result, top_banner } });
 };
 
 const getSingleService = async (req, res) => {

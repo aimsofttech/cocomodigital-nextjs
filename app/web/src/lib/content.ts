@@ -700,6 +700,54 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       }
       return listResult(items, opts.limit);
     },
+    bySlug: async (slug) => {
+      const data = await apiGet<{
+        service?: any;
+        categories?: any[];
+        top_banner?: any[];
+      }>(`/service/group-service/${encodeURIComponent(slug)}`);
+      const s = data?.service;
+      if (!s) return null;
+      return {
+        id: s._id,
+        title: s.service_title,
+        slug: s.service_slug,
+        description: s.service_description ?? s.description,
+        featured_description: s.featured_description,
+        image: buildImg(s.service_image),
+        legacyImageUrl: buildImg(s.service_image),
+        category: { id: s.service_category_id },
+        group_top_banner: (data.top_banner ?? []).map((b: any) => ({
+          heading: b.group_banner_heading,
+          subheading: b.group_banner_subheading,
+          image: buildImg(b.group_banner_img),
+          legacyImageUrl: buildImg(b.group_banner_img),
+          video: b.group_banner_video,
+          video_url: b.group_banner_video,
+          button_text: b.group_banner_button_text,
+          cta_text: b.group_banner_button_text,
+          cta_url: b.group_banner_button_url,
+        })),
+        /* The "FOR <audience>" sliding sections: group_services_category
+           (sections) → group_service_item (cards). The page/Services
+           view map cat.items → api_group_service_items (reading title,
+           description, slug, thumbnail from legacyImageUrl). */
+        group_single_service_portfolio_category: (data.categories ?? []).map(
+          (cat: any) => ({
+            id: cat._id,
+            category_name: cat.group_service_category_name,
+            display_direction: cat.display_direction,
+            items: (cat.items ?? []).map((it: any) => ({
+              id: it._id,
+              title: it.group_service_item_title,
+              slug: it.group_service_slug,
+              description: it.group_service_item_description,
+              legacyImageUrl: buildImg(it.group_service_item_thumbnail),
+            })),
+          }),
+        ),
+      };
+    },
   },
   brands: {
     list: async (opts) => {
@@ -784,12 +832,13 @@ export const findBySlug = async <T = unknown>(
   if (source?.bySlug) {
     return source.bySlug(slug, opts) as Promise<T | null>;
   }
-  const res = await findCollection<T>(collection, {
-    ...opts,
-    where: { slug: { equals: slug } },
-    limit: 1,
-  });
-  return res.docs[0] ?? null;
+  /* No detail endpoint: fetch the list and match on slug (list
+     adapters don't filter by slug, so we can't rely on a where). */
+  const res = await findCollection<T>(collection, { ...opts, limit: 2000 });
+  return (
+    ((res.docs as Array<{ slug?: string }>).find((d) => d?.slug === slug) ??
+      null) as T | null
+  );
 };
 
 /**
@@ -823,8 +872,11 @@ export const getBlogCategories = (opts?: FetchOpts) =>
 export const getServices = (opts?: FetchOpts) =>
   findCollection<any>("services", { sort: "order", ...opts });
 
+/** Service detail (/services/[slug]) — parent service + its top
+    banner(s). Resolved via the services `bySlug` source (the API's
+    group-service endpoint), shared with the client shim. */
 export const getService = (slug: string, opts?: FetchOpts) =>
-  findBySlug<any>("services", slug, { depth: 2, ...opts });
+  findBySlug<any>("services", slug, opts);
 
 export const getServiceCategories = (opts?: FetchOpts) =>
   findCollection<any>("service-categories", { sort: "order", ...opts });
