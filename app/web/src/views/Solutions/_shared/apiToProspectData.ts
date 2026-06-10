@@ -54,6 +54,8 @@ import {
   FaTwitter,
   FaFacebook,
   FaWhatsapp,
+  FaBuilding,
+  FaShoppingBag,
 } from "react-icons/fa";
 import { HiArrowUpRight } from "react-icons/hi2";
 
@@ -97,6 +99,8 @@ export const SOLUTION_ICON_MAP: Record<string, IconType> = {
   FaTwitter,
   FaFacebook,
   FaWhatsapp,
+  FaBuilding,
+  FaShoppingBag,
   HiArrowUpRight,
 };
 
