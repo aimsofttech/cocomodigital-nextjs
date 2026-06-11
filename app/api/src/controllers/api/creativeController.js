@@ -2,9 +2,31 @@ const CreativeHouseCategory = require('../../models/CreativeHouseCategory');
 const CreativeHouseItem = require('../../models/CreativeHouseItem');
 const CreativeHouseApproach = require('../../models/CreativeHouseApproach');
 const CreativeHouseFinalOutput = require('../../models/CreativeHouseFinalOutput');
+const Gallery = require('../../models/Gallery');
 const { buildS3Url } = require('../../utils/s3Upload');
 
 const buildUrl = (key) => (key ? buildS3Url(key) : '');
+
+/* The "Brief & Requirement" brand logo. The legacy `requirement_title`
+   column on a creative-house item is an integer FK into the gallery
+   table (rows where image_type = 'requirement_title'), but the MySQL→
+   Mongo migration never converted this FK, so it survives as a bare
+   int. The migration also stripped the gallery rows' MySQL ids while
+   preserving insertion order, so we resolve by ordering: sorted by
+   _id, the requirement-logo galleries run on contiguous MySQL ids
+   whose first row (Amazon Mini TV) had id 15 — i.e. Mini TV=15,
+   MX Player=16, Prime Video=17, IMDB=18. */
+const REQUIREMENT_LOGO_BASE_ID = 15;
+
+const resolveRequirementLogo = async (requirementTitle) => {
+  const reqId = Number(requirementTitle);
+  if (!Number.isInteger(reqId) || reqId < REQUIREMENT_LOGO_BASE_ID) return '';
+  const logos = await Gallery.find({ image_type: 'requirement_title' })
+    .sort({ _id: 1 })
+    .lean();
+  const g = logos[reqId - REQUIREMENT_LOGO_BASE_ID];
+  return g && g.image_file ? buildUrl(g.image_file) : '';
+};
 
 const creativeHomePriority = async (req, res) => {
   const categories = await CreativeHouseCategory.find({ status: 1 }).sort({ display_order: 1 });
@@ -49,15 +71,20 @@ const getSingleCreativeHouse = async (req, res) => {
   const item = await CreativeHouseItem.findOne({ creative_house_slug, status: 1 }).populate('creative_house_category_id', 'creative_house_category_name');
   if (!item) return res.status(404).json({ status: 'error', message: 'Not found' });
 
-  const [approaches, finalOutputs] = await Promise.all([
+  const [approaches, finalOutputs, requirementLogo] = await Promise.all([
     CreativeHouseApproach.find({ creative_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
     CreativeHouseFinalOutput.find({ creative_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
+    resolveRequirementLogo(item.requirement_title),
   ]);
 
   res.json({
     status: 'success',
     data: {
-      item: { ...item.toObject(), creative_house_thumbnail: buildUrl(item.creative_house_thumbnail) },
+      item: {
+        ...item.toObject(),
+        creative_house_thumbnail: buildUrl(item.creative_house_thumbnail),
+        requirement_logo: requirementLogo,
+      },
       approaches: approaches.map((a) => ({ ...a.toObject(), approach_image: buildUrl(a.approach_image) })),
       final_outputs: finalOutputs.map((f) => ({ ...f.toObject(), output_image: buildUrl(f.output_image) })),
     },

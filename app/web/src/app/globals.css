@@ -20847,7 +20847,12 @@
 
     color: var(--text-strong);
 
-    margin: 0;
+    /* Center the capped-width (max-width:880px) heading block within
+       its parent. text-align:center only centers the text inside the
+       block; without auto side-margins the block itself sits left of
+       center in plain (non-flex) parents like the Creative Approach
+       and Project Media sections. */
+    margin: 0 auto;
 
   }
 
