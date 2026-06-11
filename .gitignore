@@ -3,8 +3,10 @@ node_modules/
 cocoma-node-backend/node_modules/
 cocoma-react-admin/node_modules/
 
-# Environment files
+# Environment files (never commit secrets — use .env.example)
 .env
+.env.local
+.env.*.local
 cocoma-node-backend/.env
 
 # Logs
