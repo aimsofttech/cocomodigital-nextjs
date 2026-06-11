@@ -93,7 +93,16 @@ export async function apiGet<T>(
   }
 
   if (!res.ok) {
-    console.error(`[api] GET ${path} failed: ${res.status} ${res.statusText}`);
+    /* A 404 is an expected "resource doesn't exist" outcome for
+       by-slug / by-id lookups (e.g. /service/group-service/<slug> for
+       a slug with no service). Callers already handle the resulting
+       null gracefully, so don't log it as an error — that would
+       otherwise surface in the Next.js dev overlay as a Console Error
+       for a perfectly normal not-found case. Real failures (5xx, etc.)
+       are still logged. */
+    if (res.status !== 404) {
+      console.error(`[api] GET ${path} failed: ${res.status} ${res.statusText}`);
+    }
     return null;
   }
 

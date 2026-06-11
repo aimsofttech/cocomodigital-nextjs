@@ -41,7 +41,7 @@ const ServiceCategoryHero = ({ bannerData }) => {
     return (
       <div className="w-full">
         <div className="service-page-main-wrapper">
-          <h5>Banner not available</h5>
+          <h5>Banner Not Available</h5>
         </div>
       </div>
     );

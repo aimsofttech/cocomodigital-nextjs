@@ -271,7 +271,11 @@ export default function Services({
         const parentBody = await parentRes.json();
         const parent = parentBody?.docs?.[0];
         if (!parent) {
-          setBanner(null);
+          /* No service exists for this slug → no banner. Use an empty
+             array (not null) so ServiceCategoryHero renders its
+             "Banner Not Available" empty state instead of an endless
+             loading skeleton. */
+          setBanner([]);
           setServices([]);
           return;
         }
@@ -328,7 +332,9 @@ export default function Services({
           },
         };
         const servicesData = getGroupServicePayload(groupServiceData);
-        setBanner(servicesData?.group_top_banner || null);
+        /* Empty array (not null) when the service has no banners, so
+           the hero shows "Banner Not Available" rather than a skeleton. */
+        setBanner(servicesData?.group_top_banner || []);
         setServices(servicesData?.group_service_category || []);
       } catch (err: any) {
         if (cancelled) return;
