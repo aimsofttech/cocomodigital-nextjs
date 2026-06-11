@@ -42,11 +42,34 @@ const WebSeriesIndividual = () => {
        script populated only the legacy S3 URL (Media upload deferred
        to a follow-up). Also derives `category_id` from the
        category relationship for <RelatedCaseStudies/>. */
+    /* Some the API rows store the image as a bare S3 object key
+       (e.g. "poster-image/1777877055_psycho saiyaan.jpeg") rather
+       than an absolute URL. next/image calls `new URL(src)` and
+       throws "Failed to construct 'URL': Invalid URL" on a non-
+       absolute, non-root-relative path. Prefix bare keys with the
+       S3 base so every src handed to <Image> is a valid URL.
+       Already-absolute URLs and root-relative paths pass through. */
+    const S3_BASE =
+      "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/";
+    const absolutize = (v: string): string =>
+      !v
+        ? ""
+        : /^https?:\/\//.test(v) || v.startsWith("/")
+          ? v
+          : S3_BASE + v.replace(/^\/+/, "");
     const mediaUrl = (v: any, legacyKey?: string, doc?: any): string => {
-      if (!v) return legacyKey && doc ? doc[legacyKey] || "" : "";
-      if (typeof v === "string") return v;
-      if (typeof v === "object" && v.url) return v.url;
-      return legacyKey && doc ? doc[legacyKey] || "" : "";
+      const raw = !v
+        ? legacyKey && doc
+          ? doc[legacyKey] || ""
+          : ""
+        : typeof v === "string"
+          ? v
+          : typeof v === "object" && v.url
+            ? v.url
+            : legacyKey && doc
+              ? doc[legacyKey] || ""
+              : "";
+      return absolutize(raw);
     };
     const adaptDoc = (d: any) => {
       if (!d) return null;

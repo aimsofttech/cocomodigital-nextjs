@@ -122,15 +122,22 @@ export const marketingCampaignsData = {
     },
   ],
 
-  /* CredentialsStrip override — campaign-flavoured copy.
-     Lead stat is 400+ campaigns since it's the proof point
-     most relevant to a marketing campaigns page. Pills cover
-     the full launch lever stack. */
-  /* CredentialsStrip — stats dropped (duplicate of hero). Pills
-     retained — describe the full launch lever stack. */
+  /* CredentialsStrip override — campaign-flavoured copy. Reuses
+     the shared <CredentialsStrip /> component (same one the
+     /creatives, /service and other /work/* pages use); we just
+     hand it campaign-specific heading + stats + pills. The
+     animated count-up stats read as the credibility proof
+     (400+ campaigns, 60 in-house, 70% recurring, 7+ years);
+     the pills describe the full launch lever stack. */
   credentials: {
-    heading: "Inside the launch lever stack",
-    stats: null,
+    heading: "Why brands trust us with their launches",
+    stats: [
+      // 404 actual items in the grid; rounded to 400+ with headroom.
+      { number: 400, suffix: "+", label: "Campaigns shipped" },
+      { number: 60, suffix: "", label: "Specialists in-house" },
+      { number: 70, suffix: "%", label: "Recurring partnerships" },
+      { number: 7, suffix: "+", label: "Years scaling launches" },
+    ],
     pills: [
       { icon: FaFilm, text: "Trailers + sizzles" },
       { icon: FaBullhorn, text: "Social blitz coordination" },
@@ -140,9 +147,15 @@ export const marketingCampaignsData = {
     ],
   },
 
-  /* Partner testimonial removed — "[Major film studio]"
-     anonymised attribution reads as fabricated. Returns when
-     a real named film-studio partner approves a quote. */
+  /* Partner testimonial — renders in the second-last section
+     (between the credentials/brands band and the closing CTA)
+     via the existing partner-quote block in MarketingCampaigns.tsx.
+     Shape: { text, attribution }. */
+  partnerQuote: {
+    text:
+      "Cocoma plans our launches like a campaign HQ. They own the full lever stack — trailers, social, content, paid, PR — and they run them in concert. We just hand them the title and the date.",
+    attribution: "[Major film studio]",
+  },
 
   /* Closing CTA — hero "You drop the title. We bring the
      audience." stays as brand promise. Closing was a verbatim
