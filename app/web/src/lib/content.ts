@@ -519,6 +519,95 @@ const adaptMarketingItem = (
     : { id: it.marketing_house_category_id },
 });
 
+/* ── Marketing-house DETAIL (single case-study page) ─────────────
+   The /marketing/<slug> page (WebSeriesIndividual) needs the full
+   item PLUS its many sub-collections (stats, strategy, performance,
+   add-on activities, content-created, continuity program, slider
+   images). The list endpoint only carries the bare item, so every
+   one of those sections came up empty. The api's /marketing/single/
+   <slug> endpoint aggregates them all; this maps that response into
+   the flat legacy `itemData` shape the page's components read. */
+const arr = <T>(v: any): T[] => (Array.isArray(v) ? v : []);
+
+const fetchMarketingDetail = (slug: string, revalidate?: number) =>
+  apiGet<any>(`/marketing/single/${encodeURIComponent(slug)}`, { revalidate });
+
+const adaptMarketingDetail = (d: any) => {
+  const item = d?.item ?? {};
+  const catId =
+    typeof item.marketing_house_category_id === "object"
+      ? item.marketing_house_category_id?._id
+      : item.marketing_house_category_id;
+  return {
+    ...item,
+    id: item._id,
+    slug: item.marketing_house_slug ?? item.slug,
+    title: item.title ?? item.marketing_house_title,
+    poster_image: buildImg(item.poster_image),
+    marketing_video: item.marketing_video,
+    legacyImageUrl: buildImg(item.poster_image || item.marketing_house_thumbnail),
+    /* SingleWebSeriesData stats band reads highlights_* + highlights[] */
+    highlights_title: item.stats_title,
+    highlights_description: item.stats_description,
+    highlights: arr<any>(d.statics).map((s) => ({
+      value: s.value,
+      name: s.name,
+    })),
+    /* category relationship — WebSeriesIndividual derives category_id
+       from `category` for the RelatedCaseStudies rail. */
+    category: { id: catId },
+    /* Slider images (SingleWebSeriesData) */
+    images: arr<any>(d.images).map((i) => ({
+      image: buildImg(i.image),
+      upload_video: buildImg(i.marketing_item_upload_video_url),
+      video_url: i.marketing_item_video_url || "",
+    })),
+    /* StrategyExecution "Our Activities" — ideas + pre-launch rows */
+    ideas_strategy_planning: arr<any>(d.idea_strategy).map((i) => ({
+      id: i._id,
+      marketing_house_item_id: i.marketing_house_item_id,
+      title: i.title,
+      description: i.description,
+      image: buildImg(i.image || i.idea_image),
+    })),
+    pre_launch_activity: arr<any>(d.pre_launch).map((p) => ({
+      id: p._id,
+      marketing_house_item_id: p.marketing_house_item_id,
+      title: p.title ?? p.activity_title,
+      description: p.description ?? p.activity_description,
+      image: buildImg(p.activity_image || p.image),
+    })),
+    /* CampaignPerformance rows */
+    performance: arr<any>(d.performances).map((p) => ({
+      id: p._id,
+      title: p.title ?? p.performance_title,
+      sub_title: p.sub_title ?? "",
+      description: p.description ?? p.performance_description,
+      image: buildImg(p.performance_image || p.image),
+    })),
+    /* Tab categories (items fetched per-tab via the sources below). */
+    other_activity_category: arr<any>(d.other_activities).map((c) => ({
+      id: c._id,
+      category_name: c.category_name,
+    })),
+    content_created_category: arr<any>(d.content_created).map((c) => ({
+      id: c._id,
+      category_name: c.category_name,
+      navigate_to: c.navigate_to,
+    })),
+    continuity_category: arr<any>(d.community_programs).map((c) => ({
+      id: c._id,
+      category_name: c.community_program_category_name,
+      description: c.community_program_category_description,
+    })),
+    /* FAQ section reads the embedded faqs[] off the item doc. */
+    faqs: arr<any>(d.faqs).map((f) => ({
+      question: f.question,
+      answer: f.answer,
+    })),
+  };
+};
+
 const byOrder = <T extends { order?: number }>(a: T, b: T): number =>
   (a.order ?? 0) - (b.order ?? 0);
 
@@ -569,12 +658,40 @@ interface MongoOurAdvantage {
   image?: string;
 }
 
-const adaptOurAdvantage = (m: MongoOurAdvantage) => ({
-  ...m,
-  id: m._id,
-  order: m.display_order,
-  legacyImageUrl: buildImg(m.image || m.advantage_icon),
-});
+const adaptOurAdvantage = (m: MongoOurAdvantage) => {
+  /* The api stores the advantage's stats as flat numbered scalars
+     (action_number_1..7 / action_title_1..7) and its industry-
+     experience rows as exp_number_/exp_title_/exp_img_1..7. The
+     WhyCocomaDigital section reads structured `metrics[]` +
+     `industryExperience{ description, metrics[] }`, so fold the flat
+     fields into those shapes here. */
+  const seven = [1, 2, 3, 4, 5, 6, 7];
+  return {
+    ...m,
+    id: m._id,
+    order: (m as any).display_order,
+    legacyImageUrl: buildImg((m as any).image || (m as any).advantage_icon),
+    description: (m as any).action_description,
+    video_url: (m as any).video_url || "",
+    image: buildImg((m as any).image),
+    metrics: seven
+      .map((n) => ({
+        number: (m as any)[`action_number_${n}`],
+        title: (m as any)[`action_title_${n}`],
+      }))
+      .filter((x) => x.number || x.title),
+    industryExperience: {
+      description: (m as any).exp_description,
+      metrics: seven
+        .map((n) => ({
+          number: (m as any)[`exp_number_${n}`],
+          title: (m as any)[`exp_title_${n}`],
+          img: buildImg((m as any)[`exp_img_${n}`]),
+        }))
+        .filter((x) => x.number || x.title),
+    },
+  };
+};
 
 interface MongoBookCall {
   _id?: string;
@@ -673,7 +790,16 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       const data = await apiGet<MongoOurAdvantage[]>("/common/our-advantage", {
         revalidate: opts.revalidate,
       });
-      return listResult((data ?? []).map(adaptOurAdvantage), opts.limit);
+      let docs = (data ?? []).map(adaptOurAdvantage);
+      /* The marketing case-study "Why … Grow With Us" section looks up
+         a single advantage by its id (the item's our_advantage_template
+         _id). */
+      const where = opts.where as any;
+      const idEq = where?.id?.equals;
+      if (idEq !== undefined) {
+        docs = docs.filter((d) => String(d.id) === String(idEq));
+      }
+      return listResult(docs, opts.limit);
     },
   },
   "book-call-templates": {
@@ -756,6 +882,124 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       }
       items.sort(byOrder);
       return listResult(items, opts.limit);
+    },
+    /* Detail lookup hits the dedicated single-item endpoint so the
+       /marketing/<slug> case-study page gets the full item + every
+       sub-collection (stats, strategy, performance, slider, tab
+       categories) instead of just the thumbnail-card fields. */
+    bySlug: async (slug) => {
+      const data = await fetchMarketingDetail(slug);
+      return data?.item ? adaptMarketingDetail(data) : null;
+    },
+  },
+  /* ── Per-tab item sources for the marketing case-study page ──────
+     OtherActivities / ContentCreateByTeam / ContinuityProgram fetch
+     their active tab's items via these collections, keyed by the
+     parent item slug + category_name. All resolve from the same
+     /marketing/single payload (the flat per-item endpoints aren't
+     mounted), so one cached call backs every tab. */
+  "other-activities": {
+    list: async (opts) => {
+      const where = (opts.where ?? {}) as any;
+      const slug = where.item_slug?.equals;
+      const name = where.category_name?.equals;
+      if (!slug) return listResult([], opts.limit);
+      const d = await fetchMarketingDetail(slug, opts.revalidate);
+      const cats = arr<any>(d?.other_activities);
+      const cat = name ? cats.find((c) => c.category_name === name) : cats[0];
+      /* Each activity row carries up to 4 image/video pairs; the
+         renderer collapses N docs into one activity (title/desc from
+         the first) with a media slider, so expand each pair into its
+         own doc carrying the shared title/description. */
+      const docs: any[] = [];
+      for (const it of arr<any>(cat?.items)) {
+        const pairs = [
+          { image: it.image1, video: it.video1 },
+          { image: it.image2, video: it.video2 },
+          { image: it.image3, video: it.video3 },
+          { image: it.image4, video: it.video4 },
+        ].filter((m) => m.image || m.video);
+        for (const m of pairs) {
+          docs.push({
+            id: it._id,
+            title: it.title,
+            description: it.description,
+            legacyImageUrl: buildImg(m.image),
+            video_url: m.video || "",
+          });
+        }
+      }
+      return listResult(docs, opts.limit);
+    },
+  },
+  "continuity-program-items": {
+    list: async (opts) => {
+      const where = (opts.where ?? {}) as any;
+      const slug = where.item_slug?.equals;
+      const name = where.category_name?.equals;
+      if (!slug) return listResult([], opts.limit);
+      const d = await fetchMarketingDetail(slug, opts.revalidate);
+      const cats = arr<any>(d?.community_programs);
+      const cat = name
+        ? cats.find((c) => c.community_program_category_name === name)
+        : cats[0];
+      const docs = arr<any>(cat?.items).map((it) => ({
+        id: it._id,
+        marketing_house_item_id: it.marketing_house_item_id,
+        thumbnail: buildImg(
+          it.community_program_item_video_thumbnail || it.item_image,
+        ),
+        upload_video: buildImg(it.community_program_item_video_file),
+        community_program_item_video_url: it.community_program_item_video_url,
+        community_program_item_description:
+          it.community_program_item_description,
+      }));
+      return listResult(docs, opts.limit);
+    },
+  },
+  "content-created-items": {
+    list: async (opts) => {
+      const where = (opts.where ?? {}) as any;
+      const slug = where.item_slug?.equals;
+      const name = where.category_name?.equals;
+      if (!slug) return pagedResult([], opts.limit, opts.page);
+      const d = await fetchMarketingDetail(slug, opts.revalidate);
+      const cats = arr<any>(d?.content_created);
+      const cat = name ? cats.find((c) => c.category_name === name) : cats[0];
+      const docs = arr<any>(cat?.items).map((it) => ({
+        id: it._id,
+        image: buildImg(it.image),
+        url: it.url || it.item_video_url || "",
+        title: it.item_title,
+      }));
+      return pagedResult(docs, opts.limit, opts.page);
+    },
+  },
+  "content-created-carousels": {
+    list: async (opts) => {
+      const where = (opts.where ?? {}) as any;
+      const slug = where.item_slug?.equals;
+      const name = where.category_name?.equals;
+      if (!slug) return pagedResult([], opts.limit, opts.page);
+      const d = await fetchMarketingDetail(slug, opts.revalidate);
+      /* Carousels carry a content-created category id, not a name;
+         resolve the active tab's category id by name first. */
+      const cats = arr<any>(d?.content_created);
+      const cat = name ? cats.find((c) => c.category_name === name) : cats[0];
+      const catId = cat?._id;
+      const docs = arr<any>(d?.carousels)
+        .filter(
+          (c) =>
+            !catId ||
+            c.marketing_house_content_created_category_id === catId,
+        )
+        .map((c) => ({
+          id: c._id,
+          image: buildImg(c.image || c.carousel_image),
+          carousel_order: c.carousel_order,
+          url: "",
+        }));
+      return pagedResult(docs, opts.limit, opts.page);
     },
   },
   jobs: {

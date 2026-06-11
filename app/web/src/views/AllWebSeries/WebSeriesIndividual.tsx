@@ -191,7 +191,7 @@ const WebSeriesIndividual = () => {
             </div>
           </div> */}
 
-          {itemData?.our_advantage_id > 0 && <WhyCocomaDigital our_advantage_id={itemData?.our_advantage_id} />}
+          {itemData?.our_advantage_template_id && <WhyCocomaDigital our_advantage_id={itemData?.our_advantage_template_id} />}
 
           {/* Industry-relevant peer case studies — backed by
               /api/marketing-recommendations. Tiered same-category +

@@ -13,12 +13,11 @@ export default function WhyCocomaDigital({ our_advantage_id }) {
     useEffect(() => {
         const fetchOurAdvantages = async () => {
             try {
-                /* Phase 5l+ 2026-05-22: marketing-house-items store
-                   the legacy `our_advantage_id` FK (Laravel's
-                   template-id). the API assigns its own internal ids
-                   on import, so look up by legacyId instead. */
+                /* The marketing item references its advantage by the
+                   api ObjectId (our_advantage_template_id); look the
+                   single advantage up by that id. */
                 const url = new URL("/content-api/our-advantages", window.location.origin);
-                if (our_advantage_id) url.searchParams.set("where[legacyId][equals]", String(our_advantage_id));
+                if (our_advantage_id) url.searchParams.set("where[id][equals]", String(our_advantage_id));
                 url.searchParams.set("limit", "1");
                 url.searchParams.set("depth", "1");
                 const res = await fetch(url, { headers: { Accept: "application/json" } });

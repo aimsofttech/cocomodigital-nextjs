@@ -70,14 +70,23 @@ const getSingleMarketingHouse = async (req, res) => {
 
   const otherActivityData = [];
   for (const cat of otherActivityCats) {
-    const catItems = await MarketingHouseOtherActivityItem.find({ marketing_house_item_id: item._id, other_activity_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
-    otherActivityData.push({ ...cat.toObject(), items: catItems.map((i) => ({ ...i.toObject(), item_image: buildUrl(i.item_image) })) });
+    const catItems = await MarketingHouseOtherActivityItem.find({ marketing_house_item_id: item._id, marketing_house_other_activity_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
+    otherActivityData.push({
+      ...cat.toObject(),
+      items: catItems.map((i) => ({
+        ...i.toObject(),
+        image1: buildUrl(i.image1),
+        image2: buildUrl(i.image2),
+        image3: buildUrl(i.image3),
+        image4: buildUrl(i.image4),
+      })),
+    });
   }
 
   const contentData = [];
   for (const cat of contentCats) {
-    const catItems = await MarketingHouseContentCreatedItem.find({ marketing_house_item_id: item._id, content_created_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
-    contentData.push({ ...cat.toObject(), items: catItems.map((i) => ({ ...i.toObject(), item_image: buildUrl(i.item_image) })) });
+    const catItems = await MarketingHouseContentCreatedItem.find({ marketing_house_item_id: item._id, marketing_house_content_created_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
+    contentData.push({ ...cat.toObject(), items: catItems.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })) });
   }
 
   const communityProgramData = [];

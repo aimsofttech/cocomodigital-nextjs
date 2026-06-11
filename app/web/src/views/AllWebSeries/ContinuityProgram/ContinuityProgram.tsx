@@ -36,6 +36,11 @@ const ContinuityProgram = ({ itemData }) => {
         if (itemData?.id) {
           url.searchParams.set("where[parent][equals]", String(itemData.id));
         }
+        /* Items resolve from the /marketing/single payload keyed by the
+           parent item slug; category_name selects the active tab. */
+        if (itemData?.slug) {
+          url.searchParams.set("where[item_slug][equals]", String(itemData.slug));
+        }
         url.searchParams.set(
           "where[category_name][equals]",
           String(activeCategory.category_name),

@@ -79,6 +79,11 @@ const ContentCreateByTeam = ({ itemData }) => {
       if (params.parent_id) {
         url.searchParams.set("where[parent][equals]", String(params.parent_id));
       }
+      /* Items/carousels resolve from the /marketing/single payload keyed
+         by the parent item slug; category_name selects the active tab. */
+      if (itemData?.slug) {
+        url.searchParams.set("where[item_slug][equals]", String(itemData.slug));
+      }
       if (params.category_name) {
         url.searchParams.set(
           "where[category_name][equals]",
