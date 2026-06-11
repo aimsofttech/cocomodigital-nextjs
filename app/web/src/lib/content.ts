@@ -136,7 +136,11 @@ interface MongoBlogPost {
 
 interface MongoBlogCategory {
   _id?: string;
+  /* The api stores the name as `blog_category_name`; older imports
+     used `category_name`. Slug is often empty so it's derived. */
+  blog_category_name?: string;
   category_name?: string;
+  slug?: string | null;
   category_slug?: string;
   display_order?: number;
 }
@@ -155,9 +159,13 @@ const adaptBlogPost = (m: MongoBlogPost) => {
     published_at: m.published_at ?? m.createdAt,
     createdAt: m.createdAt,
     updatedAt: m.updatedAt,
-    /* imageUrl() falls back to legacyImageUrl when no Media doc is
-       populated; the api already returns a full S3 URL here. */
-    legacyImageUrl: m.blog_thumbnail ?? "",
+    /* Cover image. The api leaves `blog_thumbnail` empty and stores
+       the real cover under `main_image` (a bare S3 key), so fall back
+       to it and absolutize. `image` is set too so the client-side
+       filter path (which reads the adapted doc directly) renders the
+       cover, not just the SSR path that goes through imageUrl(). */
+    legacyImageUrl: buildImg(m.blog_thumbnail || (m as any).main_image),
+    image: buildImg(m.blog_thumbnail || (m as any).main_image),
     tags: Array.isArray(m.blog_tags) ? m.blog_tags : [],
     author:
       author && typeof author === "object"
@@ -170,16 +178,27 @@ const adaptBlogPost = (m: MongoBlogPost) => {
         : (author ?? undefined),
     category:
       cat && typeof cat === "object"
-        ? { id: cat._id, slug: cat.category_slug, name: cat.category_name }
+        ? {
+            id: cat._id,
+            name: (cat as any).blog_category_name ?? cat.category_name,
+            slug:
+              (cat as any).slug ||
+              cat.category_slug ||
+              slugify((cat as any).blog_category_name ?? cat.category_name),
+          }
         : undefined,
   };
 };
 
-const adaptBlogCategory = (m: MongoBlogCategory) => ({
-  id: m._id,
-  name: m.category_name,
-  slug: m.category_slug,
-});
+const adaptBlogCategory = (m: MongoBlogCategory) => {
+  const name = m.blog_category_name ?? m.category_name ?? "";
+  return {
+    id: m._id,
+    name,
+    /* the api leaves the slug blank, so derive it from the name. */
+    slug: m.slug || m.category_slug || slugify(name),
+  };
+};
 
 /* ── Shared helpers ──────────────────────────────────────────── */
 
@@ -1133,7 +1152,23 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       const data = await apiGet<MongoBlogPost[]>("/blog/items", {
         revalidate: opts.revalidate,
       });
-      return listResult((data ?? []).map(adaptBlogPost), opts.limit);
+      let posts = (data ?? []).map(adaptBlogPost);
+      const where = opts.where as any;
+      /* Category-filter bar sends where[category.slug][equals]; the
+         search box sends where[title][contains]. /blog/items returns
+         the full list, so filter + paginate here. */
+      const catSlug = where?.["category.slug"]?.equals;
+      if (catSlug !== undefined) {
+        posts = posts.filter((p) => p.category?.slug === catSlug);
+      }
+      const titleQ = where?.title?.contains ?? where?.title?.like;
+      if (titleQ) {
+        const q = String(titleQ).toLowerCase();
+        posts = posts.filter((p) =>
+          String(p.title ?? "").toLowerCase().includes(q),
+        );
+      }
+      return pagedResult(posts, opts.limit, opts.page);
     },
     bySlug: async (slug) => {
       const data = await apiGet<{ blog: MongoBlogPost }>(

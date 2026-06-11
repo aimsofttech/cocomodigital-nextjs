@@ -19,7 +19,7 @@ const getBlogItemBySlug = async (req, res) => {
   const { slug } = req.query;
   const filter = { status: 1, ...(slug ? { blog_slug: slug } : {}) };
   const items = await BlogItem.find(filter).sort({ createdAt: -1 })
-    .populate('blog_category_id', 'category_name category_slug')
+    .populate('blog_category_id', 'blog_category_name slug')
     .populate('blog_sub_category_id', 'sub_category_name')
     .populate('author_template_id', 'author_name author_image');
   res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), blog_thumbnail: buildUrl(i.blog_thumbnail) })) });
@@ -34,7 +34,7 @@ const getBlogItemDetailById = async (req, res) => {
 const getBlogDetail = async (req, res) => {
   const { blog_item_slug } = req.params;
   const item = await BlogItem.findOne({ blog_slug: blog_item_slug, status: 1 })
-    .populate('blog_category_id', 'category_name category_slug')
+    .populate('blog_category_id', 'blog_category_name slug')
     .populate('blog_sub_category_id', 'sub_category_name')
     .populate('author_template_id', 'author_name author_image author_designation');
   if (!item) return res.status(404).json({ status: 'error', message: 'Not found' });
