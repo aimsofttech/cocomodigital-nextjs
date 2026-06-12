@@ -21,3 +21,8 @@ cocoma-react-admin/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Active monorepo deploy (web/api/admin) — local env, build output, machine config
+.env.production
+app/admin/dist/
+ecosystem.deploy.js

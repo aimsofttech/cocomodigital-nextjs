@@ -99,6 +99,7 @@ const apiGroupServiceFaqRoutes = require('./routes/api/groupServiceFaq');
 const apiJobCategoryRoutes = require('./routes/api/jobCategory');
 
 const app = express();
+app.set('trust proxy', 1);
 
 connectDB();
 
