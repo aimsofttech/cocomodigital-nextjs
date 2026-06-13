@@ -70,6 +70,13 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Categories', path: '/creative/category', icon: TagIcon },
       { label: 'Items',      path: '/creative/item',     icon: ListBulletIcon },
+      {
+        label: 'Item Sections', icon: RectangleStackIcon,
+        children: [
+          { label: 'Creative Approach', path: '/creative/approach',     icon: SparklesIcon },
+          { label: 'Project Media',     path: '/creative/final-output', icon: FilmIcon },
+        ],
+      },
       { label: 'Projects',   path: '/creative/project',  icon: RocketLaunchIcon },
     ],
   },

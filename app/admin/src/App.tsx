@@ -298,6 +298,12 @@ export default function App() {
           <Route path="creative/item/:itemId/final-output" element={<CreativeFinalOutputList />} />
           <Route path="creative/item/:itemId/final-output/add" element={<CreativeFinalOutputForm />} />
           <Route path="creative/item/:itemId/final-output/edit/:id" element={<CreativeFinalOutputForm />} />
+          <Route path="creative/approach" element={<CreativeApproachList />} />
+          <Route path="creative/approach/add" element={<CreativeApproachForm />} />
+          <Route path="creative/approach/edit/:id" element={<CreativeApproachForm />} />
+          <Route path="creative/final-output" element={<CreativeFinalOutputList />} />
+          <Route path="creative/final-output/add" element={<CreativeFinalOutputForm />} />
+          <Route path="creative/final-output/edit/:id" element={<CreativeFinalOutputForm />} />
           <Route path="creative/project" element={<CreativeProjectList />} />
           <Route path="creative/project/add" element={<CreativeProjectForm />} />
           <Route path="creative/project/edit/:id" element={<CreativeProjectForm />} />
