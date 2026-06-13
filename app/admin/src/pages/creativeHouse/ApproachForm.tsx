@@ -8,12 +8,13 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SlugField from '@/components/ui/SlugField';
 import toast from 'react-hot-toast';
 
-interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; }
+interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; lockedItemId?: string; }
 
 const itemName = (i: any) => i.creative_house_title || i.creative_house_video_title || i.creative_house_slug || i._id;
 
-export default function ApproachForm({ onSuccess, onCancel, editId }: Props = {}) {
-  const { id: paramId, itemId } = useParams();
+export default function ApproachForm({ onSuccess, onCancel, editId, lockedItemId }: Props = {}) {
+  const { id: paramId, itemId: routeItemId } = useParams();
+  const itemId = routeItemId || lockedItemId;
   const navigate = useNavigate();
   const isModal = Boolean(onSuccess ?? onCancel);
   const id = isModal ? editId : paramId;
