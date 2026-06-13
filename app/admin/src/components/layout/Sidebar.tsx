@@ -71,7 +71,6 @@ const navigation: NavItem[] = [
       { label: 'Categories', path: '/creative/category', icon: TagIcon },
       { label: 'Items',      path: '/creative/item',     icon: ListBulletIcon },
       { label: 'Projects',   path: '/creative/project',  icon: RocketLaunchIcon },
-      { label: 'Wizard',     path: '/creative/wizard',   icon: SparklesIcon },
     ],
   },
   {

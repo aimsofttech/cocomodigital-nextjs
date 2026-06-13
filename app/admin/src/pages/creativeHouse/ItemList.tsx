@@ -32,8 +32,6 @@ export default function ItemList() {
       return <VideoCell src={videoSrc} thumbnail={row.creative_house_thumbnail} />;
     } },
     { key: 'creative_house_video_title', label: 'Video Title', sortable: true },
-    { key: 'creative_house_slug', label: 'Slug', sortable: true },
-    { key: 'creative_house_year', label: 'Year', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
