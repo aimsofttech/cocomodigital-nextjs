@@ -12,7 +12,7 @@ const rootEl = document.getElementById('root')!;
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename="/admin">
         <App />
         <Toaster
           position="top-right"
