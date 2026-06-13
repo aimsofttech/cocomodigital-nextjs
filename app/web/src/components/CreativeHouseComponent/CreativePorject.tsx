@@ -71,6 +71,8 @@ const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItem
           creative_house_video_title: i.title,
           creative_house_thumbnail: (i.image && i.image.url) || i.legacyImageUrl,
           creative_house_video_url: i.video_url,
+          creative_house_upload_video_url: i.upload_video,
+          creative_house_youtube_id: i.youtube_id,
           display_order: i.order,
         }));
         setFilteredItems(items);
@@ -262,7 +264,8 @@ const VideoGrid = ({ videos }) => {
                   priority={index < 4}
                 />
                 {(item?.creative_house_upload_video_url ||
-                  item?.creative_house_video_url) && <PlayBtn />}
+                  item?.creative_house_video_url ||
+                  item?.creative_house_youtube_id) && <PlayBtn />}
               </Link>
               <div className="absolute top-0 right-0 mr-1">
                 <EditLink

@@ -2,7 +2,7 @@ import { buildMetadata, getStaticSeo } from "@/src/lib/seo";
 import ContentCreated from "@/src/views/ContentCreated/ContentCreated";
 import {
   getCreativeHouseItems,
-  getServiceCategories,
+  getCreativeCategories,
   imageUrl,
 } from "@/src/lib/content";
 
@@ -17,17 +17,19 @@ const adaptItem = (i: any) => ({
   creative_house_video_title: i.title,
   creative_house_thumbnail: imageUrl(i),
   creative_house_video_url: i.video_url,
+  creative_house_upload_video_url: i.upload_video,
+  creative_house_youtube_id: i.youtube_id,
   display_order: i.order,
   category_id: typeof i.category === "object" ? i.category?.id : i.category,
   creative_house_category_name:
     typeof i.category === "object" ? i.category?.category_name : undefined,
 });
 
-/* Adapter: the API ServiceCategory → filter-panel shape. */
+/* Adapter: the API CreativeHouseCategory → filter-panel shape. */
 const adaptCategory = (c: any) => ({
   id: c.id,
-  creative_house_category_name: c.category_name,
-  creative_house_category_slug: c.slug,
+  creative_house_category_name: c.creative_house_category_name ?? c.name,
+  creative_house_category_slug: c.creative_house_category_slug ?? c.slug,
   slug: c.slug,
 });
 
@@ -36,7 +38,7 @@ export default async function Page() {
      window. Categories + items both SSR'd. */
   const [itemsResult, categoriesResult] = await Promise.all([
     getCreativeHouseItems({ limit: 20, depth: 1 }),
-    getServiceCategories({ limit: 50 }),
+    getCreativeCategories({ limit: 50 }),
   ]);
 
   const initialItems = itemsResult.docs.map(adaptItem);

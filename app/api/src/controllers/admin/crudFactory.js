@@ -23,10 +23,12 @@ const reconcileMedia = async (oldVal, newVal) => {
 const SLUG_SOURCE_KEYS = ['slug', 'name', 'title', 'heading', 'question'];
 
 // Pick the best value to build a slug from out of the request body.
-const pickSlugSource = (body, slugSourceField) => {
+const pickSlugSource = (body, slugSourceField, slugField = 'slug') => {
   if (slugSourceField && body[slugSourceField] && String(body[slugSourceField]).trim()) {
     return body[slugSourceField];
   }
+  // A manually-supplied slug (under whatever field name this entity uses) wins.
+  if (body[slugField] && String(body[slugField]).trim()) return body[slugField];
   for (const key of SLUG_SOURCE_KEYS) {
     if (body[key] && String(body[key]).trim()) return body[key];
   }
@@ -38,12 +40,12 @@ const pickSlugSource = (body, slugSourceField) => {
 };
 
 // Return a slug that is unique within the collection, suffixing -2, -3, ... on collision.
-const ensureUniqueSlug = async (Model, base, excludeId) => {
+const ensureUniqueSlug = async (Model, base, excludeId, slugField = 'slug') => {
   let slug = base;
   let counter = 1;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const query = { slug };
+    const query = { [slugField]: slug };
     if (excludeId) query._id = { $ne: excludeId };
     // eslint-disable-next-line no-await-in-loop
     const exists = await Model.findOne(query).select('_id').lean();
@@ -53,14 +55,14 @@ const ensureUniqueSlug = async (Model, base, excludeId) => {
   }
 };
 
-// Generate/normalise body.slug. If the body has no slug and no derivable source,
-// the slug is left untouched (e.g. partial updates that don't include the name).
-const applySlug = async (Model, body, slugSourceField, excludeId) => {
-  const source = pickSlugSource(body, slugSourceField);
+// Generate/normalise the slug field. If the body has no slug and no derivable
+// source, the slug is left untouched (e.g. partial updates without the name).
+const applySlug = async (Model, body, slugSourceField, excludeId, slugField = 'slug') => {
+  const source = pickSlugSource(body, slugSourceField, slugField);
   if (!source) return;
   const base = generateSlug(source);
   if (!base) return;
-  body.slug = await ensureUniqueSlug(Model, base, excludeId);
+  body[slugField] = await ensureUniqueSlug(Model, base, excludeId, slugField);
 };
 
 const applyUrl = (val) =>
@@ -174,6 +176,9 @@ const createCrudController = (Model, options = {}) => {
     // slug is derived from (otherwise auto-detected from name/title fields).
     slug = true,
     slugSource = null,
+    // Field the generated slug is written to (defaults to `slug`). Override for
+    // entities whose slug column has a different name (e.g. legacy schemas).
+    slugField = 'slug',
     // Optional related-record name resolution applied to index/show responses.
     // See `applyLookups` for the shape of each entry.
     lookups = [],
@@ -237,7 +242,7 @@ const createCrudController = (Model, options = {}) => {
       }
       body.user_id = req.user._id;
 
-      if (slug) await applySlug(Model, body, slugSource);
+      if (slug) await applySlug(Model, body, slugSource, null, slugField);
 
       const doc = await Model.create(body);
       res.status(201).json({ status: 'success', message: 'Created successfully', data: doc });
@@ -263,7 +268,7 @@ const createCrudController = (Model, options = {}) => {
         }
       }
 
-      if (slug) await applySlug(Model, body, slugSource, req.params.id);
+      if (slug) await applySlug(Model, body, slugSource, req.params.id, slugField);
 
       const updated = await Model.findByIdAndUpdate(req.params.id, body, { new: true, runValidators: true });
       res.json({ status: 'success', message: 'Updated successfully', data: buildS3Fields(updated, mediaFields) });

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { creativeHouseCategoryApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
+import ImageUpload from '@/components/ui/ImageUpload';
 import SlugField from '@/components/ui/SlugField';
 import toast from 'react-hot-toast';
 
@@ -35,12 +36,16 @@ export default function CategoryForm({ onSuccess, onCancel, editId }: Props = {}
 
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <div>
-        <label className="form-label">Category Name <span className="text-red-500">*</span></label>
-        <input {...register('creative_house_category_name', { required: 'Required' })} className="form-input" />
-        {errors.creative_house_category_name && <p className="form-error">{String(errors.creative_house_category_name.message)}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Category Name <span className="text-red-500">*</span></label>
+          <input {...register('creative_house_category_name', { required: 'Required' })} className="form-input" />
+          {errors.creative_house_category_name &&
+            <p className="form-error">{String(errors.creative_house_category_name.message)}</p>}
+        </div>
+        <SlugField name="creative_house_category_slug" register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
+      <ImageUpload name="creative_house_icon" label="Icon" uploadType="image" folder="creative-house" value={watch('creative_house_icon')} onChange={(url) => setValue('creative_house_icon', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

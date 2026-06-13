@@ -410,6 +410,8 @@ interface MongoCreativeItem {
   creative_house_slug?: string;
   creative_house_video_title?: string;
   creative_house_video_url?: string;
+  creative_house_upload_video_url?: string;
+  creative_house_youtube_id?: string;
   creative_house_thumbnail?: string;
   display_order?: number;
   creative_house_category_id?: string;
@@ -433,6 +435,11 @@ const adaptCreativeItem = (
   slug: it.creative_house_slug,
   title: it.creative_house_video_title,
   video_url: it.creative_house_video_url,
+  // Uploaded video (raw S3 key from the api) → absolute URL; plus the YouTube
+  // id. Carried so card grids can show a play indicator for every item that
+  // has a video, regardless of which field holds it.
+  upload_video: buildImg(it.creative_house_upload_video_url),
+  youtube_id: it.creative_house_youtube_id,
   order: it.display_order,
   legacyImageUrl: buildImg(it.creative_house_thumbnail),
   category: cat
@@ -1284,6 +1291,12 @@ export const getCreativeHouseItems = (opts?: FetchOpts) =>
 
 export const getCreativeHouseItem = (slug: string, opts?: FetchOpts) =>
   findBySlug<any>("creative-house-items", slug, opts);
+
+/** Creative-house filter categories (Videos 16:9, Shorts & Reels, …) —
+    the taxonomy the /creative-house grid filters by. Backed by the
+    `creative-categories` source (api `/creative`). */
+export const getCreativeCategories = (opts?: FetchOpts) =>
+  findCollection<any>("creative-categories", { sort: "order", ...opts });
 
 export const getMarketingHouseItems = (opts?: FetchOpts) =>
   findCollection<any>("marketing-house-items", { sort: "order", ...opts });

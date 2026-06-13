@@ -21,7 +21,7 @@ export default function CategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'creative_house_icon', label: 'Icon', render: (row: any) => <ImageCell src={row.creative_house_icon} /> },
+    { key: 'creative_house_icon', label: 'Icon', render: (row: any) => <ImageCell src={row.creative_house_icon} bg="bg-gray-800" /> },
     { key: 'creative_house_category_name', label: 'Category Name', sortable: true },
     { key: 'creative_house_category_slug', label: 'Slug', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
@@ -34,6 +34,6 @@ export default function CategoryList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <CategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Creative Category' : 'Add Creative Category'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }

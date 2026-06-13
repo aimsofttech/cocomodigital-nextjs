@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const CreativeHouseCategory = require('../../models/CreativeHouseCategory');
 const CreativeHouseItem = require('../../models/CreativeHouseItem');
 const CreativeHouseApproach = require('../../models/CreativeHouseApproach');
@@ -18,14 +19,39 @@ const buildUrl = (key) => (key ? buildS3Url(key) : '');
    MX Player=16, Prime Video=17, IMDB=18. */
 const REQUIREMENT_LOGO_BASE_ID = 15;
 
+// The gallery image key may live under `image_file` (legacy migrated rows) or
+// `image` (admin-created rows).
+const galleryImageKey = (g) => (g ? g.image_file || g.image : '');
+
 const resolveRequirementLogo = async (requirementTitle) => {
+  if (requirementTitle === undefined || requirementTitle === null || requirementTitle === '') return '';
+
+  // New admin entries (and the Client Logo dropdown) store the gallery image's
+  // ObjectId directly — resolve it by id.
+  const asStr = String(requirementTitle);
+  if (asStr.length === 24 && mongoose.Types.ObjectId.isValid(asStr)) {
+    const g = await Gallery.findById(asStr).lean();
+    const key = galleryImageKey(g);
+    if (key) return buildUrl(key);
+  }
+
+  // Legacy numeric FK → resolve by insertion order among requirement_title
+  // galleries (the MySQL→Mongo migration dropped the ids but kept order).
   const reqId = Number(requirementTitle);
-  if (!Number.isInteger(reqId) || reqId < REQUIREMENT_LOGO_BASE_ID) return '';
-  const logos = await Gallery.find({ image_type: 'requirement_title' })
-    .sort({ _id: 1 })
-    .lean();
-  const g = logos[reqId - REQUIREMENT_LOGO_BASE_ID];
-  return g && g.image_file ? buildUrl(g.image_file) : '';
+  if (Number.isInteger(reqId) && reqId >= REQUIREMENT_LOGO_BASE_ID) {
+    const logos = await Gallery.find({ image_type: 'requirement_title' })
+      .sort({ _id: 1 })
+      .lean();
+    const key = galleryImageKey(logos[reqId - REQUIREMENT_LOGO_BASE_ID]);
+    if (key) return buildUrl(key);
+  }
+
+  // Fallback: a raw S3 key or absolute URL stored directly on the item.
+  if (typeof requirementTitle === 'string' && /[/.]/.test(requirementTitle)) {
+    return buildUrl(requirementTitle);
+  }
+
+  return '';
 };
 
 const creativeHomePriority = async (req, res) => {

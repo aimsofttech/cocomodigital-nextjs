@@ -63,8 +63,6 @@ const navigation: NavItem[] = [
         ],
       },
       { label: 'Projects',         path: '/marketing/project',          icon: RocketLaunchIcon },
-      { label: 'Form Submissions', path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
-      { label: 'Wizard',           path: '/marketing/wizard',           icon: SparklesIcon },
     ],
   },
   {
@@ -138,6 +136,7 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Contact Us',        path: '/contact/contact-us',        icon: EnvelopeIcon },
       { label: 'Free Consultation', path: '/contact/free-consultation', icon: CalendarIcon },
+      { label: 'Form Submissions',  path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
     ],
   },
 ];

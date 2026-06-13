@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import ContentCreated from "@/src/views/ContentCreated/ContentCreated";
 import { buildMetadata } from "@/src/lib/seo";
-import { getCreativeHouseItem, getServiceCategories } from "@/src/lib/content";
+import { getCreativeHouseItem, getCreativeCategories } from "@/src/lib/content";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -17,7 +17,7 @@ interface PageProps {
    landed on the generic hub with an empty grid. Live serves both
    URL families separately, and we now do too. */
 const isCategorySlug = async (slug: string): Promise<boolean> => {
-  const res = await getServiceCategories({
+  const res = await getCreativeCategories({
     where: { slug: { equals: slug } },
     limit: 1,
   }).catch(() => ({ docs: [] }));
