@@ -50,6 +50,8 @@ interface CrudListPageProps<T = any> {
   modalSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   /** Called after a successful modal form submission (use to refresh list data) */
   onRefresh?: () => void;
+  /** When provided, each row gets an expand toggle revealing this content. */
+  renderExpanded?: (row: T) => React.ReactNode;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -63,7 +65,7 @@ export default function CrudListPage<T extends { _id?: string }>({
   loading, submitting, pagination, onPageChange, onSearch, onDelete,
   extraActions, rowActions, disableAdd, disableDelete, disableEdit,
   filterFields, onServerFilterChange,
-  renderModal, modalTitle, modalSize = 'lg', onRefresh,
+  renderModal, modalTitle, modalSize = 'lg', onRefresh, renderExpanded,
 }: CrudListPageProps<T>) {
   const { pathname } = useLocation();
   const sessionKey = getSessionKey(pathname);
@@ -249,6 +251,7 @@ export default function CrudListPage<T extends { _id?: string }>({
           onSearch={onSearch}
           pageSize={pageSize}
           onPageSizeChange={handlePageSizeChange}
+          renderExpanded={renderExpanded}
           actions={
             (!disableEdit && (editPath || renderModal)) || !disableDelete || rowActions
               ? defaultActions

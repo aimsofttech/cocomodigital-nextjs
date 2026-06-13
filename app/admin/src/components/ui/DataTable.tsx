@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { Fragment, useState, useMemo, useRef } from 'react';
 import {
   MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon,
   ChevronUpIcon, ChevronDownIcon, ChevronUpDownIcon,
@@ -29,6 +29,9 @@ interface DataTableProps<T = any> {
   pageSize?: number;
   /** Called when user selects a new page size */
   onPageSizeChange?: (size: number) => void;
+  /** When provided, each row gets an expand toggle that reveals this content
+   *  in a full-width panel beneath the row. */
+  renderExpanded?: (row: T) => React.ReactNode;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
@@ -67,12 +70,20 @@ function buildPageRange(current: number, total: number): (number | '…')[] {
 export default function DataTable<T extends { _id?: string }>({
   columns, data, loading, pagination, onPageChange, onSearch,
   searchPlaceholder = 'Search...', actions, emptyMessage = 'No records found',
-  headerActions, pageSize = 20, onPageSizeChange,
+  headerActions, pageSize = 20, onPageSizeChange, renderExpanded,
 }: DataTableProps<T>) {
   const [searchValue, setSearchValue] = useState('');
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const toggleExpanded = (id: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -107,7 +118,7 @@ export default function DataTable<T extends { _id?: string }>({
     return <ChevronDownIcon className="w-3.5 h-3.5 text-primary-500 ml-1 inline" />;
   };
 
-  const colSpan = columns.length + (actions ? 1 : 0);
+  const colSpan = columns.length + (actions ? 1 : 0) + (renderExpanded ? 1 : 0);
 
   // Effective pagination values for display
   const pag = pagination;
@@ -142,6 +153,7 @@ export default function DataTable<T extends { _id?: string }>({
         <table className="table">
           <thead>
             <tr>
+              {renderExpanded && <th className="w-10" />}
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -171,16 +183,42 @@ export default function DataTable<T extends { _id?: string }>({
                 </td>
               </tr>
             ) : (
-              sortedData.map((row, idx) => (
-                <tr key={(row as any)._id || idx} className="hover:bg-gray-50 transition-colors">
-                  {columns.map((col) => (
-                    <td key={col.key} className={col.className}>
-                      {col.render ? col.render(row, idx) : (row as any)[col.key] ?? '—'}
-                    </td>
-                  ))}
-                  {actions && <td className="text-right">{actions(row)}</td>}
-                </tr>
-              ))
+              sortedData.map((row, idx) => {
+                const rowId = (row as any)._id || String(idx);
+                const isExpanded = expanded.has(rowId);
+                return (
+                  <Fragment key={rowId}>
+                    <tr className={`hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-primary-50/40' : ''}`}>
+                      {renderExpanded && (
+                        <td className="align-middle">
+                          <button
+                            type="button"
+                            onClick={() => toggleExpanded(rowId)}
+                            className="p-1 rounded-md hover:bg-gray-200 text-gray-500 transition-colors"
+                            title={isExpanded ? 'Collapse' : 'Expand'}
+                            aria-expanded={isExpanded}
+                          >
+                            <ChevronRightIcon className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          </button>
+                        </td>
+                      )}
+                      {columns.map((col) => (
+                        <td key={col.key} className={col.className}>
+                          {col.render ? col.render(row, idx) : (row as any)[col.key] ?? '—'}
+                        </td>
+                      ))}
+                      {actions && <td className="text-right">{actions(row)}</td>}
+                    </tr>
+                    {renderExpanded && isExpanded && (
+                      <tr className="bg-gray-50/60">
+                        <td colSpan={colSpan} className="!whitespace-normal !max-w-none px-4 py-4 border-t border-gray-100">
+                          {renderExpanded(row)}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })
             )}
           </tbody>
         </table>

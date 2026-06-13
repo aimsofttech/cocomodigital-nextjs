@@ -68,51 +68,73 @@ export default function ItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }, { key: 'year', label: 'Year', type: 'year' as const }];
   const columns = [
-    { key: 'poster_image', label: 'Poster', render: (row: any) => <ImageCell src={row.poster_image} alt={row.title} size="w-20 h-20" /> },
+    { key: 'poster_image', label: 'Poster', render: (row: any) => <ImageCell src={row.poster_image} alt={row.title} size="w-16 h-16" /> },
     { key: 'marketing_video', label: 'Video', render: (row: any) => <VideoCell src={row.marketing_video} thumbnail={row.poster_image} /> },
-    { key: 'title', label: 'Title', sortable: true },
+    { key: 'title', label: 'Title', sortable: true, render: (row: any) => <span className="font-medium text-gray-900">{row.title || '—'}</span> },
     { key: 'year', label: 'Year', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
-    { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {
-      key: 'navigate', label: 'Navigate To', render: (row: any) => {
-        // Prefer the live targets + counts from the API; fall back to the static
-        // list (no counts) when the payload doesn't include them.
-        const targets: NavTarget[] = Array.isArray(row.navigation) && row.navigation.length
-          ? row.navigation
-          : NAV_LINKS;
+      key: 'sections', label: 'Sections', render: (row: any) => {
+        const targets: NavTarget[] = Array.isArray(row.navigation) && row.navigation.length ? row.navigation : NAV_LINKS;
+        const filled = targets.filter((t) => typeof t.count === 'number' && (t.count as number) > 0).length;
+        const total = targets.reduce((s, t) => s + (typeof t.count === 'number' ? t.count : 0), 0);
         return (
-          <div className="flex flex-wrap gap-1 max-w-md">
-            {targets.map((t) => (
-              <Link
-                key={t.segment}
-                // Route to the target's dedicated page, scoped to this item via
-                // the marketingHouseItemId query param.
-                to={targetHref(t.segment, row._id)}
-                title={typeof t.count === 'number' ? `${t.label}: ${t.count} record(s)` : t.label}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100 text-xs font-medium whitespace-nowrap transition-colors"
-              >
-                <span>{t.label}</span>
-                {typeof t.count === 'number' && (
-                  <span
-                    className={`inline-flex items-center justify-center min-w-[1.125rem] h-4 px-1 rounded-full text-[10px] font-semibold ${t.count > 0 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500'
-                      }`}
-                  >
-                    {t.count}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
+          <span className="inline-flex items-center gap-1.5 text-xs text-gray-500" title="Expand the row to manage sections">
+            <span className="inline-flex items-center justify-center min-w-[1.375rem] h-5 px-1.5 rounded-full bg-primary-100 text-primary-700 font-semibold">{total}</span>
+            <span>{filled}/{targets.length} filled</span>
+          </span>
         );
       },
     },
+    { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
+
+  // Expanded panel: the full set of item-sections shown as a neat responsive
+  // grid of cards, each linking to its page scoped to this item.
+  const renderExpanded = (row: any) => {
+    const targets: NavTarget[] = Array.isArray(row.navigation) && row.navigation.length ? row.navigation : NAV_LINKS;
+    return (
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2.5">
+          Item Sections — {row.title}
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+          {targets.map((t) => {
+            const count = typeof t.count === 'number' ? t.count : null;
+            const has = !!count && count > 0;
+            return (
+              <Link
+                key={t.segment}
+                to={targetHref(t.segment, row._id)}
+                title={`${t.label}: ${count ?? 0} record(s)`}
+                className={`group flex items-center justify-between gap-2 px-3 py-2 rounded-lg border transition-colors ${
+                  has
+                    ? 'border-primary-200 bg-primary-50/60 hover:bg-primary-100'
+                    : 'border-gray-200 bg-white hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-xs font-medium text-gray-700 truncate group-hover:text-primary-700">{t.label}</span>
+                <span
+                  className={`inline-flex items-center justify-center min-w-[1.375rem] h-5 px-1.5 rounded-full text-[10px] font-semibold flex-shrink-0 ${
+                    has ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-400'
+                  }`}
+                >
+                  {count ?? '—'}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <CrudListPage title="Marketing Items" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
+      renderExpanded={renderExpanded}
       renderModal={({ id, onSuccess, onCancel }) => <ItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Item' : 'Add Marketing Item'}
       modalSize="2xl" onRefresh={fetchAll} />
