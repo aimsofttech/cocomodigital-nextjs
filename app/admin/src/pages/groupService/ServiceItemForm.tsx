@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { groupServiceItemApi, groupServiceCategoryApi } from '@/services/adminApi';
+import { groupServiceItemApi, groupServiceCategoryApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import ImageUpload from '@/components/ui/ImageUpload';
 import SlugField from '@/components/ui/SlugField';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import toast from 'react-hot-toast';
 
 interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; }
@@ -15,11 +16,19 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
   const isModal = Boolean(onSuccess ?? onCancel);
   const id = isModal ? editId : paramId;
   const isEdit = Boolean(id);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);  // group service categories
+  const [departments, setDepartments] = useState<any[]>([]); // explore_our_service_category
+  const [serviceItems, setServiceItems] = useState<any[]>([]); // explore_our_service_item
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
 
+  const selectedDept = watch('explore_our_service_category_id');
+  const selectedSvcItem = watch('explore_our_service_item_id');
+  const selectedGroupCat = watch('group_service_category_id');
+
   useEffect(() => {
-    groupServiceCategoryApi.getAll({ limit: 100 }).then(({ data }) => setCategories(data.data || []));
+    groupServiceCategoryApi.getAll({ limit: 500 }).then(({ data }) => setCategories(data.data || []));
+    serviceCategoryApi.getAll({ limit: 200 }).then(({ data }) => setDepartments(data.data || []));
+    serviceItemApi.getAll({ limit: 500 }).then(({ data }) => setServiceItems(data.data || []));
     if (isEdit && id) {
       groupServiceItemApi.getOne(id).then(({ data }) => {
         const item = data.data;
@@ -28,10 +37,47 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
     }
   }, [id]);
 
+  // Derive Department + Service Category from the chosen Group Category (prefills on
+  // edit and back-fills when a Group Category is picked directly). Only fills blanks.
+  useEffect(() => {
+    if (!selectedGroupCat || !categories.length) return;
+    const gc = categories.find((c: any) => String(c._id) === String(selectedGroupCat));
+    if (!gc) return;
+    if (gc.explore_our_service_category_id && !selectedDept) setValue('explore_our_service_category_id', String(gc.explore_our_service_category_id));
+    if (gc.explore_our_service_item_id && !selectedSvcItem) setValue('explore_our_service_item_id', String(gc.explore_our_service_item_id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGroupCat, categories]);
+
+  // Service Category options scoped to the chosen Department (keep current selection visible).
+  const svcItemOptions = serviceItems.filter(
+    (it: any) => !selectedDept || String(it.service_category_id) === String(selectedDept) || String(it._id) === String(selectedSvcItem)
+  );
+  // Group Category options scoped to the chosen Department + Service Category.
+  const groupCatOptions = categories.filter(
+    (c: any) =>
+      String(c._id) === String(selectedGroupCat) ||
+      ((!selectedDept || String(c.explore_our_service_category_id) === String(selectedDept)) &&
+        (!selectedSvcItem || String(c.explore_our_service_item_id) === String(selectedSvcItem)))
+  );
+
+  const deptReg = register('explore_our_service_category_id');
+  const svcItemReg = register('explore_our_service_item_id');
+
   const onSubmit = async (formData: any) => {
     try {
-      if (isEdit && id) await groupServiceItemApi.update(id, formData);
-      else await groupServiceItemApi.create(formData);
+      // Explicit payload: keeps join-only fields surfaced on edit
+      // (department_name, service_category_name, group_category_name) out of writes.
+      const payload = {
+        group_service_category_id: formData.group_service_category_id,
+        group_service_item_title: formData.group_service_item_title,
+        group_service_item_slug: formData.group_service_item_slug,
+        group_service_item_description: formData.group_service_item_description,
+        group_service_item_thumbnail: formData.group_service_item_thumbnail,
+        display_order: Number(formData.display_order) || 0,
+        status: Number(formData.status),
+      };
+      if (isEdit && id) await groupServiceItemApi.update(id, payload);
+      else await groupServiceItemApi.create(payload);
       toast.success(isEdit ? 'Updated' : 'Created');
       if (onSuccess) onSuccess(); else navigate(-1);
     } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
@@ -39,11 +85,35 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
 
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Service Department</label>
+          <select
+            {...deptReg}
+            onChange={(e) => { deptReg.onChange(e); setValue('explore_our_service_item_id', ''); setValue('group_service_category_id', ''); }}
+            className="form-select"
+          >
+            <option value="">All departments</option>
+            {departments.map((d: any) => <option key={d._id} value={d._id}>{d.service_category_name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="form-label">Service Category</label>
+          <select
+            {...svcItemReg}
+            onChange={(e) => { svcItemReg.onChange(e); setValue('group_service_category_id', ''); }}
+            className="form-select"
+          >
+            <option value="">All service categories</option>
+            {svcItemOptions.map((it: any) => <option key={it._id} value={it._id}>{it.service_title}</option>)}
+          </select>
+        </div>
+      </div>
       <div>
-        <label className="form-label">Category <span className="text-red-500">*</span></label>
+        <label className="form-label">Group Category <span className="text-red-500">*</span></label>
         <select {...register('group_service_category_id', { required: 'Required' })} className="form-select">
-          <option value="">Select category</option>
-          {categories.map((c: any) => <option key={c._id} value={c._id}>{c.group_service_category_name}</option>)}
+          <option value="">Select group category</option>
+          {groupCatOptions.map((c: any) => <option key={c._id} value={c._id}>{c.group_service_category_name}</option>)}
         </select>
         {errors.group_service_category_id && <p className="form-error">{String(errors.group_service_category_id.message)}</p>}
       </div>
@@ -53,10 +123,12 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
           <input {...register('group_service_item_title', { required: 'Required' })} className="form-input" />
           {errors.group_service_item_title && <p className="form-error">{String(errors.group_service_item_title.message)}</p>}
         </div>
-        <div><label className="form-label">Slug</label><input {...register('group_service_item_slug')} className="form-input" placeholder="e.g. service-item-slug" /></div>
+        <SlugField name="group_service_item_slug" register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <div><label className="form-label">Description</label><textarea {...register('group_service_item_description')} className="form-textarea" /></div>
+      <div>
+        <label className="form-label">Description</label>
+        <RichTextEditor value={watch('group_service_item_description')} onChange={(html) => setValue('group_service_item_description', html)} placeholder="Describe the service item…" minHeight={220} />
+      </div>
       <ImageUpload name="group_service_item_thumbnail" label="Thumbnail" uploadType="image" folder="group-service" value={watch('group_service_item_thumbnail')} onChange={(url) => setValue('group_service_item_thumbnail', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>

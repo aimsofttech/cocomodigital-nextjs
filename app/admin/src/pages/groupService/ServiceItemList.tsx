@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,7 +9,23 @@ import { groupServiceItemApi } from '@/services/adminApi';
 import ServiceItemForm from './ServiceItemForm';
 
 export default function ServiceItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(groupServiceItemApi);
+  // When navigated from a Group Service Category, the category id scopes the list.
+  const [searchParams] = useSearchParams();
+  const categoryId = searchParams.get('groupServiceCategoryId') || '';
+
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(groupServiceItemApi, true, categoryId ? { group_service_category_id: categoryId } : {});
+
+  // Re-apply the scope when the URL id changes.
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(categoryId ? { group_service_category_id: categoryId } : {});
+  }, [categoryId, setFilterParams]);
+
+  // Keep the category scope when other filters change.
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(categoryId ? { group_service_category_id: categoryId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -33,9 +51,9 @@ export default function ServiceItemList() {
     <CrudListPage title="Group Service Items" breadcrumbs={[{ label: 'Group Service' }, { label: 'Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <ServiceItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Group Service Item' : 'Add Group Service Item'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }

@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,7 +9,23 @@ import { groupTopBannerApi } from '@/services/adminApi';
 import TopBannerForm from './TopBannerForm';
 
 export default function TopBannerList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(groupTopBannerApi);
+  // When navigated from a Group Service Category, the Service Category id scopes the list.
+  const [searchParams] = useSearchParams();
+  const serviceItemId = searchParams.get('serviceItemId') || '';
+
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(groupTopBannerApi, true, serviceItemId ? { explore_our_service_item_id: serviceItemId } : {});
+
+  // Re-apply the scope when the URL id changes.
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(serviceItemId ? { explore_our_service_item_id: serviceItemId } : {});
+  }, [serviceItemId, setFilterParams]);
+
+  // Keep the scope when other filters change.
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(serviceItemId ? { explore_our_service_item_id: serviceItemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -32,7 +50,7 @@ export default function TopBannerList() {
     <CrudListPage title="Group Top Banners" breadcrumbs={[{ label: 'Group Service' }, { label: 'Top Banners' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <TopBannerForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Group Top Banner' : 'Add Group Top Banner'}
       modalSize="lg" onRefresh={fetchAll} />
