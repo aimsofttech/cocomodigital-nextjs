@@ -51,12 +51,14 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
         </select>
         {errors.service_category_id && <p className="form-error">{String(errors.service_category_id.message)}</p>}
       </div>
-      <div>
-        <label className="form-label">Category Name <span className="text-red-500">*</span></label>
-        <input {...register('service_title', { required: 'Required' })} className="form-input" placeholder="Enter category name" />
-        {errors.service_title && <p className="form-error">{String(errors.service_title.message)}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Category Name <span className="text-red-500">*</span></label>
+          <input {...register('service_title', { required: 'Required' })} className="form-input" placeholder="Enter category name" />
+          {errors.service_title && <p className="form-error">{String(errors.service_title.message)}</p>}
+        </div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div>
         <label className="form-label">Video URL</label>
         <input {...register('service_video_url')} className="form-input" placeholder="https://youtube.com/..." />

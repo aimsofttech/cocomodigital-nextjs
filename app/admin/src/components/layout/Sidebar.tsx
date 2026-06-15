@@ -18,6 +18,8 @@ interface NavItem {
   path?: string;
   icon?: React.ElementType;
   children?: NavItem[];
+  /** Show the item but make it non-clickable (greyed out). */
+  disabled?: boolean;
 }
 
 const navigation: NavItem[] = [
@@ -80,19 +82,16 @@ const navigation: NavItem[] = [
       { label: 'Projects',   path: '/creative/project',  icon: RocketLaunchIcon },
     ],
   },
-  {
-    label: 'Development House', icon: CodeBracketIcon,
-    children: [
-      { label: 'Categories', path: '/development/category', icon: TagIcon },
-      { label: 'Items',      path: '/development/item',     icon: ListBulletIcon },
-    ],
-  },
+  // Development House is shown but disabled — not consumed by the web app yet.
+  { label: 'Development House', icon: CodeBracketIcon, disabled: true },
   {
     label: 'Group Services', icon: BuildingStorefrontIcon,
     children: [
       { label: 'Top Banner',       path: '/group-service/top-banner',       icon: RectangleGroupIcon },
-      { label: 'Categories',       path: '/group-service/category',         icon: TagIcon },
-      { label: 'Items',            path: '/group-service/item',             icon: ListBulletIcon },
+      { label: 'Service Department', path: '/home/service-department', icon: BuildingOffice2Icon },
+      { label: 'Service Category',   path: '/home/service-category',   icon: Squares2X2Icon },
+      { label: 'Group Categories', path: '/group-service/category',         icon: TagIcon },
+      { label: 'Group Service Items', path: '/group-service/item',           icon: ListBulletIcon },
       { label: 'Creator Platform', path: '/group-service/creator-platform', icon: UserGroupIcon },
       { label: 'Success Stories',  path: '/group-service/success-stories',  icon: StarIcon },
       { label: 'Portfolio Items',  path: '/group-service/portfolio-item',   icon: BriefcaseIcon },
@@ -174,6 +173,20 @@ function NavGroup({ item, level = 0 }: NavGroupProps) {
   const Icon = item.icon;
   const indent = level > 0 ? 'pl-8 text-xs' : '';
 
+  // ── Disabled (shown but not clickable) ──────────────────────────────────────
+  if (item.disabled) {
+    return (
+      <div
+        className={`sidebar-link ${indent} opacity-50 cursor-not-allowed select-none`}
+        title="Coming soon"
+        aria-disabled="true"
+      >
+        {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+        <span className="truncate">{item.label}</span>
+      </div>
+    );
+  }
+
   // ── Leaf (no children) ──────────────────────────────────────────────────────
   if (!item.children) {
     return (
@@ -235,6 +248,24 @@ function CollapsedItem({ item }: CollapsedItemProps) {
   const location = useLocation();
   const Icon = item.icon;
   if (!Icon) return null;
+
+  // Disabled: render a greyed, non-clickable icon (with tooltip).
+  if (item.disabled) {
+    return (
+      <div className="relative group">
+        <div
+          title={item.label}
+          aria-disabled="true"
+          className="flex items-center justify-center w-10 h-10 mx-auto rounded-lg text-gray-300 opacity-50 cursor-not-allowed"
+        >
+          <Icon className="w-5 h-5" />
+        </div>
+        <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
+          {item.label}
+        </div>
+      </div>
+    );
+  }
 
   const path = item.path ?? item.children?.[0]?.path ?? '#';
   const isActive = item.path

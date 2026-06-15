@@ -24,7 +24,9 @@ function getYouTubeId(url: string): string {
 }
 
 // ── ImageCell ─────────────────────────────────────────────────────────────────
-export function ImageCell({ src, alt = 'image', size = 'w-10 h-10', bg = '' }: { src?: string | null; alt?: string; size?: string; bg?: string }) {
+// Default thumbnail size is a wide ~2.8:1 landscape (140×50) so table previews
+// match the card ratio used on the web frontend. Pages can still override `size`.
+export function ImageCell({ src, alt = 'image', size = 'w-[140px] h-[50px]', bg = '' }: { src?: string | null; alt?: string; size?: string; bg?: string }) {
   const [open, setOpen] = useState(false);
   const [errored, setErrored] = useState(false);
 
