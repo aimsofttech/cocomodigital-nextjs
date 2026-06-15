@@ -1,8 +1,25 @@
 ﻿const GroupSingleServicePortfolioItem = require('../../models/GroupSingleServicePortfolioItem');
+const GroupSingleServicePortfolioCategory = require('../../models/GroupSingleServicePortfolioCategory');
 const createCrudController = require('./crudFactory');
 const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
 
-const base = createCrudController(GroupSingleServicePortfolioItem, { imageFields: ['portfolio_video_thumbnail'], defaultSort: { display_order: 1 }, parentField: 'portfolio_category_id' });
+const base = createCrudController(GroupSingleServicePortfolioItem, {
+  imageFields: ['portfolio_video_thumbnail'],
+  searchFields: ['portfolio_item_title'],
+  defaultSort: { display_order: 1 },
+  // Scoped by either group_service_item_id (from the Group Service Items link) or
+  // portfolio_category_id (from the Portfolio Category link).
+  parentField: ['group_service_item_id', 'portfolio_category_id'],
+  // Resolve the parent Portfolio Category name for the list/detail responses.
+  lookups: [
+    {
+      localField: 'portfolio_category_id',
+      model: GroupSingleServicePortfolioCategory,
+      nameField: 'portfolio_category_name',
+      as: 'portfolio_category_name',
+    },
+  ],
+});
 
 const storeWithYoutube = async (req, res) => {
   if (req.body.portfolio_item_video_url) {

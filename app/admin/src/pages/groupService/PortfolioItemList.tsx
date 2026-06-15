@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,7 +9,27 @@ import { groupPortfolioItemApi } from '@/services/adminApi';
 import PortfolioItemForm from './PortfolioItemForm';
 
 export default function PortfolioItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(groupPortfolioItemApi);
+  // Scoped by Group Service Item (from the items table) or by Portfolio Category
+  // (from the category table) depending on which query param is present.
+  const [searchParams] = useSearchParams();
+  const itemId = searchParams.get('groupServiceItemId') || '';
+  const categoryId = searchParams.get('portfolioCategoryId') || '';
+  const scope = itemId
+    ? { group_service_item_id: itemId }
+    : categoryId ? { portfolio_category_id: categoryId } : {};
+  const scopeKey = JSON.stringify(scope);
+
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(groupPortfolioItemApi, true, scope);
+
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(scope);
+  }, [scopeKey, setFilterParams]);
+
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...scope, ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -21,8 +43,10 @@ export default function PortfolioItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'portfolio_video_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.portfolio_video_thumbnail} /> },
-    { key: 'portfolio_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.portfolio_video_url} thumbnail={row.portfolio_video_thumbnail} /> },
+    { key: 'portfolio_item_image', label: 'Image', render: (row: any) => <ImageCell src={row.portfolio_item_image || row.portfolio_video_thumbnail} /> },
+    { key: 'portfolio_item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.portfolio_item_video_url || row.portfolio_video_url} thumbnail={row.portfolio_item_image || row.portfolio_video_thumbnail} /> },
+    { key: 'portfolio_item_title', label: 'Title', sortable: true, render: (row: any) => row.portfolio_item_title || '-' },
+    { key: 'portfolio_category_name', label: 'Portfolio Category', render: (row: any) => row.portfolio_category_name || '-' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
@@ -30,8 +54,8 @@ export default function PortfolioItemList() {
     <CrudListPage title="Portfolio Items" breadcrumbs={[{ label: 'Group Service' }, { label: 'Portfolio Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
-      renderModal={({ id, onSuccess, onCancel }) => <PortfolioItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <PortfolioItemForm editId={id} lockedItemId={itemId || undefined} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Portfolio Item' : 'Add Portfolio Item'}
       modalSize="lg" onRefresh={fetchAll} />
   );

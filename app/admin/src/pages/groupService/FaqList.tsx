@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -6,7 +8,20 @@ import { groupServiceItemFaqApi } from '@/services/adminApi';
 import FaqForm from './FaqForm';
 
 export default function FaqList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(groupServiceItemFaqApi);
+  const [searchParams] = useSearchParams();
+  const itemId = searchParams.get('groupServiceItemId') || '';
+
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(groupServiceItemFaqApi, true, itemId ? { group_service_item_id: itemId } : {});
+
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(itemId ? { group_service_item_id: itemId } : {});
+  }, [itemId, setFilterParams]);
+
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(itemId ? { group_service_item_id: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -28,8 +43,8 @@ export default function FaqList() {
     <CrudListPage title="Group Service FAQs" breadcrumbs={[{ label: 'Group Service' }, { label: 'FAQs' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
-      renderModal={({ id, onSuccess, onCancel }) => <FaqForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <FaqForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit FAQ' : 'Add FAQ'}
       modalSize="lg" onRefresh={fetchAll} />
   );

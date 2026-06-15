@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,7 +9,21 @@ import { groupSingleServiceImageApi } from '@/services/adminApi';
 import SingleServiceImageForm from './SingleServiceImageForm';
 
 export default function SingleServiceImageList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(groupSingleServiceImageApi);
+  // Scoped to a Group Service Item when navigated from the items table.
+  const [searchParams] = useSearchParams();
+  const itemId = searchParams.get('groupServiceItemId') || '';
+
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(groupSingleServiceImageApi, true, itemId ? { group_service_item_id: itemId } : {});
+
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(itemId ? { group_service_item_id: itemId } : {});
+  }, [itemId, setFilterParams]);
+
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(itemId ? { group_service_item_id: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -31,8 +47,8 @@ export default function SingleServiceImageList() {
     <CrudListPage title="Single Service Images" breadcrumbs={[{ label: 'Group Service' }, { label: 'Service Images' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
-      renderModal={({ id, onSuccess, onCancel }) => <SingleServiceImageForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <SingleServiceImageForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Single Service Image' : 'Add Single Service Image'}
       modalSize="lg" onRefresh={fetchAll} />
   );

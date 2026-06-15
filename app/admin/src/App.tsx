@@ -335,6 +335,10 @@ export default function App() {
           <Route path="group-service/item" element={<GroupServiceItemList />} />
           <Route path="group-service/item/add" element={<GroupServiceItemForm />} />
           <Route path="group-service/item/edit/:id" element={<GroupServiceItemForm />} />
+          {/* Service Item Sections — flat pages, scoped via ?groupServiceItemId */}
+          <Route path="group-service/single-service-image" element={<GroupSingleServiceImageList />} />
+          <Route path="group-service/recent-work" element={<GroupRecentWorkList />} />
+          <Route path="group-service/portfolio-category" element={<GroupPortfolioCategoryList />} />
           <Route path="group-service/item/:itemId/images" element={<GroupSingleServiceImageList />} />
           <Route path="group-service/item/:itemId/images/add" element={<GroupSingleServiceImageForm />} />
           <Route path="group-service/item/:itemId/images/edit/:id" element={<GroupSingleServiceImageForm />} />

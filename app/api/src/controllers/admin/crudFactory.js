@@ -196,15 +196,18 @@ const createCrudController = (Model, options = {}) => {
       const limit = parseInt(req.query.limit) || 50;
       const search = req.query.search || '';
       const status = req.query.status;
-      const parentId = req.query[parentField] || req.params[parentField];
 
       let filter = { ...baseFilter };
-      if (parentField && parentId) {
-        // FK fields may hold a real ObjectId (post-migration) or a string id
-        // (legacy / admin-written). Match either representation so listings work
-        // regardless of how the reference is stored.
+      // `parentField` may be a single field name or a list of them. For each that
+      // appears in the query/params, scope the listing by it. FK fields may hold a
+      // real ObjectId (post-migration) or a string id (legacy / admin-written), so
+      // match either representation.
+      const parentFields = Array.isArray(parentField) ? parentField : (parentField ? [parentField] : []);
+      for (const pf of parentFields) {
+        const parentId = req.query[pf] || req.params[pf];
+        if (parentId === undefined || parentId === null || parentId === '') continue;
         const pid = String(parentId);
-        filter[parentField] = mongoose.Types.ObjectId.isValid(pid)
+        filter[pf] = mongoose.Types.ObjectId.isValid(pid)
           ? { $in: [pid, new mongoose.Types.ObjectId(pid)] }
           : pid;
       }

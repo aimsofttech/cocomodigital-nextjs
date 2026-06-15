@@ -92,10 +92,16 @@ const navigation: NavItem[] = [
       { label: 'Service Category',   path: '/group-service/service-category',   icon: Squares2X2Icon },
       { label: 'Group Categories', path: '/group-service/category',         icon: TagIcon },
       { label: 'Group Service Items', path: '/group-service/item',           icon: ListBulletIcon },
-      { label: 'Creator Platform', path: '/group-service/creator-platform', icon: UserGroupIcon },
-      { label: 'Success Stories',  path: '/group-service/success-stories',  icon: StarIcon },
-      { label: 'Portfolio Items',  path: '/group-service/portfolio-item',   icon: BriefcaseIcon },
-      { label: 'FAQs',             path: '/group-service/faq',              icon: QuestionMarkCircleIcon },
+      {
+        label: 'Item Section', icon: RectangleStackIcon,
+        children: [
+          { label: 'Service Media',             path: '/group-service/single-service-image', icon: PhotoIcon },
+          { label: 'Recent Work',       path: '/group-service/recent-work',          icon: FilmIcon },
+          { label: 'Portfolio Category', path: '/group-service/portfolio-category',   icon: BriefcaseIcon },
+          { label: 'Portfolio Items',    path: '/group-service/portfolio-item',       icon: ListBulletIcon },
+          { label: 'FAQ',                       path: '/group-service/faq',                  icon: QuestionMarkCircleIcon },
+        ],
+      },
     ],
   },
   {
