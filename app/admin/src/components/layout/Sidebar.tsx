@@ -36,7 +36,7 @@ const navigation: NavItem[] = [
       {
         label: 'Media Portfolio', icon: FilmIcon,
         children: [
-          { label: 'Home Page Sections', path: '/settings/home-sections',      icon: RectangleStackIcon },
+          { label: 'Section Categories', path: '/settings/home-sections',      icon: RectangleStackIcon },
           { label: 'Section Items',      path: '/settings/home-section-items', icon: ListBulletIcon },
         ],
       },

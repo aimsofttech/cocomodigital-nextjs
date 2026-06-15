@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -23,6 +24,26 @@ export default function HomePageSectionList() {
     { key: 'category_name', label: 'Section Name', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
+    {
+      key: 'navigate', label: 'Navigate To', render: (row: any) => {
+        const targets = Array.isArray(row.navigation) ? row.navigation : [];
+        if (!targets.length) return '-';
+        return (
+          <div className="flex flex-col gap-1.5">
+            {targets.map((t: any) => (
+              <Link
+                key={t.segment}
+                to={`/settings/home-section-items?sectionId=${row._id}`}
+                title={typeof t.count === 'number' ? `${t.label}: ${t.count} record(s)` : t.label}
+                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md bg-primary-600 text-white hover:bg-primary-700 text-xs font-medium whitespace-nowrap transition-colors"
+              >
+                <span>{t.label}{typeof t.count === 'number' ? ` ( ${t.count} )` : ''}</span>
+              </Link>
+            ))}
+          </div>
+        );
+      },
+    },
   ];
   return (
     <CrudListPage title="Home Page Sections" breadcrumbs={[{ label: 'Settings' }, { label: 'Home Sections' }]}

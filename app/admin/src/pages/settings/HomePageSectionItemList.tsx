@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,7 +9,21 @@ import { homePageSectionItemApi } from '@/services/adminApi';
 import HomePageSectionItemForm from './HomePageSectionItemForm';
 
 export default function HomePageSectionItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(homePageSectionItemApi);
+  // Scoped to a Home Page Section when navigated from the sections table.
+  const [searchParams] = useSearchParams();
+  const sectionId = searchParams.get('sectionId') || '';
+
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
+    useCrud(homePageSectionItemApi, true, sectionId ? { home_page_section_id: sectionId } : {});
+
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    setFilterParams(sectionId ? { home_page_section_id: sectionId } : {});
+  }, [sectionId, setFilterParams]);
+
+  const handleFilterChange = (params: Record<string, any>) =>
+    setFilterParams({ ...(sectionId ? { home_page_section_id: sectionId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -22,6 +38,7 @@ export default function HomePageSectionItemList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
+    { key: 'category_name', label: 'Category', render: (row: any) => row.category_name || '-' },
     { key: 'name', label: 'Name', sortable: true },
     { key: 'url', label: 'URL', render: (row: any) => row.url ? <a href={row.url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.url}</a> : '—' },
     { key: 'display_order', label: 'Order', sortable: true },
@@ -31,8 +48,8 @@ export default function HomePageSectionItemList() {
     <CrudListPage title="Home Section Items" breadcrumbs={[{ label: 'Settings' }, { label: 'Section Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
-      renderModal={({ id, onSuccess, onCancel }) => <HomePageSectionItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <HomePageSectionItemForm editId={id} lockedSectionId={sectionId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Section Item' : 'Add Section Item'}
       modalSize="lg" onRefresh={fetchAll} />
   );
