@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const ServiceItem = require('../../models/ServiceItem');
 const ServiceCategory = require('../../models/ServiceCategory');
+const GroupTopBanner = require('../../models/GroupTopBanner');
 const createCrudController = require('./crudFactory');
 const { generateSlug } = require('../../utils/helpers');
 
@@ -53,13 +54,42 @@ const withDepartment = async (rows) => {
   });
 };
 
+// Attach a `navigation` array ([{ segment, label, count }]) to each service
+// category: the count of Group Top Banners linked to it via
+// `explore_our_service_item_id`. Drives the "Service Category Banner" column.
+const withBannerNav = async (rows) => {
+  const ids = [];
+  rows.forEach((r) => {
+    const s = String(r._id);
+    ids.push(s);
+    if (mongoose.Types.ObjectId.isValid(s)) ids.push(new mongoose.Types.ObjectId(s));
+  });
+  const map = new Map();
+  try {
+    const agg = await GroupTopBanner.aggregate([
+      { $match: { explore_our_service_item_id: { $in: ids } } },
+      { $group: { _id: '$explore_our_service_item_id', count: { $sum: 1 } } },
+    ]);
+    agg.forEach((r) => map.set(String(r._id), r.count));
+  } catch (err) {
+    // best-effort: fall through with empty counts
+  }
+  return rows.map((r) => ({
+    ...r,
+    navigation: [
+      { segment: 'banner', label: 'Service Category Banner', count: map.get(String(r._id)) || 0 },
+    ],
+  }));
+};
+
 const index = async (req, res) => {
-  // Enrich the factory's list response with the department name before sending.
+  // Enrich the factory's list response with the department name + banner nav.
   const sendJson = res.json.bind(res);
   res.json = async (payload) => {
     try {
       if (payload && Array.isArray(payload.data) && payload.data.length) {
         payload.data = await withDepartment(payload.data);
+        payload.data = await withBannerNav(payload.data);
       }
     } catch (err) {
       // Enrichment is best-effort: fall back to the raw list on lookup failure.

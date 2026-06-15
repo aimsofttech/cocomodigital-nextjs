@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { groupServiceItemApi, groupServiceCategoryApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
@@ -37,23 +37,28 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
     }
   }, [id]);
 
-  // Preselect the Group Category when adding from a scoped Group Service Categories
-  // link (the derive effect below then fills Department + Service Category).
+  // Preselect the Group Category when adding from a scoped link. Wait until the
+  // options are loaded — setting a <select> value before its <option>s exist
+  // leaves the native select on the placeholder. Apply once.
+  const lockedApplied = useRef(false);
   useEffect(() => {
-    if (lockedCategoryId && !isEdit) setValue('group_service_category_id', lockedCategoryId);
+    if (isEdit || !lockedCategoryId || !categories.length || lockedApplied.current) return;
+    setValue('group_service_category_id', lockedCategoryId);
+    lockedApplied.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lockedCategoryId, isEdit]);
+  }, [lockedCategoryId, isEdit, categories]);
 
   // Derive Department + Service Category from the chosen Group Category (prefills on
-  // edit and back-fills when a Group Category is picked directly). Only fills blanks.
+  // edit and back-fills when a Group Category is picked directly). Only fills blanks,
+  // and only once the dependent option lists exist so the selects can show them.
   useEffect(() => {
-    if (!selectedGroupCat || !categories.length) return;
+    if (!selectedGroupCat || !categories.length || !departments.length || !serviceItems.length) return;
     const gc = categories.find((c: any) => String(c._id) === String(selectedGroupCat));
     if (!gc) return;
     if (gc.explore_our_service_category_id && !selectedDept) setValue('explore_our_service_category_id', String(gc.explore_our_service_category_id));
     if (gc.explore_our_service_item_id && !selectedSvcItem) setValue('explore_our_service_item_id', String(gc.explore_our_service_item_id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroupCat, categories]);
+  }, [selectedGroupCat, categories, departments, serviceItems]);
 
   // Service Category options scoped to the chosen Department (keep current selection visible).
   const svcItemOptions = serviceItems.filter(

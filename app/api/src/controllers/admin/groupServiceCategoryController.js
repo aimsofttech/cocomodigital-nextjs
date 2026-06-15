@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const GroupServiceCategory = require('../../models/GroupServiceCategory');
 const GroupServiceItem = require('../../models/GroupServiceItem');
-const GroupTopBanner = require('../../models/GroupTopBanner');
 const ServiceCategory = require('../../models/ServiceCategory');
 const ServiceItem = require('../../models/ServiceItem');
 const createCrudController = require('./crudFactory');
@@ -57,7 +56,6 @@ const countByField = async (Model, field, values) => {
 
 // Attach a `navigation` array ([{ segment, label, count }]) to each category:
 //  - Group Service Items: group_service_item linked by group_service_category_id
-//  - Service Category Banner: group_top_banner linked by explore_our_service_item_id
 const attachNavigation = async (cats) => {
   if (!cats.length) return cats;
 
@@ -65,11 +63,6 @@ const attachNavigation = async (cats) => {
     GroupServiceItem,
     'group_service_category_id',
     cats.map((c) => c._id)
-  );
-  const bannerCounts = await countByField(
-    GroupTopBanner,
-    'explore_our_service_item_id',
-    cats.map((c) => c.explore_our_service_item_id)
   );
 
   return cats.map((c) => ({
@@ -79,11 +72,6 @@ const attachNavigation = async (cats) => {
         segment: 'items',
         label: 'Group Service Items',
         count: itemCounts.get(String(c._id)) || 0,
-      },
-      {
-        segment: 'banner',
-        label: 'Service Category Banner',
-        count: bannerCounts.get(String(c.explore_our_service_item_id)) || 0,
       },
     ],
   }));

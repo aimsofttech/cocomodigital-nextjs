@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { groupTopBannerApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
@@ -42,20 +42,25 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
   const selectedDept = watch('explore_our_service_category_id');
   const selectedSvcItem = watch('explore_our_service_item_id');
 
-  // Preselect the Service Category when adding from a scoped Group Service Categories
-  // link; the derive effect below then fills the Department.
+  // Preselect the Service Category when adding from a scoped link. Wait until the
+  // options are loaded — setting a <select> value before its <option>s exist
+  // leaves the native select on the placeholder. Apply once.
+  const lockedApplied = useRef(false);
   useEffect(() => {
-    if (lockedServiceItemId && !isEdit) setValue('explore_our_service_item_id', lockedServiceItemId);
+    if (isEdit || !lockedServiceItemId || !serviceItems.length || lockedApplied.current) return;
+    setValue('explore_our_service_item_id', lockedServiceItemId);
+    lockedApplied.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lockedServiceItemId, isEdit]);
+  }, [lockedServiceItemId, isEdit, serviceItems]);
 
-  // Derive Department from the chosen Service Category (back-fills blanks only).
+  // Derive Department from the chosen Service Category (back-fills blanks only,
+  // and only once the department options exist so the select can show it).
   useEffect(() => {
-    if (!selectedSvcItem || !serviceItems.length || selectedDept) return;
+    if (!selectedSvcItem || !serviceItems.length || !departments.length || selectedDept) return;
     const it = serviceItems.find((s: any) => String(s._id) === String(selectedSvcItem));
     if (it?.service_category_id) setValue('explore_our_service_category_id', String(it.service_category_id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSvcItem, serviceItems]);
+  }, [selectedSvcItem, serviceItems, departments, selectedDept]);
 
   // Service Category options scoped to the chosen Department (keep current selection visible).
   const svcItemOptions = serviceItems.filter(

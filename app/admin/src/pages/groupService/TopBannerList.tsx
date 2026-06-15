@@ -41,6 +41,8 @@ export default function TopBannerList() {
   const columns = [
     { key: 'group_banner_img', label: 'Image', render: (row: any) => <ImageCell src={row.group_banner_img} size="w-36 h-24" /> },
     { key: 'group_banner_video', label: 'Video', render: (row: any) => <VideoCell src={row.group_banner_video} thumbnail={row.group_banner_img} size="w-36 h-24" /> },
+    { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || '-' },
+    { key: 'service_category_name', label: 'Service Category', render: (row: any) => row.service_category_name || '-' },
     { key: 'group_banner_heading', label: 'Heading', sortable: true },
     { key: 'group_banner_subheading', label: 'Sub Heading', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },

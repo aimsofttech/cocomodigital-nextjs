@@ -6,12 +6,10 @@ import toast from 'react-hot-toast';
 import { groupServiceCategoryApi } from '@/services/adminApi';
 import ServiceCategoryForm from './ServiceCategoryForm';
 
-// Pages reachable from a group service category. Each opens scoped to this
-// category via a query param the target list reads and filters on.
-const targetHref = (segment: string, row: any) => {
-  if (segment === 'banner') return `/group-service/top-banner?serviceItemId=${row.explore_our_service_item_id || ''}`;
-  return `/group-service/item?groupServiceCategoryId=${row._id}`;
-};
+// Pages reachable from a group service category. Opens scoped to this category
+// via a query param the target list reads and filters on.
+const targetHref = (_segment: string, row: any) =>
+  `/group-service/item?groupServiceCategoryId=${row._id}`;
 
 export default function ServiceCategoryList() {
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(groupServiceCategoryApi);
