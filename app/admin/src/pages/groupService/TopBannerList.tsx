@@ -39,8 +39,8 @@ export default function TopBannerList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'group_banner_img', label: 'Image', render: (row: any) => <ImageCell src={row.group_banner_img} /> },
-    { key: 'group_banner_video', label: 'Video', render: (row: any) => <VideoCell src={row.group_banner_video} thumbnail={row.group_banner_img} /> },
+    { key: 'group_banner_img', label: 'Image', render: (row: any) => <ImageCell src={row.group_banner_img} size="w-36 h-24" /> },
+    { key: 'group_banner_video', label: 'Video', render: (row: any) => <VideoCell src={row.group_banner_video} thumbnail={row.group_banner_img} size="w-36 h-24" /> },
     { key: 'group_banner_heading', label: 'Heading', sortable: true },
     { key: 'group_banner_subheading', label: 'Sub Heading', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
@@ -51,8 +51,8 @@ export default function TopBannerList() {
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
-      renderModal={({ id, onSuccess, onCancel }) => <TopBannerForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
+      renderModal={({ id, onSuccess, onCancel }) => <TopBannerForm editId={id} lockedServiceItemId={serviceItemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Group Top Banner' : 'Add Group Top Banner'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }

@@ -24,9 +24,8 @@ function getYouTubeId(url: string): string {
 }
 
 // ── ImageCell ─────────────────────────────────────────────────────────────────
-// Default thumbnail size is a wide ~2.8:1 landscape (140×50) so table previews
-// match the card ratio used on the web frontend. Pages can still override `size`.
-export function ImageCell({ src, alt = 'image', size = 'w-[140px] h-[50px]', bg = '' }: { src?: string | null; alt?: string; size?: string; bg?: string }) {
+// Default thumbnail size (144×96) — shared across all tables. Pages can override `size`.
+export function ImageCell({ src, alt = 'image', size = 'w-36 h-24', bg = '' }: { src?: string | null; alt?: string; size?: string; bg?: string }) {
   const [open, setOpen] = useState(false);
   const [errored, setErrored] = useState(false);
 
@@ -61,12 +60,12 @@ export function ImageCell({ src, alt = 'image', size = 'w-[140px] h-[50px]', bg 
 }
 
 // ── VideoCell ─────────────────────────────────────────────────────────────────
-export function VideoCell({ src, thumbnail }: { src?: string | null; thumbnail?: string | null }) {
+export function VideoCell({ src, thumbnail, size = 'w-36 h-24' }: { src?: string | null; thumbnail?: string | null; size?: string }) {
   const [open, setOpen] = useState(false);
 
   if (!src) {
     return (
-      <div className="w-16 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
+      <div className={`${size} rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center`}>
         <PlayCircleIcon className="w-5 h-5 text-gray-300" />
       </div>
     );
@@ -83,7 +82,7 @@ export function VideoCell({ src, thumbnail }: { src?: string | null; thumbnail?:
     <>
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-        className="relative w-16 h-10 rounded-lg overflow-hidden border border-gray-200 hover:border-primary-400 hover:scale-105 transition-all group bg-gray-900 flex-shrink-0"
+        className={`relative ${size} rounded-lg overflow-hidden border border-gray-200 hover:border-primary-400 hover:scale-105 transition-all group bg-gray-900 flex-shrink-0`}
         title="Preview video"
       >
         {thumbUrl && (

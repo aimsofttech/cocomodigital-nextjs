@@ -21,7 +21,7 @@ export default function ServiceItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'service_image', label: 'Image', render: (row: any) => <ImageCell src={row.service_image} size="w-[500px] h-20" /> },
+    { key: 'service_image', label: 'Image', render: (row: any) => <ImageCell src={row.service_image} size="w-36 h-24" /> },
     { key: 'service_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.service_video_url} thumbnail={row.service_image} /> },
     { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || '-' },
     { key: 'service_title', label: 'Category Name', sortable: true },

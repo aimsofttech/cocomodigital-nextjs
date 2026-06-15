@@ -68,7 +68,7 @@ export default function ItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }, { key: 'year', label: 'Year', type: 'year' as const }];
   const columns = [
-    { key: 'poster_image', label: 'Poster', render: (row: any) => <ImageCell src={row.poster_image} alt={row.title} size="w-16 h-16" /> },
+    { key: 'poster_image', label: 'Poster', render: (row: any) => <ImageCell src={row.poster_image} alt={row.title} size="w-36 h-24" /> },
     { key: 'marketing_video', label: 'Video', render: (row: any) => <VideoCell src={row.marketing_video} thumbnail={row.poster_image} /> },
     { key: 'title', label: 'Title', sortable: true, render: (row: any) => <span className="font-medium text-gray-900">{row.title || '—'}</span> },
     { key: 'year', label: 'Year', sortable: true },

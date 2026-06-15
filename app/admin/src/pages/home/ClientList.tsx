@@ -21,7 +21,7 @@ export default function ClientList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'client_img', label: 'Image', render: (row: any) => <ImageCell src={row.client_img} alt={row.client_title} size="w-20 h-20" /> },
+    { key: 'client_img', label: 'Image', render: (row: any) => <ImageCell src={row.client_img} alt={row.client_title} size="w-36 h-24" /> },
     { key: 'client_title', label: 'Success Stories Title', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },

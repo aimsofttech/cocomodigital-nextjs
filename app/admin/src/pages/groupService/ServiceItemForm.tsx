@@ -8,9 +8,9 @@ import SlugField from '@/components/ui/SlugField';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import toast from 'react-hot-toast';
 
-interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; }
+interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; lockedCategoryId?: string; }
 
-export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props = {}) {
+export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCategoryId }: Props = {}) {
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   const isModal = Boolean(onSuccess ?? onCancel);
@@ -36,6 +36,13 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
+
+  // Preselect the Group Category when adding from a scoped Group Service Categories
+  // link (the derive effect below then fills Department + Service Category).
+  useEffect(() => {
+    if (lockedCategoryId && !isEdit) setValue('group_service_category_id', lockedCategoryId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockedCategoryId, isEdit]);
 
   // Derive Department + Service Category from the chosen Group Category (prefills on
   // edit and back-fills when a Group Category is picked directly). Only fills blanks.

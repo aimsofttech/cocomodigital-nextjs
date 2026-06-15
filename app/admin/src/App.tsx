@@ -318,6 +318,14 @@ export default function App() {
           <Route path="development/item/edit/:id" element={<DevItemForm />} />
 
           {/* Group Service */}
+          {/* Service Department / Service Category under Group Service — separate
+              paths from Home, reusing the same CRUD pages (shared data). */}
+          <Route path="group-service/service-department" element={<ServiceDepartmentList />} />
+          <Route path="group-service/service-department/add" element={<ServiceDepartmentForm />} />
+          <Route path="group-service/service-department/edit/:id" element={<ServiceDepartmentForm />} />
+          <Route path="group-service/service-category" element={<ServiceItemList />} />
+          <Route path="group-service/service-category/add" element={<ServiceItemForm />} />
+          <Route path="group-service/service-category/edit/:id" element={<ServiceItemForm />} />
           <Route path="group-service/top-banner" element={<GroupTopBannerList />} />
           <Route path="group-service/top-banner/add" element={<GroupTopBannerForm />} />
           <Route path="group-service/top-banner/edit/:id" element={<GroupTopBannerForm />} />

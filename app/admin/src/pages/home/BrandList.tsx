@@ -21,7 +21,7 @@ export default function BrandList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'brand_image', label: 'Logo', render: (row: any) => <ImageCell src={row.brand_image} alt={row.brand_name} size="w-24 h-16" /> },
+    { key: 'brand_image', label: 'Logo', render: (row: any) => <ImageCell src={row.brand_image} alt={row.brand_name} size="w-36 h-24" /> },
     { key: 'brand_name', label: 'Brand Name', sortable: true },
     { key: 'website_url', label: 'Website', sortable: true, render: (row: any) => row.website_url ? <a href={row.website_url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.website_url}</a> : '—' },
     { key: 'display_order', label: 'Order', sortable: true },
