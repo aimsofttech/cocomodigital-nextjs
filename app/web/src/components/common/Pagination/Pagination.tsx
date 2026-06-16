@@ -11,7 +11,7 @@ const Pagination = ({
 }) => {
   const maxVisiblePages = 5;
   const pageButtonClass =
-    "inline-flex h-10 min-w-10 touch-manipulation items-center justify-center rounded-[var(--radius-sm)] border-2 border-strong bg-page px-3 py-0 font-primary text-[0.95rem] font-black tracking-[var(--tracking-snug)] text-strong transition-[transform,box-shadow,background,color] duration-150 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:transform-none max-[480px]:h-9 max-[480px]:min-w-9 max-[480px]:px-2 max-[480px]:text-[0.85rem] hover:enabled:-translate-x-px hover:enabled:-translate-y-px hover:enabled:bg-[rgba(255,240,0,0.18)] hover:enabled:shadow-[2px_2px_0_var(--text-strong)]";
+    "inline-flex h-10 min-w-10 touch-manipulation items-center justify-center rounded-[var(--radius-sm)] border-2 border-strong bg-page px-3 py-0 font-primary text-[0.95rem] font-black tracking-[var(--tracking-snug)] text-strong transition-[transform,box-shadow,background,color] duration-150 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:transform-none max-[480px]:h-9 max-[480px]:min-w-9 max-[480px]:px-2 max-[480px]:text-[0.85rem] hover:enabled:-translate-x-px hover:enabled:-translate-y-px hover:enabled:bg-[rgba(255,240,0,0.18)] hover:enabled:shadow-[2px_2px_0_var(--text-strong)]";
   const activePageClass =
     "!border-strong !bg-brand !text-black -translate-x-px -translate-y-px shadow-[3px_3px_0_var(--text-strong)] hover:enabled:!-translate-x-0.5 hover:enabled:!-translate-y-0.5 hover:enabled:!bg-brand hover:enabled:shadow-[5px_5px_0_var(--text-strong)]";
 

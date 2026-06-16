@@ -22,6 +22,7 @@ const AllSeriesData = ({
   const [totalItemCount, setTotalItemCount] = useState(initialTotalItemCount);
   const [activePage, setActivePage] = useState(1);
   const [searchTitle, setSearchTitle] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   /* Gate re-fetch on first hydrate (same pattern as /career +
      /creative-house). User interaction flips the flag; client-side
      legacy fetcher takes over from there. */
@@ -43,6 +44,10 @@ const AllSeriesData = ({
   useEffect(() => {
     /* Skip the initial client-side fetch when SSR-seeded. */
     if (!userInteracted && initialItems.length > 0) return;
+    /* Guard against out-of-order responses: if a newer search fires
+       before this one resolves, `ignore` flips and we drop the stale
+       result instead of letting it overwrite the latest one. */
+    let ignore = false;
     const fetchAllSeriesData = async () => {
       try {
         /* Phase 5l: the API marketing-house-items with multi-filter
@@ -57,7 +62,14 @@ const AllSeriesData = ({
         url.searchParams.set("sort", "order");
         url.searchParams.set("depth", "1");
         const res = await fetch(url, { headers: { Accept: "application/json" } });
-        if (!res.ok) return;
+        if (ignore) return;
+        if (!res.ok) {
+          /* On a failed request, clear the grid so the "Data not
+             available" state shows instead of stale cards. */
+          setFilteredItems([]);
+          setTotalItemCount(0);
+          return;
+        }
         const body = await res.json();
         /* Phase 5+ 2026-05-22: depth=1 returns `poster_image` as a
            full Media doc object. <Image src=...> needs a URL string,
@@ -72,26 +84,38 @@ const AllSeriesData = ({
           category_id:
             typeof d.category === "object" ? d.category?.id : d.category,
         }));
+        if (ignore) return;
         setFilteredItems(items);
-        setTotalItemCount(
-          category || year || searchTitle
-            ? items.length
-            : body?.totalDocs || 0,
-        );
+        /* Always use the API's full total (across all pages) so the
+           pager renders the correct number of pages — including when a
+           category/year/title filter is active. Using the current
+           page's item count here previously capped it at one page. */
+        setTotalItemCount(body?.totalDocs || 0);
       } catch (error) {
         console.log("Error", error);
       }
     };
     fetchAllSeriesData();
+    return () => { ignore = true; };
   }, [year, category, limit, offset, searchTitle, userInteracted, initialItems.length]);
 
-  const ItemSearchHandler = (event) => {
-    const getData = setTimeout(() => {
-      setSearchTitle(event?.target?.value);
+  /* Debounce the search box: wait 400ms after the last keystroke
+     before firing the title query, so rapid typing doesn't spawn a
+     fetch per character. The ref skips the first run so an SSR-seeded
+     mount doesn't trigger a redundant client refetch. */
+  const didMountSearch = useRef(false);
+  useEffect(() => {
+    if (!didMountSearch.current) {
+      didMountSearch.current = true;
+      return;
+    }
+    const t = setTimeout(() => {
+      setSearchTitle(searchInput.trim());
+      setActivePage(1);
       setUserInteracted(true);
-    }, 500);
-    return () => clearTimeout(getData);
-  };
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
 
   return (
     <div ref={topScrollToCards} className="all-series-data-main-wrapper">
@@ -127,7 +151,8 @@ const AllSeriesData = ({
           <input
             type="text"
             placeholder="Search by title..."
-            onChange={ItemSearchHandler}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
       </div>
@@ -174,7 +199,7 @@ const AllSeriesData = ({
 
       {filteredItems.length === 0 && (
         <div className="text-center mt-4">
-          <p>No movies/items found for the selected filters.</p>
+          <p>Data not available</p>
         </div>
       )}
     </div>

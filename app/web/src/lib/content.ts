@@ -906,8 +906,27 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       if (where?.category?.equals !== undefined) {
         items = items.filter((s) => s.category.id === where.category!.equals);
       }
+      /* Title search — the /work/marketing-campaigns search box sends
+         where[title][contains]. Match case-insensitively on the item
+         title (falling back to the legacy marketing_house_title field
+         on rows that don't carry `title`). */
+      const titleQuery = where?.title?.contains ?? where?.title?.like;
+      if (titleQuery) {
+        const q = String(titleQuery).trim().toLowerCase();
+        if (q) {
+          items = items.filter((s) =>
+            (s.title || (s as any).marketing_house_title || "")
+              .toLowerCase()
+              .includes(q),
+          );
+        }
+      }
       items.sort(byOrder);
-      return listResult(items, opts.limit);
+      /* Paginate by page — the /work/marketing-campaigns grid is
+         page-based (32/page). listResult always returned the first
+         page, so page 2+ showed the same items; pagedResult slices
+         the requested page and reports real totalDocs/totalPages. */
+      return pagedResult(items, opts.limit, opts.page);
     },
     /* Detail lookup hits the dedicated single-item endpoint so the
        /marketing/<slug> case-study page gets the full item + every
