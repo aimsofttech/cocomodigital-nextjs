@@ -967,8 +967,10 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
         for (const m of pairs) {
           docs.push({
             id: it._id,
-            title: it.title,
-            description: it.description,
+            // Legacy rows store title/description; records created via the admin
+            // form store item_title/item_description. Fall back so both display.
+            title: it.title || it.item_title,
+            description: it.description || it.item_description,
             legacyImageUrl: buildImg(m.image),
             video_url: m.video || "",
           });

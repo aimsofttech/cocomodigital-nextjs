@@ -35,20 +35,6 @@ const WebSeriesIndividual = () => {
 
     let cancelled = false;
 
-    /* Phase 5l+ 2026-05-22: adapter unwraps the API Media doc objects
-       to URL strings so the existing renderer (which expects legacy
-       URL-string shape) keeps working. Falls back to `legacyImage`
-       for nested arrays where the import-marketing-house-details
-       script populated only the legacy S3 URL (Media upload deferred
-       to a follow-up). Also derives `category_id` from the
-       category relationship for <RelatedCaseStudies/>. */
-    /* Some the API rows store the image as a bare S3 object key
-       (e.g. "poster-image/1777877055_psycho saiyaan.jpeg") rather
-       than an absolute URL. next/image calls `new URL(src)` and
-       throws "Failed to construct 'URL': Invalid URL" on a non-
-       absolute, non-root-relative path. Prefix bare keys with the
-       S3 base so every src handed to <Image> is a valid URL.
-       Already-absolute URLs and root-relative paths pass through. */
     const S3_BASE =
       "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/";
     const absolutize = (v: string): string =>
@@ -84,9 +70,9 @@ const WebSeriesIndividual = () => {
           typeof d.category === "object" ? d.category?.id : d.category,
         images: Array.isArray(d.images)
           ? d.images.map((i: any) => ({
-              ...i,
-              image: mediaUrl(i?.image, "legacyImage", i),
-            }))
+            ...i,
+            image: mediaUrl(i?.image, "legacyImage", i),
+          }))
           : [],
         ideas_strategy_planning: Array.isArray(d.ideas_strategy_planning)
           ? d.ideas_strategy_planning.map(adaptNestedRow)

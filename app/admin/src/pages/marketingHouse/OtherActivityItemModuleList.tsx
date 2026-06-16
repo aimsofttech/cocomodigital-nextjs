@@ -13,19 +13,29 @@ export default function OtherActivityItemModuleList() {
   // and scopes the whole page (list + create/edit) to that item.
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
+  // When navigated from the Categories page, the page is also scoped to a single
+  // activity category (which the add/edit form then pre-selects).
+  const categoryId = searchParams.get('otherActivityCategoryId') || '';
   const [itemName, setItemName] = useState('');
+
+  // Combined scope from whatever params are present (item and/or category).
+  const scopeFilter: Record<string, any> = {
+    ...(itemId ? { marketing_house_item_id: itemId } : {}),
+    ...(categoryId ? { marketing_house_other_activity_category_id: categoryId } : {}),
+  };
 
   // Seed the filter on first render so the initial fetch is already scoped.
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseOtherActivityItemApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseOtherActivityItemApi, true, scopeFilter);
 
-  // Re-apply the filter only when the URL id actually changes. Skipped on mount
+  // Re-apply the filter only when the URL scope actually changes. Skipped on mount
   // since it's already seeded.
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
-  }, [itemId, setFilterParams]);
+    setFilterParams(scopeFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemId, categoryId, setFilterParams]);
 
   // Best-effort fetch of the item title for title context.
   useEffect(() => {
@@ -48,7 +58,7 @@ export default function OtherActivityItemModuleList() {
   // Merge the locked item filter with any status filter the user toggles, so the
   // item scope is never lost when other filters change.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...scopeFilter, ...params });
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
@@ -70,7 +80,7 @@ export default function OtherActivityItemModuleList() {
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
-      renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
+      renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemModuleForm editId={id} lockedItemId={itemId || undefined} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Item' : 'Add Add-on Activities Item'}
       modalSize="xl" onRefresh={fetchAll} />
   );

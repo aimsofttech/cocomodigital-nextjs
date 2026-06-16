@@ -186,7 +186,6 @@ const OtherActivities = ({ itemData }) => {
                         src={item.image}
                         alt="Slide"
                         className="w-auto h-auto"
-                        style={{ maxHeight: "500px", maxWidth: "100%" }}
                         width={600}
                         height={400}
                       />
@@ -214,7 +213,6 @@ const OtherActivities = ({ itemData }) => {
                     src={otherActivity.media[0].image}
                     alt="Only Slide"
                     className="w-auto h-auto"
-                    style={{ maxHeight: "500px", maxWidth: "100%" }}
                     width={600}
                     height={400}
                   />

@@ -28244,6 +28244,14 @@
 
   .other-activity-slider-wrapper .other-activity-slider-images img {
 
+    width: auto;
+
+    height: auto;
+
+    max-width: 100%;
+
+    max-height: 400px;
+
     border-radius: var(--radius-md);
 
     border: 2px solid var(--text-on-dark);
@@ -37709,6 +37717,12 @@
       justify-content: center !important;
 
       align-items: center !important;
+
+    }
+
+    .other-activity-slider-wrapper .other-activity-slider-images img {
+
+      max-height: 280px;
 
     }
 

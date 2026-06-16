@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const MarketingHouseImage = require('../../models/MarketingHouseImage');
@@ -55,22 +56,35 @@ const getSingleMarketingHouse = async (req, res) => {
   const item = await MarketingHouseItem.findOne({ marketing_house_slug, status: 1 }).populate('marketing_house_category_id', 'category_name');
   if (!item) return res.status(404).json({ status: 'error', message: 'Not found' });
 
+  // The sub-collection link fields (marketing_house_item_id, *_category_id) are
+  // Mixed: migrated rows hold ObjectIds, but records created via the admin form
+  // can persist the id as a plain string. A bare `{ field: item._id }` (ObjectId)
+  // misses the string rows, so newly-added data shows as "Data not available".
+  // Match BOTH the ObjectId and string forms of an id so either persists.
+  const idVariants = (id) => {
+    const s = String(id);
+    const out = [s];
+    if (mongoose.Types.ObjectId.isValid(s)) out.push(new mongoose.Types.ObjectId(s));
+    return out;
+  };
+  const itemIds = idVariants(item._id);
+
   const [images, statics, performances, preLaunch, ideaStrategy, otherActivityCats, contentCats, carousels, communityProgramCats, faqs] = await Promise.all([
-    MarketingHouseImage.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHouseStatics.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHousePerformance.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHousePreLaunchActivity.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHouseIdeaStrategyPlanning.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHouseOtherActivityCategory.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHouseContentCreatedCategory.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHouseContentCreatedItemCarousel.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    MarketingHouseCommunityProgramCategory.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
-    Faq.find({ marketing_house_item_id: item._id, status: 1 }).sort({ display_order: 1 }),
+    MarketingHouseImage.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHouseStatics.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHousePerformance.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHousePreLaunchActivity.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHouseIdeaStrategyPlanning.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHouseOtherActivityCategory.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHouseContentCreatedCategory.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHouseContentCreatedItemCarousel.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    MarketingHouseCommunityProgramCategory.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
+    Faq.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
   ]);
 
   const otherActivityData = [];
   for (const cat of otherActivityCats) {
-    const catItems = await MarketingHouseOtherActivityItem.find({ marketing_house_item_id: item._id, marketing_house_other_activity_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
+    const catItems = await MarketingHouseOtherActivityItem.find({ marketing_house_item_id: { $in: itemIds }, marketing_house_other_activity_category_id: { $in: idVariants(cat._id) }, status: 1 }).sort({ display_order: 1 });
     otherActivityData.push({
       ...cat.toObject(),
       items: catItems.map((i) => ({
@@ -85,13 +99,13 @@ const getSingleMarketingHouse = async (req, res) => {
 
   const contentData = [];
   for (const cat of contentCats) {
-    const catItems = await MarketingHouseContentCreatedItem.find({ marketing_house_item_id: item._id, marketing_house_content_created_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
+    const catItems = await MarketingHouseContentCreatedItem.find({ marketing_house_item_id: { $in: itemIds }, marketing_house_content_created_category_id: { $in: idVariants(cat._id) }, status: 1 }).sort({ display_order: 1 });
     contentData.push({ ...cat.toObject(), items: catItems.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })) });
   }
 
   const communityProgramData = [];
   for (const cat of communityProgramCats) {
-    const catItems = await MarketingHouseCommunityProgramCategoryItem.find({ marketing_house_item_id: item._id, community_program_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
+    const catItems = await MarketingHouseCommunityProgramCategoryItem.find({ marketing_house_item_id: { $in: itemIds }, community_program_category_id: { $in: idVariants(cat._id) }, status: 1 }).sort({ display_order: 1 });
     communityProgramData.push({ ...cat.toObject(), category_image: buildUrl(cat.category_image), items: catItems.map((i) => ({ ...i.toObject(), item_image: buildUrl(i.item_image) })) });
   }
 

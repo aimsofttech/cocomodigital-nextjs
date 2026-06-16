@@ -11,12 +11,14 @@ interface Props {
   editId?: string;
   /** When set (navigated from a Marketing Item), the item is preselected and locked. */
   lockedItemId?: string;
+  /** When set (navigated from a Category), that activity category is preselected. */
+  lockedCategoryId?: string;
 }
 
 // Item records expose their name under `title` (or legacy `marketing_house_title`).
 const itemName = (it: any) => it.title || it.marketing_house_title || 'Untitled';
 
-export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editId, lockedItemId }: Props = {}) {
+export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editId, lockedItemId, lockedCategoryId }: Props = {}) {
   const isEdit = Boolean(editId);
   const [categories, setCategories] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
@@ -76,6 +78,14 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
       .then(({ data }) => setActivityCategories(data.data || []))
       .catch(() => toast.error('Failed to load activity categories'));
   }, [selectedItem]);
+
+  // When navigated from the Categories page (create flow), pre-select that
+  // activity category once its options have loaded.
+  useEffect(() => {
+    if (lockedCategoryId && !isEdit && activityCategories.length) {
+      setValue('marketing_house_other_activity_category_id', lockedCategoryId);
+    }
+  }, [lockedCategoryId, isEdit, activityCategories, setValue]);
 
   const categoryReg = register('marketing_house_category_id', lockedItemId ? {} : { required: 'Required' });
   const itemReg = register('marketing_house_item_id', { required: 'Required' });

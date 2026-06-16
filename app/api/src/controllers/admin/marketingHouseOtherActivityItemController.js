@@ -11,7 +11,10 @@ const base = createCrudController(MarketingHouseOtherActivityItem, {
   imageFields: ['item_image', 'image1', 'image2', 'image3', 'image4'],
   searchFields: ['item_title', 'title'],
   defaultSort: { display_order: 1 },
-  parentField: 'marketing_house_item_id',
+  // Scope the listing by the marketing item and/or the linked activity category.
+  // Either can be passed as a query param; the factory matches both string and
+  // ObjectId id forms, so it works for legacy and admin-written records alike.
+  parentField: ['marketing_house_item_id', 'marketing_house_other_activity_category_id'],
   // Resolve related names (record → item → category) plus the linked other-activity
   // category. The item lookup surfaces the item's category id via `extract`, which
   // the category lookup then resolves to a name. Applied to list + show.
