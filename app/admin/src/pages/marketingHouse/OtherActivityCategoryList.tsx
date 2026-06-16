@@ -25,12 +25,12 @@ export default function OtherActivityCategoryList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Other Activity Categories" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Other Activity Categories' }]}
+    <CrudListPage title="Add-on Activities Categories" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Add-on Activities Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityCategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Other Activity Category' : 'Add Other Activity Category'}
+      modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Category' : 'Add Add-on Activities Category'}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

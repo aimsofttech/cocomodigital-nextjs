@@ -233,8 +233,8 @@ export default function App() {
           <Route path="marketing/idea-strategy-planning" element={<MarketingIdeaStrategyPlanningList />} />
           <Route path="marketing/pre-launch-activity" element={<MarketingPreLaunchActivityList />} />
           <Route path="marketing/performance" element={<MarketingPerformanceModuleList />} />
-          <Route path="marketing/other-activity-category" element={<MarketingOtherActivityCategoryModuleList />} />
-          <Route path="marketing/other-activity-item" element={<MarketingOtherActivityItemModuleList />} />
+          <Route path="marketing/add-on-activities-category" element={<MarketingOtherActivityCategoryModuleList />} />
+          <Route path="marketing/add-on-activities-item" element={<MarketingOtherActivityItemModuleList />} />
           <Route path="marketing/content-category" element={<MarketingContentCategoryModuleList />} />
           <Route path="marketing/content-item" element={<MarketingContentItemModuleList />} />
           <Route path="marketing/content-carousel" element={<MarketingContentCarouselModuleList />} />

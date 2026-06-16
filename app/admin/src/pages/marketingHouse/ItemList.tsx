@@ -19,8 +19,8 @@ const SEGMENT_ROUTE: Record<string, string> = {
   'idea-strategy': '/marketing/idea-strategy-planning',
   'pre-launch': '/marketing/pre-launch-activity',
   'performance': '/marketing/performance',
-  'other-activity-category': '/marketing/other-activity-category',
-  'other-activity-item': '/marketing/other-activity-item',
+  'other-activity-category': '/marketing/add-on-activities-category',
+  'other-activity-item': '/marketing/add-on-activities-item',
   'content-category': '/marketing/content-category',
   'content-item': '/marketing/content-item',
   'community-program': '/marketing/community-program',
@@ -52,6 +52,17 @@ const NAV_LINKS: NavTarget[] = [
   { label: 'Continuity Items', segment: 'community-program-item' },
   { label: 'FAQ', segment: 'faq' },
 ];
+
+// Admin-only full-name display labels, keyed by segment. The backend sends
+// shortened labels (e.g. 'Other Act. Cat.'); this overrides them for display
+// only — the API (segments/routes and backend labels) stays unchanged.
+const DISPLAY_LABEL: Record<string, string> = {
+  'other-activity-category': 'Add-on Activities Categories',
+  'other-activity-item': 'Add-on Activities Items',
+  'content-category': 'Content Categories',
+  'community-program': 'Continuity Category',
+};
+const labelFor = (t: NavTarget) => DISPLAY_LABEL[t.segment] ?? t.label;
 
 export default function ItemList() {
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseItemApi);
@@ -106,14 +117,14 @@ export default function ItemList() {
               <Link
                 key={t.segment}
                 to={targetHref(t.segment, row._id)}
-                title={`${t.label}: ${count ?? 0} record(s)`}
+                title={`${labelFor(t)}: ${count ?? 0} record(s)`}
                 className={`group flex items-center justify-between gap-2 px-3 py-2 rounded-lg border transition-colors ${
                   has
                     ? 'border-primary-200 bg-primary-50/60 hover:bg-primary-100'
                     : 'border-gray-200 bg-white hover:bg-gray-50'
                 }`}
               >
-                <span className="text-xs font-medium text-gray-700 truncate group-hover:text-primary-700">{t.label}</span>
+                <span className="text-xs font-medium text-gray-700 leading-tight group-hover:text-primary-700">{labelFor(t)}</span>
                 <span
                   className={`inline-flex items-center justify-center min-w-[1.375rem] h-5 px-1.5 rounded-full text-[10px] font-semibold flex-shrink-0 ${
                     has ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-400'

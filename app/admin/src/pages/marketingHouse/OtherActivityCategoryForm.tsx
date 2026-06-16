@@ -56,7 +56,7 @@ export default function OtherActivityCategoryForm({ onSuccess, onCancel, editId 
   if (isModal) return form;
   return (
     <div>
-      <PageHeader title={isEdit ? 'Edit Other Activity Category' : 'Add Other Activity Category'} breadcrumbs={[{ label: 'Other Activity Category', path: '../' }, { label: isEdit ? 'Edit' : 'Add' }]} />
+      <PageHeader title={isEdit ? 'Edit Add-on Activities Category' : 'Add Add-on Activities Category'} breadcrumbs={[{ label: 'Add-on Activities Category', path: '../' }, { label: isEdit ? 'Edit' : 'Add' }]} />
       <div className="card max-w-2xl">{form}</div>
     </div>
   );

@@ -62,12 +62,12 @@ export default function OtherActivityItemModuleList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `Other Activities Items — ${itemName}` : 'Other Activities Items'} breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Other Activities Items' }]}
+    <CrudListPage title={itemName ? `Add-on Activities Items — ${itemName}` : 'Add-on Activities Items'} breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Add-on Activities Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Other Activity Item' : 'Add Other Activity Item'}
+      modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Item' : 'Add Add-on Activities Item'}
       modalSize="xl" onRefresh={fetchAll} />
   );
 }
