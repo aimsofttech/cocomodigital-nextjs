@@ -4,15 +4,18 @@ import { useForm } from 'react-hook-form';
 import { jobListApi, jobCategoryApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import SlugField from '@/components/ui/SlugField';
+import ImageUpload from '@/components/ui/ImageUpload';
 import toast from 'react-hot-toast';
 
 interface Props {
   onSuccess?: () => void;
   onCancel?: () => void;
   editId?: string;
+  /** When set (navigated from a Category), that category is preselected. */
+  lockedCategoryId?: string;
 }
 
-export default function JobListForm({ onSuccess, onCancel, editId }: Props = {}) {
+export default function JobListForm({ onSuccess, onCancel, editId, lockedCategoryId }: Props = {}) {
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   const isModal = Boolean(onSuccess ?? onCancel);
@@ -29,6 +32,14 @@ export default function JobListForm({ onSuccess, onCancel, editId }: Props = {})
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
+
+  // When navigated from the Categories page (create flow), pre-select that
+  // category once the category options have loaded.
+  useEffect(() => {
+    if (lockedCategoryId && !isEdit && categories.length) {
+      setValue('job_category_id', lockedCategoryId);
+    }
+  }, [lockedCategoryId, isEdit, categories, setValue]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -87,6 +98,7 @@ export default function JobListForm({ onSuccess, onCancel, editId }: Props = {})
         <div><label className="form-label">Salary</label><input {...register('job_salary')} className="form-input" placeholder="e.g. $50,000 - $70,000" /></div>
       </div>
       <div><label className="form-label">Job Description</label><textarea {...register('job_description')} className="form-textarea min-h-48" placeholder="Write a short description of the role…" /></div>
+      <ImageUpload name="job_image" label="Image" uploadType="image" folder="jobs" value={watch('job_image')} onChange={(url) => setValue('job_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

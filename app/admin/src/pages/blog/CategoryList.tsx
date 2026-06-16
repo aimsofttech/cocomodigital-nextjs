@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -21,6 +22,21 @@ export default function CategoryList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'blog_category_name', label: 'Category Name', sortable: true },
+    {
+      key: 'sub_categories_count', label: 'Sub Categories', render: (row: any) => {
+        const count = typeof row.sub_categories_count === 'number' ? row.sub_categories_count : 0;
+        return (
+          <Link
+            to={`/blog/sub-category?blogCategoryId=${row._id}`}
+            title="View / add sub categories for this category"
+            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-primary-200 bg-primary-50/60 hover:bg-primary-100 transition-colors"
+          >
+            <span className="inline-flex items-center justify-center min-w-[1.375rem] h-5 px-1.5 rounded-full bg-primary-600 text-white text-[10px] font-semibold">{count}</span>
+            <span className="text-xs font-medium text-primary-700">Sub Categories</span>
+          </Link>
+        );
+      },
+    },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

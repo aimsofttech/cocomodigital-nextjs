@@ -5,6 +5,7 @@ const jobListSchema = new mongoose.Schema({
   job_category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'JobCategory', default: null },
   job_title: { type: String, required: true, trim: true },
   job_slug: { type: String, trim: true, unique: true },
+  job_image: { type: String, default: null },
   job_description: { type: String, trim: true },
   job_requirements: { type: String, trim: true },
   job_type: { type: String, trim: true },

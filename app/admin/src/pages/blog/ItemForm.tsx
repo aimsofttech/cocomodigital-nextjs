@@ -5,6 +5,7 @@ import { blogItemApi, blogCategoryApi, blogSubCategoryApi } from '@/services/adm
 import PageHeader from '@/components/ui/PageHeader';
 import ImageUpload from '@/components/ui/ImageUpload';
 import SlugField from '@/components/ui/SlugField';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -12,9 +13,13 @@ interface Props {
   onSuccess?: () => void;
   onCancel?: () => void;
   editId?: string;
+  /** When set (navigated from a Sub Category), preselect this parent category. */
+  lockedCategoryId?: string;
+  /** When set (navigated from a Sub Category), preselect this sub category. */
+  lockedSubCategoryId?: string;
 }
 
-export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
+export default function ItemForm({ onSuccess, onCancel, editId, lockedCategoryId, lockedSubCategoryId }: Props = {}) {
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   const isModal = Boolean(onSuccess ?? onCancel);
@@ -43,6 +48,21 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       blogSubCategoryApi.getAll({ blog_category_id: selectedCategory, limit: 100 }).then(({ data }) => setSubCategories(data.data || []));
     }
   }, [selectedCategory]);
+
+  // When navigated from the Sub Categories page (create flow), pre-select the
+  // parent category once the category options have loaded...
+  useEffect(() => {
+    if (lockedCategoryId && !isEdit && categories.length) {
+      setValue('blog_category_id', lockedCategoryId);
+    }
+  }, [lockedCategoryId, isEdit, categories, setValue]);
+
+  // ...then pre-select the sub category once its options have loaded.
+  useEffect(() => {
+    if (lockedSubCategoryId && !isEdit && subCategories.length) {
+      setValue('blog_sub_category_id', lockedSubCategoryId);
+    }
+  }, [lockedSubCategoryId, isEdit, subCategories, setValue]);
 
   const onSubmit = async (formData: any) => {
     const fd = new FormData();
@@ -76,25 +96,25 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
           </select>
         </div>
       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="form-label">Title <span className="text-red-500">*</span></label>
+          <input {...register('blog_title', { required: 'Required' })} className="form-input" placeholder="Enter blog title" />
+          {errors.blog_title && <p className="form-error">{String(errors.blog_title.message)}</p>}
+        </div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
+      </div>
       <div>
-        <label className="form-label">Title <span className="text-red-500">*</span></label>
-        <input {...register('blog_title', { required: 'Required' })} className="form-input" placeholder="Enter blog title" />
-        {errors.blog_title && <p className="form-error">{String(errors.blog_title.message)}</p>}
+        <label className="form-label">Description</label>
+        <RichTextEditor value={watch('blog_description')} onChange={(html) => setValue('blog_description', html)} placeholder="Type your Description here…" minHeight={260} uploadFolder="blog" />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Item Slug</label><input {...register('blog_item_slug')} className="form-input" placeholder="auto-generated — you can edit" /></div>
-        <div><label className="form-label">Blog Slug</label><input {...register('blog_slug')} className="form-input" placeholder="auto-generated — you can edit" /></div>
-      </div>
-      <div><label className="form-label">Description</label><textarea {...register('blog_description')} className="form-textarea min-h-48" placeholder="Write a short description…" /></div>
       <ImageUpload name="main_image" label="Main Image" uploadType="image" folder="blog" value={watch('main_image')} onChange={(url) => setValue('main_image', url)} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Meta Keywords</label><input {...register('blog_meta_keyword')} className="form-input" placeholder="comma, separated, keywords" /></div>
-        <div><label className="form-label">Meta Description</label><textarea {...register('blog_meta_description')} className="form-textarea" placeholder="Short description for search engines" /></div>
-      </div>
+      <div><label className="form-label">Meta Title</label><input {...register('blog_meta_title')} className="form-input" placeholder="Title for search engines" /></div>
+      <div><label className="form-label">Meta Description</label><textarea {...register('blog_meta_description')} className="form-textarea" placeholder="Short description for search engines" /></div>
+      <div><label className="form-label">Meta Keywords</label><input {...register('blog_meta_keyword')} className="form-input" placeholder="comma, separated, keywords" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
-        <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="0">Draft</option><option value="1">Published</option></select></div>
+        <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel ? onCancel() : navigate('/blog/item')} className="btn-secondary flex-1">Cancel</button>

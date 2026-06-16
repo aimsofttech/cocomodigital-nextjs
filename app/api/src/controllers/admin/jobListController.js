@@ -1,10 +1,23 @@
 const JobList = require('../../models/JobList');
+const JobCategory = require('../../models/JobCategory');
 const createCrudController = require('./crudFactory');
 const { generateSlug, parseCsvOrExcel } = require('../../utils/helpers');
 
 const base = createCrudController(JobList, {
+  imageFields: ['job_image'],
   searchFields: ['job_title', 'job_location', 'job_type'],
   defaultSort: { display_order: 1, createdAt: -1 },
+  parentField: 'job_category_id',
+  // Resolve the job category's name for the list/detail responses. `name` is the
+  // current field; `category_name` is the legacy fallback for migrated rows.
+  lookups: [
+    {
+      localField: 'job_category_id',
+      model: JobCategory,
+      nameField: ['name', 'category_name'],
+      as: 'job_category_name',
+    },
+  ],
 });
 
 const storeWithSlug = async (req, res) => {

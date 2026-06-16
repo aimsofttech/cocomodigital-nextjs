@@ -10,9 +10,11 @@ interface Props {
   onSuccess?: () => void;
   onCancel?: () => void;
   editId?: string;
+  /** When set (navigated from a Category), that parent category is preselected. */
+  lockedCategoryId?: string;
 }
 
-export default function SubCategoryForm({ onSuccess, onCancel, editId }: Props = {}) {
+export default function SubCategoryForm({ onSuccess, onCancel, editId, lockedCategoryId }: Props = {}) {
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   const isModal = Boolean(onSuccess ?? onCancel);
@@ -30,6 +32,14 @@ export default function SubCategoryForm({ onSuccess, onCancel, editId }: Props =
     }
   }, [id]);
 
+  // When navigated from the Categories page (create flow), pre-select that parent
+  // category once the category options have loaded.
+  useEffect(() => {
+    if (lockedCategoryId && !isEdit && categories.length) {
+      setValue('blog_category_id', lockedCategoryId);
+    }
+  }, [lockedCategoryId, isEdit, categories, setValue]);
+
   const onSubmit = async (data: any) => {
     try {
       if (isEdit && id) await blogSubCategoryApi.update(id, data);
@@ -42,25 +52,19 @@ export default function SubCategoryForm({ onSuccess, onCancel, editId }: Props =
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
-        <label className="form-label">Parent Category <span className="text-red-500">*</span></label>
+        <label className="form-label">Category Name <span className="text-red-500">*</span></label>
         <select {...register('blog_category_id', { required: 'Required' })} className="form-select">
           <option value="">Select category</option>
           {categories.map((c: any) => <option key={c._id} value={c._id}>{c.blog_category_name}</option>)}
         </select>
         {errors.blog_category_id && <p className="form-error">{String(errors.blog_category_id.message)}</p>}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="form-label">Sub Category Name <span className="text-red-500">*</span></label>
-          <input {...register('blog_sub_category_name', { required: 'Required' })} className="form-input" placeholder="Enter sub category name" />
-          {errors.blog_sub_category_name && <p className="form-error">{String(errors.blog_sub_category_name.message)}</p>}
-        </div>
-        <div>
-          <label className="form-label">Slug</label>
-          <input {...register('blog_sub_category_slug')} className="form-input" placeholder="auto-generated — you can edit" />
-        </div>
+      <div>
+        <label className="form-label">Sub Category Name <span className="text-red-500">*</span></label>
+        <input {...register('blog_sub_category_name', { required: 'Required' })} className="form-input" placeholder="Enter sub category name" />
+        {errors.blog_sub_category_name && <p className="form-error">{String(errors.blog_sub_category_name.message)}</p>}
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
+      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} name="blog_sub_category_slug" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
