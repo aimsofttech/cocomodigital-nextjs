@@ -140,6 +140,7 @@ export const freeConsultationApi = {
   createCategory: (data: Record<string, any>) => api.post(`${BASE}/free-consultation/categories`, data),
   updateCategory: (id: string, data: Record<string, any>) => api.put(`${BASE}/free-consultation/categories/${id}`, data),
   deleteCategory: (id: string) => api.delete(`${BASE}/free-consultation/categories/${id}`),
+  deleteSubmission: (id: string) => api.delete(`${BASE}/free-consultation/submissions/${id}`),
 };
 
 export const homePageSectionApi = createCrudService('home-page-section');

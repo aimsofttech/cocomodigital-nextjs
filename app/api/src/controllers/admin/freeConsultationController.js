@@ -6,9 +6,15 @@ const indexSubmissions = async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const skip = (page - 1) * limit;
   const search = req.query.search || '';
-  const filter = search
-    ? { $or: [{ name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }] }
-    : {};
+  // The `free_consultation_item` collection also holds legacy service-config
+  // rows (keyed by free_consultation_category_id, no name/email) that are NOT
+  // booking submissions. Restrict to real bookings — those always have a name.
+  const filter = {
+    name: { $exists: true, $nin: [null, ''] },
+    ...(search
+      ? { $or: [{ name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }] }
+      : {}),
+  };
   const [data, total] = await Promise.all([
     FreeConsultationItem.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     FreeConsultationItem.countDocuments(filter),
@@ -44,4 +50,10 @@ const destroy = async (req, res) => {
   res.json({ status: 'success', message: 'Deleted' });
 };
 
-module.exports = { indexCategories, indexSubmissions, show, storeCat, updateCat, destroyCat: destroy };
+const destroySubmission = async (req, res) => {
+  const doc = await FreeConsultationItem.findByIdAndDelete(req.params.id);
+  if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
+  res.json({ status: 'success', message: 'Deleted successfully' });
+};
+
+module.exports = { indexCategories, indexSubmissions, show, storeCat, updateCat, destroyCat: destroy, destroySubmission };

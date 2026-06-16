@@ -7,5 +7,6 @@ router.post('/categories', protect, ctrl.storeCat);
 router.put('/categories/:id', protect, ctrl.updateCat);
 router.delete('/categories/:id', protect, ctrl.destroyCat);
 router.get('/submissions', protect, ctrl.indexSubmissions);
+router.delete('/submissions/:id', protect, ctrl.destroySubmission);
 
 module.exports = router;

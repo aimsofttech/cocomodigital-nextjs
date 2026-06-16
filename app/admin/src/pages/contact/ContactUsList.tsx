@@ -7,6 +7,7 @@ import TableFilter, {
   FilterField, FilterValues, applyClientFilters, isEmptyValue,
 } from '@/components/ui/TableFilter';
 import Modal from '@/components/ui/Modal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -27,6 +28,8 @@ export default function ContactUsList() {
   const [pagination, setPagination] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>(() => { try { return JSON.parse(sessionStorage.getItem(sk) || '{}'); } catch { return {}; } });
 
   const fetchData = () => {
@@ -49,20 +52,31 @@ export default function ContactUsList() {
   const activeCount = FILTER_FIELDS.filter((f) => !isEmptyValue(filterValues[f.key])).length;
   const filteredData = applyClientFilters(data, filterValues, FILTER_FIELDS);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this message?')) return;
-    await contactUsApi.delete(id);
-    toast.success('Deleted');
-    fetchData();
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await contactUsApi.delete(deleteId);
+      toast.success('Deleted');
+      setDeleteId(null);
+      fetchData();
+    } catch {
+      toast.error('Failed to delete');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const columns = [
-    { key: 'name', label: 'Name', sortable: true, render: (row: any) => `${row.first_name || ''} ${row.last_name || ''}`.trim() || '—' },
+    { key: 'name', label: 'Name', sortable: true, render: (row: any) => `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.name || '—' },
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone_no', label: 'Phone', sortable: true },
-    { key: 'company_name', label: 'Company', sortable: true },
-    { key: 'media_budget', label: 'Budget', sortable: true },
-    { key: 'createdAt', label: 'Date', sortable: true, render: (row: any) => new Date(row.createdAt).toLocaleDateString() },
+    { key: 'phone_no', label: 'Phone', sortable: true, render: (row: any) => row.phone_no || row.phone || '—' },
+    { key: 'company_name', label: 'Company', sortable: true, render: (row: any) => row.company_name || '—' },
+    { key: 'media_budget', label: 'Budget', sortable: true, render: (row: any) => row.media_budget || '—' },
+    { key: 'createdAt', label: 'Date', sortable: true, render: (row: any) => {
+      const d = row.createdAt || row.created_at;
+      return d ? new Date(d).toLocaleDateString() : '—';
+    } },
   ];
 
   return (
@@ -75,7 +89,7 @@ export default function ContactUsList() {
           actions={(row: any) => (
             <div className="flex gap-1 justify-end">
               <button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button>
-              <button onClick={() => handleDelete(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button>
+              <button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button>
             </div>
           )}
         />
@@ -94,6 +108,13 @@ export default function ContactUsList() {
           </div>
         )}
       </Modal>
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this contact submission? This action cannot be undone."
+        loading={deleting}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import TableFilter, {
   FilterField, FilterValues, applyClientFilters, isEmptyValue,
 } from '@/components/ui/TableFilter';
 import Modal from '@/components/ui/Modal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -27,6 +28,8 @@ export default function FreeConsultationList() {
   const [pagination, setPagination] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>(() => { try { return JSON.parse(sessionStorage.getItem(sk) || '{}'); } catch { return {}; } });
 
   const fetchData = () => {
@@ -49,21 +52,31 @@ export default function FreeConsultationList() {
   const activeCount = FILTER_FIELDS.filter((f) => !isEmptyValue(filterValues[f.key])).length;
   const filteredData = applyClientFilters(data, filterValues, FILTER_FIELDS);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this submission?')) return;
-    await (freeConsultationApi as any).delete?.(id);
-    toast.success('Deleted');
-    fetchData();
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await freeConsultationApi.deleteSubmission(deleteId);
+      toast.success('Deleted');
+      setDeleteId(null);
+      fetchData();
+    } catch {
+      toast.error('Failed to delete');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const columns = [
-    { key: 'name', label: 'Name', sortable: true, render: (row: any) => `${row.first_name || ''} ${row.last_name || ''}`.trim() || '—' },
+    { key: 'name', label: 'Name', sortable: true, render: (row: any) => row.name || `${row.first_name || ''} ${row.last_name || ''}`.trim() || '—' },
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone_no', label: 'Phone', sortable: true },
-    { key: 'company_name', label: 'Company', sortable: true },
-    { key: 'schedule_date', label: 'Schedule Date', sortable: true, render: (row: any) => row.schedule_date ? new Date(row.schedule_date).toLocaleDateString() : '—' },
-    { key: 'schedule_time', label: 'Time', sortable: true },
-    { key: 'createdAt', label: 'Submitted', sortable: true, render: (row: any) => new Date(row.createdAt).toLocaleDateString() },
+    { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || row.phone_no || '—' },
+    { key: 'company', label: 'Company', sortable: true, render: (row: any) => row.company || row.company_name || '—' },
+    { key: 'budget', label: 'Budget', sortable: true, render: (row: any) => row.budget || '—' },
+    { key: 'createdAt', label: 'Submitted', sortable: true, render: (row: any) => {
+      const d = row.createdAt || row.created_at;
+      return d ? new Date(d).toLocaleDateString() : '—';
+    } },
   ];
 
   return (
@@ -76,7 +89,7 @@ export default function FreeConsultationList() {
           actions={(row: any) => (
             <div className="flex gap-1 justify-end">
               <button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button>
-              <button onClick={() => handleDelete(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button>
+              <button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button>
             </div>
           )}
         />
@@ -85,20 +98,24 @@ export default function FreeConsultationList() {
         {selected && (
           <div className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{`${selected.first_name || ''} ${selected.last_name || ''}`.trim()}</p></div>
-              <div><p className="text-xs text-gray-500">Email</p><p>{selected.email}</p></div>
-              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone_no || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Company</p><p>{selected.company_name || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Schedule Date</p><p>{selected.schedule_date ? new Date(selected.schedule_date).toLocaleDateString() : '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Schedule Time</p><p>{selected.schedule_time || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Timezone</p><p>{selected.timezone || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Duration</p><p>{selected.schedule_duration ? `${selected.schedule_duration} min` : '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.name || `${selected.first_name || ''} ${selected.last_name || ''}`.trim() || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || selected.phone_no || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Company</p><p>{selected.company || selected.company_name || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Budget</p><p>{selected.budget || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : '—'}</p></div>
             </div>
-            {selected.website_link && <div><p className="text-xs text-gray-500">Website</p><a href={selected.website_link} target="_blank" className="text-primary-600 hover:underline text-xs">{selected.website_link}</a></div>}
-            {selected.msg && <div><p className="text-xs text-gray-500 mb-1">Message</p><p className="bg-gray-50 p-3 rounded-lg">{selected.msg}</p></div>}
+            {(selected.message || selected.msg) && <div><p className="text-xs text-gray-500 mb-1">Message</p><p className="bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selected.message || selected.msg}</p></div>}
           </div>
         )}
       </Modal>
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this consultation booking? This action cannot be undone."
+        loading={deleting}
+      />
     </div>
   );
 }

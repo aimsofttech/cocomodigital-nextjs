@@ -7,6 +7,7 @@ import TableFilter, {
   FilterField, FilterValues, applyClientFilters, isEmptyValue,
 } from '@/components/ui/TableFilter';
 import Modal from '@/components/ui/Modal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -27,6 +28,8 @@ export default function FormList() {
   const [pagination, setPagination] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>(() => { try { return JSON.parse(sessionStorage.getItem(sk) || '{}'); } catch { return {}; } });
 
   const fetchData = () => {
@@ -49,11 +52,19 @@ export default function FormList() {
   const activeCount = FILTER_FIELDS.filter((f) => !isEmptyValue(filterValues[f.key])).length;
   const filteredData = applyClientFilters(data, filterValues, FILTER_FIELDS);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this submission?')) return;
-    await marketingFormApi.delete(id);
-    toast.success('Deleted');
-    fetchData();
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await marketingFormApi.delete(deleteId);
+      toast.success('Deleted');
+      setDeleteId(null);
+      fetchData();
+    } catch {
+      toast.error('Failed to delete');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const columns = [
@@ -62,7 +73,10 @@ export default function FormList() {
     { key: 'whatsapp_no', label: 'WhatsApp', sortable: true },
     { key: 'campaign_budget', label: 'Budget', sortable: true },
     { key: 'realease_date', label: 'Release Date', sortable: true },
-    { key: 'createdAt', label: 'Submitted', sortable: true, render: (row: any) => new Date(row.createdAt).toLocaleDateString() },
+    { key: 'createdAt', label: 'Submitted', sortable: true, render: (row: any) => {
+      const d = row.createdAt || row.created_at;
+      return d ? new Date(d).toLocaleDateString() : '—';
+    } },
   ];
 
   return (
@@ -75,7 +89,7 @@ export default function FormList() {
           actions={(row: any) => (
             <div className="flex gap-1 justify-end">
               <button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button>
-              <button onClick={() => handleDelete(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button>
+              <button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button>
             </div>
           )}
         />
@@ -94,6 +108,13 @@ export default function FormList() {
           </div>
         )}
       </Modal>
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this form submission? This action cannot be undone."
+        loading={deleting}
+      />
     </div>
   );
 }
