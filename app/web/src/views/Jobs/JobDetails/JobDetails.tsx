@@ -194,7 +194,7 @@ const JobDetails = () => {
                     {jobDetails?.experience && (
                       <span className="job-details-meta-chip">
                         <FaUserClock aria-hidden="true" />
-                        {`${jobDetails.experience} Years`}
+                        {jobDetails.experience}
                       </span>
                     )}
                     {jobDetails?.job_type && (

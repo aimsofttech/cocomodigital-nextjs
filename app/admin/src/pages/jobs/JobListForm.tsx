@@ -5,7 +5,13 @@ import { jobListApi, jobCategoryApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import SlugField from '@/components/ui/SlugField';
 import ImageUpload from '@/components/ui/ImageUpload';
+import RichTextEditor from '@/components/ui/RichTextEditor';
+import MultiSelect from '@/components/ui/MultiSelect';
 import toast from 'react-hot-toast';
+
+const JOB_TYPE_OPTIONS = ['Full Time', 'Part Time', 'Freelance', 'Contract', 'Internship'].map((v) => ({ value: v, label: v }));
+const WORKPLACE_OPTIONS = ['On-site', 'Remote', 'Hybrid'].map((v) => ({ value: v, label: v }));
+const EXPERIENCE_OPTIONS = ['0 - 1 Year', '1 - 2 Years', '3 - 5 Years', '6 - 8 Years', '9 - 12 Years', '12+ Years', '0 - 12 Years'].map((v) => ({ value: v, label: v }));
 
 interface Props {
   onSuccess?: () => void;
@@ -52,52 +58,41 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
 
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div>
+        <label className="form-label">Job Category</label>
+        <select {...register('job_category_id')} className="form-select">
+          <option value="">Select category</option>
+          {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
+        </select>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="form-label">Job Category</label>
-          <select {...register('job_category_id')} className="form-select">
-            <option value="">Select category</option>
-            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
-          </select>
-        </div>
         <div>
           <label className="form-label">Job Title <span className="text-red-500">*</span></label>
           <input {...register('job_title', { required: 'Required' })} className="form-input" placeholder="e.g. Senior Video Editor" />
           {errors.job_title && <p className="form-error">{String(errors.job_title.message)}</p>}
         </div>
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} name="job_slug" />
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div>
-        <label className="form-label">Job Slug</label>
-        <input {...register('job_slug')} className="form-input" placeholder="auto-generated — you can edit" />
+        <label className="form-label">Job Type</label>
+        <MultiSelect options={JOB_TYPE_OPTIONS} value={watch('job_type')} onChange={(vals) => setValue('job_type', vals, { shouldDirty: true })} placeholder="Select job type(s)" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="form-label">Job Type</label>
-          <select {...register('job_type')} className="form-select">
-            <option value="">Select type</option>
-            <option value="Full Time">Full Time</option>
-            <option value="Part Time">Part Time</option>
-            <option value="Contract">Contract</option>
-            <option value="Internship">Internship</option>
-          </select>
-        </div>
-        <div>
-          <label className="form-label">Workplace Type</label>
-          <select {...register('workplace_type')} className="form-select">
-            <option value="">Select</option>
-            <option value="Remote">Remote</option>
-            <option value="On-site">On-site</option>
-            <option value="Hybrid">Hybrid</option>
-          </select>
-        </div>
-        <div><label className="form-label">Experience</label><input {...register('job_experience')} className="form-input" placeholder="e.g. 2-3 years" /></div>
+      <div>
+        <label className="form-label">Workplace Type</label>
+        <MultiSelect options={WORKPLACE_OPTIONS} value={watch('workplace_type')} onChange={(vals) => setValue('workplace_type', vals, { shouldDirty: true })} placeholder="Select workplace type(s)" />
+      </div>
+      <div>
+        <label className="form-label">Experience</label>
+        <MultiSelect options={EXPERIENCE_OPTIONS} value={watch('experience')} onChange={(vals) => setValue('experience', vals, { shouldDirty: true })} placeholder="Select experience" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Location</label><input {...register('job_location')} className="form-input" placeholder="e.g. Mumbai, India" /></div>
         <div><label className="form-label">Salary</label><input {...register('job_salary')} className="form-input" placeholder="e.g. $50,000 - $70,000" /></div>
       </div>
-      <div><label className="form-label">Job Description</label><textarea {...register('job_description')} className="form-textarea min-h-48" placeholder="Write a short description of the role…" /></div>
+      <div>
+        <label className="form-label">Job Description</label>
+        <RichTextEditor value={watch('job_description')} onChange={(html) => setValue('job_description', html)} placeholder="Type Job Description here…" minHeight={260} uploadFolder="jobs" />
+      </div>
       <ImageUpload name="job_image" label="Image" uploadType="image" folder="jobs" value={watch('job_image')} onChange={(url) => setValue('job_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>

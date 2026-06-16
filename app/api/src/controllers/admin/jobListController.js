@@ -8,8 +8,12 @@ const base = createCrudController(JobList, {
   searchFields: ['job_title', 'job_location', 'job_type'],
   defaultSort: { display_order: 1, createdAt: -1 },
   parentField: 'job_category_id',
-  // Resolve the job category's name for the list/detail responses. `name` is the
-  // current field; `category_name` is the legacy fallback for migrated rows.
+  // Single slug for the listing: generate a unique `job_slug` (the field the
+  // public web app and the admin form use). A manually-edited slug is respected;
+  // otherwise it's derived from the job title. Generated on create and update.
+  slugField: 'job_slug',
+  // Resolve the (single) job category's name for the list/detail responses.
+  // `name` is the current field; `category_name` is the legacy fallback.
   lookups: [
     {
       localField: 'job_category_id',
@@ -19,11 +23,6 @@ const base = createCrudController(JobList, {
     },
   ],
 });
-
-const storeWithSlug = async (req, res) => {
-  if (!req.body.job_slug && req.body.job_title) req.body.job_slug = generateSlug(req.body.job_title);
-  return base.store(req, res);
-};
 
 const bulkUpload = async (req, res) => {
   if (!req.file) return res.status(400).json({ status: 'error', message: 'No file uploaded' });
@@ -36,9 +35,9 @@ const bulkUpload = async (req, res) => {
       const item = await JobList.create({
         job_title: title,
         job_slug: generateSlug(title),
-        job_type: row[1] || '',
+        job_type: row[1] ? [row[1]] : [],
         job_location: row[2] || '',
-        experience: row[3] || '',
+        experience: row[3] ? [row[3]] : [],
         job_description: row[4] || '',
         status: 0,
         user_id: req.user._id,
@@ -51,4 +50,4 @@ const bulkUpload = async (req, res) => {
   }
 };
 
-module.exports = { ...base, store: storeWithSlug, bulkUpload };
+module.exports = { ...base, bulkUpload };
