@@ -78,22 +78,22 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       </div>
       <div>
         <label className="form-label">Title <span className="text-red-500">*</span></label>
-        <input {...register('blog_title', { required: 'Required' })} className="form-input" />
+        <input {...register('blog_title', { required: 'Required' })} className="form-input" placeholder="Enter blog title" />
         {errors.blog_title && <p className="form-error">{String(errors.blog_title.message)}</p>}
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Item Slug</label><input {...register('blog_item_slug')} className="form-input" /></div>
-        <div><label className="form-label">Blog Slug</label><input {...register('blog_slug')} className="form-input" /></div>
+        <div><label className="form-label">Item Slug</label><input {...register('blog_item_slug')} className="form-input" placeholder="auto-generated — you can edit" /></div>
+        <div><label className="form-label">Blog Slug</label><input {...register('blog_slug')} className="form-input" placeholder="auto-generated — you can edit" /></div>
       </div>
-      <div><label className="form-label">Description</label><textarea {...register('blog_description')} className="form-textarea min-h-48" /></div>
+      <div><label className="form-label">Description</label><textarea {...register('blog_description')} className="form-textarea min-h-48" placeholder="Write a short description…" /></div>
       <ImageUpload name="main_image" label="Main Image" uploadType="image" folder="blog" value={watch('main_image')} onChange={(url) => setValue('main_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Meta Keywords</label><input {...register('blog_meta_keyword')} className="form-input" /></div>
-        <div><label className="form-label">Meta Description</label><textarea {...register('blog_meta_description')} className="form-textarea" /></div>
+        <div><label className="form-label">Meta Keywords</label><input {...register('blog_meta_keyword')} className="form-input" placeholder="comma, separated, keywords" /></div>
+        <div><label className="form-label">Meta Description</label><textarea {...register('blog_meta_description')} className="form-textarea" placeholder="Short description for search engines" /></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="0">Draft</option><option value="1">Published</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

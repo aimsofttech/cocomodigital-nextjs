@@ -158,7 +158,7 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
         </div>
       </div>
 
-      <div><label className="form-label">Description</label><textarea {...register('community_program_item_description')} className="form-textarea" rows={4} /></div>
+      <div><label className="form-label">Description</label><textarea {...register('community_program_item_description')} className="form-textarea" rows={4} placeholder="Write a short description…" /></div>
 
       {/* Video: external URL or uploaded file */}
       <div>
@@ -181,7 +181,7 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
         value={watch('community_program_item_video_thumbnail')} onChange={(url) => setValue('community_program_item_video_thumbnail', url)} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

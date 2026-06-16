@@ -38,7 +38,7 @@ export default function PageForm({ onSuccess, onCancel, editId }: Props = {}) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Page Title <span className="text-red-500">*</span></label>
-          <input {...register('page_title', { required: 'Required' })} className="form-input" />
+          <input {...register('page_title', { required: 'Required' })} className="form-input" placeholder="Enter page title" />
           {errors.page_title && <p className="form-error">{String(errors.page_title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
@@ -48,10 +48,10 @@ export default function PageForm({ onSuccess, onCancel, editId }: Props = {}) {
           {errors.page_slug && <p className="form-error">{String(errors.page_slug.message)}</p>}
         </div>
       </div>
-      <div><label className="form-label">Page Content</label><textarea {...register('page_content')} className="form-textarea min-h-48" /></div>
+      <div><label className="form-label">Page Content</label><textarea {...register('page_content')} className="form-textarea min-h-48" placeholder="Write the page content…" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Meta Title</label><input {...register('meta_title')} className="form-input" /></div>
-        <div><label className="form-label">Meta Description</label><input {...register('meta_description')} className="form-input" /></div>
+        <div><label className="form-label">Meta Title</label><input {...register('meta_title')} className="form-input" placeholder="Meta title for SEO" /></div>
+        <div><label className="form-label">Meta Description</label><input {...register('meta_description')} className="form-input" placeholder="Short description for search engines" /></div>
       </div>
       <div>
         <label className="form-label">Status</label>

@@ -66,16 +66,16 @@ export default function FaqForm({ onSuccess, onCancel, editId, lockedItemId }: P
       </div>
       <div>
         <label className="form-label">Question <span className="text-red-500">*</span></label>
-        <input {...register('question', { required: 'Required' })} className="form-input" />
+        <input {...register('question', { required: 'Required' })} className="form-input" placeholder="Enter the question" />
         {errors.question && <p className="form-error">{String(errors.question.message)}</p>}
       </div>
       <div>
         <label className="form-label">Answer <span className="text-red-500">*</span></label>
-        <textarea {...register('answer', { required: 'Required' })} className="form-textarea min-h-28" />
+        <textarea {...register('answer', { required: 'Required' })} className="form-textarea min-h-28" placeholder="Write a short description…" />
         {errors.answer && <p className="form-error">{String(errors.answer.message)}</p>}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

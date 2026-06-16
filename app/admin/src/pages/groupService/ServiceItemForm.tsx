@@ -132,7 +132,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Title <span className="text-red-500">*</span></label>
-          <input {...register('group_service_item_title', { required: 'Required' })} className="form-input" />
+          <input {...register('group_service_item_title', { required: 'Required' })} className="form-input" placeholder="Enter service item title" />
           {errors.group_service_item_title && <p className="form-error">{String(errors.group_service_item_title.message)}</p>}
         </div>
         <SlugField name="group_service_item_slug" register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
@@ -143,7 +143,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
       </div>
       <ImageUpload name="group_service_item_thumbnail" label="Thumbnail" uploadType="image" folder="group-service" value={watch('group_service_item_thumbnail')} onChange={(url) => setValue('group_service_item_thumbnail', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

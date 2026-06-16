@@ -94,7 +94,7 @@ export default function PerformanceModuleForm({ onSuccess, onCancel, editId, loc
       {lockedItemId ? (
         <div>
           <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
-          <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly />
+          <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly placeholder="Marketing Item" />
           <input type="hidden" {...register('marketing_house_item_id')} />
           <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
         </div>
@@ -125,7 +125,7 @@ export default function PerformanceModuleForm({ onSuccess, onCancel, editId, loc
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Title <span className="text-red-500">*</span></label>
-          <input {...register('performance_title', { required: 'Required' })} className="form-input" />
+          <input {...register('performance_title', { required: 'Required' })} className="form-input" placeholder="Enter performance title" />
           {errors.performance_title && <p className="form-error">{String(errors.performance_title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
@@ -146,10 +146,10 @@ export default function PerformanceModuleForm({ onSuccess, onCancel, editId, loc
             value={watch('performance_upload_video_url')} onChange={(url) => setValue('performance_upload_video_url', url)} />
         )}
       </div>
-      <div><label className="form-label">Description</label><textarea {...register('performance_description')} className="form-textarea" /></div>
+      <div><label className="form-label">Description</label><textarea {...register('performance_description')} className="form-textarea" placeholder="Write a short description…" /></div>
       <ImageUpload name="performance_image" label="Performance Image" uploadType="image" folder="marketing-house" value={watch('performance_image')} onChange={(url) => setValue('performance_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

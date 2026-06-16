@@ -50,12 +50,12 @@ export default function ContentCarouselForm({ onSuccess, onCancel, editId }: Pro
         </select>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Carousel Title</label><input {...register('carousel_title')} className="form-input" /></div>
+        <div><label className="form-label">Carousel Title</label><input {...register('carousel_title')} className="form-input" placeholder="Enter carousel title" /></div>
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <ImageUpload name="carousel_image" label="Carousel Image" uploadType="image" folder="marketing-house" value={watch('carousel_image')} onChange={(url) => setValue('carousel_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

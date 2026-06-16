@@ -39,15 +39,15 @@ export default function StaticsForm({ onSuccess, onCancel, editId }: Props = {})
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Title <span className="text-red-500">*</span></label>
-          <input {...register('statics_title', { required: 'Required' })} className="form-input" />
+          <input {...register('statics_title', { required: 'Required' })} className="form-input" placeholder="Enter statics title" />
           {errors.statics_title && <p className="form-error">{String(errors.statics_title.message)}</p>}
         </div>
         <div><label className="form-label">Value</label><input {...register('statics_value')} className="form-input" placeholder="e.g. 100+" /></div>
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <div><label className="form-label">Description</label><textarea {...register('statics_description')} className="form-textarea" /></div>
+      <div><label className="form-label">Description</label><textarea {...register('statics_description')} className="form-textarea" placeholder="Write a short description…" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

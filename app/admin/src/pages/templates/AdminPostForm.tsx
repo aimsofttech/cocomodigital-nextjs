@@ -40,7 +40,7 @@ export default function AdminPostForm({ onSuccess, onCancel, editId }: Props = {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Post Title <span className="text-red-500">*</span></label>
-          <input {...register('post_title', { required: 'Required' })} className="form-input" />
+          <input {...register('post_title', { required: 'Required' })} className="form-input" placeholder="Enter post title" />
           {errors.post_title && <p className="form-error">{String(errors.post_title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
@@ -52,7 +52,7 @@ export default function AdminPostForm({ onSuccess, onCancel, editId }: Props = {
           </select>
         </div>
       </div>
-      <div><label className="form-label">Content</label><textarea {...register('post_content')} className="form-textarea min-h-48" /></div>
+      <div><label className="form-label">Content</label><textarea {...register('post_content')} className="form-textarea min-h-48" placeholder="Write the post content…" /></div>
       <ImageUpload name="post_image" label="Featured Image" uploadType="image" folder="templates" value={watch('post_image')} onChange={(url) => setValue('post_image', url)} />
       <div>
         <label className="form-label">Active Status</label>

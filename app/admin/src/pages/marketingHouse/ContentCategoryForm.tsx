@@ -38,7 +38,7 @@ export default function ContentCategoryForm({ onSuccess, onCancel, editId }: Pro
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Category Name <span className="text-red-500">*</span></label>
-        <input {...register('category_name', { required: 'Required' })} className="form-input" />
+        <input {...register('category_name', { required: 'Required' })} className="form-input" placeholder="Enter category name" />
         {errors.category_name && <p className="form-error">{String(errors.category_name.message)}</p>}
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
@@ -46,7 +46,7 @@ export default function ContentCategoryForm({ onSuccess, onCancel, editId }: Pro
         <div><label className="form-label">Navigate To (URL)</label><input {...register('navigate_to')} className="form-input" placeholder="e.g. /page-path" /></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

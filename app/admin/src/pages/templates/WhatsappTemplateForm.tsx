@@ -38,7 +38,7 @@ export default function WhatsappTemplateForm({ onSuccess, onCancel, editId }: Pr
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Template Name <span className="text-red-500">*</span></label>
-          <input {...register('template_name', { required: 'Required' })} className="form-input" />
+          <input {...register('template_name', { required: 'Required' })} className="form-input" placeholder="Enter template name" />
           {errors.template_name && <p className="form-error">{String(errors.template_name.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />

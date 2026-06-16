@@ -51,14 +51,14 @@ export default function JobListForm({ onSuccess, onCancel, editId }: Props = {})
         </div>
         <div>
           <label className="form-label">Job Title <span className="text-red-500">*</span></label>
-          <input {...register('job_title', { required: 'Required' })} className="form-input" />
+          <input {...register('job_title', { required: 'Required' })} className="form-input" placeholder="e.g. Senior Video Editor" />
           {errors.job_title && <p className="form-error">{String(errors.job_title.message)}</p>}
         </div>
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div>
         <label className="form-label">Job Slug</label>
-        <input {...register('job_slug')} className="form-input" />
+        <input {...register('job_slug')} className="form-input" placeholder="auto-generated — you can edit" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
@@ -83,12 +83,12 @@ export default function JobListForm({ onSuccess, onCancel, editId }: Props = {})
         <div><label className="form-label">Experience</label><input {...register('job_experience')} className="form-input" placeholder="e.g. 2-3 years" /></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Location</label><input {...register('job_location')} className="form-input" /></div>
+        <div><label className="form-label">Location</label><input {...register('job_location')} className="form-input" placeholder="e.g. Mumbai, India" /></div>
         <div><label className="form-label">Salary</label><input {...register('job_salary')} className="form-input" placeholder="e.g. $50,000 - $70,000" /></div>
       </div>
-      <div><label className="form-label">Job Description</label><textarea {...register('job_description')} className="form-textarea min-h-48" /></div>
+      <div><label className="form-label">Job Description</label><textarea {...register('job_description')} className="form-textarea min-h-48" placeholder="Write a short description of the role…" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">
