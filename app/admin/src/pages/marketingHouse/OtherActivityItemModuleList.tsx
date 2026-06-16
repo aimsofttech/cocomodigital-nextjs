@@ -55,6 +55,10 @@ export default function OtherActivityItemModuleList() {
     { key: 'image1', label: 'Image', render: (row: any) => <ImageCell src={row.image1 || row.image2 || row.image3 || row.image4 || row.item_image} alt="activity" /> },
     { key: 'video1', label: 'Video', render: (row: any) => <VideoCell src={row.video1 || row.video2 || row.video3 || row.video4 || row.item_video_url} thumbnail={row.image1 || row.image2 || row.item_image} /> },
     { key: 'item_title', label: 'Title', sortable: true, render: (row: any) => row.item_title || row.title || '—' },
+    { key: 'item_description', label: 'Description', render: (row: any) => {
+      const text = String(row.item_description || row.description || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+      return <span className="text-xs text-gray-600 line-clamp-2 max-w-md min-w-[20rem] block" title={text}>{text || '—'}</span>;
+    } },
     { key: 'other_activity_category_name', label: 'Activity Category', render: (row: any) => row.other_activity_category_name || '—' },
     { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
     { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || '—' },
