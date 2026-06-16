@@ -7,13 +7,14 @@
  * re-fetches the same payload, so flipping back to a tab you
  * already viewed feels just as slow the second time.
  *
- * This wraps an async fetcher with a sessionStorage cache:
+ * This wraps an async fetcher with an in-memory (per-page-load) cache:
  *   - First call hits the network; result is stored under `key`.
  *   - Repeat calls within the TTL return the cached payload
  *     synchronously (well, as a resolved promise) so the tab
  *     content shows instantly.
- *   - Cache lives in sessionStorage (per-tab), so it dies when
- *     the user closes the tab — no stale data across visits.
+ *   - The cache lives in a module-level Map that resets on every page
+ *     reload, so each refresh re-calls the API for fresh data while
+ *     tab switches within one page view stay instant.
  *
  * Backend caching / N+1 fixes are a separate (Anshu) job; this
  * is purely a frontend perceived-speed win.
@@ -26,30 +27,18 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
+// In-memory only: the cache lives in this module-level Map, which is reset
+// every time the page reloads. So tab switches within a single page view are
+// still served from cache (fast), but every page refresh re-calls the API for
+// fresh data — sessionStorage persistence is intentionally NOT used here.
 const memoryCache = new Map<string, CacheEntry<unknown>>();
 
 function readStore<T>(key: string): CacheEntry<T> | null {
-  // Prefer the in-memory hit (cheaper, no JSON parse).
-  if (memoryCache.has(key)) return memoryCache.get(key) as CacheEntry<T>;
-  try {
-    const raw = sessionStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as CacheEntry<T>;
-    memoryCache.set(key, parsed);
-    return parsed;
-  } catch {
-    return null;
-  }
+  return (memoryCache.get(key) as CacheEntry<T>) ?? null;
 }
 
 function writeStore<T>(key: string, payload: CacheEntry<T>): void {
   memoryCache.set(key, payload);
-  try {
-    sessionStorage.setItem(key, JSON.stringify(payload));
-  } catch {
-    // sessionStorage can throw if quota is hit — that's fine,
-    // we still have the in-memory copy for this session.
-  }
 }
 
 /**

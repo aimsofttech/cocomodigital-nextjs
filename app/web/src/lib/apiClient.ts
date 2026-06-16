@@ -20,8 +20,11 @@
  *    ISR / SSG / SSR behaviour is preserved exactly.
  */
 
-/** Default cache lifetime for content fetches (seconds). */
-const DEFAULT_REVALIDATE = 5 * 60;
+/** Default cache lifetime for content fetches (seconds).
+ *  0 = no caching → every request (and every page refresh) re-fetches
+ *  fresh data from the API. Callers can still opt into caching by passing
+ *  an explicit `revalidate` > 0. */
+const DEFAULT_REVALIDATE = 0;
 
 /** Resolved API base URL, trailing slash stripped. */
 export const API_BASE_URL: string = (
@@ -84,9 +87,13 @@ export async function apiGet<T>(
 
   let res: Response;
   try {
-    res = await fetch(url, {
-      next: { revalidate: opts.revalidate ?? DEFAULT_REVALIDATE },
-    });
+    // revalidate 0 → opt out of the Next.js data cache entirely (no-store),
+    // so the data is fresh on every request/refresh. >0 keeps ISR caching.
+    const revalidate = opts.revalidate ?? DEFAULT_REVALIDATE;
+    res = await fetch(
+      url,
+      revalidate > 0 ? { next: { revalidate } } : { cache: "no-store" },
+    );
   } catch (err) {
     console.error(`[api] GET ${path} network error:`, err);
     return null;

@@ -28100,6 +28100,8 @@
 
     -webkit-tap-highlight-color: transparent;
 
+    cursor: pointer !important;
+
     /* motion-tap (100ms) for transform + shadow so the active state
   
        fires the moment the user clicks. Color crossfade can be a

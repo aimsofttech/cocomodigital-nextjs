@@ -133,10 +133,7 @@ const OtherActivities = ({ itemData }) => {
             {itemData?.other_activity_category?.map((item, index) => (
               <button
                 key={index}
-                className={`inline-flex items-center justify-center rounded-md border border-transparent font-medium transition focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 mr-2 other-activity-header-btn ${activeCategory?.id === item?.id
-                  ? "border-white bg-transparent text-white hover:bg-white hover:text-black"
-                  : "border-neutral-400 bg-transparent text-neutral-700 hover:bg-neutral-100"
-                  }`}
+                className={`inline-flex items-center justify-center cursor-pointer other-activity-header-btn ${activeCategory?.id === item?.id ? 'active' : ''}`}
                 onClick={() => {
                   setActiveCategory(item);
                 }}
