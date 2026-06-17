@@ -95,7 +95,7 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
     if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
     const fd = new FormData();
     fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['marketing_house_other_activity_category_id', 'item_title', 'item_description', 'slug', 'display_order', 'status'].forEach((k) => {
+    ['marketing_house_other_activity_category_id', 'title', 'description', 'slug', 'display_order', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
     // Up to 4 image (uploaded) + video (URL) pairs — always send (empty allowed)
@@ -165,12 +165,12 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Item Title <span className="text-red-500">*</span></label>
-          <input {...register('item_title', { required: 'Required' })} className="form-input" placeholder="Enter item title" />
-          {errors.item_title && <p className="form-error">{String(errors.item_title.message)}</p>}
+          <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter item title" />
+          {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <div><label className="form-label">Description</label><textarea {...register('item_description')} className="form-textarea" placeholder="Write a short description…" /></div>
+      <div><label className="form-label">Description</label><textarea {...register('description')} className="form-textarea" placeholder="Write a short description…" /></div>
       {/* Up to 4 images (uploaded) each paired with an optional video link */}
       {[1, 2, 3, 4].map((n) => (
         <div key={n} className="grid grid-cols-1 sm:grid-cols-2 gap-4">

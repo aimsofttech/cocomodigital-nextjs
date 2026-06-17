@@ -82,19 +82,29 @@ const getSingleMarketingHouse = async (req, res) => {
     Faq.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 }),
   ]);
 
+  const mapOtherActivityItem = (i) => ({
+    ...i.toObject(),
+    image: buildUrl(i.image),
+    image1: buildUrl(i.image1),
+    image2: buildUrl(i.image2),
+    image3: buildUrl(i.image3),
+    image4: buildUrl(i.image4),
+  });
+
   const otherActivityData = [];
+  const seenActivityItemIds = new Set();
   for (const cat of otherActivityCats) {
     const catItems = await MarketingHouseOtherActivityItem.find({ marketing_house_item_id: { $in: itemIds }, marketing_house_other_activity_category_id: { $in: idVariants(cat._id) }, status: 1 }).sort({ display_order: 1 });
-    otherActivityData.push({
-      ...cat.toObject(),
-      items: catItems.map((i) => ({
-        ...i.toObject(),
-        image1: buildUrl(i.image1),
-        image2: buildUrl(i.image2),
-        image3: buildUrl(i.image3),
-        image4: buildUrl(i.image4),
-      })),
-    });
+    catItems.forEach((i) => seenActivityItemIds.add(String(i._id)));
+    otherActivityData.push({ ...cat.toObject(), items: catItems.map(mapOtherActivityItem) });
+  }
+  // The activity category is optional in admin, so an item can exist without a
+  // category link. Such items would otherwise be dropped from every tab — surface
+  // them under the first category so they still render on the web.
+  if (otherActivityData.length) {
+    const allItems = await MarketingHouseOtherActivityItem.find({ marketing_house_item_id: { $in: itemIds }, status: 1 }).sort({ display_order: 1 });
+    const orphanItems = allItems.filter((i) => !seenActivityItemIds.has(String(i._id)));
+    if (orphanItems.length) otherActivityData[0].items.push(...orphanItems.map(mapOtherActivityItem));
   }
 
   const contentData = [];
@@ -116,8 +126,8 @@ const getSingleMarketingHouse = async (req, res) => {
       images: images.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
       statics,
       performances: performances.map((p) => ({ ...p.toObject(), performance_image: buildUrl(p.performance_image) })),
-      pre_launch: preLaunch.map((p) => ({ ...p.toObject(), activity_image: buildUrl(p.activity_image) })),
-      idea_strategy: ideaStrategy.map((i) => ({ ...i.toObject(), idea_image: buildUrl(i.idea_image) })),
+      pre_launch: preLaunch.map((p) => ({ ...p.toObject(), image: buildUrl(p.image) })),
+      idea_strategy: ideaStrategy.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
       other_activities: otherActivityData,
       content_created: contentData,
       carousels: carousels.map((c) => ({ ...c.toObject(), carousel_image: buildUrl(c.carousel_image) })),
@@ -130,7 +140,7 @@ const getSingleMarketingHouse = async (req, res) => {
 const getMarketingOtherActivityItem = async (req, res) => {
   const { marketing_house_item_id } = req.query;
   const items = await MarketingHouseOtherActivityItem.find({ marketing_house_item_id, status: 1 }).sort({ display_order: 1 });
-  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), item_image: buildUrl(i.item_image) })) });
+  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })) });
 };
 
 const getMarketingContinuityProgramItem = async (req, res) => {

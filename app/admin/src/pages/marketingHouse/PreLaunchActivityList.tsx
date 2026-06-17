@@ -44,8 +44,8 @@ export default function PreLaunchActivityList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'activity_image', label: 'Image', render: (row: any) => <ImageCell src={row.activity_image || row.image} alt={row.activity_title} /> },
-    { key: 'activity_title', label: 'Title', sortable: true, render: (row: any) => row.activity_title || row.title || '—' },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} alt={row.title} /> },
+    { key: 'title', label: 'Title', sortable: true, render: (row: any) => row.title || '—' },
     { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || '—' },
     { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || '—' },
     { key: 'display_order', label: 'Order', sortable: true },

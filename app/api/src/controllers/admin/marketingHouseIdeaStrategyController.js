@@ -4,8 +4,8 @@ const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const createCrudController = require('./crudFactory');
 
 module.exports = createCrudController(MarketingHouseIdeaStrategyPlanning, {
-  imageFields: ['idea_image'],
-  searchFields: ['idea_title', 'title'],
+  imageFields: ['image'],
+  searchFields: ['title'],
   defaultSort: { display_order: 1 },
   parentField: 'marketing_house_item_id',
   // Resolve the related item/category into readable names (highlight → item →

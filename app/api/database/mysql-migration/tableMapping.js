@@ -203,9 +203,9 @@ const TABLE_MAP = {
     model: 'MarketingHousePreLaunchActivity',
     order: 22,
     fields: {
-      title:       'activity_title',
-      description: 'activity_description',
-      image:       'activity_image',
+      title:       'title',
+      description: 'description',
+      image:       'image',
     },
     statusField: 'status',
     foreignKeys: {
@@ -220,9 +220,9 @@ const TABLE_MAP = {
     model: 'MarketingHouseIdeaStrategyPlanning',
     order: 22,
     fields: {
-      title:       'idea_title',
-      description: 'idea_description',
-      image:       'idea_image',
+      title:       'title',
+      description: 'description',
+      image:       'image',
     },
     statusField: 'status',
     foreignKeys: {
@@ -249,10 +249,10 @@ const TABLE_MAP = {
     model: 'MarketingHouseOtherActivityItem',
     order: 24,
     fields: {
-      title:            'item_title',
-      description:      'item_description',
-      image1:           'item_image',
-      // image2..image4 — map to same item_image (only first image kept; extras dropped)
+      title:            'title',
+      description:      'description',
+      image1:           'image',
+      // image2..image4 — map to same image (only first image kept; extras dropped)
     },
     statusField: 'status',
     foreignKeys: {

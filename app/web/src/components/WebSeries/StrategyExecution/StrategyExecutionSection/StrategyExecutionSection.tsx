@@ -77,7 +77,7 @@ const StrategyExecutionSection = ({ data, index }) => {
               <Image
                 className="pre-launched-activity-img-wrapper-img w-full h-auto"
                 src={data?.image || dummyImage}
-                alt={data?.title}
+                alt={data?.title || "Strategy execution activity"}
                 width={600}
                 height={400}
                 style={{ width: "100%", height: "auto" }}

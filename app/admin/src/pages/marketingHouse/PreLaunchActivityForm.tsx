@@ -68,7 +68,7 @@ export default function PreLaunchActivityForm({ onSuccess, onCancel, editId, loc
     if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
     const fd = new FormData();
     fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['activity_title', 'activity_description', 'activity_image', 'slug', 'display_order', 'status'].forEach((k) => {
+    ['title', 'description', 'image', 'slug', 'display_order', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
     try {
@@ -115,13 +115,13 @@ export default function PreLaunchActivityForm({ onSuccess, onCancel, editId, loc
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Activity Title <span className="text-red-500">*</span></label>
-          <input {...register('activity_title', { required: 'Required' })} className="form-input" placeholder="Enter activity title" />
-          {errors.activity_title && <p className="form-error">{String(errors.activity_title.message)}</p>}
+          <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter activity title" />
+          {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <div><label className="form-label">Description</label><textarea {...register('activity_description')} className="form-textarea" placeholder="Write a short description…" /></div>
-      <ImageUpload name="activity_image" label="Activity Image" uploadType="image" folder="marketing-house" value={watch('activity_image')} onChange={(url) => setValue('activity_image', url)} />
+      <div><label className="form-label">Description</label><textarea {...register('description')} className="form-textarea" placeholder="Write a short description…" /></div>
+      <ImageUpload name="image" label="Activity Image" uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

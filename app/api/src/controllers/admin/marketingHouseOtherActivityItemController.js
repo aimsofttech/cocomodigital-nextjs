@@ -7,9 +7,9 @@ const { getYoutubeVideoId } = require('../../utils/s3Upload');
 
 const base = createCrudController(MarketingHouseOtherActivityItem, {
   // Up to 4 uploaded images: build S3 URLs on read; reconcile/delete from S3 on
-  // replace/delete. (`item_image` kept for any legacy single-image records.)
-  imageFields: ['item_image', 'image1', 'image2', 'image3', 'image4'],
-  searchFields: ['item_title', 'title'],
+  // replace/delete. (`image` kept for any legacy single-image records.)
+  imageFields: ['image', 'image1', 'image2', 'image3', 'image4'],
+  searchFields: ['title'],
   defaultSort: { display_order: 1 },
   // Scope the listing by the marketing item and/or the linked activity category.
   // Either can be passed as a query param; the factory matches both string and

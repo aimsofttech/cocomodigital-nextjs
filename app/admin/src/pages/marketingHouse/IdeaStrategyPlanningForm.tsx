@@ -66,7 +66,7 @@ export default function IdeaStrategyPlanningForm({ onSuccess, onCancel, editId, 
     if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
     const fd = new FormData();
     fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['idea_title', 'idea_description', 'idea_image', 'slug', 'display_order', 'status'].forEach((k) => {
+    ['title', 'description', 'image', 'slug', 'display_order', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
     try {
@@ -113,16 +113,16 @@ export default function IdeaStrategyPlanningForm({ onSuccess, onCancel, editId, 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Title <span className="text-red-500">*</span></label>
-          <input {...register('idea_title', { required: 'Required' })} className="form-input" placeholder="Enter title" />
-          {errors.idea_title && <p className="form-error">{String(errors.idea_title.message)}</p>}
+          <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter title" />
+          {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
       <div>
         <label className="form-label">Description</label>
-        <RichTextEditor value={watch('idea_description')} onChange={(html) => setValue('idea_description', html)} placeholder="Describe the idea / strategy…" minHeight={220} />
+        <RichTextEditor value={watch('description')} onChange={(html) => setValue('description', html)} placeholder="Describe the idea / strategy…" minHeight={220} />
       </div>
-      <ImageUpload name="idea_image" label="Image" uploadType="image" folder="marketing-house" value={watch('idea_image')} onChange={(url) => setValue('idea_image', url)} />
+      <ImageUpload name="image" label="Image" uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

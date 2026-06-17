@@ -594,14 +594,14 @@ const adaptMarketingDetail = (d: any) => {
       marketing_house_item_id: i.marketing_house_item_id,
       title: i.title,
       description: i.description,
-      image: buildImg(i.image || i.idea_image),
+      image: buildImg(i.image),
     })),
     pre_launch_activity: arr<any>(d.pre_launch).map((p) => ({
       id: p._id,
       marketing_house_item_id: p.marketing_house_item_id,
-      title: p.title ?? p.activity_title,
-      description: p.description ?? p.activity_description,
-      image: buildImg(p.activity_image || p.image),
+      title: p.title,
+      description: p.description,
+      image: buildImg(p.image),
     })),
     /* CampaignPerformance rows */
     performance: arr<any>(d.performances).map((p) => ({
@@ -958,19 +958,24 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
          own doc carrying the shared title/description. */
       const docs: any[] = [];
       for (const it of arr<any>(cat?.items)) {
-        const pairs = [
+        let pairs = [
           { image: it.image1, video: it.video1 },
           { image: it.image2, video: it.video2 },
           { image: it.image3, video: it.video3 },
           { image: it.image4, video: it.video4 },
         ].filter((m) => m.image || m.video);
+        // Records created via the single-image form carry `image`/`video_url`
+        // instead of the image1..4/video1..4 pairs — fall back to those.
+        if (!pairs.length && (it.image || it.video_url)) {
+          pairs = [{ image: it.image, video: it.video_url }];
+        }
+        // Still surface text-only items (no media yet) so they're not dropped.
+        if (!pairs.length) pairs = [{ image: "", video: "" }];
         for (const m of pairs) {
           docs.push({
             id: it._id,
-            // Legacy rows store title/description; records created via the admin
-            // form store item_title/item_description. Fall back so both display.
-            title: it.title || it.item_title,
-            description: it.description || it.item_description,
+            title: it.title,
+            description: it.description,
             legacyImageUrl: buildImg(m.image),
             video_url: m.video || "",
           });
