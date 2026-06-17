@@ -59,6 +59,12 @@ export default function PerformanceModuleList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <PerformanceModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Performance' : 'Add Performance'}
+      csv={{
+        api: marketingHousePerformanceApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'performance',
+      }}
       modalSize="xl" onRefresh={fetchAll} />
   );
 }

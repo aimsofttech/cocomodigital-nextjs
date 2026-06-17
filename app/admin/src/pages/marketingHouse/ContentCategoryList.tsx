@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -6,6 +7,7 @@ import { marketingHouseContentCategoryApi } from '@/services/adminApi';
 import ContentCategoryForm from './ContentCategoryForm';
 
 export default function ContentCategoryList() {
+  const { itemId } = useParams();
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseContentCategoryApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
@@ -32,6 +34,12 @@ export default function ContentCategoryList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ContentCategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Category' : 'Add Content Category'}
+      csv={{
+        api: marketingHouseContentCategoryApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'content-categories',
+      }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

@@ -10,4 +10,6 @@ router.post('/', protect, upload.single('category_image'), ctrl.store);
 router.put('/:id', protect, upload.single('category_image'), ctrl.update);
 router.delete('/:id', protect, ctrl.destroy);
 
+require('./_csvRoutes')(router, ctrl);
+
 module.exports = router;

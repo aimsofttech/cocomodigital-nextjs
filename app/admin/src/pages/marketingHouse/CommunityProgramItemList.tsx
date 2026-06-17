@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,6 +8,7 @@ import { marketingHouseCommunityProgramItemApi } from '@/services/adminApi';
 import CommunityProgramItemForm from './CommunityProgramItemForm';
 
 export default function CommunityProgramItemList() {
+  const { itemId } = useParams();
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseCommunityProgramItemApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
@@ -34,6 +36,12 @@ export default function CommunityProgramItemList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <CommunityProgramItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Community Program Item' : 'Add Community Program Item'}
+      csv={{
+        api: marketingHouseCommunityProgramItemApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'community-program-items',
+      }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

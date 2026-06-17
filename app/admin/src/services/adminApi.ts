@@ -18,6 +18,12 @@ export const createCrudService = (endpoint: string) => ({
     }),
   delete: (id: string) =>
     api.delete(`${BASE}/${endpoint}/${id}`),
+  // Bulk CSV/XLSX export (download) and create-only import. Available on every
+  // module built from createCrudController on the API side.
+  exportCsv: (params?: Record<string, any>) =>
+    api.get(`${BASE}/${endpoint}/export/csv`, { params, responseType: 'blob' }),
+  importCsv: (data: FormData) =>
+    api.post(`${BASE}/${endpoint}/import/csv`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
 });
 
 // Specific services

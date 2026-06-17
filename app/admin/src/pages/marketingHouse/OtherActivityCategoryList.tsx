@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -6,6 +7,7 @@ import { marketingHouseOtherActivityCategoryApi } from '@/services/adminApi';
 import OtherActivityCategoryForm from './OtherActivityCategoryForm';
 
 export default function OtherActivityCategoryList() {
+  const { itemId } = useParams();
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseOtherActivityCategoryApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
@@ -31,6 +33,12 @@ export default function OtherActivityCategoryList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityCategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Category' : 'Add Add-on Activities Category'}
+      csv={{
+        api: marketingHouseOtherActivityCategoryApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'other-activity-categories',
+      }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

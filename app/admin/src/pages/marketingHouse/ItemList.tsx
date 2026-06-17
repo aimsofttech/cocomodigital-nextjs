@@ -148,6 +148,7 @@ export default function ItemList() {
       renderExpanded={renderExpanded}
       renderModal={({ id, onSuccess, onCancel }) => <ItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Item' : 'Add Marketing Item'}
+      csv={{ api: marketingHouseItemApi, filename: 'marketing-items' }}
       modalSize="2xl" onRefresh={fetchAll} />
   );
 }

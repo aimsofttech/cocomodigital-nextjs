@@ -12,4 +12,6 @@ router.put('/:id', protect, upload.single('item_image'), ctrl.update);
 router.delete('/:id', protect, ctrl.destroy);
 router.post('/bulk-upload', protect, bulkUpload.single('file'), ctrl.bulkUpload);
 
+require('./_csvRoutes')(router, ctrl);
+
 module.exports = router;

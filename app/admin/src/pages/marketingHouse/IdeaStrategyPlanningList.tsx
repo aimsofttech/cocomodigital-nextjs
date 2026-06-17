@@ -58,6 +58,12 @@ export default function IdeaStrategyPlanningList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <IdeaStrategyPlanningForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Idea Strategy Planning' : 'Add Idea Strategy Planning'}
+      csv={{
+        api: marketingHouseIdeaStrategyApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'idea-strategy-planning',
+      }}
       modalSize="xl" onRefresh={fetchAll} />
   );
 }

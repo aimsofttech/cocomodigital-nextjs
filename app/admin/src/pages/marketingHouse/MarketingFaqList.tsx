@@ -68,6 +68,12 @@ export default function MarketingFaqList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <MarketingFaqForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit FAQ' : 'Add FAQ'}
+      csv={{
+        api: marketingHouseFaqApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'faqs',
+      }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

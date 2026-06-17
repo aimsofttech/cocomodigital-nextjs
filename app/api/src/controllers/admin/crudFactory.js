@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { buildS3Url, deleteManyFromS3 } = require('../../utils/s3Upload');
 const { paginateQuery, generateSlug } = require('../../utils/helpers');
+const { recordsToCsv, fileToRecords, coerce, OMIT_IMPORT } = require('../../utils/csv');
 
 // Normalise a media field value (string | array | null) into an array of values.
 const toMediaArray = (val) => {
@@ -287,6 +288,87 @@ const createCrudController = (Model, options = {}) => {
 
       await doc.deleteOne();
       res.json({ status: 'success', message: 'Deleted successfully' });
+    },
+
+    // Export all matching records (respecting parent scope + status/search) as a
+    // CSV download. Raw stored values are written so the file round-trips through
+    // `importCsv` unchanged. Mirrors `index`'s filter logic, minus pagination.
+    exportCsv: async (req, res) => {
+      const filter = { ...baseFilter };
+      const parentFields = Array.isArray(parentField) ? parentField : (parentField ? [parentField] : []);
+      for (const pf of parentFields) {
+        const parentId = req.query[pf] || req.params[pf];
+        if (parentId === undefined || parentId === null || parentId === '') continue;
+        const pid = String(parentId);
+        filter[pf] = mongoose.Types.ObjectId.isValid(pid)
+          ? { $in: [pid, new mongoose.Types.ObjectId(pid)] }
+          : pid;
+      }
+      if (req.query.status !== undefined && req.query.status !== '') filter.status = parseInt(req.query.status);
+      if (req.query.search && searchFields.length) {
+        filter.$or = searchFields.map((f) => ({ [f]: { $regex: req.query.search, $options: 'i' } }));
+      }
+      const docs = await Model.find(filter).sort(defaultSort).lean();
+      const records = docs.map(stripInternal);
+      const csv = recordsToCsv(records);
+      const name = (Model.collection && Model.collection.collectionName) || 'export';
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${name}.csv"`);
+      // Prepend a BOM so Excel opens UTF-8 correctly.
+      res.send('﻿' + csv);
+    },
+
+    // Bulk-create records from an uploaded CSV/XLSX file. Create-only: identity
+    // and audit columns are ignored, every row becomes a new document. Fields
+    // present on the request body (e.g. a parent id from an item-scoped list)
+    // are injected into rows that don't already supply them.
+    importCsv: async (req, res) => {
+      if (!req.file) return res.status(400).json({ status: 'error', message: 'No file uploaded' });
+      let records;
+      try {
+        records = fileToRecords(req.file);
+      } catch (err) {
+        return res.status(400).json({ status: 'error', message: `Could not parse file: ${err.message}` });
+      }
+      if (!records.length) return res.status(400).json({ status: 'error', message: 'No data rows found in file' });
+
+      // Scope/default fields supplied alongside the upload. Row values win; these
+      // only fill columns the row leaves blank.
+      const injected = {};
+      for (const [k, v] of Object.entries(req.body || {})) {
+        if (k === 'file' || v === undefined || v === '' || v === null) continue;
+        injected[k] = v;
+      }
+
+      const errors = [];
+      let created = 0;
+      for (let i = 0; i < records.length; i++) {
+        try {
+          const body = {};
+          for (const [k, v] of Object.entries(records[i])) {
+            if (OMIT_IMPORT.has(k)) continue;
+            const val = coerce(v);
+            if (val === '' || val === null || val === undefined) continue; // let schema defaults apply
+            body[k] = val;
+          }
+          for (const [k, v] of Object.entries(injected)) {
+            if (body[k] === undefined) body[k] = v;
+          }
+          body.user_id = req.user._id;
+          if (slug) await applySlug(Model, body, slugSource, null, slugField);
+          await Model.create(body);
+          created += 1;
+        } catch (err) {
+          // +2 maps the array index to the spreadsheet row (1-based, +1 header).
+          errors.push({ row: i + 2, message: err.message });
+        }
+      }
+
+      res.status(created ? 201 : 400).json({
+        status: created ? 'success' : 'error',
+        message: `${created} record(s) imported${errors.length ? `, ${errors.length} failed` : ''}`,
+        data: { created, failed: errors.length, total: records.length, errors: errors.slice(0, 50) },
+      });
     },
   };
 };

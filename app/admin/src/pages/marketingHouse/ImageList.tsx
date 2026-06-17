@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,6 +8,7 @@ import { marketingHouseImageApi } from '@/services/adminApi';
 import ImageForm from './ImageForm';
 
 export default function ImageList() {
+  const { itemId } = useParams();
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHouseImageApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
@@ -33,6 +35,12 @@ export default function ImageList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ImageForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Image' : 'Add Marketing Image'}
+      csv={{
+        api: marketingHouseImageApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'marketing-images',
+      }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

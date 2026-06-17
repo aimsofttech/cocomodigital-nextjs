@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { useItemScopedCrud } from '@/hooks/useItemScopedCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -7,6 +8,7 @@ import { marketingHousePreLaunchApi } from '@/services/adminApi';
 import PreLaunchForm from './PreLaunchForm';
 
 export default function PreLaunchList() {
+  const { itemId } = useParams();
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useItemScopedCrud(marketingHousePreLaunchApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
@@ -34,6 +36,12 @@ export default function PreLaunchList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <PreLaunchForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Pre-Launch Activity' : 'Add Pre-Launch Activity'}
+      csv={{
+        api: marketingHousePreLaunchApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'pre-launch',
+      }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

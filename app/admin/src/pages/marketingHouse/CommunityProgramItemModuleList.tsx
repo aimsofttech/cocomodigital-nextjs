@@ -66,6 +66,12 @@ export default function CommunityProgramItemModuleList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <CommunityProgramItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Continuity Item' : 'Add Continuity Item'}
+      csv={{
+        api: marketingHouseCommunityProgramItemApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'community-program-items',
+      }}
       modalSize="xl" onRefresh={fetchAll} />
   );
 }

@@ -56,6 +56,12 @@ export default function ContentCategoryModuleList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <ContentCategoryModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Category' : 'Add Content Category'}
+      csv={{
+        api: marketingHouseContentCategoryApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'content-categories',
+      }}
       modalSize="xl" onRefresh={fetchAll} />
   );
 }

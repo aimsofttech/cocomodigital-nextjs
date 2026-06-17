@@ -71,6 +71,12 @@ export default function HighlightsList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <HighlightsForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Highlight' : 'Add Highlight'}
+      csv={{
+        api: marketingHouseStaticsApi,
+        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
+        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        filename: 'highlights',
+      }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }

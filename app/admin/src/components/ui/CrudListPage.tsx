@@ -12,6 +12,7 @@ import TableFilter, {
   extractServerParams,
   isEmptyValue,
 } from './TableFilter';
+import CsvActions, { CsvConfig } from './CsvActions';
 
 interface Breadcrumb { label: string; path?: string; }
 
@@ -52,6 +53,8 @@ interface CrudListPageProps<T = any> {
   onRefresh?: () => void;
   /** When provided, each row gets an expand toggle revealing this content. */
   renderExpanded?: (row: T) => React.ReactNode;
+  /** When provided, Export/Import (CSV) buttons appear in the header. */
+  csv?: CsvConfig;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -65,7 +68,7 @@ export default function CrudListPage<T extends { _id?: string }>({
   loading, submitting, pagination, onPageChange, onSearch, onDelete,
   extraActions, rowActions, disableAdd, disableDelete, disableEdit,
   filterFields, onServerFilterChange,
-  renderModal, modalTitle, modalSize = 'lg', onRefresh, renderExpanded,
+  renderModal, modalTitle, modalSize = 'lg', onRefresh, renderExpanded, csv,
 }: CrudListPageProps<T>) {
   const { pathname } = useLocation();
   const sessionKey = getSessionKey(pathname);
@@ -211,6 +214,12 @@ export default function CrudListPage<T extends { _id?: string }>({
         actions={
           <div className="flex items-center gap-2">
             {extraActions}
+            {csv && (
+              <CsvActions
+                {...csv}
+                onImported={() => { csv.onImported?.(); onRefresh?.(); }}
+              />
+            )}
             {!disableAdd && (renderModal ? (
               <button
                 type="button"

@@ -32,6 +32,7 @@ export default function ProjectList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ProjectForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Project' : 'Add Marketing Project'}
+      csv={{ api: marketingHouseProjectApi, filename: 'marketing-projects' }}
       modalSize="lg" onRefresh={fetchAll} />
   );
 }
