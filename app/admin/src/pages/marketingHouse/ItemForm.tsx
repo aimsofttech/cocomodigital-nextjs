@@ -63,7 +63,22 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
 
   const onSubmit = async (formData: any) => {
     const fd = new FormData();
-    Object.entries(formData).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== '') fd.append(k, String(v)); });
+    // Numeric / required / managed fields: never send these as an empty string
+    // (would cast-error or fail validation). They always carry a value anyway.
+    const keepOnlyIfFilled = new Set(['display_order', 'status', 'marketing_house_category_id']);
+    Object.entries(formData).forEach(([k, v]) => {
+      // Never stringify objects/arrays into "[object Object]" — skip them.
+      if (v !== null && typeof v === 'object') return;
+      const isEmpty = v === undefined || v === null || v === '';
+      if (isEmpty) {
+        // On EDIT, forward empty strings so cleared fields (e.g. a removed Client
+        // Requirement) are actually unset through the API. On CREATE, skip empties
+        // so schema defaults apply. Always skip numeric/required fields.
+        if (isEdit && !keepOnlyIfFilled.has(k)) fd.append(k, '');
+        return;
+      }
+      fd.append(k, String(v));
+    });
     try {
       if (isEdit && id) await marketingHouseItemApi.update(id, fd); else await marketingHouseItemApi.create(fd);
       toast.success(isEdit ? 'Updated' : 'Created');
