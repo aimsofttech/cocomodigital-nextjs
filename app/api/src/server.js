@@ -41,6 +41,7 @@ const adminCreativeFinalOutputRoutes = require('./routes/admin/creativeHouseFina
 const adminCreativeProjectRoutes = require('./routes/admin/creativeHouseProject');
 const adminCreativeWizardRoutes = require('./routes/admin/creativeHouseWizard');
 const adminMarketingWizardRoutes = require('./routes/admin/marketingHouseWizard');
+const adminMarketingBulkUploadRoutes = require('./routes/admin/marketingHouseBulkUpload');
 const adminDevHouseCategoryRoutes = require('./routes/admin/developmentHouseCategory');
 const adminDevHouseItemRoutes = require('./routes/admin/developmentHouseItem');
 const adminGroupTopBannerRoutes = require('./routes/admin/groupTopBanner');
@@ -158,6 +159,7 @@ app.use(`${adminBase}/marketing-house/faq`, adminMarketingFaqRoutes);
 app.use(`${adminBase}/marketing-house/project`, adminMarketingProjectRoutes);
 app.use(`${adminBase}/marketing-house/form`, adminMarketingFormRoutes);
 app.use(`${adminBase}/marketing-house/wizard`, adminMarketingWizardRoutes);
+app.use(`${adminBase}/marketing-house/bulk-upload`, adminMarketingBulkUploadRoutes);
 app.use(`${adminBase}/creative-house/category`, adminCreativeCategoryRoutes);
 app.use(`${adminBase}/creative-house/item`, adminCreativeItemRoutes);
 app.use(`${adminBase}/creative-house/approach`, adminCreativeApproachRoutes);

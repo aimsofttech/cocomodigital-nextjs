@@ -64,6 +64,22 @@ export const marketingHouseCommunityProgramItemApi = {
 };
 export const marketingHouseProjectApi = createCrudService('marketing-house/project');
 export const marketingHouseFaqApi = createCrudService('marketing-house/faq');
+
+// Bulk upload — create many complete Marketing House records (item + all related
+// sections) from a single CSV/XLSX file. `validate` is a dry run; `importBulk`
+// writes; `downloadTemplate` returns a sample CSV blob.
+export const marketingHouseBulkUploadApi = {
+  downloadTemplate: () =>
+    api.get(`${BASE}/marketing-house/bulk-upload/template`, { responseType: 'blob' }),
+  validate: (data: FormData) =>
+    api.post(`${BASE}/marketing-house/bulk-upload/validate`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  importBulk: (data: FormData) =>
+    api.post(`${BASE}/marketing-house/bulk-upload/import`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+};
 export const marketingFormApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/marketing-house/form`, { params }),
   markRead: (id: string) => api.put(`${BASE}/marketing-house/form/${id}/mark-read`),

@@ -71,6 +71,7 @@ const MarketingProjectList = lazy(() => import('@/pages/marketingHouse/ProjectLi
 const MarketingProjectForm = lazy(() => import('@/pages/marketingHouse/ProjectForm'));
 const MarketingFormList = lazy(() => import('@/pages/marketingHouse/FormList'));
 const MarketingWizard = lazy(() => import('@/pages/marketingHouse/Wizard'));
+const MarketingBulkUpload = lazy(() => import('@/pages/marketingHouse/BulkUpload'));
 
 // Creative House
 const CreativeCategoryList = lazy(() => import('@/pages/creativeHouse/CategoryList'));
@@ -279,6 +280,7 @@ export default function App() {
           <Route path="marketing/item/:itemId/community-program-item" element={<MarketingCommunityProgramItemList />} />
           <Route path="marketing/item/:itemId/community-program-item/add" element={<MarketingCommunityProgramItemForm />} />
           <Route path="marketing/item/:itemId/community-program-item/edit/:id" element={<MarketingCommunityProgramItemForm />} />
+          <Route path="marketing/bulk-upload" element={<MarketingBulkUpload />} />
           <Route path="marketing/project" element={<MarketingProjectList />} />
           <Route path="marketing/project/add" element={<MarketingProjectForm />} />
           <Route path="marketing/project/edit/:id" element={<MarketingProjectForm />} />

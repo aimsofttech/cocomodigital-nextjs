@@ -9,6 +9,7 @@ import {
   RocketLaunchIcon, ClipboardDocumentListIcon, SparklesIcon, UserGroupIcon,
   QuestionMarkCircleIcon, NewspaperIcon, UsersIcon, UserIcon, PhoneIcon,
   CursorArrowRaysIcon, TrophyIcon, ChatBubbleLeftRightIcon, CalendarIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 
 // ── Nav tree ────────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Categories',       path: '/marketing/category',         icon: TagIcon },
       { label: 'Items',            path: '/marketing/item',             icon: ListBulletIcon },
+      { label: 'Bulk Upload',      path: '/marketing/bulk-upload',      icon: ArrowUpTrayIcon },
       {
         label: 'Item Sections', icon: RectangleStackIcon,
         children: [
