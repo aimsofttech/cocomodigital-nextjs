@@ -25401,15 +25401,15 @@
 
     margin: 0;
 
-    display: -webkit-box;
+    /* Display the full goal text — no line-clamp truncation. */
 
-    -webkit-line-clamp: 3;
+    display: block;
 
-    -webkit-box-orient: vertical;
+    overflow: visible;
 
-    overflow: hidden;
+    overflow-wrap: break-word;
 
-    text-overflow: ellipsis;
+    word-break: break-word;
 
   }
 
