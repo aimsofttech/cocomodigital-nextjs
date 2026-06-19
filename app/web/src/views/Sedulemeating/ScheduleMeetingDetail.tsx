@@ -1,6 +1,6 @@
 // @ts-nocheck
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useLocation } from "@/src/lib/navigation";
 import { useCart } from "@/src/lib/cart";
@@ -49,14 +49,34 @@ type Stage = "picker" | "form" | "confirmed";
 const ScheduleMeetingDetails = () => {
   const location = useLocation();
   const { clear: clearCart } = useCart();
-  const { cartItems = [] } = location.state || {};
 
-  /* Stage: picker → form → confirmed */
-  const [stage,    setStage]    = useState<Stage>("picker");
-  const [pickedDate,   setPickedDate]   = useState<Date | null>(null);
-  const [pickedTime,   setPickedTime]   = useState<string>("");
-  const [pickedTz,     setPickedTz]     = useState<string>("");
+  /* Capture navigation state ONCE on mount: the cart, plus any slot the
+     /ScheduleMeeting picker already chose (passed via persisted nav state).
+     Reading it once — not on every render — means clearing the persisted
+     state below can't wipe the cart/slot mid-flow. */
+  const [navOnce] = useState<Record<string, any>>(() => (location.state as any) || {});
+  const cartItems = navOnce.cartItems || [];
+  const incomingDate = navOnce.date ? new Date(navOnce.date) : null;
+  const hasIncomingSlot = Boolean(
+    incomingDate && !isNaN(incomingDate.getTime()) && navOnce.time
+  );
+
+  /* Stage: picker → form → confirmed. When the user already picked a slot on
+     /ScheduleMeeting, jump straight to the details form so they don't have to
+     choose the time a second time. */
+  const [stage,    setStage]    = useState<Stage>(hasIncomingSlot ? "form" : "picker");
+  const [pickedDate,   setPickedDate]   = useState<Date | null>(hasIncomingSlot ? incomingDate : null);
+  const [pickedTime,   setPickedTime]   = useState<string>(hasIncomingSlot ? navOnce.time : "");
+  const [pickedTz,     setPickedTz]     = useState<string>(hasIncomingSlot ? (navOnce.timeZone || "") : "");
   const [bookingInfo,  setBookingInfo]  = useState<Record<string, string>>({});
+
+  /* Consume the persisted nav state so a later refresh or direct visit to
+     /schedule-meeting doesn't resurrect a stale slot or cart. */
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try { sessionStorage.removeItem("__cocoma_navigation_state__:/schedule-meeting"); } catch { /* noop */ }
+    }
+  }, []);
 
   /* Form state */
   const [step,        setStep]        = useState(1);
@@ -129,12 +149,24 @@ const ScheduleMeetingDetails = () => {
           phone:       formData.phone || "",
           service:     cartItems?.[0]?.title || "Discovery Call",
           source_page: "/ScheduleMeeting",
+          // Structured slot fields so the notification emails render cleanly.
+          meeting_date:     finalDate,
+          meeting_time:     t24,
+          meeting_timezone: pickedTz,
           notes,
         }),
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
-        throw new Error(b?.errors?.[0]?.message || b?.message || `HTTP ${res.status}`);
+        // 502/503/504 or an "upstream" message means the API server couldn't be
+        // reached (e.g. it isn't running) — show an actionable message instead
+        // of the raw proxy error.
+        const serverUnreachable = res.status >= 502 || /upstream/i.test(b?.message || "");
+        throw new Error(
+          serverUnreachable
+            ? "We couldn't reach the booking server right now. Please try again in a moment — or email anil@cocomadigital.com and we'll lock your slot."
+            : (b?.errors?.[0]?.message || b?.message || `HTTP ${res.status}`)
+        );
       }
       clearCart();
       setBookingInfo({

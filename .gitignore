@@ -5,6 +5,7 @@ cocoma-react-admin/node_modules/
 
 # Environment files (never commit secrets — use .env.example)
 .env
+.env.example
 .env.local
 .env.*.local
 cocoma-node-backend/.env

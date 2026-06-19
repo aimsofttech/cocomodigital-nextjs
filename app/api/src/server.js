@@ -93,6 +93,7 @@ const apiBlogRoutes = require('./routes/api/blog');
 const apiJobRoutes = require('./routes/api/job');
 const apiClientRoutes = require('./routes/api/client');
 const apiContactRoutes = require('./routes/api/contact');
+const apiGoogleRoutes = require('./routes/api/google');
 const apiCommonRoutes = require('./routes/api/common');
 const apiHomePageSectionRoutes = require('./routes/api/homePageSection');
 const apiFaqRoutes = require('./routes/api/faq');
@@ -216,6 +217,7 @@ app.use('/api/blog', apiBlogRoutes);
 app.use('/api/job', apiJobRoutes);
 app.use('/api/client', apiClientRoutes);
 app.use('/api/contact', apiContactRoutes);
+app.use('/api/google', apiGoogleRoutes);
 app.use('/api/common', apiCommonRoutes);
 app.use('/api/home-page-sections', apiHomePageSectionRoutes);
 app.use('/api/faqs', apiFaqRoutes);
@@ -233,6 +235,18 @@ app.listen(PORT, () => {
   console.log(`  API    : http://localhost:${PORT}`);
   console.log(`  Mode   : ${process.env.NODE_ENV || 'development'}`);
   console.log('================================\n');
+  // Verify SMTP at boot so a misconfiguration surfaces immediately (non-fatal).
+  require('./services/mailer').verify().catch(() => {});
+  // Report Google Meet / Calendar status so it's obvious whether booking emails
+  // will include a Meet link.
+  if (require('./services/calendarService').isConfigured()) {
+    logger.info('Google Meet: configured — bookings will include a Meet link.');
+  } else {
+    logger.warn(
+      'Google Meet: not configured — set GOOGLE_CLIENT_ID/SECRET then visit ' +
+        '/api/google/oauth/start to connect (bookings still work without a link).'
+    );
+  }
 });
 
 module.exports = app;
