@@ -132,6 +132,13 @@ const ScheduleMeetingDetails = () => {
     const t24 = convertTo24Hour(pickedTime);
     if (!t24) { setSubmitError("Invalid time — go back and pick again."); return; }
 
+    // Exact slot instant (UTC) — the server uses this to reserve the slot and
+    // reject duplicate bookings. Built from the picked local wall-clock time.
+    const meetingStartUtc = (() => {
+      const d = new Date(`${finalDate}T${t24}`);
+      return Number.isNaN(d.getTime()) ? null : d.toISOString();
+    })();
+
     const notes = [
       `Slot: ${finalDate} ${t24} (${pickedTz})`,
       formData.message ? `Message: ${formData.message}` : "",
@@ -153,11 +160,20 @@ const ScheduleMeetingDetails = () => {
           meeting_date:     finalDate,
           meeting_time:     t24,
           meeting_timezone: pickedTz,
+          meeting_start_utc: meetingStartUtc,
           notes,
         }),
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
+        // Slot was taken between picking and submitting — send the user back to
+        // the picker, which re-fetches availability and disables the taken slot.
+        if (res.status === 409) {
+          setSubmitError(b?.message || "That time slot is no longer available. Please pick another.");
+          setStage("picker");
+          setStep(1);
+          return;
+        }
         // 502/503/504 or an "upstream" message means the API server couldn't be
         // reached (e.g. it isn't running) — show an actionable message instead
         // of the raw proxy error.

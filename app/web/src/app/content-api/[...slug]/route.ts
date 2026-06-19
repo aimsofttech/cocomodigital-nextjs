@@ -65,6 +65,22 @@ export async function GET(
     return NextResponse.json(g ?? {});
   }
 
+  // Booking slot availability — proxied to the Express API (not the content layer).
+  if (seg[0] === "meeting-availability") {
+    try {
+      const res = await fetch(
+        `${API_BASE}/contact/availability?${sp.toString()}`,
+        { cache: "no-store" },
+      );
+      const data = await res.json().catch(() => ({ booked: [] }));
+      return NextResponse.json(data, { status: res.status });
+    } catch {
+      // Fail open: if the API is unreachable, return no bookings so the UI still
+      // shows slots (the server-side unique index still prevents double-booking).
+      return NextResponse.json({ status: "error", booked: [] });
+    }
+  }
+
   const collection = seg[0];
   if (!collection) return NextResponse.json(emptyList);
 

@@ -31,6 +31,12 @@ function generateTimeSlots(date) {
   return slots;
 }
 
+// Canonical slot id shared with the API: the UTC instant truncated to the
+// minute ("YYYY-MM-DDTHH:mm"). Must match the backend's slot_key format.
+function slotKeyOf(slot) {
+  return slot.toISOString().slice(0, 16);
+}
+
 function formatSlot(slot, hour12) {
   return slot.toLocaleTimeString([], {
     hour: hour12 ? "numeric" : "2-digit",
@@ -51,6 +57,8 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState(null); // store the Date itself
   const [timezone, setTimezone] = useState("");
+  const [bookedKeys, setBookedKeys] = useState(() => new Set<string>());
+  const [slotsLoading, setSlotsLoading] = useState(false);
   // Default to 12h in en-US locales, 24h elsewhere — matches the
   // user's regional expectation without a settings click.
   const [hour12, setHour12] = useState(() => {
@@ -78,6 +86,41 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
   useEffect(() => {
     setSelectedSlot(null);
   }, [selectedDate]);
+
+  // Fetch which slots are already booked for the visible day and disable them.
+  // Re-runs whenever the day's slots change (i.e. on date change / remount), so
+  // availability refreshes after a booking is made elsewhere.
+  useEffect(() => {
+    let cancelled = false;
+    if (!timeSlots.length) {
+      setBookedKeys(new Set());
+      return;
+    }
+    const from = timeSlots[0].toISOString();
+    const to = timeSlots[timeSlots.length - 1].toISOString();
+    setSlotsLoading(true);
+    fetch(
+      `/content-api/meeting-availability?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+      { headers: { Accept: "application/json" } }
+    )
+      .then((r) => (r.ok ? r.json() : { booked: [] }))
+      .then((d) => {
+        if (cancelled) return;
+        const booked = new Set<string>(d?.booked || []);
+        setBookedKeys(booked);
+        // If the currently selected slot just became booked, clear it.
+        setSelectedSlot((cur) => (cur && booked.has(slotKeyOf(cur)) ? null : cur));
+      })
+      .catch(() => {
+        if (!cancelled) setBookedKeys(new Set());
+      })
+      .finally(() => {
+        if (!cancelled) setSlotsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [timeSlots]);
 
   const handleConfirm = () => {
     if (!selectedDate || !selectedSlot) return;
@@ -212,6 +255,12 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                   No more slots today — pick another date.
                 </p>
               ) : (
+                <>
+                {slotsLoading && (
+                  <p className="schedule-slots-loading" aria-live="polite">
+                    Checking availability…
+                  </p>
+                )}
                 <ul
                   className="schedule-slots"
                   role="listbox"
@@ -221,14 +270,18 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                     const label = formatSlot(slot, hour12);
                     const active =
                       selectedSlot && selectedSlot.getTime() === slot.getTime();
+                    const booked = bookedKeys.has(slotKeyOf(slot));
                     return (
                       <li key={slot.getTime()}>
                         <button
                           type="button"
                           role="option"
                           aria-selected={active}
-                          className={`schedule-slot ${active ? "schedule-slot--active" : ""}`}
-                          onClick={() => setSelectedSlot(slot)}
+                          disabled={booked}
+                          aria-disabled={booked}
+                          title={booked ? "Already booked" : undefined}
+                          className={`schedule-slot ${active ? "schedule-slot--active" : ""} ${booked ? "schedule-slot--booked" : ""}`}
+                          onClick={() => !booked && setSelectedSlot(slot)}
                         >
                           {label}
                         </button>
@@ -236,6 +289,7 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                     );
                   })}
                 </ul>
+                </>
               )}
             </div>
           </div>

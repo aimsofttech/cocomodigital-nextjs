@@ -84,7 +84,7 @@ const sendBookingEmails = async (booking = {}) => {
   // 1) Owner (Anil) — booking alert, reply goes straight to the visitor.
   const ownerHtml = shell(
     'New meeting booking',
-    detailRows(booking, slot, meetLink) + row('Source', booking.source_page),
+    detailRows(booking, slot, meetLink),
     `You have a new discovery-call booking from <strong>${esc(visitorName)}</strong>.` +
       (meetLink ? ' The Google Meet link is below — it will open at the booked time.' : '')
   );

@@ -48633,6 +48633,44 @@
 
   }
 
+  .schedule-slot--booked,
+
+  .schedule-slot:disabled {
+
+    opacity: 0.4;
+
+    cursor: not-allowed;
+
+    text-decoration: line-through;
+
+    background: var(--surface-muted, #f1f1f1);
+
+    box-shadow: none;
+
+    transform: none;
+
+  }
+
+  .schedule-slot--booked:hover {
+
+    transform: none;
+
+    box-shadow: none;
+
+    background: var(--surface-muted, #f1f1f1);
+
+  }
+
+  .schedule-slots-loading {
+
+    font-size: 0.85rem;
+
+    color: var(--text-muted);
+
+    margin: 0 0 var(--space-2);
+
+  }
+
   /* ===========================================================
   
      Confirm button — only shown after both picked
