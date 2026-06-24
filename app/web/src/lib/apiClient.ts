@@ -39,6 +39,35 @@ export const API_BASE_URL: string = (
  */
 const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
 
+/**
+ * The Express API and this Next.js app boot concurrently in dev
+ * (`npm run dev` runs both). On a cold start the API isn't listening
+ * on its port yet (it also connects to a remote MongoDB first), so the
+ * homepage's first SSR fetches race ahead and fail with ECONNREFUSED —
+ * flooding the console and rendering empty sections. Retry connection
+ * failures a few times with a short backoff so the page recovers as
+ * soon as the API is up, instead of bailing on the first refusal.
+ */
+const CONNECT_RETRY_ATTEMPTS = 4;
+const CONNECT_RETRY_DELAY_MS = 500;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** True when a thrown fetch error is a transient connection failure
+ *  (server not accepting connections yet) rather than a real fault. */
+const isConnectionError = (err: unknown): boolean => {
+  const codes = ["ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "EAI_AGAIN"];
+  const seen = new Set<unknown>();
+  const walk = (e: any): boolean => {
+    if (!e || typeof e !== "object" || seen.has(e)) return false;
+    seen.add(e);
+    if (typeof e.code === "string" && codes.includes(e.code)) return true;
+    if (Array.isArray(e.errors) && e.errors.some(walk)) return true;
+    return walk(e.cause);
+  };
+  return walk(err);
+};
+
 /** The envelope every Express api endpoint returns. */
 export interface ApiEnvelope<T> {
   status: "success" | "error";
@@ -85,18 +114,27 @@ export async function apiGet<T>(
 
   const url = buildUrl(path, opts.searchParams);
 
+  // revalidate 0 → opt out of the Next.js data cache entirely (no-store),
+  // so the data is fresh on every request/refresh. >0 keeps ISR caching.
+  const revalidate = opts.revalidate ?? DEFAULT_REVALIDATE;
+  const fetchInit: RequestInit =
+    revalidate > 0 ? { next: { revalidate } } : { cache: "no-store" };
+
   let res: Response;
-  try {
-    // revalidate 0 → opt out of the Next.js data cache entirely (no-store),
-    // so the data is fresh on every request/refresh. >0 keeps ISR caching.
-    const revalidate = opts.revalidate ?? DEFAULT_REVALIDATE;
-    res = await fetch(
-      url,
-      revalidate > 0 ? { next: { revalidate } } : { cache: "no-store" },
-    );
-  } catch (err) {
-    console.error(`[api] GET ${path} network error:`, err);
-    return null;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      res = await fetch(url, fetchInit);
+      break;
+    } catch (err) {
+      // Retry transient connection failures (API still booting) a few
+      // times before giving up, so a cold-start race doesn't surface.
+      if (isConnectionError(err) && attempt < CONNECT_RETRY_ATTEMPTS) {
+        await sleep(CONNECT_RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+      console.error(`[api] GET ${path} network error:`, err);
+      return null;
+    }
   }
 
   if (!res.ok) {
