@@ -8,7 +8,7 @@ cocoma-react-admin/node_modules/
 .env.example
 .env.local
 .env.*.local
-cocoma-node-backend/.env
+# cocoma-node-backend/.env
 
 # Logs
 logs/
