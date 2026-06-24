@@ -130,7 +130,10 @@ const createMeetingEvent = async (booking = {}) => {
     const res = await cal.events.insert({
       calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
       conferenceDataVersion: 1,
-      sendUpdates: 'all', // Google also emails its native invite to attendees
+      // 'none' = create the event + Meet link but DON'T let Google email its own
+      // native invite to attendees. We send a single branded "booked" email from
+      // the app (see mailer), so 'all'/'externalOnly' would duplicate it.
+      sendUpdates: 'none',
       requestBody: {
         summary: `Discovery Call — ${booking.name || 'Guest'} × ${brand}`,
         description: booking.message || booking.notes || 'Booked via cocomadigital.com',

@@ -92,7 +92,13 @@ const sendBookingEmails = async (booking = {}) => {
   // 2) Visitor — acknowledgement.
   const userHtml = shell(
     meetLink ? 'Your call is booked' : 'We received your booking request',
-    detailRows({ service: booking.service }, slot, meetLink),
+    // Show the service, slot and the visitor's own message back to them, but not
+    // their contact fields (name/email/phone/company) — no point echoing those.
+    detailRows(
+      { service: booking.service, message: booking.message, notes: booking.notes },
+      slot,
+      meetLink
+    ),
     `Hi ${esc(booking.name ? String(booking.name).split(' ')[0] : 'there')}, thanks for booking a call with ${esc(brand())}. ` +
       (meetLink
         ? `Your call${slot ? ` for <strong>${esc(slot)}</strong>` : ''} is confirmed — join using the Google Meet button below at the scheduled time.`
