@@ -133,4 +133,136 @@ const sendBookingEmails = async (booking = {}) => {
   return result;
 };
 
-module.exports = { sendBookingEmails, ownerEmail };
+// ── Meeting request flow (pending → confirmed / rejected) ────────────────────
+
+/**
+ * Step 1: User submits a meeting request — status becomes "pending".
+ * No Meet link yet. Notify user (wait for approval) and owner (review needed).
+ */
+const sendMeetingRequestEmails = async (booking = {}) => {
+  const slot = resolveSlot(booking);
+  const visitorName = booking.name || booking.userName || 'there';
+
+  const ownerHtml = shell(
+    'New Meeting Request',
+    row('Name', visitorName) +
+    row('Email', booking.email) +
+    row('Phone', booking.phone) +
+    row('Company', booking.companyName || booking.company) +
+    row('Service', booking.service) +
+    row('Requested Slot', slot) +
+    row('Notes', booking.notes || booking.message),
+    `A user has requested a 15-minute meeting. Please review and confirm the meeting request from the admin panel.`
+  );
+
+  const userHtml = shell(
+    'Meeting Request Received',
+    row('Name', visitorName) +
+    row('Requested Slot', slot) +
+    row('Duration', '15 Minutes'),
+    `Thank you for booking a meeting. Your request has been submitted successfully. Please wait for admin confirmation. You will receive a meeting link once your meeting is approved.`
+  );
+
+  const [owner, user] = await Promise.allSettled([
+    sendMail({
+      to: ownerEmail(),
+      replyTo: booking.email,
+      subject: 'New Meeting Request',
+      html: ownerHtml,
+      text: `A user has requested a 15-minute meeting.\nName: ${visitorName}\nEmail: ${booking.email}\nSlot: ${slot || 'n/a'}\n\nPlease review in the admin panel.`,
+    }),
+    booking.email
+      ? sendMail({
+          to: booking.email,
+          replyTo: ownerEmail(),
+          subject: 'Meeting Request Received',
+          html: userHtml,
+          text: `Thank you for booking a meeting. Your request has been submitted successfully. Please wait for admin confirmation. You will receive a meeting link once your meeting is approved.`,
+        })
+      : Promise.resolve({ sent: false, skipped: true }),
+  ]);
+
+  const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
+  const result = { owner: unwrap(owner), user: unwrap(user) };
+  logger.info(`Meeting request emails: owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)} user=${JSON.stringify(result.user.sent ?? result.user.skipped)}`);
+  return result;
+};
+
+/**
+ * Step 4: Admin confirms the meeting — send Meet link to both parties.
+ */
+const sendMeetingConfirmedEmails = async (booking = {}) => {
+  const slot = resolveSlot(booking);
+  const visitorName = booking.name || booking.userName || 'there';
+  const meetLink = booking.meetLink || '';
+
+  const userHtml = shell(
+    'Meeting Confirmed',
+    meetRow(meetLink) +
+    row('Date', booking.meetingDate || booking.meeting_date) +
+    row('Time', booking.meetingTime || booking.meeting_time) +
+    row('Duration', '15 Minutes'),
+    `Your meeting request has been approved. Please join the meeting using the link below.`
+  );
+
+  const ownerHtml = shell(
+    'Meeting Scheduled Successfully',
+    meetRow(meetLink) +
+    row('User Name', visitorName) +
+    row('Email', booking.email) +
+    row('Phone', booking.phone) +
+    row('Date', booking.meetingDate || booking.meeting_date) +
+    row('Time', booking.meetingTime || booking.meeting_time),
+    `A meeting has been confirmed with the following user.`
+  );
+
+  const [owner, user] = await Promise.allSettled([
+    sendMail({
+      to: ownerEmail(),
+      replyTo: booking.email,
+      subject: 'Meeting Scheduled Successfully',
+      html: ownerHtml,
+      text: `Meeting confirmed.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}\nGoogle Meet: ${meetLink || 'n/a'}`,
+    }),
+    booking.email
+      ? sendMail({
+          to: booking.email,
+          replyTo: ownerEmail(),
+          subject: 'Meeting Confirmed',
+          html: userHtml,
+          text: `Your meeting request has been approved.\nDate: ${booking.meetingDate || booking.meeting_date || 'n/a'}\nTime: ${booking.meetingTime || booking.meeting_time || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
+        })
+      : Promise.resolve({ sent: false, skipped: true }),
+  ]);
+
+  const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
+  const result = { owner: unwrap(owner), user: unwrap(user) };
+  logger.info(`Meeting confirmed emails: owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)} user=${JSON.stringify(result.user.sent ?? result.user.skipped)}`);
+  return result;
+};
+
+/**
+ * Step 5: Admin rejects the meeting — notify the user only.
+ */
+const sendMeetingRejectedEmail = async (booking = {}) => {
+  const visitorName = booking.name || booking.userName || 'there';
+
+  const userHtml = shell(
+    'Meeting Request Rejected',
+    row('Name', visitorName),
+    `We regret to inform you that your meeting request could not be approved at this time.`
+  );
+
+  const result = await sendMail({
+    to: booking.email,
+    replyTo: ownerEmail(),
+    subject: 'Meeting Request Rejected',
+    html: userHtml,
+    text: `We regret to inform you that your meeting request could not be approved at this time.`,
+  });
+
+  logger.info(`Meeting rejected email: user=${JSON.stringify(result.sent ?? result.skipped)}`);
+  return result;
+};
+
+module.exports = { sendBookingEmails, sendMeetingRequestEmails, sendMeetingConfirmedEmails, sendMeetingRejectedEmail, ownerEmail };

@@ -1,0 +1,422 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
+import { meetingApi } from '@/services/adminApi';
+import PageHeader from '@/components/ui/PageHeader';
+import DataTable from '@/components/ui/DataTable';
+import TableFilter, {
+  FilterField, FilterValues, isEmptyValue,
+} from '@/components/ui/TableFilter';
+import Modal from '@/components/ui/Modal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import {
+  EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon,
+  CalendarDaysIcon, EnvelopeIcon, PhoneIcon, BuildingOfficeIcon,
+} from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-800',
+  confirmed: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800',
+  completed: 'bg-blue-100 text-blue-800',
+};
+
+const StatusBadge = ({ status }: { status: string }) => (
+  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-700'}`}>
+    {status}
+  </span>
+);
+
+const FILTER_FIELDS: FilterField[] = [
+  {
+    key: 'status', label: 'Status', type: 'select', serverSide: true,
+    options: [
+      { value: 'pending', label: 'Pending' },
+      { value: 'confirmed', label: 'Confirmed' },
+      { value: 'rejected', label: 'Rejected' },
+      { value: 'completed', label: 'Completed' },
+    ],
+  },
+  { key: 'createdAt', label: 'Date Range', type: 'date-range', serverSide: false },
+];
+
+function getSessionKey(p: string) { return `crud_filter_${p.replace(/\//g, '_')}`; }
+
+export default function MeetingList() {
+  const { pathname } = useLocation();
+  const sk = getSessionKey(pathname);
+
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState<number>(() => { try { return parseInt(sessionStorage.getItem(sk + '_ps') || '20'); } catch { return 20; } });
+  const [pagination, setPagination] = useState<any>(null);
+  const [search, setSearch] = useState('');
+  const [filterValues, setFilterValues] = useState<FilterValues>(() => { try { return JSON.parse(sessionStorage.getItem(sk) || '{}'); } catch { return {}; } });
+
+  const [selected, setSelected] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Confirmation modals
+  const [confirmTarget, setConfirmTarget] = useState<any>(null);
+  const [rejectTarget, setRejectTarget] = useState<any>(null);
+
+  const [stats, setStats] = useState<Record<string, number>>({});
+
+  const serverFilters: Record<string, any> = {};
+  FILTER_FIELDS.filter((f) => f.serverSide && !isEmptyValue(filterValues[f.key])).forEach((f) => {
+    serverFilters[f.apiParam || f.key] = filterValues[f.key];
+  });
+
+  const fetchData = useCallback(() => {
+    setLoading(true);
+    meetingApi.getAll({ page, limit, search, ...serverFilters })
+      .then(({ data: res }: any) => { setData(res.data || []); setPagination(res.pagination); })
+      .finally(() => setLoading(false));
+  }, [page, limit, search, JSON.stringify(serverFilters)]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    meetingApi.getStats().then(({ data: res }: any) => setStats(res.data || {})).catch(() => {});
+  }, [data]);
+
+  const handleFilterChange = (key: string, value: any) => {
+    const next = { ...filterValues, [key]: value };
+    setFilterValues(next);
+    setPage(1);
+    try { sessionStorage.setItem(sk, JSON.stringify(next)); } catch { /* noop */ }
+  };
+  const handleFilterReset = () => {
+    setFilterValues({});
+    setPage(1);
+    try { sessionStorage.removeItem(sk); } catch { /* noop */ }
+  };
+  const handlePageSizeChange = (s: number) => { setLimit(s); setPage(1); try { sessionStorage.setItem(sk + '_ps', String(s)); } catch { /* noop */ } };
+
+  const activeCount = FILTER_FIELDS.filter((f) => !isEmptyValue(filterValues[f.key])).length;
+
+  // Called after the user clicks "Confirm" inside the confirm modal
+  const executeConfirm = async () => {
+    if (!confirmTarget) return;
+    setActionLoading(true);
+    try {
+      await meetingApi.confirm(confirmTarget._id);
+      toast.success('Meeting confirmed and emails sent');
+      setConfirmTarget(null);
+      if (selected?._id === confirmTarget._id) setSelected(null);
+      fetchData();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Failed to confirm meeting');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Called after the user clicks "Reject" inside the reject modal
+  const executeReject = async () => {
+    if (!rejectTarget) return;
+    setActionLoading(true);
+    try {
+      await meetingApi.reject(rejectTarget._id);
+      toast.success('Meeting rejected and user notified');
+      setRejectTarget(null);
+      if (selected?._id === rejectTarget._id) setSelected(null);
+      fetchData();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Failed to reject meeting');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await meetingApi.delete(deleteId);
+      toast.success('Deleted');
+      setDeleteId(null);
+      fetchData();
+    } catch {
+      toast.error('Failed to delete');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const columns = [
+    {
+      key: 'userName', label: 'Name', sortable: true,
+      render: (row: any) => <span className="font-medium text-gray-900">{row.userName || '—'}</span>,
+    },
+    { key: 'email', label: 'Email', sortable: true, render: (row: any) => row.email || '—' },
+    { key: 'phone', label: 'Phone', render: (row: any) => row.phone || '—' },
+    {
+      key: 'meetingDate', label: 'Meeting Date', sortable: true,
+      render: (row: any) => row.meetingDate
+        ? <span className="whitespace-nowrap">{row.meetingDate}{row.meetingTime ? ` · ${row.meetingTime}` : ''}</span>
+        : '—',
+    },
+    {
+      key: 'status', label: 'Status', sortable: true,
+      render: (row: any) => <StatusBadge status={row.status} />,
+    },
+    {
+      key: 'createdAt', label: 'Submitted', sortable: true,
+      render: (row: any) => row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '—',
+    },
+  ];
+
+  return (
+    <div>
+      <PageHeader
+        title="Meeting Requests"
+        breadcrumbs={[{ label: 'Contact' }, { label: 'Meetings' }]}
+      />
+
+      {/* Stats bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+        {[
+          { label: 'Pending', key: 'pending', color: 'text-yellow-600 bg-yellow-50' },
+          { label: 'Confirmed', key: 'confirmed', color: 'text-green-600 bg-green-50' },
+          { label: 'Rejected', key: 'rejected', color: 'text-red-600 bg-red-50' },
+          { label: 'Completed', key: 'completed', color: 'text-blue-600 bg-blue-50' },
+        ].map(({ label, key, color }) => (
+          <div key={key} className={`card p-4 flex items-center gap-3 ${color}`}>
+            <span className="text-2xl font-bold">{stats[key] ?? '—'}</span>
+            <span className="text-sm font-medium">{label}</span>
+          </div>
+        ))}
+      </div>
+
+      <TableFilter
+        fields={FILTER_FIELDS}
+        values={filterValues}
+        onChange={handleFilterChange}
+        onReset={handleFilterReset}
+        activeCount={activeCount}
+        loading={loading}
+      />
+
+      <div className="card">
+        <DataTable
+          columns={columns}
+          data={data}
+          loading={loading}
+          pagination={pagination}
+          onPageChange={setPage}
+          onSearch={setSearch}
+          pageSize={limit}
+          onPageSizeChange={handlePageSizeChange}
+          actions={(row: any) => (
+            <div className="flex gap-1 justify-end">
+              <button
+                onClick={() => setSelected(row)}
+                className="p-1.5 rounded hover:bg-blue-50 text-blue-600"
+                title="View details"
+              >
+                <EyeIcon className="w-4 h-4" />
+              </button>
+              {row.status === 'pending' && (
+                <>
+                  <button
+                    onClick={() => setConfirmTarget(row)}
+                    className="p-1.5 rounded hover:bg-green-50 text-green-600"
+                    title="Confirm meeting"
+                  >
+                    <CheckCircleIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setRejectTarget(row)}
+                    className="p-1.5 rounded hover:bg-orange-50 text-orange-500"
+                    title="Reject meeting"
+                  >
+                    <XCircleIcon className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setDeleteId(row._id)}
+                className="p-1.5 rounded hover:bg-red-50 text-red-500"
+                title="Delete"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        />
+      </div>
+
+      {/* ── Detail modal ────────────────────────────────────────────────────── */}
+      <Modal isOpen={!!selected} onClose={() => setSelected(null)} title="Meeting Details" size="lg">
+        {selected && (
+          <div className="space-y-4 text-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.userName || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Company</p><p>{selected.companyName || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Meeting Date</p><p>{selected.meetingDate || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Meeting Time</p><p>{selected.meetingTime || '—'}{selected.meetingTimezone ? ` (${selected.meetingTimezone})` : ''}</p></div>
+              <div><p className="text-xs text-gray-500">Duration</p><p>{selected.duration || 15} minutes</p></div>
+              <div><p className="text-xs text-gray-500">Status</p><StatusBadge status={selected.status} /></div>
+              <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : '—'}</p></div>
+              {selected.confirmedAt && <div><p className="text-xs text-gray-500">Confirmed At</p><p>{new Date(selected.confirmedAt).toLocaleString()}</p></div>}
+              {selected.rejectedAt && <div><p className="text-xs text-gray-500">Rejected At</p><p>{new Date(selected.rejectedAt).toLocaleString()}</p></div>}
+            </div>
+            {selected.notes && (
+              <div><p className="text-xs text-gray-500 mb-1">Notes / Message</p><p className="bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selected.notes}</p></div>
+            )}
+            {selected.meetLink && (
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Google Meet Link</p>
+                <a href={selected.meetLink} target="_blank" rel="noopener noreferrer"
+                  className="text-blue-600 underline break-all">{selected.meetLink}</a>
+              </div>
+            )}
+            {selected.status === 'pending' && (
+              <div className="flex gap-3 pt-2 border-t">
+                <button
+                  onClick={() => { setSelected(null); setConfirmTarget(selected); }}
+                  className="btn-primary flex-1"
+                >
+                  Confirm Meeting
+                </button>
+                <button
+                  onClick={() => { setSelected(null); setRejectTarget(selected); }}
+                  className="btn-secondary flex-1 !border-red-300 !text-red-600 hover:!bg-red-50"
+                >
+                  Reject Meeting
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Confirm meeting modal ────────────────────────────────────────────── */}
+      <Modal isOpen={!!confirmTarget} onClose={() => setConfirmTarget(null)} title="Confirm Meeting" size="sm">
+        {confirmTarget && (
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircleIcon className="w-7 h-7 text-green-600" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-semibold text-gray-900">Confirm this meeting?</p>
+              <p className="text-sm text-gray-500">
+                A Google Meet link will be generated and confirmation emails will be sent to both
+                <span className="font-medium text-gray-700"> {confirmTarget.userName}</span> and the owner.
+              </p>
+            </div>
+            {/* Meeting summary */}
+            <div className="w-full rounded-lg border border-gray-100 bg-gray-50 divide-y divide-gray-100 text-left text-sm">
+              <div className="flex items-center gap-2 px-3 py-2">
+                <EnvelopeIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="text-gray-600 truncate">{confirmTarget.email}</span>
+              </div>
+              {confirmTarget.phone && (
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <PhoneIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="text-gray-600">{confirmTarget.phone}</span>
+                </div>
+              )}
+              {(confirmTarget.meetingDate || confirmTarget.meetingTime) && (
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <CalendarDaysIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="text-gray-600">
+                    {confirmTarget.meetingDate}{confirmTarget.meetingTime ? ` · ${confirmTarget.meetingTime}` : ''}
+                    {confirmTarget.meetingTimezone ? ` (${confirmTarget.meetingTimezone})` : ''}
+                  </span>
+                </div>
+              )}
+              {confirmTarget.companyName && (
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <BuildingOfficeIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="text-gray-600">{confirmTarget.companyName}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setConfirmTarget(null)}
+                className="btn-secondary flex-1"
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeConfirm}
+                disabled={actionLoading}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white font-medium text-sm hover:bg-green-700 disabled:opacity-60 transition-colors"
+              >
+                {actionLoading ? 'Confirming…' : 'Yes, Confirm'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Reject meeting modal ─────────────────────────────────────────────── */}
+      <Modal isOpen={!!rejectTarget} onClose={() => setRejectTarget(null)} title="Reject Meeting" size="sm">
+        {rejectTarget && (
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center">
+              <XCircleIcon className="w-7 h-7 text-orange-500" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-semibold text-gray-900">Reject this meeting?</p>
+              <p className="text-sm text-gray-500">
+                A rejection email will be sent to
+                <span className="font-medium text-gray-700"> {rejectTarget.userName}</span> notifying
+                them that their request could not be approved.
+              </p>
+            </div>
+            {/* Meeting summary */}
+            <div className="w-full rounded-lg border border-gray-100 bg-gray-50 divide-y divide-gray-100 text-left text-sm">
+              <div className="flex items-center gap-2 px-3 py-2">
+                <EnvelopeIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="text-gray-600 truncate">{rejectTarget.email}</span>
+              </div>
+              {(rejectTarget.meetingDate || rejectTarget.meetingTime) && (
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <CalendarDaysIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <span className="text-gray-600">
+                    {rejectTarget.meetingDate}{rejectTarget.meetingTime ? ` · ${rejectTarget.meetingTime}` : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setRejectTarget(null)}
+                className="btn-secondary flex-1"
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeReject}
+                disabled={actionLoading}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white font-medium text-sm hover:bg-orange-600 disabled:opacity-60 transition-colors"
+              >
+                {actionLoading ? 'Rejecting…' : 'Yes, Reject'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Delete confirmation ──────────────────────────────────────────────── */}
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        message="Are you sure you want to delete this meeting request? This action cannot be undone."
+        loading={deleting}
+      />
+    </div>
+  );
+}

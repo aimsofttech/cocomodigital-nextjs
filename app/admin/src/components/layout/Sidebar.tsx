@@ -149,6 +149,7 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Contact Us',        path: '/contact/contact-us',        icon: EnvelopeIcon },
       { label: 'Free Consultation', path: '/contact/free-consultation', icon: CalendarIcon },
+      { label: 'Meeting Requests',  path: '/contact/meetings',          icon: PhoneIcon },
       { label: 'Form Submissions',  path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
     ],
   },

@@ -167,3 +167,13 @@ export const freeConsultationApi = {
 
 export const homePageSectionApi = createCrudService('home-page-section');
 export const homePageSectionItemApi = createCrudService('home-page-section-item');
+
+export const meetingApi = {
+  getAll: (params?: Record<string, any>) => api.get(`${BASE}/meetings`, { params }),
+  getStats: () => api.get(`${BASE}/meetings/stats`),
+  getOne: (id: string) => api.get(`${BASE}/meetings/${id}`),
+  confirm: (id: string) => api.put(`${BASE}/meetings/${id}/confirm`),
+  reject: (id: string) => api.put(`${BASE}/meetings/${id}/reject`),
+  updateStatus: (id: string, status: string) => api.put(`${BASE}/meetings/${id}/status`, { status }),
+  delete: (id: string) => api.delete(`${BASE}/meetings/${id}`),
+};
