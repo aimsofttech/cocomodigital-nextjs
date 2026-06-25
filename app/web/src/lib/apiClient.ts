@@ -48,8 +48,8 @@ const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
  * failures a few times with a short backoff so the page recovers as
  * soon as the API is up, instead of bailing on the first refusal.
  */
-const CONNECT_RETRY_ATTEMPTS = 4;
-const CONNECT_RETRY_DELAY_MS = 500;
+const CONNECT_RETRY_ATTEMPTS = 10;
+const CONNECT_RETRY_DELAY_MS = 1000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
