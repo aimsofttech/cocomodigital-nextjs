@@ -3405,7 +3405,7 @@
 
     width: 100%;
 
-    padding: 6px;
+    padding: 6px 12px;
 
     cursor: pointer;
 
@@ -3415,7 +3415,7 @@
 
     width: 100%;
 
-    text-align: center;
+    text-align: left;
 
   }
 
@@ -42004,7 +42004,7 @@
 
     align-items: center;
 
-    gap: var(--space-5);
+    gap: var(--space-7);
 
   }
 
@@ -42747,8 +42747,95 @@
 
   }
 
+  /* Loading skeleton — shimmer blocks matching <JobCard />'s
+     shape (category + title, 4 meta chips, CTA) so the grid
+     holds its layout when real cards swap in. */
+
+  .career-page-card-skeleton {
+
+    cursor: default;
+
+  }
+
+  .career-page-card-skeleton-block {
+
+    display: block;
+
+    border-radius: var(--radius-sm);
+
+    background: linear-gradient(90deg,
+        var(--bg-page-soft) 25%,
+        var(--bg-page-tint) 50%,
+        var(--bg-page-soft) 75%);
+
+    background-size: 200% 100%;
+
+    animation: career-page-card-shimmer 1.6s ease-in-out infinite;
+
+  }
+
+  .career-page-card-skeleton-category {
+
+    width: 40%;
+
+    height: 0.85rem;
+
+  }
+
+  .career-page-card-skeleton-title {
+
+    width: 75%;
+
+    height: 1.15rem;
+
+  }
+
+  .career-page-card-skeleton-chip {
+
+    width: 5.5rem;
+
+    height: 1.6rem;
+
+    border-radius: var(--radius-pill);
+
+  }
+
+  .career-page-card-skeleton-cta {
+
+    margin-top: auto;
+
+    align-self: flex-end;
+
+    width: 5rem;
+
+    height: 0.9rem;
+
+  }
+
+  @keyframes career-page-card-shimmer {
+
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .career-page-card-skeleton-block {
+
+      animation: none;
+
+    }
+
+  }
+
   /* ----------------------------------------------------------
-  
+
      Responsive — smaller shadow on phones; chip text shrinks
   
      slightly so 3-4 chips fit per row even on narrow screens.

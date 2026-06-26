@@ -7,6 +7,7 @@ import { FaArrowRight } from "react-icons/fa";
 import CustomSelect from "../../../components/common/CustomSelect/CustomSelect";
 import Pagination from "../../../components/common/Pagination/Pagination";
 import JobCard from "./JobCard";
+import JobCardSkeleton from "./JobCardSkeleton";
 import CareerTrustStrip from "../../../components/Jobs/CareerTrustStrip/CareerTrustStrip";
 
 // Cocoma HR contact — used for "don't see your role?" speculative
@@ -344,11 +345,10 @@ const Career = ({
 
             {/* Job Listings */}
             <div className="career-page-card-main-wrapper">
-              {loadingJobs && (
-                <div className="career-page-no-data-wrapper">
-                  <p className="text-center">Loading…</p>
-                </div>
-              )}
+              {loadingJobs &&
+                Array.from({ length: 6 }, (_, index) => (
+                  <JobCardSkeleton key={index} />
+                ))}
               {!loadingJobs &&
                 (jobList?.length > 0 ? (
                   jobList?.map((job, index) => (

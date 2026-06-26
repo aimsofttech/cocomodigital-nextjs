@@ -40,15 +40,14 @@ export const API_BASE_URL: string = (
 const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
 
 /**
- * The Express API and this Next.js app boot concurrently in dev
- * (`npm run dev` runs both). On a cold start the API isn't listening
- * on its port yet (it also connects to a remote MongoDB first), so the
- * homepage's first SSR fetches race ahead and fail with ECONNREFUSED —
- * flooding the console and rendering empty sections. Retry connection
- * failures a few times with a short backoff so the page recovers as
- * soon as the API is up, instead of bailing on the first refusal.
+ * `npm run dev` now gates WEB's startup on the API's /health endpoint
+ * (see root package.json `dev:web`), so the old cold-start race is
+ * already closed before this module ever runs. This retry stays as a
+ * safety net for the API restarting mid-session (nodemon restarts on
+ * every API file save) so an in-flight SSR fetch recovers instead of
+ * flooding the console with ECONNREFUSED.
  */
-const CONNECT_RETRY_ATTEMPTS = 10;
+const CONNECT_RETRY_ATTEMPTS = 15;
 const CONNECT_RETRY_DELAY_MS = 1000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
