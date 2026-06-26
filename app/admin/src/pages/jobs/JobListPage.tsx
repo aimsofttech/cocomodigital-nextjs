@@ -57,14 +57,14 @@ export default function JobListPage() {
     },
   ];
   const columns = [
-    { key: 'job_title', label: 'Job Title', sortable: true },
-    { key: 'job_category_name', label: 'Category', render: (row: any) => row.job_category_name || '—' },
-    { key: 'job_type', label: 'Type', render: (row: any) => (Array.isArray(row.job_type) ? row.job_type.join(', ') : row.job_type) || '—' },
-    { key: 'workplace_type', label: 'Workplace', render: (row: any) => (Array.isArray(row.workplace_type) ? row.workplace_type.join(', ') : row.workplace_type) || '—' },
-    { key: 'job_location', label: 'Location', sortable: true },
-    { key: 'experience', label: 'Experience', render: (row: any) => (Array.isArray(row.experience) ? row.experience.join(', ') : row.experience) || '—' },
-    { key: 'display_order', label: 'Order', sortable: true },
-    { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
+    { key: 'job_title', label: 'Job Title', sortable: true, className: 'min-w-[220px] max-w-[260px]' },
+    { key: 'job_category_name', label: 'Category', className: 'min-w-[160px]', render: (row: any) => row.job_category_name || '—' },
+    { key: 'job_type', label: 'Type', className: 'min-w-[220px]', render: (row: any) => (Array.isArray(row.job_type) ? row.job_type.join(', ') : row.job_type) || '—' },
+    { key: 'workplace_type', label: 'Workplace', className: 'min-w-[180px]', render: (row: any) => (Array.isArray(row.workplace_type) ? row.workplace_type.join(', ') : row.workplace_type) || '—' },
+    { key: 'job_location', label: 'Location', sortable: true, className: 'min-w-[140px]' },
+    { key: 'experience', label: 'Experience', className: 'min-w-[220px]', render: (row: any) => (Array.isArray(row.experience) ? row.experience.join(', ') : row.experience) || '—' },
+    { key: 'display_order', label: 'Order', sortable: true, className: 'min-w-[90px] whitespace-nowrap' },
+    { key: 'status', label: 'Status', sortable: true, className: 'min-w-[140px] whitespace-nowrap', render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
     <CrudListPage

@@ -97,6 +97,17 @@
   }
 }
 
+/* ── Job Categories table — themed with the admin primary color
+   instead of the default gray, scoped so other tables (Job
+   Listings, Applicants, etc.) keep their existing look. ───────── */
+.category-table-theme .table th {
+  background-color: theme('colors.primary.50');
+  color: theme('colors.primary.700');
+}
+.category-table-theme .table tr:hover td {
+  background-color: theme('colors.primary.50');
+}
+
 /* ── Rich text editor content ────────────────────────────────── */
 .rte-content:empty:before {
   content: attr(data-placeholder);
