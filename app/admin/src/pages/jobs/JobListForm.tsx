@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 const JOB_TYPE_OPTIONS = ['Full Time', 'Part Time', 'Freelance', 'Contract', 'Internship'].map((v) => ({ value: v, label: v }));
 const WORKPLACE_OPTIONS = ['On-site', 'Remote', 'Hybrid'].map((v) => ({ value: v, label: v }));
-const EXPERIENCE_OPTIONS = ['0 - 1 Year', '1 - 2 Years', '3 - 5 Years', '6 - 8 Years', '9 - 12 Years', '12+ Years', '0 - 12 Years'].map((v) => ({ value: v, label: v }));
+const EXPERIENCE_OPTIONS = ['0 - 1 Year', '1 - 2 Year', '3 - 5 Year', '6 - 8 Year', '9 - 12 Years', '0 - 12 Years', '12+ Years'].map((v) => ({ value: v, label: v }));
 
 interface Props {
   onSuccess?: () => void;
@@ -48,6 +48,9 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
   }, [lockedCategoryId, isEdit, categories, setValue]);
 
   const onSubmit = async (data: any) => {
+    // A disabled <select> is excluded from RHF's submission payload, so
+    // re-apply the locked category explicitly rather than relying on it.
+    if (lockedCategoryId && !isEdit) data.job_category_id = lockedCategoryId;
     try {
       if (isEdit && id) await jobListApi.update(id, data);
       else await jobListApi.create(data);
@@ -60,7 +63,11 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Job Category</label>
-        <select {...register('job_category_id')} className="form-select">
+        <select
+          {...register('job_category_id')}
+          className="form-select"
+          disabled={Boolean(lockedCategoryId) && !isEdit}
+        >
           <option value="">Select category</option>
           {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
         </select>

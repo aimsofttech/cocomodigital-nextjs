@@ -2,7 +2,7 @@
 
 import NextLink from "next/link";
 import { useParams as useNextParams, usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type {
   LinkProps,
   NavigateProps,
@@ -60,24 +60,29 @@ export function useNavigate(): NavigateFn {
 export function useLocation(): LocationResult {
   const pathname = usePathname() || "/";
 
-  let state: unknown = null;
-  if (typeof window !== "undefined") {
-    const raw = sessionStorage.getItem(stateKey(pathname));
-    if (raw) {
-      try {
-        state = JSON.parse(raw);
-      } catch {
-        state = null;
-      }
-    }
-  }
+  /* sessionStorage/window are browser-only, but on the client's very
+     first render (the one React hydrates against) they're already
+     populated by navigate() — reading them inline here would make
+     that first render diverge from the server's (always-empty)
+     render and trigger a hydration mismatch. Default to the SSR-safe
+     empty values and fill in the real ones in an effect, after
+     hydration has already reconciled. */
+  const [state, setState] = useState<unknown>(null);
+  const [search, setSearch] = useState("");
+  const [hash, setHash] = useState("");
 
-  return {
-    pathname,
-    search: typeof window !== "undefined" ? window.location.search : "",
-    hash: typeof window !== "undefined" ? window.location.hash : "",
-    state,
-  };
+  useEffect(() => {
+    const raw = sessionStorage.getItem(stateKey(pathname));
+    try {
+      setState(raw ? JSON.parse(raw) : null);
+    } catch {
+      setState(null);
+    }
+    setSearch(window.location.search);
+    setHash(window.location.hash);
+  }, [pathname]);
+
+  return { pathname, search, hash, state };
 }
 
 export function useParams(): UseParamsResult {

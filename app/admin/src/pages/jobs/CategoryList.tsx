@@ -24,16 +24,15 @@ export default function CategoryList() {
     { key: 'name', label: 'Category Name', sortable: true },
     { key: 'slug', label: 'Slug', sortable: true },
     {
-      key: 'job_list_count', label: 'Job List', render: (row: any) => {
+      key: 'navigate', label: 'Navigate To', render: (row: any) => {
         const count = typeof row.job_list_count === 'number' ? row.job_list_count : 0;
         return (
           <Link
             to={`/jobs/list?jobCategoryId=${row._id}`}
-            title="View / add job listings for this category"
-            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-primary-200 bg-primary-50/60 hover:bg-primary-100 transition-colors"
+            title={`Job List: ${count} record(s)`}
+            className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md bg-primary-600 text-white hover:bg-primary-700 text-xs font-medium whitespace-nowrap transition-colors"
           >
-            <span className="inline-flex items-center justify-center min-w-[1.375rem] h-5 px-1.5 rounded-full bg-primary-600 text-white text-[10px] font-semibold">{count}</span>
-            <span className="text-xs font-medium text-primary-700">Job List</span>
+            <span>Job List ( {count} )</span>
           </Link>
         );
       },

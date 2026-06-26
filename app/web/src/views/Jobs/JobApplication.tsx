@@ -184,67 +184,52 @@ const JobApplicationForm = () => {
     setSubmitting(true);
     setSubmitError("");
     try {
-      /* Step 1: upload the resume to the content API (public create,
-         scoped to PDF/Word mimetypes). Returns a resume doc id we
-         attach to the applicant below. */
-      let resumeMediaId: string | number | null = null;
-      if (formData.upload_resume instanceof File) {
-        const mediaForm = new FormData();
-        mediaForm.append("file", formData.upload_resume);
-        mediaForm.append(
-          "_payload",
-          JSON.stringify({
-            applicant_name: `${formData.first_name} ${formData.last_name}`.trim(),
-          }),
-        );
-        const mediaRes = await fetch("/content-api/job-resumes", {
-          method: "POST",
-          body: mediaForm,
-        });
-        if (!mediaRes.ok) {
-          throw new Error(`Resume upload failed (HTTP ${mediaRes.status}).`);
-        }
-        const mediaBody = await mediaRes.json();
-        resumeMediaId = mediaBody?.doc?.id ?? null;
-      }
-
-      /* Step 2: build a structured cover_letter / notes blob so
-         the rich form fields (experience, CTC, notice period,
-         work preferences, portfolio link) survive even though the
-         JobApplicants schema doesn't model them as first-class
-         fields. Add them on the collection later if Anil wants. */
+      /* Build a structured cover_letter / notes blob so the rich
+         form fields (CTC, notice period, work preferences) survive
+         even though the JobApplicants schema doesn't model them as
+         first-class fields. Add them on the collection later if
+         Anil wants. */
       const notesBlob = [
-        formData.experience && `Experience: ${formData.experience}`,
         formData.current_ctc && `Current CTC: ${formData.current_ctc}`,
         formData.annual_ctc && `Expected CTC: ${formData.annual_ctc}`,
         formData.notice_period_days &&
           `Notice period (days): ${formData.notice_period_days}`,
-        formData.linkedin_profile && `LinkedIn: ${formData.linkedin_profile}`,
-        formData.portfolio_link && `Portfolio: ${formData.portfolio_link}`,
         formData.job_prefrence && `Job preference: ${formData.job_prefrence}`,
         formData.work_type && `Work type: ${formData.work_type}`,
-        formData.state && `State: ${formData.state}`,
-        formData.country && `Country: ${formData.country}`,
       ]
         .filter(Boolean)
         .join("\n");
 
-      /* Step 3: POST the application doc. job_id is the
-         relationship to the parent Jobs doc (resolved in the
-         useEffect above from the slug). */
-      const applicantPayload: Record<string, unknown> = {
-        name: `${formData.first_name} ${formData.last_name}`.trim(),
-        email: formData.email,
-        phone: formData.phone_no,
-        cover_letter: notesBlob,
-      };
-      if (jobIdRef.current != null) applicantPayload.job_id = jobIdRef.current;
-      if (resumeMediaId != null) applicantPayload.resume = resumeMediaId;
+      /* The Express api only exposes ONE endpoint for applications
+         (POST /job/applicants), which expects a single multipart
+         request: the resume file under `applicant_resume` alongside
+         the applicant's fields — there's no separate resume-upload
+         endpoint. job_list_id is the relationship to the parent
+         Jobs doc (resolved in the useEffect above from the slug). */
+      const applicantForm = new FormData();
+      if (jobIdRef.current != null) {
+        applicantForm.append("job_list_id", String(jobIdRef.current));
+      }
+      applicantForm.append(
+        "applicant_name",
+        `${formData.first_name} ${formData.last_name}`.trim(),
+      );
+      applicantForm.append("applicant_email", formData.email);
+      applicantForm.append("applicant_phone", formData.phone_no);
+      applicantForm.append("cover_letter", notesBlob);
+      applicantForm.append("state", formData.state);
+      applicantForm.append("country", formData.country);
+      applicantForm.append("experience", formData.experience);
+      applicantForm.append("linkedin_url", formData.linkedin_profile);
+      applicantForm.append("portfolio_url", formData.portfolio_link);
+      if (formData.upload_resume instanceof File) {
+        applicantForm.append("applicant_resume", formData.upload_resume);
+      }
 
       const res = await fetch("/content-api/job-applicants", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(applicantPayload),
+        headers: { Accept: "application/json" },
+        body: applicantForm,
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

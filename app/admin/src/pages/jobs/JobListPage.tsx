@@ -40,17 +40,21 @@ export default function JobListPage() {
 
   const FILTER_FIELDS = [
     { key: 'status', label: 'Status', type: 'status' as const },
-    { key: 'job_type', label: 'Job Type', type: 'select' as const, options: [
-      { value: 'full-time', label: 'Full Time' },
-      { value: 'part-time', label: 'Part Time' },
-      { value: 'contract', label: 'Contract' },
-      { value: 'internship', label: 'Internship' },
-    ]},
-    { key: 'workplace_type', label: 'Workplace', type: 'select' as const, options: [
-      { value: 'remote', label: 'Remote' },
-      { value: 'on-site', label: 'On-site' },
-      { value: 'hybrid', label: 'Hybrid' },
-    ]},
+    {
+      key: 'job_type', label: 'Job Type', type: 'select' as const, options: [
+        { value: 'full-time', label: 'Full Time' },
+        { value: 'part-time', label: 'Part Time' },
+        { value: 'contract', label: 'Contract' },
+        { value: 'internship', label: 'Internship' },
+      ]
+    },
+    {
+      key: 'workplace_type', label: 'Workplace', type: 'select' as const, options: [
+        { value: 'remote', label: 'Remote' },
+        { value: 'on-site', label: 'On-site' },
+        { value: 'hybrid', label: 'Hybrid' },
+      ]
+    },
   ];
   const columns = [
     { key: 'job_title', label: 'Job Title', sortable: true },
@@ -63,11 +67,21 @@ export default function JobListPage() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Job Listings" breadcrumbs={[{ label: 'Jobs' }, { label: 'Listings' }]}
-      columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
-      renderModal={({ id, onSuccess, onCancel }) => <JobListForm editId={id} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
+    <CrudListPage
+      title="Job Listings"
+      breadcrumbs={[{ label: 'Jobs' }, { label: 'Listings' }]}
+      columns={columns}
+      data={data}
+      loading={loading}
+      submitting={submitting}
+      pagination={pagination}
+      onPageChange={setPage}
+      onSearch={setSearch}
+      onDelete={remove}
+      filterFields={FILTER_FIELDS}
+      onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <JobListForm editId={id} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess}
+        onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Job Listing' : 'Add Job Listing'}
       modalSize="xl" onRefresh={fetchAll} />
   );

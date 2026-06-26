@@ -67,7 +67,7 @@ const createS3Upload = (folder) =>
     }),
     limits: { fileSize: 50 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-      const allowed = /jpeg|jpg|png|gif|webp|mp4|mov|avi|pdf|csv|xlsx|xls/;
+      const allowed = /jpeg|jpg|png|gif|webp|mp4|mov|avi|pdf|csv|xlsx|xls|docx?/;
       const ext = allowed.test(path.extname(file.originalname).toLowerCase());
       const mime = allowed.test(file.mimetype);
       if (ext || mime) cb(null, true);
