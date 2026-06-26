@@ -184,46 +184,34 @@ const JobApplicationForm = () => {
     setSubmitting(true);
     setSubmitError("");
     try {
-      /* Build a structured cover_letter / notes blob so the rich
-         form fields (CTC, notice period, work preferences) survive
-         even though the JobApplicants schema doesn't model them as
-         first-class fields. Add them on the collection later if
-         Anil wants. */
-      const notesBlob = [
-        formData.current_ctc && `Current CTC: ${formData.current_ctc}`,
-        formData.annual_ctc && `Expected CTC: ${formData.annual_ctc}`,
-        formData.notice_period_days &&
-          `Notice period (days): ${formData.notice_period_days}`,
-        formData.job_prefrence && `Job preference: ${formData.job_prefrence}`,
-        formData.work_type && `Work type: ${formData.work_type}`,
-      ]
-        .filter(Boolean)
-        .join("\n");
-
       /* The Express api only exposes ONE endpoint for applications
          (POST /job/applicants), which expects a single multipart
-         request: the resume file under `applicant_resume` alongside
+         request: the resume file under `resume` alongside
          the applicant's fields — there's no separate resume-upload
-         endpoint. job_list_id is the relationship to the parent
+         endpoint. jobListId is the relationship to the parent
          Jobs doc (resolved in the useEffect above from the slug). */
       const applicantForm = new FormData();
       if (jobIdRef.current != null) {
-        applicantForm.append("job_list_id", String(jobIdRef.current));
+        applicantForm.append("jobListId", String(jobIdRef.current));
       }
       applicantForm.append(
-        "applicant_name",
+        "name",
         `${formData.first_name} ${formData.last_name}`.trim(),
       );
-      applicantForm.append("applicant_email", formData.email);
-      applicantForm.append("applicant_phone", formData.phone_no);
-      applicantForm.append("cover_letter", notesBlob);
+      applicantForm.append("email", formData.email);
+      applicantForm.append("phone", formData.phone_no);
       applicantForm.append("state", formData.state);
       applicantForm.append("country", formData.country);
       applicantForm.append("experience", formData.experience);
-      applicantForm.append("linkedin_url", formData.linkedin_profile);
-      applicantForm.append("portfolio_url", formData.portfolio_link);
+      applicantForm.append("linkedinUrl", formData.linkedin_profile);
+      applicantForm.append("portfolioUrl", formData.portfolio_link);
+      applicantForm.append("currentCtc", formData.current_ctc);
+      applicantForm.append("annualCtc", formData.annual_ctc);
+      applicantForm.append("noticePeriodDays", formData.notice_period_days);
+      applicantForm.append("jobPrefrence", formData.job_prefrence);
+      applicantForm.append("workType", formData.work_type);
       if (formData.upload_resume instanceof File) {
-        applicantForm.append("applicant_resume", formData.upload_resume);
+        applicantForm.append("resume", formData.upload_resume);
       }
 
       const res = await fetch("/content-api/job-applicants", {

@@ -30,20 +30,29 @@ const getJobDetail = async (req, res) => {
 };
 
 const storeApplicant = async (req, res) => {
-  const { job_list_id, applicant_name, applicant_email, applicant_phone, cover_letter, linkedin_url, portfolio_url, state, country, experience } = req.body;
-  if (!job_list_id || !applicant_name || !applicant_email) {
+  const {
+    jobListId, name, email, phone, coverLetter,
+    linkedinUrl, portfolioUrl, state, country, experience,
+    currentCtc, annualCtc, noticePeriodDays, jobPrefrence, workType,
+  } = req.body;
+  if (!jobListId || !name || !email) {
     return res.status(400).json({ status: 'error', message: 'Job ID, name, and email are required' });
   }
   const resumeKey = req.file ? (req.file.key || req.file.path) : null;
-  const applicant = await JobApplicant.create({ job_list_id, applicant_name, applicant_email, applicant_phone, cover_letter, linkedin_url, portfolio_url, state, country, experience, applicant_resume: resumeKey });
+  const applicant = await JobApplicant.create({
+    jobListId, name, email, phone, coverLetter,
+    linkedinUrl, portfolioUrl, state, country, experience,
+    currentCtc, annualCtc, noticePeriodDays, jobPrefrence, workType,
+    resume: resumeKey,
+  });
   res.status(201).json({ status: 'success', message: 'Application submitted successfully', data: applicant });
 };
 
 const showApplicant = async (req, res) => {
-  const applicant = await JobApplicant.findById(req.params.id).populate('job_list_id', 'job_title');
+  const applicant = await JobApplicant.findById(req.params.id).populate('jobListId', 'job_title');
   if (!applicant) return res.status(404).json({ status: 'error', message: 'Not found' });
   const obj = applicant.toObject();
-  if (obj.applicant_resume) obj.applicant_resume = `${process.env.AWS_URL}/${obj.applicant_resume}`;
+  if (obj.resume) obj.resume = `${process.env.AWS_URL}/${obj.resume}`;
   res.json({ status: 'success', data: obj });
 };
 

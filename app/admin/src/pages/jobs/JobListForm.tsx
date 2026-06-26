@@ -92,9 +92,9 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
         <label className="form-label">Experience</label>
         <MultiSelect options={EXPERIENCE_OPTIONS} value={watch('experience')} onChange={(vals) => setValue('experience', vals, { shouldDirty: true })} placeholder="Select experience" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Location</label><input {...register('job_location')} className="form-input" placeholder="e.g. Mumbai, India" /></div>
-        <div><label className="form-label">Salary</label><input {...register('job_salary')} className="form-input" placeholder="e.g. $50,000 - $70,000" /></div>
+      <div>
+        <label className="form-label">Location</label>
+        <input {...register('job_location')} className="form-input" placeholder="e.g. Mumbai, India" />
       </div>
       <div>
         <label className="form-label">Job Description</label>

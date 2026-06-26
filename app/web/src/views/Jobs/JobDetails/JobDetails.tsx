@@ -29,6 +29,18 @@ const WORK_TYPE_LABELS: Record<string, string> = {
   hybrid: "Hybrid",
 };
 
+/* job_type / work_type / experience may be saved as a single value
+   or an array of multiple selections — render either as a single,
+   comma-separated string instead of letting JSX render an array's
+   items back-to-back with no separator. */
+const joinLabels = (
+  value: string | string[] | null | undefined,
+  labels?: Record<string, string>,
+): string => {
+  const values = Array.isArray(value) ? value : value ? [value] : [];
+  return values.map((v) => labels?.[v] ?? v).join(", ");
+};
+
 const JobDetails = () => {
   const { slug } = useParams();
   const [error, setError] = useState(null);
@@ -194,19 +206,19 @@ const JobDetails = () => {
                     {jobDetails?.experience && (
                       <span className="job-details-meta-chip">
                         <FaUserClock aria-hidden="true" />
-                        {jobDetails.experience}
+                        {joinLabels(jobDetails.experience)} Year
                       </span>
                     )}
                     {jobDetails?.job_type && (
                       <span className="job-details-meta-chip">
                         <FaBriefcase aria-hidden="true" />
-                        {JOB_TYPE_LABELS[jobDetails.job_type] ?? jobDetails.job_type}
+                        {joinLabels(jobDetails.job_type, JOB_TYPE_LABELS)}
                       </span>
                     )}
                     {jobDetails?.work_type && (
                       <span className="job-details-meta-chip">
                         <FaLaptopHouse aria-hidden="true" />
-                        {WORK_TYPE_LABELS[jobDetails.work_type] ?? jobDetails.work_type}
+                        {joinLabels(jobDetails.work_type, WORK_TYPE_LABELS)}
                       </span>
                     )}
                   </div>

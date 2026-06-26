@@ -134,8 +134,9 @@ export const jobApplicantApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/job/applicant`, { params }),
   getAllApplications: (params?: Record<string, any>) => api.get(`${BASE}/job/applicant/all`, { params }),
   getOne: (id: string) => api.get(`${BASE}/job/applicant/${id}`),
-  updateStatus: (id: string, status: string) => api.put(`${BASE}/job/applicant/${id}/status`, { application_status: status }),
+  updateStatus: (id: string, status: string) => api.put(`${BASE}/job/applicant/${id}/status`, { applicationStatus: status }),
   bulkDelete: (ids: string[]) => api.post(`${BASE}/job/applicant/bulk-delete`, { ids }),
+  remove: (id: string) => api.delete(`${BASE}/job/applicant/${id}`),
 };
 
 export const galleryImageApi = createCrudService('gallery/image');

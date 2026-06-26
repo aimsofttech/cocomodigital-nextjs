@@ -174,19 +174,24 @@ export interface JobList extends BaseModel {
 }
 
 export interface JobApplicant extends BaseModel {
-  job_list_id: string | JobList;
-  applicant_name: string;
-  applicant_email: string;
-  applicant_phone?: string;
-  applicant_resume?: string;
-  cover_letter?: string;
+  jobListId: string | JobList;
+  name: string;
+  email: string;
+  phone?: string;
+  resume?: string;
+  coverLetter?: string;
   state?: string;
   country?: string;
   experience?: string;
-  linkedin_url?: string;
-  portfolio_url?: string;
-  application_status: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'hired';
-  is_read: number;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  currentCtc?: string;
+  annualCtc?: string;
+  noticePeriodDays?: string;
+  jobPrefrence?: string;
+  workType?: string;
+  applicationStatus: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'hired';
+  isRead: number;
 }
 
 export interface GroupServiceCategory extends BaseModel {
