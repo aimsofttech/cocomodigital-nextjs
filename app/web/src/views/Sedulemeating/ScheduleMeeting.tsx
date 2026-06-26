@@ -50,6 +50,7 @@ function formatLongDate(date) {
     weekday: "long",
     day: "numeric",
     month: "long",
+    year: "numeric",
   });
 }
 
@@ -192,14 +193,6 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
               <span>{timezone || "Your local time"}</span>
             </li>
           </ul>
-
-          {/* ONE sentence — pitches the offer without competing with
-              the calendar action. Detailed agenda goes in the email. */}
-          <p className="schedule-host-pitch">
-            Tell me about your release. I'll send a{" "}
-            <span className="bg-highlight-yellow bg-[length:100%_100%] bg-no-repeat px-[0.15em] box-decoration-clone">free 7-day mini-strategy</span>{" "}
-            after the call — no obligation.
-          </p>
         </aside>
 
         {/* ------------------------------------------------------- *
@@ -220,33 +213,44 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
             </div>
 
             <div className="schedule-slots-pane">
-              <div className="schedule-slots-head">
-                <p className="schedule-slots-date">
-                  {formatLongDate(selectedDate)}
-                </p>
-                <div
-                  className="schedule-hour-toggle"
-                  role="tablist"
-                  aria-label="Time format"
-                >
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={hour12}
-                    className={`schedule-hour-toggle-btn ${hour12 ? "is-active" : ""}`}
-                    onClick={() => setHour12(true)}
-                  >
-                    12h
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={!hour12}
-                    className={`schedule-hour-toggle-btn ${!hour12 ? "is-active" : ""}`}
-                    onClick={() => setHour12(false)}
-                  >
-                    24h
-                  </button>
+              <div className="flex items-center justify-between gap-2 flex-wrap flex-shrink-0">
+                <div className="w-full">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-satoshi text-[1.15rem] font-black text-strong m-0 tracking-tight">
+                      <span className="inline bg-[linear-gradient(transparent_55%,var(--brand,var(--color-primary,#fff000))_55%)] bg-no-repeat px-0.5">
+                        {formatLongDate(selectedDate)}
+                      </span>
+                    </p>
+                    <div
+                      className="inline-flex bg-page-soft border-[1.5px] border-strong rounded-full p-0.5"
+                      role="tablist"
+                      aria-label="Time format"
+                    >
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={hour12}
+                        className={`font-satoshi text-[0.7rem] font-black tracking-[0.04em] rounded-full px-[9px] py-1 cursor-pointer transition-colors duration-150 ${hour12 ? "bg-strong text-page" : "bg-transparent text-muted"}`}
+                        onClick={() => setHour12(true)}
+                      >
+                        12h
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={!hour12}
+                        className={`font-satoshi text-[0.7rem] font-black tracking-[0.04em] rounded-full px-[9px] py-1 cursor-pointer transition-colors duration-150 ${!hour12 ? "bg-strong text-page" : "bg-transparent text-muted"}`}
+                        onClick={() => setHour12(false)}
+                      >
+                        24h
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[0.8rem] text-muted mt-1 mb-0">
+                    <span className="inline bg-[linear-gradient(transparent_55%,var(--brand,var(--color-primary,#fff000))_55%)] bg-no-repeat px-0.5">
+                      {timezone || "Your local time"} · 15 min · Google Meet
+                    </span>
+                  </p>
                 </div>
               </div>
 
@@ -305,6 +309,7 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
             >
               Confirm — {formatLongDate(selectedDate)} at{" "}
               {formatSlot(selectedSlot, hour12)}
+              {timezone && ` (${timezone})`}
             </button>
           )}
         </section>
