@@ -42665,7 +42665,7 @@
 
     color: var(--text-strong);
 
-    background-color: var(--bg-page);
+    background-color: var(--brand, var(--color-primary, #fff000));
 
     border: 1.5px solid var(--text-strong);
 
@@ -42721,19 +42721,39 @@
 
     padding-top: var(--space-2);
 
+    transition: color var(--motion-base);
+
+  }
+
+  .career-page-card-cta:hover {
+
+    color: var(--brand, var(--color-primary, #fff000));
+
   }
 
   .career-page-card-cta-icon {
 
     font-size: 0.78rem;
 
-    transition: transform var(--motion-tap);
+    transition: transform var(--motion-base);
 
   }
 
-  .career-page-card-main:hover .career-page-card-cta-icon {
+  /* Arrow nudges right whenever the card (or, more specifically,
+     the Read More row itself) is hovered — either trigger covers
+     hovering the card generally and hovering the CTA precisely. */
 
-    transform: translateX(4px);
+  .career-page-card-main:hover .career-page-card-cta-icon,
+
+  .career-page-card-cta:hover .career-page-card-cta-icon {
+
+    transform: translateX(6px);
+
+  }
+
+  .career-page-card-cta:hover {
+
+    text-decoration-color: var(--text-strong);
 
   }
 
