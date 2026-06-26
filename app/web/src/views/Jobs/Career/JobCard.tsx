@@ -13,36 +13,16 @@ import { ADMIN_URL } from "../../../utils/constant";
 /**
  * <JobCard /> on /career
  *
- * Simplified from the earlier "labelled 2×2 meta grid" layout.
- * Showing Experience / Employment Type / Location / Work Type
- * each with an UPPERCASE label + value chip stacked vertically
- * meant every card had ~4 separate label blocks, each with 1-3
- * yellow chips inside — and a 3-column grid of those cards on
- * desktop showed 24+ yellow chips at once. Read as messy.
- *
- * New layout puts all meta into ONE horizontal row of outline
- * chips with inline icons, drops the redundant labels (the icon
- * conveys what the chip is), and pulls yellow back to just the
- * card-level accent (top strip + offset shadow). Cleaner scan,
- * same information.
- *
- * Multi-select handling (Anshu QA #10): admin recently enabled
- * multi-select on Job Type AND Work Type, so a single role can
- * carry "Freelance + Internship + Part Time" + "On-Site +
- * Remote + Hybrid". Rendering one chip per value made the
- * matching card balloon to 9 chips while peer cards stayed at
- * 4 — broke the row's visual rhythm.
- *
- * Fix: group each multi-select array into a single chip whose
- * label is the values joined by " / ". Chip count stays a
- * stable max of 4 (location · experience · type · workplace)
- * regardless of how many options admin selected per field. Long
- * combined labels wrap to a second line inside the chip via
- * .career-page-card-meta-chip CSS rather than spilling into
- * additional chips.
+ * One chip per field (location, experience, job type, work type),
+ * icon inside the chip. When a field has multiple selected values
+ * (admin multi-select), they're joined with " / " inside that one
+ * chip rather than rendered as separate chips — keeps same-category
+ * data visually grouped instead of bleeding into a flat row of
+ * individual value chips. Always shows every value in full (no
+ * capping/truncation/"+N more").
  */
 
-/** Join an array of {label} entries into a single readable
+/** Join an array of {label} entries into a single " / "-separated
  *  string. Returns null if the array is empty/missing so the
  *  caller can suppress the chip entirely. */
 const joinLabels = (arr) => {
@@ -64,6 +44,7 @@ const JobCard = ({
   location,
 }) => {
   const locationLabel = joinLabels(location);
+  const experienceLabel = joinLabels(experience);
   const typeLabel = joinLabels(type);
   const workplaceLabel = joinLabels(workplace);
 
@@ -76,11 +57,9 @@ const JobCard = ({
         <h3 className="career-page-card-title font-primary">{title}</h3>
       </div>
 
-      {/* Single horizontal row of meta chips. Each chip is an icon
-          + value pair — replaces the previous 4-block labelled
-          grid. Multi-select arrays collapse to one chip with
-          " / "-joined values, so chip count stays consistent at
-          ≤4 regardless of how many admin-side options are picked. */}
+      {/* One chip per field, icon inside. Multi-select values join
+          with " / " inside the same chip instead of spawning a
+          separate chip per value. */}
       <div className="career-page-card-meta">
         {locationLabel && (
           <span className="career-page-card-meta-chip">
@@ -88,10 +67,10 @@ const JobCard = ({
             {locationLabel}
           </span>
         )}
-        {experience && (
+        {experienceLabel && (
           <span className="career-page-card-meta-chip">
             <FaUserClock aria-hidden="true" />
-            {`${experience} Years`}
+            {experienceLabel}
           </span>
         )}
         {typeLabel && (

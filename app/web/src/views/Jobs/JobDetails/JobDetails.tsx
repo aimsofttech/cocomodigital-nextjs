@@ -206,7 +206,7 @@ const JobDetails = () => {
                     {jobDetails?.experience && (
                       <span className="job-details-meta-chip">
                         <FaUserClock aria-hidden="true" />
-                        {joinLabels(jobDetails.experience)} Year
+                        {joinLabels(jobDetails.experience)}
                       </span>
                     )}
                     {jobDetails?.job_type && (

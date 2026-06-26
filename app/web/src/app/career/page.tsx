@@ -21,33 +21,35 @@ const humaniseEnum = (v?: string | null): string | null => {
     .join(" ");
 };
 
-/* Wrap a scalar enum/text value as an array of `{label}` entries —
-   the shape JobCard's `joinLabels()` helper consumes. JobCard
-   was designed for multi-select fields (admin can pick multiple
-   job_types per role) so it iterates an array. Our schema today
-   stores single-select strings, so we singleton-wrap. Returns
-   undefined for empty values so the chip suppresses cleanly. */
-const wrapAsLabels = (v?: string | null) => {
-  const label = humaniseEnum(v);
-  return label ? [{ label }] : undefined;
+/* Wrap an array of raw values into the `{label}[]` shape JobCard's
+   `joinLabels()` helper consumes, humanising each entry (snake_case
+   enum codes → display text). Returns undefined for empty arrays so
+   the chip group suppresses cleanly. */
+const wrapEnumLabels = (v?: string[] | string | null) => {
+  const arr = Array.isArray(v) ? v : v ? [v] : [];
+  const labels = arr.map(humaniseEnum).filter(Boolean) as string[];
+  return labels.length ? labels.map((label) => ({ label })) : undefined;
+};
+
+/* Same shape, but the values are already display-ready (experience
+   labels are humanised upstream in content.ts) or a single scalar
+   (location) — no enum humanising needed, just wrap. */
+const wrapAsLabels = (v?: string[] | string | null) => {
+  const arr = Array.isArray(v) ? v : v ? [v] : [];
+  return arr.length ? arr.map((label) => ({ label })) : undefined;
 };
 
 /* Adapter: the API job → the legacy shape the Career view's
    JobCard component expects. Field renames: title→job_title,
    slug→job_slug, etc. Once the JobCard is refactored to read
-   the API shapes directly, this adapter goes away.
-   Phase 5+ 2026-05-22: previously passed scalar strings for
-   job_type / workplace_type / job_location, but JobCard expected
-   array-of-`{label}` (legacy multi-select shape) and silently
-   suppressed all three chips. Wrap each via wrapAsLabels so the
-   chips render. */
+   the API shapes directly, this adapter goes away. */
 const adaptJob = (j: any) => ({
   id: j.id,
   job_title: j.title,
   job_slug: j.slug,
-  job_experience: j.experience,
-  job_type: wrapAsLabels(j.job_type),
-  workplace_type: wrapAsLabels(j.work_type),
+  job_experience: wrapAsLabels(j.experience),
+  job_type: wrapEnumLabels(j.job_type),
+  workplace_type: wrapEnumLabels(j.work_type),
   job_location: wrapAsLabels(j.location),
   job_salary: j.salary_range,
   display_order: j.order,

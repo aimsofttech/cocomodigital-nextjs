@@ -330,8 +330,9 @@ interface MongoJob {
   job_title?: string;
   job_slug?: string;
   job_experience?: string;
-  job_type?: string;
-  workplace_type?: string;
+  experience?: string[];
+  job_type?: string | string[];
+  workplace_type?: string | string[];
   job_location?: string;
   job_salary?: string | null;
   job_description?: string;
@@ -343,6 +344,48 @@ interface MongoJob {
   job_category_id?: { _id?: string; name?: string; slug?: string } | string | null;
 }
 
+/* Multi-select fields (job_type / workplace_type) have been saved in
+   three different shapes across the data's history: a real array
+   (current schema), a single scalar string (legacy single-select),
+   or a comma-joined string (legacy multi-select, e.g.
+   "full_time,freelance,internship"). Normalise all three into a
+   plain string array so downstream humanising/label-mapping always
+   operates on individual values instead of mangling a joined blob. */
+const splitMulti = (v?: string | string[] | null): string[] => {
+  const arr = Array.isArray(v) ? v : v ? [v] : [];
+  return arr.flatMap((s) =>
+    typeof s === "string" ? s.split(",").map((x) => x.trim()) : s,
+  ).filter(Boolean);
+};
+
+/* Experience has the same multi-shape problem as job_type, plus the
+   legacy single-select values are raw codes ("1-2", "5", "0") rather
+   than display labels. Humanise each code into a readable label;
+   values that already look like a label (contain "year") pass
+   through untouched. */
+const humaniseExperienceCode = (v: string): string | null => {
+  if (!v) return null;
+  if (/year/i.test(v)) return v;
+  if (v === "0") return "Fresher";
+  const range = v.match(/^(\d+)\s*-\s*(\d+)$/);
+  if (range) return `${range[1]} - ${range[2]} Years`;
+  if (/^\d+\+?$/.test(v)) return `${v} Years`;
+  return v;
+};
+
+/* The new schema's `experience` array takes priority when populated;
+   otherwise fall back to the legacy scalar `job_experience` field —
+   most existing job postings only ever had the legacy field set. */
+const normaliseExperience = (m: MongoJob): string[] => {
+  const source =
+    Array.isArray(m.experience) && m.experience.length
+      ? m.experience
+      : m.job_experience
+        ? [m.job_experience]
+        : [];
+  return source.map(humaniseExperienceCode).filter(Boolean) as string[];
+};
+
 const adaptJob = (m: MongoJob) => {
   const cat = m.job_category_id;
   return {
@@ -350,8 +393,9 @@ const adaptJob = (m: MongoJob) => {
     id: m._id,
     slug: m.job_slug,
     title: m.job_title,
-    experience: m.job_experience,
-    work_type: m.workplace_type,
+    experience: normaliseExperience(m),
+    job_type: splitMulti(m.job_type),
+    work_type: splitMulti(m.workplace_type),
     location: m.job_location,
     salary_range: m.job_salary ?? undefined,
     description: m.job_description,
@@ -1056,7 +1100,13 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
   },
   jobs: {
     list: async (opts) => {
-      const data = await apiGet<MongoJob[]>("/job/list", {
+      /* `/job/list` is the paginated admin-style endpoint and
+         defaults to limit=10 server-side when no page params are
+         sent — it was silently capping the public listing to the
+         first 10 active jobs. `/job` (no path suffix) is the
+         unrestricted "all active jobs" endpoint; use that instead
+         so every active job shows up. */
+      const data = await apiGet<MongoJob[]>("/job", {
         revalidate: opts.revalidate,
       });
       return listResult((data ?? []).map(adaptJob), opts.limit);

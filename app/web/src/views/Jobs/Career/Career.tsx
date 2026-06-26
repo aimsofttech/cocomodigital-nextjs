@@ -160,17 +160,26 @@ const Career = ({
           };
           return ov[v] || v.split(/[_\s]+/).map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
         };
+        /* job_type / work_type are arrays of raw snake_case codes —
+           humanise each entry. */
+        const wrapEnum = (v: any) => {
+          const arr = Array.isArray(v) ? v : v ? [v] : [];
+          const labels = arr.map(humanise).filter(Boolean);
+          return labels.length ? labels.map((label) => ({ label })) : undefined;
+        };
+        /* experience / location are already display-ready (content.ts
+           humanises experience codes upstream) — just wrap. */
         const wrap = (v: any) => {
-          const l = humanise(v);
-          return l ? [{ label: l }] : undefined;
+          const arr = Array.isArray(v) ? v : v ? [v] : [];
+          return arr.length ? arr.map((label) => ({ label })) : undefined;
         };
         const adapted = (body?.docs || []).map((j: any) => ({
           id: j.id,
           job_title: j.title,
           job_slug: j.slug,
-          job_experience: j.experience,
-          job_type: wrap(j.job_type),
-          workplace_type: wrap(j.work_type),
+          job_experience: wrap(j.experience),
+          job_type: wrapEnum(j.job_type),
+          workplace_type: wrapEnum(j.work_type),
           job_location: wrap(j.location),
           category_name:
             typeof j.category === "object" ? j.category?.name : undefined,
