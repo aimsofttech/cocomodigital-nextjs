@@ -48278,9 +48278,9 @@
 
     display: grid;
 
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: minmax(320px, 340px) 1fr;
 
-    gap: var(--space-4);
+    gap: var(--space-2);
 
     height: 440px;
 
