@@ -175,6 +175,8 @@ export const meetingApi = {
   getOne: (id: string) => api.get(`${BASE}/meetings/${id}`),
   confirm: (id: string) => api.put(`${BASE}/meetings/${id}/confirm`),
   reject: (id: string) => api.put(`${BASE}/meetings/${id}/reject`),
+  reschedule: (id: string, data: { meetingDate: string; meetingTime: string }) =>
+    api.put(`${BASE}/meetings/${id}/reschedule`, data),
   updateStatus: (id: string, status: string) => api.put(`${BASE}/meetings/${id}/status`, { status }),
   delete: (id: string) => api.delete(`${BASE}/meetings/${id}`),
 };

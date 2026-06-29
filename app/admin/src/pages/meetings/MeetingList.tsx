@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import Calendar from 'react-calendar';
 import { meetingApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
@@ -10,10 +11,54 @@ import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Tooltip from '@/components/ui/Tooltip';
 import {
-  EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon,
+  EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon, ArrowPathIcon,
   CalendarDaysIcon, EnvelopeIcon, PhoneIcon, BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+
+// 10:00–18:45 in 15-minute steps — mirrors the public booking page's slot grid.
+const RESCHEDULE_SLOTS: string[] = (() => {
+  const slots: string[] = [];
+  for (let h = 10; h < 19; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  }
+  return slots;
+})();
+
+// A meeting whose scheduled slot has already passed without being resolved.
+function isExpired(row: any): boolean {
+  if (row.meeting_start_utc) {
+    const t = new Date(row.meeting_start_utc).getTime();
+    if (!Number.isNaN(t)) return t < Date.now();
+  }
+  if (!row.meetingDate) return false;
+  const t = new Date(`${row.meetingDate}T${(row.meetingTime || '00:00').slice(0, 5)}`).getTime();
+  return !Number.isNaN(t) && t < Date.now();
+}
+
+function isSameLocalDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+// Local YYYY-MM-DD (not toISOString, which would shift the date across UTC midnight).
+function dateToYMD(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function formatLongDate(d: Date): string {
+  return d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// "14:30" -> "2:30 PM" when hour12, otherwise passed through unchanged.
+function formatSlotLabel(slot24: string, hour12: boolean): string {
+  if (!hour12) return slot24;
+  const [h, m] = slot24.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -63,6 +108,10 @@ export default function MeetingList() {
   // Confirmation modals
   const [confirmTarget, setConfirmTarget] = useState<any>(null);
   const [rejectTarget, setRejectTarget] = useState<any>(null);
+  const [rescheduleTarget, setRescheduleTarget] = useState<any>(null);
+  const [rescheduleDate, setRescheduleDate] = useState<Date>(new Date());
+  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [rescheduleHour12, setRescheduleHour12] = useState(true);
 
   const [stats, setStats] = useState<Record<string, number>>({});
 
@@ -132,6 +181,55 @@ export default function MeetingList() {
       setActionLoading(false);
     }
   };
+
+  const openReschedule = (row: any) => {
+    setRescheduleTarget(row);
+    setRescheduleDate(new Date());
+    setRescheduleTime('');
+  };
+  const closeReschedule = () => {
+    if (actionLoading) return;
+    setRescheduleTarget(null);
+    setRescheduleDate(new Date());
+    setRescheduleTime('');
+  };
+
+  // Called after the user picks a new date/time and clicks "Reschedule & Notify"
+  const executeReschedule = async () => {
+    if (!rescheduleTarget || !rescheduleTime) return;
+    setActionLoading(true);
+    try {
+      await meetingApi.reschedule(rescheduleTarget._id, { meetingDate: dateToYMD(rescheduleDate), meetingTime: rescheduleTime });
+      toast.success('Meeting rescheduled and emails sent');
+      if (selected?._id === rescheduleTarget._id) setSelected(null);
+      closeReschedule();
+      fetchData();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Failed to reschedule meeting');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Drop a previously-picked time when the calendar date changes — a slot valid
+  // on one day isn't necessarily valid (or even rendered) on another.
+  useEffect(() => {
+    setRescheduleTime('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rescheduleDate]);
+
+  // Hide already-passed slots when the selected day is today (soft UX guard —
+  // the backend still re-validates against the meeting's actual timezone).
+  const visibleRescheduleSlots = useMemo(() => {
+    const now = new Date();
+    if (!isSameLocalDay(rescheduleDate, now)) return RESCHEDULE_SLOTS;
+    return RESCHEDULE_SLOTS.filter((slot) => {
+      const [h, m] = slot.split(':').map(Number);
+      const slotDate = new Date(rescheduleDate);
+      slotDate.setHours(h, m, 0, 0);
+      return slotDate.getTime() > now.getTime();
+    });
+  }, [rescheduleDate]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -222,26 +320,6 @@ export default function MeetingList() {
                   <EyeIcon className="w-4 h-4" />
                 </button>
               </Tooltip>
-              {row.status === 'pending' && (
-                <>
-                  <Tooltip content="Confirm meeting">
-                    <button
-                      onClick={() => setConfirmTarget(row)}
-                      className="p-1.5 rounded hover:bg-green-50 text-green-600"
-                    >
-                      <CheckCircleIcon className="w-4 h-4" />
-                    </button>
-                  </Tooltip>
-                  <Tooltip content="Reject meeting">
-                    <button
-                      onClick={() => setRejectTarget(row)}
-                      className="p-1.5 rounded hover:bg-orange-50 text-orange-500"
-                    >
-                      <XCircleIcon className="w-4 h-4" />
-                    </button>
-                  </Tooltip>
-                </>
-              )}
               <Tooltip content="Delete">
                 <button
                   onClick={() => setDeleteId(row._id)}
@@ -282,22 +360,42 @@ export default function MeetingList() {
                   className="text-blue-600 underline break-all">{selected.meetLink}</a>
               </div>
             )}
-            {selected.status === 'pending' && (
-              <div className="flex gap-3 pt-2 border-t">
-                <button
-                  onClick={() => { setSelected(null); setConfirmTarget(selected); }}
-                  className="btn-primary flex-1"
-                >
-                  Confirm Meeting
-                </button>
-                <button
-                  onClick={() => { setSelected(null); setRejectTarget(selected); }}
-                  className="btn-secondary flex-1 !border-red-300 !text-red-600 hover:!bg-red-50"
-                >
-                  Reject Meeting
-                </button>
-              </div>
-            )}
+            <div className="flex gap-3 pt-2 border-t flex-wrap">
+              <button
+                onClick={() => { setSelected(null); setConfirmTarget(selected); }}
+                disabled={selected.status !== 'pending' || isExpired(selected)}
+                title={
+                  selected.status !== 'pending'
+                    ? `This meeting has already been ${selected.status}`
+                    : isExpired(selected)
+                    ? 'This meeting slot has already passed — reschedule it instead'
+                    : undefined
+                }
+                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Confirm Meeting
+              </button>
+              <button
+                onClick={() => { setSelected(null); setRejectTarget(selected); }}
+                disabled={selected.status !== 'pending' || isExpired(selected)}
+                title={
+                  selected.status !== 'pending'
+                    ? `This meeting has already been ${selected.status}`
+                    : isExpired(selected)
+                    ? 'This meeting slot has already passed — reschedule it instead'
+                    : undefined
+                }
+                className="btn-secondary flex-1 !border-red-300 !text-red-600 hover:!bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Reject Meeting
+              </button>
+              <button
+                onClick={() => { setSelected(null); openReschedule(selected); }}
+                className="btn-secondary flex-1 !border-purple-300 !text-purple-600 hover:!bg-purple-50"
+              >
+                Reschedule Meeting
+              </button>
+            </div>
           </div>
         )}
       </Modal>
@@ -408,6 +506,106 @@ export default function MeetingList() {
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white font-medium text-sm hover:bg-orange-600 disabled:opacity-60 transition-colors"
               >
                 {actionLoading ? 'Rejecting…' : 'Yes, Reject'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Reschedule meeting modal ─────────────────────────────────────────── */}
+      <Modal isOpen={!!rescheduleTarget} onClose={closeReschedule} title="Reschedule Meeting" size="xl">
+        {rescheduleTarget && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                <ArrowPathIcon className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">{rescheduleTarget.userName}</p>
+                <p className="text-sm text-gray-500">
+                  Previously: {rescheduleTarget.meetingDate}{rescheduleTarget.meetingTime ? ` · ${rescheduleTarget.meetingTime}` : ''}
+                  {rescheduleTarget.meetingTimezone ? ` (${rescheduleTarget.meetingTimezone})` : ''} — expired
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Left: calendar */}
+              <div className="reschedule-calendar border border-gray-200 rounded-xl p-3">
+                <Calendar
+                  onChange={(d) => setRescheduleDate(d as Date)}
+                  value={rescheduleDate}
+                  minDate={new Date()}
+                  prev2Label={null}
+                  next2Label={null}
+                />
+              </div>
+
+              {/* Right: date header + time-slot grid */}
+              <div className="flex flex-col min-h-0">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div>
+                    <p className="font-bold text-gray-900 text-sm leading-tight">{formatLongDate(rescheduleDate)}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {rescheduleTarget.meetingTimezone || 'Local time'} · 15 min · Google Meet
+                    </p>
+                  </div>
+                  <div className="inline-flex bg-gray-100 border border-gray-200 rounded-full p-0.5 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setRescheduleHour12(true)}
+                      className={`text-xs font-bold rounded-full px-2.5 py-1 transition-colors ${rescheduleHour12 ? 'bg-gray-900 text-white' : 'text-gray-500'}`}
+                    >
+                      12h
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRescheduleHour12(false)}
+                      className={`text-xs font-bold rounded-full px-2.5 py-1 transition-colors ${!rescheduleHour12 ? 'bg-gray-900 text-white' : 'text-gray-500'}`}
+                    >
+                      24h
+                    </button>
+                  </div>
+                </div>
+
+                {visibleRescheduleSlots.length === 0 ? (
+                  <p className="text-sm text-gray-400 py-4">No more slots today — pick another date.</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 overflow-y-auto max-h-64 pr-1">
+                    {visibleRescheduleSlots.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setRescheduleTime(slot)}
+                        className={`text-sm font-semibold px-2 py-2 rounded-lg border transition-colors ${
+                          rescheduleTime === slot
+                            ? 'bg-purple-600 text-white border-purple-600'
+                            : 'border-gray-200 hover:border-purple-400 text-gray-700'
+                        }`}
+                      >
+                        {formatSlotLabel(slot, rescheduleHour12)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500">
+              A new Google Meet link will be generated and emails will be sent to both{' '}
+              <span className="font-medium text-gray-700">{rescheduleTarget.userName}</span> and the owner.
+            </p>
+
+            <div className="flex gap-3">
+              <button onClick={closeReschedule} className="btn-secondary flex-1" disabled={actionLoading}>
+                Cancel
+              </button>
+              <button
+                onClick={executeReschedule}
+                disabled={actionLoading || !rescheduleTime}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-purple-600 text-white font-medium text-sm hover:bg-purple-700 disabled:opacity-60 transition-colors"
+              >
+                {actionLoading ? 'Rescheduling…' : 'Reschedule & Notify'}
               </button>
             </div>
           </div>

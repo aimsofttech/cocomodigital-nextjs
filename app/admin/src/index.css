@@ -95,6 +95,62 @@
   .sidebar-link-active {
     @apply sidebar-link bg-primary-50 text-primary-700 hover:bg-primary-50;
   }
+
+  /* ── react-calendar reskin (Reschedule Meeting modal) ─────────────────────
+     Fully Tailwind-driven — no react-calendar/dist/Calendar.css import, so
+     this is the only source of layout/visual styling for the calendar.
+     Scoped under .reschedule-calendar so it can't affect anything else. ── */
+  .reschedule-calendar .react-calendar {
+    @apply w-full border-none bg-transparent font-sans;
+  }
+  .reschedule-calendar .react-calendar__navigation {
+    @apply flex items-center mb-2 h-9;
+  }
+  .reschedule-calendar .react-calendar__navigation__label {
+    @apply flex-grow text-center text-sm font-bold text-gray-900 rounded-md py-1.5;
+  }
+  .reschedule-calendar .react-calendar__navigation button {
+    @apply text-sm font-bold text-gray-700 bg-transparent rounded-md min-w-[32px] transition-colors;
+  }
+  .reschedule-calendar .react-calendar__navigation button:enabled:hover,
+  .reschedule-calendar .react-calendar__navigation button:enabled:focus {
+    @apply bg-primary-50 text-primary-700;
+  }
+  .reschedule-calendar .react-calendar__navigation button:disabled {
+    @apply opacity-30 bg-transparent;
+  }
+  .reschedule-calendar .react-calendar__month-view__weekdays {
+    @apply grid grid-cols-7 mb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400;
+  }
+  .reschedule-calendar .react-calendar__month-view__weekdays__weekday {
+    @apply text-center py-1;
+  }
+  .reschedule-calendar .react-calendar__month-view__weekdays abbr {
+    @apply no-underline cursor-default;
+  }
+  .reschedule-calendar .react-calendar__month-view__days {
+    @apply grid grid-cols-7 gap-y-0.5;
+  }
+  .reschedule-calendar .react-calendar__tile {
+    @apply text-sm font-medium text-gray-700 bg-transparent rounded-md py-2 transition-colors;
+  }
+  .reschedule-calendar .react-calendar__tile:enabled:hover {
+    @apply bg-primary-50;
+  }
+  .reschedule-calendar .react-calendar__tile--now {
+    @apply bg-primary-50 text-primary-700 font-bold;
+  }
+  .reschedule-calendar .react-calendar__tile:disabled {
+    @apply text-gray-300 bg-transparent cursor-not-allowed;
+  }
+  .reschedule-calendar .react-calendar__month-view__days__day--neighboringMonth {
+    @apply text-gray-300;
+  }
+  .reschedule-calendar .react-calendar__tile--active,
+  .reschedule-calendar .react-calendar__tile--active:enabled:hover,
+  .reschedule-calendar .react-calendar__tile--active:enabled:focus {
+    @apply bg-primary-600 text-white font-bold;
+  }
 }
 
 /* ── Job Categories table — themed with the admin primary color

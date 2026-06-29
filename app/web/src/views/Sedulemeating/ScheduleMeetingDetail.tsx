@@ -266,14 +266,6 @@ const ScheduleMeetingDetails = () => {
             <li><FaVideo aria-hidden="true" /><span>Google Meet</span></li>
             <li><FaGlobeAsia aria-hidden="true" /><span>{pickedTz || "Your local time"}</span></li>
           </ul>
-
-          <p className="schedule-host-pitch">
-            Tell me about your release. I'll send a{" "}
-            <span className="bg-highlight-yellow bg-[length:100%_100%] bg-no-repeat px-[0.15em] box-decoration-clone">
-              free 7-day mini-strategy
-            </span>{" "}
-            after the call — no obligation.
-          </p>
         </aside>
 
         {/* ── Right: booking summary + 2-step form ── */}

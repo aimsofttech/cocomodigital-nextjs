@@ -1,6 +1,7 @@
 const Meeting = require('../../models/Meeting');
 const { createMeetingEvent } = require('../../services/calendarService');
-const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail } = require('../../services/bookingMailer');
+const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails } = require('../../services/bookingMailer');
+const { zonedTimeToUtc } = require('../../utils/timezone');
 const logger = require('../../utils/logger');
 
 // GET /admin/api/meetings
@@ -96,6 +97,86 @@ const confirm = async (req, res) => {
   res.json({ status: 'success', message: 'Meeting confirmed and emails sent', data: doc });
 };
 
+// PUT /admin/api/meetings/:id/reschedule
+// Admin picks a new date/time for a meeting (typically one whose original slot
+// already expired), regenerates the Google Meet link for the new slot, and
+// notifies both the user and the owner. Keeps the meeting's original timezone
+// so the wall-clock time stays meaningful to the visitor who requested it.
+const reschedule = async (req, res) => {
+  const { meetingDate, meetingTime } = req.body;
+  if (!meetingDate || !meetingTime) {
+    return res.status(400).json({ status: 'error', message: 'meetingDate and meetingTime are required' });
+  }
+
+  const doc = await Meeting.findById(req.params.id);
+  if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
+
+  const timezone = doc.meetingTimezone || process.env.BOOKING_TIMEZONE || 'Asia/Kolkata';
+  const startUtc = zonedTimeToUtc(meetingDate, meetingTime, timezone);
+  if (!startUtc) return res.status(400).json({ status: 'error', message: 'Invalid meetingDate/meetingTime' });
+  if (startUtc.getTime() <= Date.now()) {
+    return res.status(400).json({ status: 'error', message: 'Please pick a time in the future' });
+  }
+
+  const slot_key = startUtc.toISOString().slice(0, 16);
+  const clash = await Meeting.findOne({
+    _id: { $ne: doc._id },
+    slot_key,
+    status: { $in: ['pending', 'confirmed'] },
+  }).lean();
+  if (clash) {
+    return res.status(409).json({ status: 'error', message: 'That time slot is already booked. Please pick another.' });
+  }
+
+  const { meetLink, eventId, htmlLink } = await createMeetingEvent({
+    name: doc.userName,
+    email: doc.email,
+    service: doc.service,
+    message: doc.notes,
+    notes: doc.notes,
+    meeting_date: meetingDate,
+    meeting_time: meetingTime,
+    meeting_timezone: timezone,
+  });
+
+  doc.meetingDate = meetingDate;
+  doc.meetingTime = meetingTime;
+  doc.meetingTimezone = timezone;
+  doc.meeting_start_utc = startUtc;
+  doc.slot_key = slot_key;
+  doc.status = 'confirmed';
+  doc.meetLink = meetLink || null;
+  doc.meetId = eventId || null;
+  doc.google_event_id = eventId || null;
+  doc.google_html_link = htmlLink || null;
+  doc.confirmedBy = req.user?._id || req.user?.id || null;
+  doc.confirmedAt = new Date();
+  doc.rescheduledBy = req.user?._id || req.user?.id || null;
+  doc.rescheduledAt = new Date();
+
+  try {
+    await doc.save();
+  } catch (err) {
+    if (err && err.code === 11000) {
+      return res.status(409).json({ status: 'error', message: 'That time slot was just booked. Please pick another.' });
+    }
+    throw err;
+  }
+
+  (async () => {
+    await sendMeetingRescheduledEmails({
+      name: doc.userName,
+      email: doc.email,
+      phone: doc.phone,
+      meetingDate: doc.meetingDate,
+      meetingTime: doc.meetingTime,
+      meetLink: doc.meetLink,
+    });
+  })().catch((e) => logger.error('reschedule email error:', e));
+
+  res.json({ status: 'success', message: 'Meeting rescheduled and emails sent', data: doc });
+};
+
 // PUT /admin/api/meetings/:id/reject
 const reject = async (req, res) => {
   const doc = await Meeting.findById(req.params.id);
@@ -130,4 +211,4 @@ const destroy = async (req, res) => {
   res.json({ status: 'success', message: 'Deleted successfully' });
 };
 
-module.exports = { index, stats, show, confirm, reject, updateStatus, destroy };
+module.exports = { index, stats, show, confirm, reject, reschedule, updateStatus, destroy };

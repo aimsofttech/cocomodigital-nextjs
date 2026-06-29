@@ -30,6 +30,10 @@ const meetingSchema = new mongoose.Schema({
   confirmedBy: { type: mongoose.Schema.Types.Mixed, default: null },
   confirmedAt: { type: Date, default: null },
   rejectedAt: { type: Date, default: null },
+
+  // Populated when an admin reschedules an expired/pending meeting to a new slot.
+  rescheduledBy: { type: mongoose.Schema.Types.Mixed, default: null },
+  rescheduledAt: { type: Date, default: null },
 }, { timestamps: true, collection: 'meetings' });
 
 // Prevent two confirmed meetings at the same slot (race-proof via unique index).

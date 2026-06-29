@@ -22,6 +22,18 @@ const esc = (v) =>
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
+// Convert a 24h "HH:mm" / "HH:mm:ss" time string to "h:mm AM/PM". Returns the
+// input unchanged if it doesn't look like a time string.
+const formatTime12 = (time) => {
+  const m = /^(\d{1,2}):(\d{2})/.exec(String(time || '').trim());
+  if (!m) return time;
+  let h = parseInt(m[1], 10);
+  const min = m[2];
+  const period = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${min} ${period}`;
+};
+
 // Derive a readable slot line from structured fields, or parse it out of the
 // free-text `notes` the booking page sends ("Slot: 2026-06-20 14:30 (Asia/Kolkata)").
 const resolveSlot = (b) => {
@@ -192,15 +204,17 @@ const sendMeetingRequestEmails = async (booking = {}) => {
  * Step 4: Admin confirms the meeting — send Meet link to both parties.
  */
 const sendMeetingConfirmedEmails = async (booking = {}) => {
-  const slot = resolveSlot(booking);
+  const dateDisplay = booking.meetingDate || booking.meeting_date;
+  const timeDisplay = formatTime12(booking.meetingTime || booking.meeting_time);
+  const slot = [dateDisplay, timeDisplay].filter(Boolean).join(' ');
   const visitorName = booking.name || booking.userName || 'there';
   const meetLink = booking.meetLink || '';
 
   const userHtml = shell(
     'Meeting Confirmed',
     meetRow(meetLink) +
-    row('Date', booking.meetingDate || booking.meeting_date) +
-    row('Time', booking.meetingTime || booking.meeting_time) +
+    row('Date', dateDisplay) +
+    row('Time', timeDisplay) +
     row('Duration', '15 Minutes'),
     `Your meeting request has been approved. Please join the meeting using the link below.`
   );
@@ -211,8 +225,8 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
     row('User Name', visitorName) +
     row('Email', booking.email) +
     row('Phone', booking.phone) +
-    row('Date', booking.meetingDate || booking.meeting_date) +
-    row('Time', booking.meetingTime || booking.meeting_time),
+    row('Date', dateDisplay) +
+    row('Time', timeDisplay),
     `A meeting has been confirmed with the following user.`
   );
 
@@ -230,7 +244,7 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
           replyTo: ownerEmail(),
           subject: 'Meeting Confirmed',
           html: userHtml,
-          text: `Your meeting request has been approved.\nDate: ${booking.meetingDate || booking.meeting_date || 'n/a'}\nTime: ${booking.meetingTime || booking.meeting_time || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
+          text: `Your meeting request has been approved.\nDate: ${dateDisplay || 'n/a'}\nTime: ${timeDisplay || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
         })
       : Promise.resolve({ sent: false, skipped: true }),
   ]);
@@ -238,6 +252,62 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
   const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
   const result = { owner: unwrap(owner), user: unwrap(user) };
   logger.info(`Meeting confirmed emails: owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)} user=${JSON.stringify(result.user.sent ?? result.user.skipped)}`);
+  return result;
+};
+
+/**
+ * Admin reschedules an expired/pending meeting to a new slot — notify both
+ * parties with the updated date/time and the (re)generated Meet link.
+ */
+const sendMeetingRescheduledEmails = async (booking = {}) => {
+  const dateDisplay = booking.meetingDate || booking.meeting_date;
+  const timeDisplay = formatTime12(booking.meetingTime || booking.meeting_time);
+  const slot = [dateDisplay, timeDisplay].filter(Boolean).join(' ');
+  const visitorName = booking.name || booking.userName || 'there';
+  const meetLink = booking.meetLink || '';
+
+  const userHtml = shell(
+    'Meeting Rescheduled',
+    meetRow(meetLink) +
+    row('Date', dateDisplay) +
+    row('Time', timeDisplay) +
+    row('Duration', '15 Minutes'),
+    `Your meeting has been rescheduled to a new time. Please join using the link below at the new scheduled time.`
+  );
+
+  const ownerHtml = shell(
+    'Meeting Rescheduled',
+    meetRow(meetLink) +
+    row('User Name', visitorName) +
+    row('Email', booking.email) +
+    row('Phone', booking.phone) +
+    row('Date', dateDisplay) +
+    row('Time', timeDisplay),
+    `The meeting with the following user has been rescheduled to a new time.`
+  );
+
+  const [owner, user] = await Promise.allSettled([
+    sendMail({
+      to: ownerEmail(),
+      replyTo: booking.email,
+      subject: 'Meeting Rescheduled',
+      html: ownerHtml,
+      text: `Meeting rescheduled.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}\nGoogle Meet: ${meetLink || 'n/a'}`,
+    }),
+    booking.email
+      ? sendMail({
+          to: booking.email,
+          replyTo: ownerEmail(),
+          subject: 'Your Meeting Has Been Rescheduled',
+          html: userHtml,
+          text: `Your meeting has been rescheduled.\nDate: ${dateDisplay || 'n/a'}\nTime: ${timeDisplay || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
+        })
+      : Promise.resolve({ sent: false, skipped: true }),
+  ]);
+
+  const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
+  const result = { owner: unwrap(owner), user: unwrap(user) };
+  logger.info(`Meeting rescheduled emails: owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)} user=${JSON.stringify(result.user.sent ?? result.user.skipped)}`);
   return result;
 };
 
@@ -265,4 +335,11 @@ const sendMeetingRejectedEmail = async (booking = {}) => {
   return result;
 };
 
-module.exports = { sendBookingEmails, sendMeetingRequestEmails, sendMeetingConfirmedEmails, sendMeetingRejectedEmail, ownerEmail };
+module.exports = {
+  sendBookingEmails,
+  sendMeetingRequestEmails,
+  sendMeetingConfirmedEmails,
+  sendMeetingRejectedEmail,
+  sendMeetingRescheduledEmails,
+  ownerEmail,
+};

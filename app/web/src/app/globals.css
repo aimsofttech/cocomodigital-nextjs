@@ -48228,22 +48228,6 @@
 
   }
 
-  /* The pitch — ONE sentence with a yellow marker on the offer.
-  
-     Anything longer competes with the calendar. */
-
-  .schedule-host-pitch {
-
-    font-size: 0.9rem;
-
-    line-height: var(--leading-snug);
-
-    color: var(--text-body);
-
-    margin: 0;
-
-  }
-
   /* ===========================================================
   
      Picker (right) — single sticker-framed card
@@ -48313,6 +48297,8 @@
     display: flex;
 
     flex-direction: column;
+
+    padding-bottom: var(--space-5);
 
   }
 
