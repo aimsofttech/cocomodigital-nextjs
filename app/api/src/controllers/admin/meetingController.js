@@ -4,6 +4,17 @@ const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingResched
 const { zonedTimeToUtc } = require('../../utils/timezone');
 const logger = require('../../utils/logger');
 
+// 10:00–18:45 in 15-minute steps — mirrors the reschedule picker's slot grid.
+const DAY_SLOTS = (() => {
+  const slots = [];
+  for (let h = 10; h < 19; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  }
+  return slots;
+})();
+
 // GET /admin/api/meetings
 const index = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -95,6 +106,35 @@ const confirm = async (req, res) => {
   })().catch((e) => logger.error('confirm email error:', e));
 
   res.json({ status: 'success', message: 'Meeting confirmed and emails sent', data: doc });
+};
+
+// GET /admin/api/meetings/availability?date=YYYY-MM-DD&timezone=Asia/Kolkata&excludeId=<id>
+// Which of the day's 15-min slots are already taken by another pending/confirmed
+// meeting, so the reschedule picker can disable them. Computed server-side so the
+// admin's browser timezone never has to be reconciled with the meeting's timezone.
+const availability = async (req, res) => {
+  const { date, timezone, excludeId } = req.query;
+  if (!date) return res.status(400).json({ status: 'error', message: 'date is required' });
+  const tz = timezone || process.env.BOOKING_TIMEZONE || 'Asia/Kolkata';
+
+  const slotKeys = DAY_SLOTS
+    .map((time) => {
+      const d = zonedTimeToUtc(date, time, tz);
+      return d ? { time, slot_key: d.toISOString().slice(0, 16) } : null;
+    })
+    .filter(Boolean);
+
+  const filter = {
+    slot_key: { $in: slotKeys.map((s) => s.slot_key) },
+    status: { $in: ['pending', 'confirmed'] },
+  };
+  if (excludeId) filter._id = { $ne: excludeId };
+
+  const docs = await Meeting.find(filter).select('slot_key -_id').lean();
+  const bookedKeys = new Set(docs.map((d) => d.slot_key));
+  const booked = slotKeys.filter((s) => bookedKeys.has(s.slot_key)).map((s) => s.time);
+
+  res.json({ status: 'success', booked });
 };
 
 // PUT /admin/api/meetings/:id/reschedule
@@ -211,4 +251,4 @@ const destroy = async (req, res) => {
   res.json({ status: 'success', message: 'Deleted successfully' });
 };
 
-module.exports = { index, stats, show, confirm, reject, reschedule, updateStatus, destroy };
+module.exports = { index, stats, show, confirm, reject, reschedule, availability, updateStatus, destroy };

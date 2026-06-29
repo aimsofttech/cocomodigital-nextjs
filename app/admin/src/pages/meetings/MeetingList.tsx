@@ -112,6 +112,8 @@ export default function MeetingList() {
   const [rescheduleDate, setRescheduleDate] = useState<Date>(new Date());
   const [rescheduleTime, setRescheduleTime] = useState('');
   const [rescheduleHour12, setRescheduleHour12] = useState(true);
+  const [bookedTimes, setBookedTimes] = useState<Set<string>>(new Set());
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
   const [stats, setStats] = useState<Record<string, number>>({});
 
@@ -192,6 +194,7 @@ export default function MeetingList() {
     setRescheduleTarget(null);
     setRescheduleDate(new Date());
     setRescheduleTime('');
+    setBookedTimes(new Set());
   };
 
   // Called after the user picks a new date/time and clicks "Reschedule & Notify"
@@ -211,13 +214,6 @@ export default function MeetingList() {
     }
   };
 
-  // Drop a previously-picked time when the calendar date changes — a slot valid
-  // on one day isn't necessarily valid (or even rendered) on another.
-  useEffect(() => {
-    setRescheduleTime('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rescheduleDate]);
-
   // Hide already-passed slots when the selected day is today (soft UX guard —
   // the backend still re-validates against the meeting's actual timezone).
   const visibleRescheduleSlots = useMemo(() => {
@@ -230,6 +226,41 @@ export default function MeetingList() {
       return slotDate.getTime() > now.getTime();
     });
   }, [rescheduleDate]);
+
+  // Default the time picker to the meeting's own original time-of-day whenever
+  // the target meeting or the picked date changes — admins usually keep the
+  // same time and just move the day. Falls back to no selection if that slot
+  // isn't valid (e.g. already past) for the newly-picked date.
+  useEffect(() => {
+    if (!rescheduleTarget) return;
+    const originalTime = (rescheduleTarget.meetingTime || '').slice(0, 5);
+    setRescheduleTime(originalTime && visibleRescheduleSlots.includes(originalTime) ? originalTime : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rescheduleDate, rescheduleTarget]);
+
+  // Fetch which slots on the picked date are already booked/confirmed by
+  // ANOTHER meeting, so they can be disabled in the grid below.
+  useEffect(() => {
+    if (!rescheduleTarget) { setBookedTimes(new Set()); return; }
+    let cancelled = false;
+    setAvailabilityLoading(true);
+    meetingApi
+      .checkAvailability({
+        date: dateToYMD(rescheduleDate),
+        timezone: rescheduleTarget.meetingTimezone || undefined,
+        excludeId: rescheduleTarget._id,
+      })
+      .then(({ data }: any) => { if (!cancelled) setBookedTimes(new Set(data?.booked || [])); })
+      .catch(() => { if (!cancelled) setBookedTimes(new Set()); })
+      .finally(() => { if (!cancelled) setAvailabilityLoading(false); });
+    return () => { cancelled = true; };
+  }, [rescheduleTarget, rescheduleDate]);
+
+  // If the currently-selected slot turns out to already be booked (race with
+  // another booking, or it was auto-selected before availability loaded), drop it.
+  useEffect(() => {
+    if (rescheduleTime && bookedTimes.has(rescheduleTime)) setRescheduleTime('');
+  }, [bookedTimes, rescheduleTime]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -568,24 +599,35 @@ export default function MeetingList() {
                   </div>
                 </div>
 
+                {availabilityLoading && (
+                  <p className="text-xs text-gray-400 mb-1.5" aria-live="polite">Checking availability…</p>
+                )}
+
                 {visibleRescheduleSlots.length === 0 ? (
                   <p className="text-sm text-gray-400 py-4">No more slots today — pick another date.</p>
                 ) : (
                   <div className="grid grid-cols-2 gap-2 overflow-y-auto max-h-64 pr-1">
-                    {visibleRescheduleSlots.map((slot) => (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => setRescheduleTime(slot)}
-                        className={`text-sm font-semibold px-2 py-2 rounded-lg border transition-colors ${
-                          rescheduleTime === slot
-                            ? 'bg-purple-600 text-white border-purple-600'
-                            : 'border-gray-200 hover:border-purple-400 text-gray-700'
-                        }`}
-                      >
-                        {formatSlotLabel(slot, rescheduleHour12)}
-                      </button>
-                    ))}
+                    {visibleRescheduleSlots.map((slot) => {
+                      const booked = bookedTimes.has(slot);
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          disabled={booked}
+                          title={booked ? 'Already booked' : undefined}
+                          onClick={() => !booked && setRescheduleTime(slot)}
+                          className={`text-sm font-semibold px-2 py-2 rounded-lg border transition-colors ${
+                            booked
+                              ? 'border-gray-200 text-gray-300 bg-gray-50 line-through cursor-not-allowed'
+                              : rescheduleTime === slot
+                              ? 'bg-purple-600 text-white border-purple-600'
+                              : 'border-gray-200 hover:border-purple-400 text-gray-700'
+                          }`}
+                        >
+                          {formatSlotLabel(slot, rescheduleHour12)}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

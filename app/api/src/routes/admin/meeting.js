@@ -3,6 +3,7 @@ const ctrl = require('../../controllers/admin/meetingController');
 const { protect } = require('../../middleware/auth');
 
 router.get('/stats', protect, ctrl.stats);
+router.get('/availability', protect, ctrl.availability);
 router.get('/', protect, ctrl.index);
 router.get('/:id', protect, ctrl.show);
 router.put('/:id/confirm', protect, ctrl.confirm);
