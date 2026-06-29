@@ -1,7 +1,12 @@
 import SingleService from "@/src/views/Services/SingleService";
 import type { Metadata } from "next";
 import StructuredData from "@/src/components/common/StructuredData/StructuredData";
-import { getService, getServices, imageUrl } from "@/src/lib/content";
+import {
+  getGroupServiceItem,
+  getService,
+  getServices,
+  imageUrl,
+} from "@/src/lib/content";
 import {
   absoluteUrl,
   breadcrumbJsonLd,
@@ -131,6 +136,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   let doc = await getService(slug);
+  if (!doc) doc = await getGroupServiceItem(slug);
   if (!doc) doc = await findDocByPortfolioItemSlug(slug);
   const service = adaptService(doc);
   const description = truncate(
@@ -162,7 +168,14 @@ export default async function Page({ params }: PageProps) {
   // 1. Try direct top-level service lookup by slug.
   let doc = await getService(slug);
 
-  // 2. Fallback: search portfolio items inside every service.
+  // 2. Fallback: the slug may belong to a GroupServiceItem (a
+  //    sub-service one tier below the top-level service) — these have
+  //    their own slug and detail endpoint.
+  if (!doc) {
+    doc = await getGroupServiceItem(slug);
+  }
+
+  // 3. Last resort: search portfolio items inside every service.
   //    This handles slugs auto-generated from portfolio item titles
   //    that haven't yet been created as standalone service records.
   if (!doc) {

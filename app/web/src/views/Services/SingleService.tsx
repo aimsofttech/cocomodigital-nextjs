@@ -127,7 +127,21 @@ export default function SingleService({
         const svcBody = await svcRes.json();
         let svc = svcBody?.docs?.[0];
 
-        // 2. Fallback: search portfolio items in every service.
+        // 2. Fallback: the slug may belong to a GroupServiceItem (a
+        //    sub-service one tier below the top-level service).
+        if (!svc) {
+          const groupUrl = new URL("/content-api/group-service-items", window.location.origin);
+          groupUrl.searchParams.set("where[slug][equals]", slug);
+          groupUrl.searchParams.set("limit", "1");
+          const groupRes = await fetch(groupUrl, { headers: { Accept: "application/json" } });
+          if (cancelled) return;
+          if (groupRes.ok) {
+            const groupBody = await groupRes.json();
+            svc = groupBody?.docs?.[0];
+          }
+        }
+
+        // 3. Last resort: search portfolio items in every service.
         //    Mirrors the server-side findDocByPortfolioItemSlug in page.tsx.
         if (!svc) {
           const allUrl = new URL("/content-api/services", window.location.origin);

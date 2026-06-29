@@ -1214,6 +1214,58 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       };
     },
   },
+  /* GroupServiceItem detail — the sub-service tier one level below the
+     top-level service (e.g. "Title Launch Campaign Videos" under
+     "Marketing House"). These have their own slug
+     (group_service_slug) and detail endpoint; a /service/[slug] visit
+     for one of these falls back here when the top-level `services`
+     lookup above finds nothing. */
+  "group-service-items": {
+    bySlug: async (slug) => {
+      const data = await apiGet<{
+        service?: any;
+        portfolio?: any[];
+        faqs?: any[];
+      }>(`/service/single-service/${encodeURIComponent(slug)}`);
+      const s = data?.service;
+      if (!s) return null;
+      return {
+        id: s._id,
+        title: s.group_service_item_title,
+        slug: s.group_service_slug,
+        description: s.group_service_item_description,
+        short_description: s.group_service_item_description2,
+        featured_description: s.group_service_item_description,
+        image: buildImg(s.group_service_item_thumbnail),
+        legacyImageUrl: buildImg(s.group_service_item_thumbnail),
+        group_service_item_title: s.group_service_item_title,
+        group_service_item_description: s.group_service_item_description,
+        category: { id: s.group_service_category_id },
+        group_top_banner: [],
+        group_single_service_portfolio_category: (data?.portfolio ?? []).map(
+          (cat: any) => ({
+            id: cat._id,
+            category_name: cat.portfolio_category_name,
+            items: (cat.items ?? []).map((it: any) => ({
+              id: it._id,
+              title: it.portfolio_item_title,
+              slug: it.slug || "",
+              image: buildImg(it.portfolio_item_image),
+              video_url: it.portfolio_item_video_url,
+              description: it.portfolio_item_title,
+            })),
+          }),
+        ),
+        faqs: (data?.faqs ?? []).map((f: any) => ({
+          id: f._id,
+          question: f.question,
+          answer: f.answer,
+        })),
+        meta_title: null,
+        meta_description: null,
+      };
+    },
+  },
   brands: {
     list: async (opts) => {
       const data = await apiGet<MongoBrand[]>("/common/brands", {
@@ -1358,6 +1410,11 @@ export const getServices = (opts?: FetchOpts) =>
     group-service endpoint), shared with the client shim. */
 export const getService = (slug: string, opts?: FetchOpts) =>
   findBySlug<any>("services", slug, opts);
+
+/** GroupServiceItem detail (the sub-service tier) — fallback for
+    /service/[slug] when the slug isn't a top-level service. */
+export const getGroupServiceItem = (slug: string, opts?: FetchOpts) =>
+  findBySlug<any>("group-service-items", slug, opts);
 
 export const getServiceCategories = (opts?: FetchOpts) =>
   findCollection<any>("service-categories", { sort: "order", ...opts });

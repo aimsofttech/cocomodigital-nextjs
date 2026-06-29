@@ -89,7 +89,7 @@ const groupService = async (req, res) => {
 
 const getSingleService = async (req, res) => {
   const { group_service_slug } = req.params;
-  const serviceItem = await GroupServiceItem.findOne({ group_service_item_slug: group_service_slug, status: 1 });
+  const serviceItem = await GroupServiceItem.findOne({ group_service_slug, status: 1 });
   if (!serviceItem) return res.status(404).json({ status: 'error', message: 'Service not found' });
 
   const [images, recentWork, portfolioCategories, faqs] = await Promise.all([
