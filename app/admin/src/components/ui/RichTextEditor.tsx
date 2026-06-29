@@ -5,6 +5,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import uploadApi from '@/services/uploadApi';
+import Tooltip from './Tooltip';
 
 interface Props {
   value?: string;
@@ -89,15 +90,16 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'Wr
   };
 
   const Btn = ({ title, onClick, children }: { title: string; onClick: () => void; children: ReactNode }) => (
-    <button
-      type="button"
-      title={title}
-      onMouseDown={(e) => e.preventDefault()} // keep selection/focus in the editor
-      onClick={onClick}
-      className="h-8 min-w-8 px-1.5 inline-flex items-center justify-center rounded text-gray-600 hover:bg-gray-200 text-sm font-medium"
-    >
-      {children}
-    </button>
+    <Tooltip content={title}>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()} // keep selection/focus in the editor
+        onClick={onClick}
+        className="h-8 min-w-8 px-1.5 inline-flex items-center justify-center rounded text-gray-600 hover:bg-gray-200 text-sm font-medium"
+      >
+        {children}
+      </button>
+    </Tooltip>
   );
 
   const Sep = () => <span className="w-px h-5 bg-gray-200 mx-0.5" />;

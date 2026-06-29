@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PlayCircleIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import Modal from './Modal';
+import Tooltip from './Tooltip';
 
 // S3 bucket base URL — images stored as S3 keys (relative paths) need this prepended
 const S3_URL = (import.meta as any).env?.VITE_AWS_URL || '';
@@ -80,23 +81,24 @@ export function VideoCell({ src, thumbnail, size = 'w-36 h-24' }: { src?: string
 
   return (
     <>
-      <button
-        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-        className={`relative ${size} rounded-lg overflow-hidden border border-gray-200 hover:border-primary-400 hover:scale-105 transition-all group bg-gray-900 flex-shrink-0`}
-        title="Preview video"
-      >
-        {thumbUrl && (
-          <img
-            src={thumbUrl}
-            alt="thumb"
-            className="absolute inset-0 w-full h-full object-cover opacity-75"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
-        )}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <PlayCircleIcon className="w-6 h-6 text-white drop-shadow group-hover:scale-110 transition-transform" />
-        </div>
-      </button>
+      <Tooltip content="Preview video" className="flex-shrink-0">
+        <button
+          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          className={`relative ${size} rounded-lg overflow-hidden border border-gray-200 hover:border-primary-400 hover:scale-105 transition-all group bg-gray-900 flex-shrink-0`}
+        >
+          {thumbUrl && (
+            <img
+              src={thumbUrl}
+              alt="thumb"
+              className="absolute inset-0 w-full h-full object-cover opacity-75"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <PlayCircleIcon className="w-6 h-6 text-white drop-shadow group-hover:scale-110 transition-transform" />
+          </div>
+        </button>
+      </Tooltip>
 
       {open && (
         <Modal isOpen onClose={() => setOpen(false)} title="Video Preview" size="xl">

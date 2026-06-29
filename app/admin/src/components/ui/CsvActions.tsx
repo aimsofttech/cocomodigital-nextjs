@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import Tooltip from './Tooltip';
 
 export interface CsvConfig {
   /** Any service from createCrudService (exposes exportCsv / importCsv). */
@@ -76,26 +77,28 @@ export default function CsvActions({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={handleExport}
-        disabled={busy !== null}
-        className="btn-secondary btn-sm flex items-center gap-1.5 disabled:opacity-60"
-        title="Export all rows to CSV"
-      >
-        <ArrowDownTrayIcon className="w-4 h-4" />
-        {busy === 'export' ? 'Exporting…' : 'Export'}
-      </button>
-      <button
-        type="button"
-        onClick={() => fileRef.current?.click()}
-        disabled={busy !== null}
-        className="btn-secondary btn-sm flex items-center gap-1.5 disabled:opacity-60"
-        title="Bulk add records from a CSV / Excel file"
-      >
-        <ArrowUpTrayIcon className="w-4 h-4" />
-        {busy === 'import' ? 'Importing…' : 'Import'}
-      </button>
+      <Tooltip content="Export all rows to CSV">
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={busy !== null}
+          className="btn-secondary btn-sm flex items-center gap-1.5 disabled:opacity-60"
+        >
+          <ArrowDownTrayIcon className="w-4 h-4" />
+          {busy === 'export' ? 'Exporting…' : 'Export'}
+        </button>
+      </Tooltip>
+      <Tooltip content="Bulk add records from a CSV / Excel file">
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy !== null}
+          className="btn-secondary btn-sm flex items-center gap-1.5 disabled:opacity-60"
+        >
+          <ArrowUpTrayIcon className="w-4 h-4" />
+          {busy === 'import' ? 'Importing…' : 'Import'}
+        </button>
+      </Tooltip>
       <input
         ref={fileRef}
         type="file"

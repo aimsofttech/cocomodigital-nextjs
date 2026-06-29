@@ -8,6 +8,7 @@ import TableFilter, {
 } from '@/components/ui/TableFilter';
 import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Tooltip from '@/components/ui/Tooltip';
 import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -88,8 +89,8 @@ export default function FormList() {
           onPageChange={setPage} onSearch={setSearch} pageSize={limit} onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
             <div className="flex gap-1 justify-end">
-              <button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button>
-              <button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button>
+              <Tooltip content="View"><button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button></Tooltip>
+              <Tooltip content="Delete"><button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button></Tooltip>
             </div>
           )}
         />

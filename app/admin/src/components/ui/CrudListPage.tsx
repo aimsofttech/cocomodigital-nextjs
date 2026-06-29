@@ -5,6 +5,7 @@ import DataTable, { Column } from './DataTable';
 import ConfirmDialog from './ConfirmDialog';
 import PageHeader from './PageHeader';
 import Modal from './Modal';
+import Tooltip from './Tooltip';
 import TableFilter, {
   FilterField,
   FilterValues,
@@ -176,32 +177,35 @@ export default function CrudListPage<T extends { _id?: string }>({
     <div className="flex items-center justify-end gap-1">
       {rowActions?.(row)}
       {!disableEdit && (renderModal ? (
-        <button
-          type="button"
-          onClick={() => openEditModal(row._id!)}
-          className="p-1.5 rounded-md hover:bg-blue-50 text-blue-600 transition-colors"
-          title="Edit"
-        >
-          <PencilIcon className="w-4 h-4" />
-        </button>
+        <Tooltip content="Edit">
+          <button
+            type="button"
+            onClick={() => openEditModal(row._id!)}
+            className="p-1.5 rounded-md hover:bg-blue-50 text-blue-600 transition-colors"
+          >
+            <PencilIcon className="w-4 h-4" />
+          </button>
+        </Tooltip>
       ) : editPath ? (
-        <Link
-          to={editPath(row)}
-          className="p-1.5 rounded-md hover:bg-blue-50 text-blue-600 transition-colors"
-          title="Edit"
-        >
-          <PencilIcon className="w-4 h-4" />
-        </Link>
+        <Tooltip content="Edit">
+          <Link
+            to={editPath(row)}
+            className="p-1.5 rounded-md hover:bg-blue-50 text-blue-600 transition-colors"
+          >
+            <PencilIcon className="w-4 h-4" />
+          </Link>
+        </Tooltip>
       ) : null)}
       {!disableDelete && (
-        <button
-          type="button"
-          onClick={() => setDeleteId(row._id!)}
-          className="p-1.5 rounded-md hover:bg-red-50 text-red-500 transition-colors"
-          title="Delete"
-        >
-          <TrashIcon className="w-4 h-4" />
-        </button>
+        <Tooltip content="Delete">
+          <button
+            type="button"
+            onClick={() => setDeleteId(row._id!)}
+            className="p-1.5 rounded-md hover:bg-red-50 text-red-500 transition-colors"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        </Tooltip>
       )}
     </div>
   );
@@ -221,19 +225,23 @@ export default function CrudListPage<T extends { _id?: string }>({
               />
             )}
             {!disableAdd && (renderModal ? (
-              <button
-                type="button"
-                onClick={openAddModal}
-                className="btn-primary btn-sm flex items-center gap-1.5"
-              >
-                <PlusIcon className="w-4 h-4" />
-                Add New
-              </button>
+              <Tooltip content="Add New">
+                <button
+                  type="button"
+                  onClick={openAddModal}
+                  className="btn-primary btn-sm flex items-center gap-1.5"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Add New
+                </button>
+              </Tooltip>
             ) : addPath ? (
-              <Link to={addPath} className="btn-primary btn-sm flex items-center gap-1.5">
-                <PlusIcon className="w-4 h-4" />
-                Add New
-              </Link>
+              <Tooltip content="Add New">
+                <Link to={addPath} className="btn-primary btn-sm flex items-center gap-1.5">
+                  <PlusIcon className="w-4 h-4" />
+                  Add New
+                </Link>
+              </Tooltip>
             ) : null)}
           </div>
         }

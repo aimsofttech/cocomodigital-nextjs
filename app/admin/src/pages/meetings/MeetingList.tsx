@@ -8,6 +8,7 @@ import TableFilter, {
 } from '@/components/ui/TableFilter';
 import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Tooltip from '@/components/ui/Tooltip';
 import {
   EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon,
   CalendarDaysIcon, EnvelopeIcon, PhoneIcon, BuildingOfficeIcon,
@@ -213,38 +214,42 @@ export default function MeetingList() {
           onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
             <div className="flex gap-1 justify-end">
-              <button
-                onClick={() => setSelected(row)}
-                className="p-1.5 rounded hover:bg-blue-50 text-blue-600"
-                title="View details"
-              >
-                <EyeIcon className="w-4 h-4" />
-              </button>
+              <Tooltip content="View details">
+                <button
+                  onClick={() => setSelected(row)}
+                  className="p-1.5 rounded hover:bg-blue-50 text-blue-600"
+                >
+                  <EyeIcon className="w-4 h-4" />
+                </button>
+              </Tooltip>
               {row.status === 'pending' && (
                 <>
-                  <button
-                    onClick={() => setConfirmTarget(row)}
-                    className="p-1.5 rounded hover:bg-green-50 text-green-600"
-                    title="Confirm meeting"
-                  >
-                    <CheckCircleIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setRejectTarget(row)}
-                    className="p-1.5 rounded hover:bg-orange-50 text-orange-500"
-                    title="Reject meeting"
-                  >
-                    <XCircleIcon className="w-4 h-4" />
-                  </button>
+                  <Tooltip content="Confirm meeting">
+                    <button
+                      onClick={() => setConfirmTarget(row)}
+                      className="p-1.5 rounded hover:bg-green-50 text-green-600"
+                    >
+                      <CheckCircleIcon className="w-4 h-4" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="Reject meeting">
+                    <button
+                      onClick={() => setRejectTarget(row)}
+                      className="p-1.5 rounded hover:bg-orange-50 text-orange-500"
+                    >
+                      <XCircleIcon className="w-4 h-4" />
+                    </button>
+                  </Tooltip>
                 </>
               )}
-              <button
-                onClick={() => setDeleteId(row._id)}
-                className="p-1.5 rounded hover:bg-red-50 text-red-500"
-                title="Delete"
-              >
-                <TrashIcon className="w-4 h-4" />
-              </button>
+              <Tooltip content="Delete">
+                <button
+                  onClick={() => setDeleteId(row._id)}
+                  className="p-1.5 rounded hover:bg-red-50 text-red-500"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </Tooltip>
             </div>
           )}
         />

@@ -5,6 +5,7 @@ import {
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon,
 } from '@heroicons/react/24/outline';
 import LoadingSpinner from './LoadingSpinner';
+import Tooltip from './Tooltip';
 
 export interface Column<T = any> {
   key: string;
@@ -191,15 +192,16 @@ export default function DataTable<T extends { _id?: string }>({
                     <tr className={`hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-primary-50/40' : ''}`}>
                       {renderExpanded && (
                         <td className="align-middle">
-                          <button
-                            type="button"
-                            onClick={() => toggleExpanded(rowId)}
-                            className="p-1 rounded-md hover:bg-gray-200 text-gray-500 transition-colors"
-                            title={isExpanded ? 'Collapse' : 'Expand'}
-                            aria-expanded={isExpanded}
-                          >
-                            <ChevronRightIcon className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                          </button>
+                          <Tooltip content={isExpanded ? 'Collapse' : 'Expand'}>
+                            <button
+                              type="button"
+                              onClick={() => toggleExpanded(rowId)}
+                              className="p-1 rounded-md hover:bg-gray-200 text-gray-500 transition-colors"
+                              aria-expanded={isExpanded}
+                            >
+                              <ChevronRightIcon className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                            </button>
+                          </Tooltip>
                         </td>
                       )}
                       {columns.map((col) => (
@@ -259,24 +261,26 @@ export default function DataTable<T extends { _id?: string }>({
           {totalPages > 0 && (
             <div className="flex items-center gap-1">
               {/* First page */}
-              <button
-                onClick={() => onPageChange?.(1)}
-                disabled={currentPage <= 1}
-                title="First page"
-                className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronDoubleLeftIcon className="w-3.5 h-3.5" />
-              </button>
+              <Tooltip content="First page">
+                <button
+                  onClick={() => onPageChange?.(1)}
+                  disabled={currentPage <= 1}
+                  className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronDoubleLeftIcon className="w-3.5 h-3.5" />
+                </button>
+              </Tooltip>
 
               {/* Prev page */}
-              <button
-                onClick={() => onPageChange?.(currentPage - 1)}
-                disabled={currentPage <= 1}
-                title="Previous page"
-                className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeftIcon className="w-4 h-4" />
-              </button>
+              <Tooltip content="Previous page">
+                <button
+                  onClick={() => onPageChange?.(currentPage - 1)}
+                  disabled={currentPage <= 1}
+                  className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeftIcon className="w-4 h-4" />
+                </button>
+              </Tooltip>
 
               {/* Page number buttons with ellipsis */}
               {buildPageRange(currentPage, totalPages).map((item, idx) =>
@@ -300,24 +304,26 @@ export default function DataTable<T extends { _id?: string }>({
               )}
 
               {/* Next page */}
-              <button
-                onClick={() => onPageChange?.(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                title="Next page"
-                className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRightIcon className="w-4 h-4" />
-              </button>
+              <Tooltip content="Next page">
+                <button
+                  onClick={() => onPageChange?.(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
+                  className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRightIcon className="w-4 h-4" />
+                </button>
+              </Tooltip>
 
               {/* Last page */}
-              <button
-                onClick={() => onPageChange?.(totalPages)}
-                disabled={currentPage >= totalPages}
-                title="Last page"
-                className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronDoubleRightIcon className="w-3.5 h-3.5" />
-              </button>
+              <Tooltip content="Last page">
+                <button
+                  onClick={() => onPageChange?.(totalPages)}
+                  disabled={currentPage >= totalPages}
+                  className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronDoubleRightIcon className="w-3.5 h-3.5" />
+                </button>
+              </Tooltip>
             </div>
           )}
         </div>

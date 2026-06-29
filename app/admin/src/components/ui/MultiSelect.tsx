@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { XMarkIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
+import Tooltip from './Tooltip';
 
 interface Option {
   value: string;
@@ -50,15 +51,16 @@ export default function MultiSelect({ options, value = [], onChange, placeholder
             className="inline-flex items-center gap-1 bg-primary-100 text-primary-700 text-xs font-medium pl-2 pr-1 py-0.5 rounded"
           >
             {labelFor(val)}
-            <button
-              type="button"
-              title="Remove"
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => { e.stopPropagation(); remove(val); }}
-              className="rounded-full p-0.5 hover:bg-primary-200 hover:text-primary-900"
-            >
-              <XMarkIcon className="w-3.5 h-3.5" />
-            </button>
+            <Tooltip content="Remove">
+              <button
+                type="button"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); remove(val); }}
+                className="rounded-full p-0.5 hover:bg-primary-200 hover:text-primary-900"
+              >
+                <XMarkIcon className="w-3.5 h-3.5" />
+              </button>
+            </Tooltip>
           </span>
         ))}
         <ChevronDownIcon className="w-4 h-4 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from './Modal';
+import Tooltip from './Tooltip';
 
 interface StatusToggleProps {
   status: number | string;
@@ -60,7 +61,9 @@ export default function StatusToggle({ status, onConfirm, label }: StatusToggleP
         >
           {isActive ? 'Active' : 'Inactive'}
         </span>
-        <Switch on={isActive} onClick={() => setOpen(true)} />
+        <Tooltip content={isActive ? 'Set Inactive' : 'Set Active'}>
+          <Switch on={isActive} onClick={() => setOpen(true)} />
+        </Tooltip>
       </div>
 
       <Modal isOpen={open} onClose={() => (saving ? undefined : setOpen(false))} title="Change Status" size="sm">

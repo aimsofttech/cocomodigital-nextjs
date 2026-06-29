@@ -6,6 +6,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Tooltip from '@/components/ui/Tooltip';
 import toast from 'react-hot-toast';
 import TableFilter, {
   FilterField, FilterValues, applyClientFilters, isEmptyValue,
@@ -108,22 +109,24 @@ export default function ApplicantList() {
           onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
             <div className="flex items-center justify-end gap-1">
-              <button
-                type="button"
-                onClick={() => setViewRow(row)}
-                className="p-1.5 rounded-md hover:bg-blue-50 text-blue-600 transition-colors"
-                title="View"
-              >
-                <EyeIcon className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeleteId(row._id)}
-                className="p-1.5 rounded-md hover:bg-red-50 text-red-500 transition-colors"
-                title="Delete"
-              >
-                <TrashIcon className="w-4 h-4" />
-              </button>
+              <Tooltip content="View">
+                <button
+                  type="button"
+                  onClick={() => setViewRow(row)}
+                  className="p-1.5 rounded-md hover:bg-blue-50 text-blue-600 transition-colors"
+                >
+                  <EyeIcon className="w-4 h-4" />
+                </button>
+              </Tooltip>
+              <Tooltip content="Delete">
+                <button
+                  type="button"
+                  onClick={() => setDeleteId(row._id)}
+                  className="p-1.5 rounded-md hover:bg-red-50 text-red-500 transition-colors"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </Tooltip>
             </div>
           )}
         />
