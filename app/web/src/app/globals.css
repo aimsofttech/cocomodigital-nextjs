@@ -7243,7 +7243,7 @@
 
   .for-new-pos {
 
-    position: static;
+    position: relative;
 
   }
 
@@ -7367,15 +7367,15 @@
 
   .services-dropdown-menu {
 
-    position: fixed;
+    position: absolute;
 
-    top: 72px;
+    top: calc(100% - 9px);
 
-    right: 8px;
+    left: 0;
 
-    left: auto;
+    right: auto;
 
-    width: min(calc(100vw - 16px), 950px);
+    width: min(calc(100vw - 48px), 950px);
 
     transform: none;
 
