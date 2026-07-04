@@ -279,20 +279,20 @@ interface WhereClause {
 
 interface MongoBrand {
   _id?: string;
-  brand_name?: string;
-  brand_image?: string;
-  website_url?: string;
+  name?: string;
+  image?: string;
+  websiteUrl?: string;
   slug?: string | null;
-  display_order?: number;
+  displayOrder?: number;
 }
 
 const adaptBrand = (m: MongoBrand) => ({
   id: m._id,
-  name: m.brand_name,
-  slug: m.slug ?? slugify(m.brand_name),
-  order: m.display_order,
-  legacyImageUrl: m.brand_image ?? "",
-  website_url: m.website_url,
+  name: m.name,
+  slug: m.slug ?? slugify(m.name),
+  order: m.displayOrder,
+  legacyImageUrl: m.image ?? "",
+  website_url: m.websiteUrl,
 });
 
 interface MongoAuthor {

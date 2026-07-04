@@ -47,18 +47,18 @@ export default function BrandForm({ onSuccess, onCancel, editId }: Props = {}) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Brand Name <span className="text-red-500">*</span></label>
-          <input {...register('brand_name', { required: 'Required' })} className="form-input" placeholder="Enter brand name" />
-          {errors.brand_name && <p className="form-error">{String(errors.brand_name.message)}</p>}
+          <input {...register('name', { required: 'Required' })} className="form-input" placeholder="Enter brand name" />
+          {errors.name && <p className="form-error">{String(errors.name.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <ImageUpload name="brand_image" label="Brand Logo" uploadType="image" folder="brands" value={watch('brand_image')} onChange={(url) => setValue('brand_image', url)} />
+      <ImageUpload name="image" label="Brand Logo" uploadType="image" folder="brands" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div>
         <label className="form-label">Website URL</label>
-        <input {...register('website_url')} type="url" className="form-input" placeholder="https://example.com" />
+        <input {...register('websiteUrl')} type="url" className="form-input" placeholder="https://example.com" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

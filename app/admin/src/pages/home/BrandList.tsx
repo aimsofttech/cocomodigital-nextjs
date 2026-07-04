@@ -21,17 +21,30 @@ export default function BrandList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'brand_image', label: 'Logo', render: (row: any) => <ImageCell src={row.brand_image} alt={row.brand_name} size="w-36 h-24" /> },
-    { key: 'brand_name', label: 'Brand Name', sortable: true },
-    { key: 'website_url', label: 'Website', sortable: true, render: (row: any) => row.website_url ? <a href={row.website_url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.website_url}</a> : 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    {
+      key: 'image',
+      label: 'Logo',
+      render: (row: any) => <ImageCell src={row.image} alt={row.name} size="w-40 h-18" />
+    },
+    { key: 'name', label: 'Brand Name', sortable: true, render: (row: any) => <span className="capitalize">{row.name || 'N/A'}</span> },
+    { key: 'websiteUrl', label: 'Website', sortable: true, render: (row: any) => row.websiteUrl ? <a href={row.websiteUrl} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.websiteUrl}</a> : 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Brands" breadcrumbs={[{ label: 'Home' }, { label: 'Brands' }]}
-      columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
+    <CrudListPage
+      title="Brands"
+      breadcrumbs={[{ label: 'Home' }, { label: 'Brands' }]}
+      columns={columns}
+      data={data}
+      loading={loading}
+      submitting={submitting}
+      pagination={pagination}
+      onPageChange={setPage}
+      onSearch={setSearch}
+      onDelete={remove}
+      filterFields={FILTER_FIELDS}
+      onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <BrandForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Brand' : 'Add Brand'}
       modalSize="lg" onRefresh={fetchAll} />

@@ -53,8 +53,9 @@ export interface TopBanner extends BaseModel {
 }
 
 export interface Brand extends BaseModel {
-  brand_name: string;
-  brand_image?: string;
+  name: string;
+  image?: string;
+  websiteUrl?: string;
 }
 
 export interface ServiceCategory extends BaseModel {

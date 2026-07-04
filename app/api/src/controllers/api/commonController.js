@@ -14,7 +14,7 @@ const buildUrl = (key) => (key ? buildS3Url(key) : '');
 
 const commonApi = async (req, res) => {
   const [brands, authors, bannerTitles, bookCalls, advantages, creatorPlatforms, successStories, hireUs] = await Promise.all([
-    Brand.find({ status: 1 }).sort({ display_order: 1 }),
+    Brand.find({ status: 1 }).sort({ displayOrder: 1 }),
     AuthorTemplate.find({ status: 1 }).sort({ display_order: 1 }),
     BannerTitleTemplate.find({ status: 1 }).sort({ display_order: 1 }),
     BookCall.find({ status: 1 }).sort({ display_order: 1 }),
@@ -26,7 +26,7 @@ const commonApi = async (req, res) => {
   res.json({
     status: 'success',
     data: {
-      brands: brands.map((b) => ({ ...b.toObject(), brand_image: buildUrl(b.brand_image) })),
+      brands: brands.map((b) => ({ ...b.toObject(), image: buildUrl(b.image) })),
       authors: authors.map((a) => ({ ...a.toObject(), author_image: buildUrl(a.author_image) })),
       banner_titles: bannerTitles.map((b) => ({ ...b.toObject(), banner_image: buildUrl(b.banner_image) })),
       book_calls: bookCalls.map((b) => ({ ...b.toObject(), book_call_image: buildUrl(b.book_call_image) })),
@@ -39,8 +39,8 @@ const commonApi = async (req, res) => {
 };
 
 const brand = async (req, res) => {
-  const data = await Brand.find({ status: 1 }).sort({ display_order: 1 });
-  res.json({ status: 'success', data: data.map((b) => ({ ...b.toObject(), brand_image: buildUrl(b.brand_image) })) });
+  const data = await Brand.find({ status: 1 }).sort({ displayOrder: 1 });
+  res.json({ status: 'success', data: data.map((b) => ({ ...b.toObject(), image: buildUrl(b.image) })) });
 };
 
 const hireUs = async (req, res) => {
