@@ -799,8 +799,8 @@ interface MongoHomeSectionItem {
 
 interface MongoHomeSection {
   _id?: string;
-  category_name?: string;
-  display_order?: number;
+  name?: string;
+  displayOrder?: number;
   items?: MongoHomeSectionItem[];
 }
 
@@ -813,7 +813,7 @@ const adaptHomeYoutubeCard = (
 ) => ({
   id: it._id,
   title: it.name,
-  subtitle: sec.category_name,
+  subtitle: sec.name,
   link: it.url,
   legacyImageUrl: buildImg(it.image || it.item_image),
   order: it.display_order,

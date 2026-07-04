@@ -4,8 +4,8 @@ const HomePageSectionItem = require('../../models/HomePageSectionItem');
 const createCrudController = require('./crudFactory');
 
 const base = createCrudController(HomePageSection, {
-  searchFields: ['section_name', 'section_title', 'category_name'],
-  defaultSort: { display_order: 1 },
+  searchFields: ['name'],
+  defaultSort: { displayOrder: 1 },
 });
 
 // Attach a `navigation` array with the count of Section Items in each section

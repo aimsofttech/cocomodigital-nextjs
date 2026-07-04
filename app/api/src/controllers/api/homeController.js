@@ -17,7 +17,7 @@ const index = async (req, res) => {
   const [topBannerRaw, serviceItems, videoRaw, clients] = await Promise.all([
     TopBanner.findOne({ status: 1, country }).sort({ displayOrder: 1 }).select('id bookCallTemplateId country heading subHeading buttonText buttonUrl videoThumbnail videoUrl displayOrder status createdAt updatedAt'),
     ServiceItem.find({ status: 1, ...(serviceCategoryId ? { serviceCategoryId } : {}) }).sort({ displayOrder: 1 }).select('id serviceCategoryId image videoUrl title slug buttonText displayOrder status'),
-    Video.findOne({ status: 1 }).sort({ display_order: 1 }).select('id video_thumbnail video_url display_order status'),
+    Video.findOne({ status: 1 }).sort({ displayOrder: 1 }).select('id thumbnail url displayOrder status'),
     Client.find({ status: 1 }).sort({ display_order: 1 }).limit(6).select('id client_img client_title client_slug display_order status'),
   ]);
 
@@ -43,8 +43,7 @@ const index = async (req, res) => {
 
   const video = videoRaw ? {
     ...videoRaw.toObject(),
-    video_thumbnail: buildUrl(videoRaw.video_thumbnail),
-    video_url: videoRaw.video_url,
+    thumbnail: buildUrl(videoRaw.thumbnail),
   } : null;
 
   const other_service = serviceItems.map((s) => ({ ...s.toObject(), image: buildUrl(s.image) }));

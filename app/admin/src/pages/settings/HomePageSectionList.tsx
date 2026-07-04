@@ -21,8 +21,8 @@ export default function HomePageSectionList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'category_name', label: 'Section Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'name', label: 'Section Name', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {
       key: 'navigate', label: 'Navigate To', render: (row: any) => {

@@ -62,7 +62,7 @@ export default function HomePageSectionItemForm({ onSuccess, onCancel, editId, l
         <label className="form-label">Category <span className="text-red-500">*</span></label>
         <select {...register('home_page_section_id', { required: 'Required' })} className="form-select">
           <option value="">Select category</option>
-          {sections.map((s: any) => <option key={s._id} value={s._id}>{s.category_name || s.section_name}</option>)}
+          {sections.map((s: any) => <option key={s._id} value={s._id}>{s.name}</option>)}
         </select>
         {errors.home_page_section_id && <p className="form-error">{String(errors.home_page_section_id.message)}</p>}
       </div>

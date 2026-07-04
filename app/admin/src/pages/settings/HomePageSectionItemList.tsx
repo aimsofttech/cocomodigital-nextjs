@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
-import { homePageSectionItemApi } from '@/services/adminApi';
+import { homePageSectionItemApi, homePageSectionApi } from '@/services/adminApi';
 import HomePageSectionItemForm from './HomePageSectionItemForm';
 
 export default function HomePageSectionItemList() {
@@ -25,6 +25,14 @@ export default function HomePageSectionItemList() {
   const handleFilterChange = (params: Record<string, any>) =>
     setFilterParams({ ...(sectionId ? { home_page_section_id: sectionId } : {}), ...params });
 
+  // Section categories for the "Category" filter dropdown.
+  const [sections, setSections] = useState<any[]>([]);
+  useEffect(() => {
+    homePageSectionApi.getAll({ limit: 200 })
+      .then(({ data }) => setSections(data.data || []))
+      .catch(() => setSections([]));
+  }, []);
+
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
       await homePageSectionItemApi.update(id, { status: newStatus });
@@ -35,7 +43,16 @@ export default function HomePageSectionItemList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'home_page_section_id',
+      label: 'Category',
+      type: 'select' as const,
+      /* TableFilter prepends its own "All Category" placeholder option. */
+      options: sections.map((s: any) => ({ value: String(s._id), label: s.name })),
+    },
+  ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
     { key: 'category_name', label: 'Category', render: (row: any) => row.category_name || 'N/A' },

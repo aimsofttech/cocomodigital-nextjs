@@ -42,13 +42,13 @@ export default function VideoForm({ onSuccess, onCancel, editId }: Props = {}) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Video <span className="text-red-500">*</span></label>
-        <ImageUpload name="video_url" uploadType="video" folder="home/videos" value={watch('video_url')} onChange={(url) => setValue('video_url', url, { shouldValidate: true, shouldDirty: true })} />
-        <input {...register('video_url', { required: 'Required' })} className="form-input mt-2" placeholder="Or paste a video URL (https://youtube.com/...)" />
-        {errors.video_url && <p className="form-error">{String(errors.video_url.message)}</p>}
+        <ImageUpload name="url" uploadType="video" folder="home/videos" value={watch('url')} onChange={(url) => setValue('url', url, { shouldValidate: true, shouldDirty: true })} />
+        <input {...register('url', { required: 'Required' })} className="form-input mt-2" placeholder="Or paste a video URL (https://youtube.com/...)" />
+        {errors.url && <p className="form-error">{String(errors.url.message)}</p>}
       </div>
-      <ImageUpload name="video_thumbnail" label="Video Thumbnail" uploadType="image" folder="home" value={watch('video_thumbnail')} onChange={(url) => setValue('video_thumbnail', url)} />
+      <ImageUpload name="thumbnail" label="Video Thumbnail" uploadType="image" folder="home" value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

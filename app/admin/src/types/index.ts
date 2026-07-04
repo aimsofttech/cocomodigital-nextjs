@@ -73,8 +73,8 @@ export interface ServiceItem extends BaseModel {
 }
 
 export interface Video extends BaseModel {
-  video_thumbnail?: string;
-  video_url?: string;
+  thumbnail?: string;
+  url?: string;
 }
 
 export interface Client extends BaseModel {
@@ -291,10 +291,7 @@ export interface Page extends BaseModel {
 }
 
 export interface HomePageSection extends BaseModel {
-  section_name: string;
-  section_title?: string;
-  section_subtitle?: string;
-  section_type?: string;
+  name: string;
 }
 
 export interface HomePageSectionItem extends BaseModel {

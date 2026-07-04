@@ -11,7 +11,7 @@ module.exports = createCrudController(HomePageSectionItem, {
     {
       localField: 'home_page_section_id',
       model: HomePageSection,
-      nameField: 'category_name',
+      nameField: 'name',
       as: 'category_name',
     },
   ],

@@ -21,9 +21,9 @@ export default function VideoList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'video_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.video_thumbnail} /> },
-    { key: 'video_url', label: 'Video', render: (row: any) => <VideoCell src={row.video_url} thumbnail={row.video_thumbnail} /> },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
+    { key: 'url', label: 'Video', render: (row: any) => <VideoCell src={row.url} thumbnail={row.thumbnail} /> },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
