@@ -36,6 +36,6 @@ export default function ServiceDepartmentList() {
       renderModal={({ id, onSuccess, onCancel }) =>
         <ServiceDepartmentForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Service Department' : 'Add Service Department'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }
