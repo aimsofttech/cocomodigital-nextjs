@@ -842,6 +842,38 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       );
       return listResult((data ?? []).map(adaptSuccessStory), opts.limit);
     },
+    /* Case-study detail (/case-studies/[slug]) — the story content
+       lives on the Client entity (admin → Home → Success Stories):
+       title, rich HTML description, image, author / book-call refs.
+       The project list above (/common/success-stories) carries no
+       slugs, so slug lookups must hit the client detail endpoint. */
+    bySlug: async (slug) => {
+      const c = await apiGet<any>(
+        `/client/detail/${encodeURIComponent(slug)}`,
+      );
+      if (!c) return null;
+      const author =
+        c.authorTemplateId && typeof c.authorTemplateId === "object"
+          ? c.authorTemplateId
+          : null;
+      const bookCall =
+        c.bookCallTemplateId && typeof c.bookCallTemplateId === "object"
+          ? c.bookCallTemplateId
+          : null;
+      return {
+        id: c._id,
+        slug: c.slug,
+        title: c.title,
+        client_name: c.title,
+        description: c.description,
+        image: buildImg(c.image),
+        legacyImageUrl: buildImg(c.image),
+        author_id: author?._id ?? c.authorTemplateId ?? null,
+        author,
+        book_call_id: bookCall?._id ?? c.bookCallTemplateId ?? null,
+        order: c.displayOrder,
+      };
+    },
   },
   "monthly-performance": {
     list: async (opts) => {
