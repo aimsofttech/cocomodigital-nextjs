@@ -214,14 +214,14 @@ const slugify = (input: string | null | undefined): string =>
 
 interface MongoServiceItem {
   _id?: string;
-  service_title?: string;
-  service_slug?: string;
-  service_image?: string;
-  service_video_url?: string;
-  button_text?: string;
-  button_url?: string | null;
-  display_order?: number;
-  service_category_id?: string;
+  title?: string;
+  slug?: string;
+  image?: string;
+  videoUrl?: string;
+  buttonText?: string;
+  buttonUrl?: string | null;
+  displayOrder?: number;
+  serviceCategoryId?: string;
 }
 
 interface MongoServiceCategory {
@@ -235,17 +235,17 @@ interface MongoServiceCategory {
 
 const adaptServiceItem = (m: MongoServiceItem, categoryId?: string) => ({
   id: m._id,
-  title: m.service_title,
-  slug: m.service_slug,
+  title: m.title,
+  slug: m.slug,
   /* The header megamenu reads item.image directly (resolveImg);
      keep legacyImageUrl too for imageUrl() consumers elsewhere. */
-  image: m.service_image ?? "",
-  legacyImageUrl: m.service_image ?? "",
-  video_url: m.service_video_url,
-  button_text: m.button_text,
-  button_url: m.button_url ?? undefined,
-  order: m.display_order,
-  category: { id: categoryId ?? m.service_category_id },
+  image: m.image ?? "",
+  legacyImageUrl: m.image ?? "",
+  video_url: m.videoUrl,
+  button_text: m.buttonText,
+  button_url: m.buttonUrl ?? undefined,
+  order: m.displayOrder,
+  category: { id: categoryId ?? m.serviceCategoryId },
 });
 
 const adaptServiceCategory = (m: MongoServiceCategory) => ({
@@ -1175,13 +1175,13 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       if (!s) return null;
       return {
         id: s._id,
-        title: s.service_title,
-        slug: s.service_slug,
-        description: s.service_description ?? s.description,
-        featured_description: s.featured_description,
-        image: buildImg(s.service_image),
-        legacyImageUrl: buildImg(s.service_image),
-        category: { id: s.service_category_id },
+        title: s.title,
+        slug: s.slug,
+        description: s.description,
+        featured_description: s.featuredDescription ?? s.featured_description,
+        image: buildImg(s.image),
+        legacyImageUrl: buildImg(s.image),
+        category: { id: s.serviceCategoryId },
         group_top_banner: (data.topBanner ?? []).map((b: any) => ({
           heading: b.heading,
           subheading: b.subHeading,

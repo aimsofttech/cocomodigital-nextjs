@@ -9,14 +9,14 @@ const buildUrl = (key) => (key ? buildS3Url(key) : '');
 
 const index = async (req, res) => {
   const lang = req.query.lang || 'en-us';
-  const serviceCategoryId = req.query.service_category_id;
+  const serviceCategoryId = req.query.serviceCategoryId || req.query.service_category_id;
 
   const countryExists = await TopBanner.exists({ status: 1, country: lang });
   const country = countryExists ? lang : 'en-us';
 
   const [topBannerRaw, serviceItems, videoRaw, clients] = await Promise.all([
     TopBanner.findOne({ status: 1, country }).sort({ displayOrder: 1 }).select('id bookCallTemplateId country heading subHeading buttonText buttonUrl videoThumbnail videoUrl displayOrder status createdAt updatedAt'),
-    ServiceItem.find({ status: 1, ...(serviceCategoryId ? { service_category_id: serviceCategoryId } : {}) }).sort({ display_order: 1 }).select('id service_category_id service_image service_video_url service_title service_slug button_text display_order status'),
+    ServiceItem.find({ status: 1, ...(serviceCategoryId ? { serviceCategoryId } : {}) }).sort({ displayOrder: 1 }).select('id serviceCategoryId image videoUrl title slug buttonText displayOrder status'),
     Video.findOne({ status: 1 }).sort({ display_order: 1 }).select('id video_thumbnail video_url display_order status'),
     Client.find({ status: 1 }).sort({ display_order: 1 }).limit(6).select('id client_img client_title client_slug display_order status'),
   ]);
@@ -47,7 +47,7 @@ const index = async (req, res) => {
     video_url: videoRaw.video_url,
   } : null;
 
-  const other_service = serviceItems.map((s) => ({ ...s.toObject(), service_image: buildUrl(s.service_image), slug: s.service_slug, service_button_text: s.button_text }));
+  const other_service = serviceItems.map((s) => ({ ...s.toObject(), image: buildUrl(s.image) }));
   const clientData = clients.map((c) => ({ ...c.toObject(), client_img: buildUrl(c.client_img), slug: c.client_slug }));
 
   res.json({ status: 'success', data: { topBanner, other_service, video, client: clientData } });

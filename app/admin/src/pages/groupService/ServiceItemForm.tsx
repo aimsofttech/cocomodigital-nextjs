@@ -62,7 +62,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
 
   // Service Category options scoped to the chosen Department (keep current selection visible).
   const svcItemOptions = serviceItems.filter(
-    (it: any) => !selectedDept || String(it.service_category_id) === String(selectedDept) || String(it._id) === String(selectedSvcItem)
+    (it: any) => !selectedDept || String(it.serviceCategoryId) === String(selectedDept) || String(it._id) === String(selectedSvcItem)
   );
   // Group Category options scoped to the chosen Department + Service Category.
   const groupCatOptions = categories.filter(
@@ -117,7 +117,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
             className="form-select"
           >
             <option value="">All service categories</option>
-            {svcItemOptions.map((it: any) => <option key={it._id} value={it._id}>{it.service_title}</option>)}
+            {svcItemOptions.map((it: any) => <option key={it._id} value={it._id}>{it.title}</option>)}
           </select>
         </div>
       </div>

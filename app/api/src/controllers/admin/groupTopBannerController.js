@@ -20,7 +20,7 @@ module.exports = createCrudController(GroupTopBanner, {
     {
       localField: 'exploreOurServiceItemId',
       model: ServiceItem,
-      nameField: 'service_title',
+      nameField: 'title',
       as: 'serviceCategoryName',
     },
   ],

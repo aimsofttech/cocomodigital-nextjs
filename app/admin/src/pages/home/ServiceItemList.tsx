@@ -22,11 +22,11 @@ export default function ServiceItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'service_image', label: 'Image', render: (row: any) => <ImageCell src={row.service_image} size="w-[500px] h-24" /> },
-    { key: 'service_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.service_video_url} thumbnail={row.service_image} /> },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} size="w-[500px] h-24" /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl} thumbnail={row.image} /> },
     { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || 'N/A' },
-    { key: 'service_title', label: 'Category Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'title', label: 'Category Name', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {
       key: 'navigate', label: 'Navigate To', render: (row: any) => {

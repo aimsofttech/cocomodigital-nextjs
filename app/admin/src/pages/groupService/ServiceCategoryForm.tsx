@@ -42,7 +42,7 @@ export default function ServiceCategoryForm({ onSuccess, onCancel, editId }: Pro
   const itemOptions = serviceItems.filter(
     (it: any) =>
       !selectedDept ||
-      String(it.service_category_id) === String(selectedDept) ||
+      String(it.serviceCategoryId) === String(selectedDept) ||
       String(it._id) === String(selectedItem)
   );
 
@@ -83,7 +83,7 @@ export default function ServiceCategoryForm({ onSuccess, onCancel, editId }: Pro
           <select {...register('explore_our_service_item_id', { required: 'Required' })} className="form-select">
             <option value="">Select category</option>
             {itemOptions.map((it: any) => (
-              <option key={it._id} value={it._id}>{it.service_title}</option>
+              <option key={it._id} value={it._id}>{it.title}</option>
             ))}
           </select>
           {errors.explore_our_service_item_id && <p className="form-error">{String(errors.explore_our_service_item_id.message)}</p>}

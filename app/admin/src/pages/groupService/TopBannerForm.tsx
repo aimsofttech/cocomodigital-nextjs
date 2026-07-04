@@ -58,13 +58,13 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
   useEffect(() => {
     if (!selectedSvcItem || !serviceItems.length || !departments.length || selectedDept) return;
     const it = serviceItems.find((s: any) => String(s._id) === String(selectedSvcItem));
-    if (it?.service_category_id) setValue('exploreOurServiceCategoryId', String(it.service_category_id));
+    if (it?.serviceCategoryId) setValue('exploreOurServiceCategoryId', String(it.serviceCategoryId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSvcItem, serviceItems, departments, selectedDept]);
 
   // Service Category options scoped to the chosen Department (keep current selection visible).
   const svcItemOptions = serviceItems.filter(
-    (it: any) => !selectedDept || String(it.service_category_id) === String(selectedDept) || String(it._id) === String(selectedSvcItem)
+    (it: any) => !selectedDept || String(it.serviceCategoryId) === String(selectedDept) || String(it._id) === String(selectedSvcItem)
   );
 
   const deptReg = register('exploreOurServiceCategoryId', { required: 'Required' });
@@ -107,7 +107,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
           <label className="form-label">Department Name <span className="text-red-500">*</span></label>
           <select
             {...deptReg}
-            onChange={(e) => { deptReg.onChange(e); setValue('explore_our_service_item_id', ''); }}
+            onChange={(e) => { deptReg.onChange(e); setValue('exploreOurServiceItemId', ''); }}
             className="form-select"
           >
             <option value="">Select department</option>
@@ -119,7 +119,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
           <label className="form-label">Service Category Name <span className="text-red-500">*</span></label>
           <select {...register('exploreOurServiceItemId', { required: 'Required' })} className="form-select">
             <option value="">Select category</option>
-            {svcItemOptions.map((it: any) => <option key={it._id} value={it._id}>{it.service_title}</option>)}
+            {svcItemOptions.map((it: any) => <option key={it._id} value={it._id}>{it.title}</option>)}
           </select>
           {errors.exploreOurServiceItemId && <p className="form-error">{String(errors.exploreOurServiceItemId.message)}</p>}
         </div>

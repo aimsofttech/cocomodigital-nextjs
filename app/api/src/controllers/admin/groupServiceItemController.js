@@ -39,7 +39,7 @@ const base = createCrudController(GroupServiceItem, {
     {
       localField: 'explore_our_service_item_id',
       model: ServiceItem,
-      nameField: 'service_title',
+      nameField: 'title',
       as: 'service_category_name',
     },
   ],

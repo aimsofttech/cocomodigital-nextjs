@@ -82,8 +82,8 @@ const categories = async (req, res) => {
   const cats = await ServiceCategory.find({ status: 1 }).sort({ displayOrder: 1 });
   const result = [];
   for (const cat of cats) {
-    const items = await ServiceItem.find({ service_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
-    result.push({ ...cat.toObject(), items: items.map((i) => ({ ...i.toObject(), service_image: buildUrl(i.service_image) })) });
+    const items = await ServiceItem.find({ serviceCategoryId: cat._id, status: 1 }).sort({ displayOrder: 1 });
+    result.push({ ...cat.toObject(), items: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })) });
   }
   res.json({ status: 'success', data: result });
 };

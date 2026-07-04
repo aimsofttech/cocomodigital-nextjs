@@ -45,31 +45,31 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Select Department <span className="text-red-500">*</span></label>
-        <select {...register('service_category_id', { required: 'Required' })} className="form-select">
+        <select {...register('serviceCategoryId', { required: 'Required' })} className="form-select">
           <option value="">Select department</option>
           {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
         </select>
-        {errors.service_category_id && <p className="form-error">{String(errors.service_category_id.message)}</p>}
+        {errors.serviceCategoryId && <p className="form-error">{String(errors.serviceCategoryId.message)}</p>}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Category Name <span className="text-red-500">*</span></label>
-          <input {...register('service_title', { required: 'Required' })} className="form-input" placeholder="Enter category name" />
-          {errors.service_title && <p className="form-error">{String(errors.service_title.message)}</p>}
+          <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter category name" />
+          {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
       <div>
         <label className="form-label">Video URL</label>
-        <input {...register('service_video_url')} className="form-input" placeholder="https://youtube.com/..." />
+        <input {...register('videoUrl')} className="form-input" placeholder="https://youtube.com/..." />
       </div>
-      <ImageUpload name="service_image" label="Service Image" uploadType="image" folder="home" value={watch('service_image')} onChange={(url) => setValue('service_image', url)} />
+      <ImageUpload name="image" label="Service Image" uploadType="image" folder="home" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div>
         <label className="form-label">Button Text</label>
-        <input {...register('button_text')} className="form-input" placeholder="e.g. Learn More" />
+        <input {...register('buttonText')} className="form-input" placeholder="e.g. Learn More" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

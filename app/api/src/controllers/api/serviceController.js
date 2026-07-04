@@ -17,11 +17,11 @@ const serviceHomePriority = async (req, res) => {
   const categories = await ServiceCategory.find({ status: 1 }).sort({ displayOrder: 1 });
   const result = [];
   for (const cat of categories) {
-    const items = await ServiceItem.find({ service_category_id: cat._id, status: 1 }).sort({ display_order: 1 })
-      .select('id service_category_id service_image service_video_url service_title service_slug button_text display_order status');
+    const items = await ServiceItem.find({ serviceCategoryId: cat._id, status: 1 }).sort({ displayOrder: 1 })
+      .select('id serviceCategoryId image videoUrl title slug buttonText displayOrder status');
     result.push({
       ...cat.toObject(),
-      items: items.map((i) => ({ ...i.toObject(), service_image: buildUrl(i.service_image), slug: i.service_slug, service_button_text: i.button_text })),
+      items: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
     });
   }
   res.json({ status: 'success', data: result });
@@ -29,7 +29,7 @@ const serviceHomePriority = async (req, res) => {
 
 const groupService = async (req, res) => {
   const { service_slug } = req.params;
-  const serviceItem = await ServiceItem.findOne({ service_slug, status: 1 });
+  const serviceItem = await ServiceItem.findOne({ slug: service_slug, status: 1 });
   if (!serviceItem) return res.status(404).json({ status: 'error', message: 'Service not found' });
 
   const categories = await GroupServiceCategory.find({
@@ -71,11 +71,11 @@ const groupService = async (req, res) => {
     status: 1,
     exploreOurServiceItemId: { $in: [serviceItem._id, String(serviceItem._id)] },
   }).sort({ displayOrder: 1 });
-  if (banners.length === 0 && serviceItem.service_category_id) {
+  if (banners.length === 0 && serviceItem.serviceCategoryId) {
     banners = await GroupTopBanner.find({
       status: 1,
       exploreOurServiceCategoryId: {
-        $in: [serviceItem.service_category_id, String(serviceItem.service_category_id)],
+        $in: [serviceItem.serviceCategoryId, String(serviceItem.serviceCategoryId)],
       },
     }).sort({ displayOrder: 1 });
   }

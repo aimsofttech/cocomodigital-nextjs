@@ -64,13 +64,12 @@ export interface ServiceCategory extends BaseModel {
 }
 
 export interface ServiceItem extends BaseModel {
-  service_category_id: string | ServiceCategory;
-  service_title: string;
-  service_slug?: string;
-  service_image?: string;
-  service_video_url?: string;
-  button_text?: string;
-  button_url?: string;
+  serviceCategoryId: string | ServiceCategory;
+  title: string;
+  image?: string;
+  videoUrl?: string;
+  buttonText?: string;
+  buttonUrl?: string;
 }
 
 export interface Video extends BaseModel {

@@ -3,27 +3,26 @@ const ServiceItem = require('../../models/ServiceItem');
 const ServiceCategory = require('../../models/ServiceCategory');
 const GroupTopBanner = require('../../models/GroupTopBanner');
 const createCrudController = require('./crudFactory');
-const { generateSlug } = require('../../utils/helpers');
 
 const base = createCrudController(ServiceItem, {
-  imageFields: ['service_image'],
-  searchFields: ['service_title', 'service_slug'],
-  defaultSort: { display_order: 1 },
-  parentField: 'service_category_id',
+  imageFields: ['image'],
+  searchFields: ['title', 'slug'],
+  defaultSort: { displayOrder: 1 },
+  parentField: 'serviceCategoryId',
 });
 
-// A service_category_id may be either a Mongo ObjectId (records created in the
+// A serviceCategoryId may be either a Mongo ObjectId (records created in the
 // admin) or a legacy MySQL integer id (migrated records). Detect which.
 const isObjectIdRef = (v) =>
   v instanceof mongoose.Types.ObjectId || (typeof v === 'string' && /^[a-fA-F0-9]{24}$/.test(v));
 
 // Attach the parent Department name (from explore_our_service_category) to each
-// row, keyed by service_category_id, resolving both ObjectId and legacy int refs.
+// row, keyed by serviceCategoryId, resolving both ObjectId and legacy int refs.
 const withDepartment = async (rows) => {
   const objectIdRefs = [];
   const legacyIdRefs = [];
   rows.forEach((r) => {
-    const v = r.service_category_id;
+    const v = r.serviceCategoryId;
     if (v === null || v === undefined || v === '') return;
     if (isObjectIdRef(v)) objectIdRefs.push(String(v));
     else if (Number.isFinite(Number(v))) legacyIdRefs.push(Number(v));
@@ -46,7 +45,7 @@ const withDepartment = async (rows) => {
   });
 
   return rows.map((r) => {
-    const v = r.service_category_id;
+    const v = r.serviceCategoryId;
     let department_name = null;
     if (isObjectIdRef(v)) department_name = nameByObjectId[String(v)] || null;
     else if (Number.isFinite(Number(v))) department_name = nameByLegacyId[Number(v)] || null;
@@ -99,18 +98,6 @@ const index = async (req, res) => {
   return base.index(req, res);
 };
 
-const storeWithSlug = async (req, res) => {
-  if (!req.body.service_slug && req.body.service_title) {
-    req.body.service_slug = generateSlug(req.body.service_title);
-  }
-  return base.store(req, res);
-};
-
-const updateWithSlug = async (req, res) => {
-  if (!req.body.service_slug && req.body.service_title) {
-    req.body.service_slug = generateSlug(req.body.service_title);
-  }
-  return base.update(req, res);
-};
-
-module.exports = { ...base, index, store: storeWithSlug, update: updateWithSlug };
+// Slug generation is handled by crudFactory's applySlug (derives a unique
+// `slug` from `title` when none is supplied), so no custom wrappers needed.
+module.exports = { ...base, index };
