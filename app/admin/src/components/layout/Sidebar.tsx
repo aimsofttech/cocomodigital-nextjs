@@ -55,7 +55,7 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: 'Marketing House', icon: MegaphoneIcon,
+    label: 'Marketing Campaigns', icon: MegaphoneIcon,
     children: [
       { label: 'Categories',       path: '/marketing/category',         icon: TagIcon },
       { label: 'Items',            path: '/marketing/item',             icon: ListBulletIcon },

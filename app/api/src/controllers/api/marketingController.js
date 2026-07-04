@@ -20,7 +20,7 @@ const { buildS3Url } = require('../../utils/s3Upload');
 const buildUrl = (key) => (key ? buildS3Url(key) : '');
 
 const marketingHomePriority = async (req, res) => {
-  const categories = await MarketingHouseCategory.find({ status: 1 }).sort({ display_order: 1 });
+  const categories = await MarketingHouseCategory.find({ status: 1 }).sort({ displayOrder: 1 });
   const result = [];
   for (const cat of categories) {
     const items = await MarketingHouseItem.find({ marketing_house_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
@@ -35,7 +35,7 @@ const marketingHomePriority = async (req, res) => {
 const index = async (req, res) => marketingHomePriority(req, res);
 
 const marketingFilterData = async (req, res) => {
-  const categories = await MarketingHouseCategory.find({ status: 1 }).sort({ display_order: 1 }).select('id category_name');
+  const categories = await MarketingHouseCategory.find({ status: 1 }).sort({ displayOrder: 1 }).select('id name');
   res.json({ status: 'success', data: { categories } });
 };
 

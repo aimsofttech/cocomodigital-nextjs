@@ -21,13 +21,13 @@ export default function CategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'marketing_house_icon', label: 'Icon', render: (row: any) => <ImageCell src={row.marketing_house_icon} bg="bg-black" /> },
-    { key: 'category_name', label: 'Category Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'icon', label: 'Icon', render: (row: any) => <ImageCell src={row.icon} bg="bg-black" /> },
+    { key: 'name', label: 'Category Name', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Marketing Categories" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Categories' }]}
+    <CrudListPage title="Marketing Categories" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}

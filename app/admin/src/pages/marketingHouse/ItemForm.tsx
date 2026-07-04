@@ -214,7 +214,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
   return (
     <div>
       <PageHeader title={isEdit ? 'Edit Marketing Item' : 'Add Marketing Item'}
-        breadcrumbs={[{ label: 'Marketing House' }, { label: 'Items', path: '/marketing/item' }, { label: isEdit ? 'Edit' : 'Add' }]} />
+        breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Items', path: '/marketing/item' }, { label: isEdit ? 'Edit' : 'Add' }]} />
       <div className="card max-w-4xl">{form}</div>
     </div>
   );

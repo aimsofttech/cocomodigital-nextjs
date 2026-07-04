@@ -141,7 +141,7 @@ export default function ItemList() {
   };
 
   return (
-    <CrudListPage title="Marketing Items" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Items' }]}
+    <CrudListPage title="Marketing Items" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}

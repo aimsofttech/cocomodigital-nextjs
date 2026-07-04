@@ -50,7 +50,7 @@ export default function ContentCategoryModuleList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `Content Categories — ${itemName}` : 'Content Categories'} breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Content Categories' }]}
+    <CrudListPage title={itemName ? `Content Categories — ${itemName}` : 'Content Categories'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'Content Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}

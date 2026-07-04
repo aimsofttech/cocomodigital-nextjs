@@ -223,7 +223,7 @@ const resolveCategoryId = async (row, defaultCategoryId, categoryCache) => {
     const key = String(name).trim().toLowerCase();
     if (categoryCache.has(key)) return categoryCache.get(key);
     const cat = await MarketingHouseCategory.findOne({
-      category_name: { $regex: `^${escapeRegex(String(name).trim())}$`, $options: 'i' },
+      name: { $regex: `^${escapeRegex(String(name).trim())}$`, $options: 'i' },
     }).select('_id').lean();
     const id = cat ? String(cat._id) : null;
     categoryCache.set(key, id);

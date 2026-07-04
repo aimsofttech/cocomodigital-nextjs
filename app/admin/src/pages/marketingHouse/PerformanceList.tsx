@@ -30,7 +30,7 @@ export default function PerformanceList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Marketing Performance" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Performance' }]}
+    <CrudListPage title="Marketing Performance" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Performance' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}

@@ -27,7 +27,7 @@ export default function OtherActivityCategoryList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Add-on Activities Categories" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Add-on Activities Categories' }]}
+    <CrudListPage title="Add-on Activities Categories" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Add-on Activities Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}

@@ -76,7 +76,7 @@ export default function OtherActivityItemModuleList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `Add-on Activities Items — ${itemName}` : 'Add-on Activities Items'} breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'Add-on Activities Items' }]}
+    <CrudListPage title={itemName ? `Add-on Activities Items — ${itemName}` : 'Add-on Activities Items'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'Add-on Activities Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}

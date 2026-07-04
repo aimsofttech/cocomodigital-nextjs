@@ -28,7 +28,7 @@ export default function CommunityProgramList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Community Programs" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Community Programs' }]}
+    <CrudListPage title="Community Programs" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Community Programs' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}

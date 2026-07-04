@@ -30,7 +30,7 @@ export default function IdeaStrategyList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Idea & Strategy" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Idea Strategy' }]}
+    <CrudListPage title="Idea & Strategy" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Idea Strategy' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}

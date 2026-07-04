@@ -82,7 +82,7 @@ export default function FormList() {
 
   return (
     <div>
-      <PageHeader title="Marketing Form Submissions" breadcrumbs={[{ label: 'Marketing House' }, { label: 'Forms' }]} />
+      <PageHeader title="Marketing Form Submissions" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Forms' }]} />
       <TableFilter fields={FILTER_FIELDS} values={filterValues} onChange={handleFilterChange} onReset={handleFilterReset} activeCount={activeCount} loading={loading} />
       <div className="card">
         <DataTable columns={columns} data={filteredData} loading={loading} pagination={pagination}

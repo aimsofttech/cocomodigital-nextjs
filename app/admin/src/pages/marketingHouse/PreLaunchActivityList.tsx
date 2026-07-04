@@ -52,7 +52,7 @@ export default function PreLaunchActivityList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `PreLaunched Activity — ${itemName}` : 'PreLaunched Activity'} breadcrumbs={[{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'PreLaunched Activity' }]}
+    <CrudListPage title={itemName ? `PreLaunched Activity — ${itemName}` : 'PreLaunched Activity'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'PreLaunched Activity' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}

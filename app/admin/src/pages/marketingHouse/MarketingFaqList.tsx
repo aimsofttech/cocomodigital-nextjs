@@ -58,8 +58,8 @@ export default function MarketingFaqList() {
   ];
 
   const breadcrumbs = itemId
-    ? [{ label: 'Marketing House' }, { label: 'Items', path: '/marketing/item' }, { label: itemName || 'Item' }, { label: 'FAQ' }]
-    : [{ label: 'Marketing House' }, { label: 'Item Sections' }, { label: 'FAQ' }];
+    ? [{ label: 'Marketing Campaigns' }, { label: 'Items', path: '/marketing/item' }, { label: itemName || 'Item' }, { label: 'FAQ' }]
+    : [{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'FAQ' }];
 
   return (
     <CrudListPage title={itemName ? `FAQ — ${itemName}` : 'FAQ'} breadcrumbs={breadcrumbs}

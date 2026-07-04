@@ -86,7 +86,8 @@ export interface Client extends BaseModel {
 }
 
 export interface MarketingHouseCategory extends BaseModel {
-  category_name: string;
+  name: string;
+  icon?: string;
 }
 
 export interface MarketingHouseItem extends BaseModel {

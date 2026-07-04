@@ -97,7 +97,7 @@ export default function BulkUpload() {
   };
 
   const requireReady = () => {
-    if (!categoryId) { toast.error('Please select a Marketing House category'); return false; }
+    if (!categoryId) { toast.error('Please select a Marketing Campaigns category'); return false; }
     if (!file) { toast.error('Please choose a CSV/XLSX file'); return false; }
     return true;
   };
@@ -163,7 +163,7 @@ export default function BulkUpload() {
     <div>
       <PageHeader
         title="Bulk Upload"
-        breadcrumbs={[{ label: 'Marketing House' }, { label: 'Bulk Upload' }]}
+        breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Bulk Upload' }]}
         actions={
           <button
             type="button"
@@ -182,7 +182,7 @@ export default function BulkUpload() {
         <div className="card lg:col-span-2 space-y-4">
           <div>
             <label className="form-label">
-              Marketing House Category <span className="text-red-500">*</span>
+              Marketing Campaigns Category <span className="text-red-500">*</span>
             </label>
             <select
               className="form-select"
@@ -286,7 +286,7 @@ export default function BulkUpload() {
         <div className="card space-y-3">
           <h3 className="font-semibold text-gray-800">CSV format</h3>
           <p className="text-sm text-gray-600">
-            One row = one complete Marketing House item. Core columns:
+            One row = one complete Marketing Campaigns item. Core columns:
           </p>
           <ul className="text-xs text-gray-600 list-disc pl-4 space-y-0.5">
             <li><code>marketing_house_title</code> (required)</li>

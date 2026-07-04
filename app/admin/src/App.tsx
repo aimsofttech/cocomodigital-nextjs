@@ -27,7 +27,7 @@ const VideoForm = lazy(() => import('@/pages/home/VideoForm'));
 const ClientList = lazy(() => import('@/pages/home/ClientList'));
 const ClientForm = lazy(() => import('@/pages/home/ClientForm'));
 
-// Marketing House
+// Marketing Campaigns
 const MarketingCategoryList = lazy(() => import('@/pages/marketingHouse/CategoryList'));
 const MarketingCategoryForm = lazy(() => import('@/pages/marketingHouse/CategoryForm'));
 const MarketingItemList = lazy(() => import('@/pages/marketingHouse/ItemList'));
@@ -230,7 +230,7 @@ export default function App() {
           <Route path="home/client/add" element={<ClientForm />} />
           <Route path="home/client/edit/:id" element={<ClientForm />} />
 
-          {/* Marketing House */}
+          {/* Marketing Campaigns */}
           <Route path="marketing/category" element={<MarketingCategoryList />} />
           <Route path="marketing/category/add" element={<MarketingCategoryForm />} />
           <Route path="marketing/category/edit/:id" element={<MarketingCategoryForm />} />

@@ -430,13 +430,13 @@ const adaptJobCategory = (m: MongoJobCategory) => ({
 
 interface MongoMarketingCategory {
   _id?: string;
-  category_name?: string;
+  name?: string;
 }
 
 const adaptMarketingCategory = (m: MongoMarketingCategory) => ({
   id: m._id,
-  name: m.category_name,
-  slug: slugify(m.category_name),
+  name: m.name,
+  slug: slugify(m.name),
 });
 
 /* ── Image URL builder ───────────────────────────────────────── */

@@ -66,7 +66,7 @@ export const marketingHouseCommunityProgramItemApi = {
 export const marketingHouseProjectApi = createCrudService('marketing-house/project');
 export const marketingHouseFaqApi = createCrudService('marketing-house/faq');
 
-// Bulk upload — create many complete Marketing House records (item + all related
+// Bulk upload — create many complete Marketing Campaigns records (item + all related
 // sections) from a single CSV/XLSX file. `validate` is a dry run; `importBulk`
 // writes; `downloadTemplate` returns a sample CSV blob.
 export const marketingHouseBulkUploadApi = {

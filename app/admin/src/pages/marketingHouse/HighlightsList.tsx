@@ -61,8 +61,8 @@ export default function HighlightsList() {
   ];
 
   const breadcrumbs = itemId
-    ? [{ label: 'Marketing House' }, { label: 'Items', path: '/marketing/item' }, { label: itemName || 'Item' }, { label: 'Highlights' }]
-    : [{ label: 'Marketing House' }, { label: 'Highlights' }];
+    ? [{ label: 'Marketing Campaigns' }, { label: 'Items', path: '/marketing/item' }, { label: itemName || 'Item' }, { label: 'Highlights' }]
+    : [{ label: 'Marketing Campaigns' }, { label: 'Highlights' }];
 
   return (
     <CrudListPage title={itemName ? `Highlights — ${itemName}` : 'Highlights'} breadcrumbs={breadcrumbs}
