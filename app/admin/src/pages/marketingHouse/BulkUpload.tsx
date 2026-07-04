@@ -358,7 +358,7 @@ export default function BulkUpload() {
                   {failedRows.map((r) => (
                     <tr key={r.row} className="border-b last:border-0 align-top">
                       <td className="py-2 pr-4 text-gray-700">{r.row}</td>
-                      <td className="py-2 pr-4 text-gray-700">{r.title || '—'}</td>
+                      <td className="py-2 pr-4 text-gray-700">{r.title || 'N/A'}</td>
                       <td className="py-2 text-red-600">
                         <ul className="list-disc pl-4 space-y-0.5">
                           {(r.errors || []).map((e, i) => <li key={i}>{e}</li>)}

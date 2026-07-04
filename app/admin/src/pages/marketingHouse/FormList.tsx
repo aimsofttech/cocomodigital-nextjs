@@ -76,7 +76,7 @@ export default function FormList() {
     { key: 'realease_date', label: 'Release Date', sortable: true },
     { key: 'createdAt', label: 'Submitted', sortable: true, render: (row: any) => {
       const d = row.createdAt || row.created_at;
-      return d ? new Date(d).toLocaleDateString() : '—';
+      return d ? new Date(d).toLocaleDateString() : 'N/A';
     } },
   ];
 
@@ -88,7 +88,7 @@ export default function FormList() {
         <DataTable columns={columns} data={filteredData} loading={loading} pagination={pagination}
           onPageChange={setPage} onSearch={setSearch} pageSize={limit} onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
-            <div className="flex gap-1 justify-end">
+            <div className="flex gap-1 justify-start">
               <Tooltip content="View"><button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button></Tooltip>
               <Tooltip content="Delete"><button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button></Tooltip>
             </div>
@@ -101,9 +101,9 @@ export default function FormList() {
             <div className="grid grid-cols-2 gap-3">
               <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.name}</p></div>
               <div><p className="text-xs text-gray-500">Email</p><p>{selected.email}</p></div>
-              <div><p className="text-xs text-gray-500">WhatsApp</p><p>{selected.whatsapp_no || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Budget</p><p>{selected.campaign_budget || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Release Date</p><p>{selected.realease_date || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">WhatsApp</p><p>{selected.whatsapp_no || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Budget</p><p>{selected.campaign_budget || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Release Date</p><p>{selected.realease_date || 'N/A'}</p></div>
             </div>
             {selected.about_message && <div><p className="text-xs text-gray-500 mb-1">Message</p><p className="bg-gray-50 p-3 rounded-lg">{selected.about_message}</p></div>}
           </div>

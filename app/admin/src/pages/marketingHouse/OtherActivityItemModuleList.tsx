@@ -64,14 +64,14 @@ export default function OtherActivityItemModuleList() {
   const columns = [
     { key: 'image1', label: 'Image', render: (row: any) => <ImageCell src={row.image1 || row.image2 || row.image3 || row.image4 || row.image} alt="activity" /> },
     { key: 'video1', label: 'Video', render: (row: any) => <VideoCell src={row.video1 || row.video2 || row.video3 || row.video4 || row.video_url} thumbnail={row.image1 || row.image2 || row.image} /> },
-    { key: 'title', label: 'Title', sortable: true, render: (row: any) => row.title || '—' },
+    { key: 'title', label: 'Title', sortable: true, render: (row: any) => row.title || 'N/A' },
     { key: 'description', label: 'Description', render: (row: any) => {
       const text = String(row.description || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-      return <span className="text-xs text-gray-600 line-clamp-2 max-w-md min-w-[20rem] block" title={text}>{text || '—'}</span>;
+      return <span className="text-xs text-gray-600 line-clamp-2 max-w-md min-w-[20rem] block" title={text}>{text || 'N/A'}</span>;
     } },
-    { key: 'other_activity_category_name', label: 'Activity Category', render: (row: any) => row.other_activity_category_name || '—' },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || '—' },
+    { key: 'other_activity_category_name', label: 'Activity Category', render: (row: any) => row.other_activity_category_name || 'N/A' },
+    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
+    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

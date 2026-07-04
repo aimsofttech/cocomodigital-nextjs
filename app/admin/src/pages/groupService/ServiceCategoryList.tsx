@@ -27,8 +27,8 @@ export default function ServiceCategoryList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'group_service_category_name', label: 'Group Service Categories', sortable: true },
-    { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || '-' },
-    { key: 'category_name', label: 'Service Categories', render: (row: any) => row.category_name || '-' },
+    { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || 'N/A' },
+    { key: 'category_name', label: 'Service Categories', render: (row: any) => row.category_name || 'N/A' },
     { key: 'display_direction', label: 'Direction', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },

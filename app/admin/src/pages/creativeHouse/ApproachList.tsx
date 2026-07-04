@@ -51,9 +51,9 @@ export default function ApproachList() {
   const columns = [
     { key: 'approach_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.approach_thumbnail} /> },
     { key: 'approach_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.approach_video_url || row.approach_upload_video_url} thumbnail={row.approach_thumbnail} /> },
-    { key: 'creative_house_item_name', label: 'Creative Item', sortable: true, render: (row: any) => <span className="block w-40 whitespace-normal break-words">{row.creative_house_item_name || '—'}</span> },
-    { key: 'approach_heading', label: 'Heading', sortable: true, render: (row: any) => <span className="block w-48 whitespace-normal break-words">{row.approach_heading || '—'}</span> },
-    { key: 'approach_description', label: 'Description', render: (row: any) => <span className="block w-64 whitespace-normal break-words" title={row.approach_description}>{row.approach_description || '—'}</span> },
+    { key: 'creative_house_item_name', label: 'Creative Item', sortable: true, render: (row: any) => <span className="block w-40 whitespace-normal break-words">{row.creative_house_item_name || 'N/A'}</span> },
+    { key: 'approach_heading', label: 'Heading', sortable: true, render: (row: any) => <span className="block w-48 whitespace-normal break-words">{row.approach_heading || 'N/A'}</span> },
+    { key: 'approach_description', label: 'Description', render: (row: any) => <span className="block w-64 whitespace-normal break-words" title={row.approach_description}>{row.approach_description || 'N/A'}</span> },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

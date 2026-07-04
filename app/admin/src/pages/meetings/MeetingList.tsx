@@ -280,15 +280,15 @@ export default function MeetingList() {
   const columns = [
     {
       key: 'userName', label: 'Name', sortable: true,
-      render: (row: any) => <span className="font-medium text-gray-900">{row.userName || '—'}</span>,
+      render: (row: any) => <span className="font-medium text-gray-900">{row.userName || 'N/A'}</span>,
     },
-    { key: 'email', label: 'Email', sortable: true, render: (row: any) => row.email || '—' },
-    { key: 'phone', label: 'Phone', render: (row: any) => row.phone || '—' },
+    { key: 'email', label: 'Email', sortable: true, render: (row: any) => row.email || 'N/A' },
+    { key: 'phone', label: 'Phone', render: (row: any) => row.phone || 'N/A' },
     {
       key: 'meetingDate', label: 'Meeting Date', sortable: true,
       render: (row: any) => row.meetingDate
         ? <span className="whitespace-nowrap">{row.meetingDate}{row.meetingTime ? ` · ${row.meetingTime}` : ''}</span>
-        : '—',
+        : 'N/A',
     },
     {
       key: 'status', label: 'Status', sortable: true,
@@ -296,7 +296,7 @@ export default function MeetingList() {
     },
     {
       key: 'createdAt', label: 'Submitted', sortable: true,
-      render: (row: any) => row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '—',
+      render: (row: any) => row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A',
     },
   ];
 
@@ -316,7 +316,7 @@ export default function MeetingList() {
           { label: 'Completed', key: 'completed', color: 'text-blue-600 bg-blue-50' },
         ].map(({ label, key, color }) => (
           <div key={key} className={`card p-4 flex items-center gap-3 ${color}`}>
-            <span className="text-2xl font-bold">{stats[key] ?? '—'}</span>
+            <span className="text-2xl font-bold">{stats[key] ?? 'N/A'}</span>
             <span className="text-sm font-medium">{label}</span>
           </div>
         ))}
@@ -342,7 +342,7 @@ export default function MeetingList() {
           pageSize={limit}
           onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
-            <div className="flex gap-1 justify-end">
+            <div className="flex gap-1 justify-start">
               <Tooltip content="View details">
                 <button
                   onClick={() => setSelected(row)}
@@ -369,15 +369,15 @@ export default function MeetingList() {
         {selected && (
           <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.userName || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Company</p><p>{selected.companyName || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Meeting Date</p><p>{selected.meetingDate || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Meeting Time</p><p>{selected.meetingTime || '—'}{selected.meetingTimezone ? ` (${selected.meetingTimezone})` : ''}</p></div>
+              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.userName || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Company</p><p>{selected.companyName || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Meeting Date</p><p>{selected.meetingDate || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Meeting Time</p><p>{selected.meetingTime || 'N/A'}{selected.meetingTimezone ? ` (${selected.meetingTimezone})` : ''}</p></div>
               <div><p className="text-xs text-gray-500">Duration</p><p>{selected.duration || 15} minutes</p></div>
               <div><p className="text-xs text-gray-500">Status</p><StatusBadge status={selected.status} /></div>
-              <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : 'N/A'}</p></div>
               {selected.confirmedAt && <div><p className="text-xs text-gray-500">Confirmed At</p><p>{new Date(selected.confirmedAt).toLocaleString()}</p></div>}
               {selected.rejectedAt && <div><p className="text-xs text-gray-500">Rejected At</p><p>{new Date(selected.rejectedAt).toLocaleString()}</p></div>}
             </div>

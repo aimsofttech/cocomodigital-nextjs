@@ -45,8 +45,8 @@ export default function PortfolioItemList() {
   const columns = [
     { key: 'portfolio_item_image', label: 'Image', render: (row: any) => <ImageCell src={row.portfolio_item_image || row.portfolio_video_thumbnail} /> },
     { key: 'portfolio_item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.portfolio_item_video_url || row.portfolio_video_url} thumbnail={row.portfolio_item_image || row.portfolio_video_thumbnail} /> },
-    { key: 'portfolio_item_title', label: 'Title', sortable: true, render: (row: any) => row.portfolio_item_title || '-' },
-    { key: 'portfolio_category_name', label: 'Portfolio Category', render: (row: any) => row.portfolio_category_name || '-' },
+    { key: 'portfolio_item_title', label: 'Title', sortable: true, render: (row: any) => row.portfolio_item_title || 'N/A' },
+    { key: 'portfolio_category_name', label: 'Portfolio Category', render: (row: any) => row.portfolio_category_name || 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

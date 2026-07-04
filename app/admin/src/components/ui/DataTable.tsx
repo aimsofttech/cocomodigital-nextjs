@@ -39,6 +39,13 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 type SortDir = 'asc' | 'desc' | null;
 
+/** Render a cell's raw value, falling back to a muted "N/A" when the
+ *  data is missing (null / undefined / empty string). */
+export const cellValue = (val: any): React.ReactNode =>
+  val === null || val === undefined || (typeof val === 'string' && val.trim() === '')
+    ? <span className="text-gray-400">N/A</span>
+    : val;
+
 function sortValue(val: any): string | number {
   if (val === null || val === undefined) return '';
   if (typeof val === 'number') return val;
@@ -155,6 +162,7 @@ export default function DataTable<T extends { _id?: string }>({
           <thead>
             <tr>
               {renderExpanded && <th className="w-10" />}
+              {actions && <th>Actions</th>}
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -167,7 +175,6 @@ export default function DataTable<T extends { _id?: string }>({
                   </span>
                 </th>
               ))}
-              {actions && <th className="text-right">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
@@ -204,12 +211,12 @@ export default function DataTable<T extends { _id?: string }>({
                           </Tooltip>
                         </td>
                       )}
+                      {actions && <td>{actions(row)}</td>}
                       {columns.map((col) => (
                         <td key={col.key} className={col.className}>
-                          {col.render ? col.render(row, idx) : (row as any)[col.key] ?? '—'}
+                          {col.render ? col.render(row, idx) : cellValue((row as any)[col.key])}
                         </td>
                       ))}
-                      {actions && <td className="text-right">{actions(row)}</td>}
                     </tr>
                     {renderExpanded && isExpanded && (
                       <tr className="bg-gray-50/60">

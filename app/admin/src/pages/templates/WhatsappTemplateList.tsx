@@ -22,7 +22,7 @@ export default function WhatsappTemplateList() {
   const columns = [
     { key: 'template_name', label: 'Template Name', sortable: true },
     { key: 'template_type', label: 'Type', sortable: true },
-    { key: 'template_body', label: 'Body', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.template_body || '—'}</span> },
+    { key: 'template_body', label: 'Body', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.template_body || 'N/A'}</span> },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

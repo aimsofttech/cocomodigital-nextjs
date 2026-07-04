@@ -25,7 +25,7 @@ export default function CommunityProgramItemList() {
   const columns = [
     { key: 'community_program_item_video_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.community_program_item_video_thumbnail} /> },
     { key: 'community_program_item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.community_program_item_video_url} thumbnail={row.community_program_item_video_thumbnail} /> },
-    { key: 'community_program_item_description', label: 'Description', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.community_program_item_description || '—'}</span> },
+    { key: 'community_program_item_description', label: 'Description', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.community_program_item_description || 'N/A'}</span> },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

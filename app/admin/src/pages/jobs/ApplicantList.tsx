@@ -80,13 +80,13 @@ export default function ApplicantList() {
   const columns = [
     { key: 'name', label: 'Name', sortable: true, render: (row: any) => (
       <button type="button" onClick={() => setViewRow(row)} className="text-primary-600 hover:underline font-medium text-left">
-        {row.name || '—'}
+        {row.name || 'N/A'}
       </button>
     )},
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || '—' },
-    { key: 'job_title', label: 'Applied For', render: (row: any) => row.jobListId?.job_title || '—' },
-    { key: 'experience', label: 'Experience', sortable: true, render: (row: any) => row.experience || '—' },
+    { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || 'N/A' },
+    { key: 'job_title', label: 'Applied For', render: (row: any) => row.jobListId?.job_title || 'N/A' },
+    { key: 'experience', label: 'Experience', sortable: true, render: (row: any) => row.experience || 'N/A' },
     { key: 'applicationStatus', label: 'Status', render: (row: any) => (
       <span className={`badge ${STATUS_BADGES[row.applicationStatus] || 'badge-warning'} capitalize`}>{row.applicationStatus}</span>
     )},
@@ -108,7 +108,7 @@ export default function ApplicantList() {
           pageSize={limit}
           onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-start gap-1">
               <Tooltip content="View">
                 <button
                   type="button"
@@ -136,19 +136,19 @@ export default function ApplicantList() {
         {viewRow && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><p className="text-xs text-gray-500">Applied For</p><p className="font-semibold">{viewRow.jobListId?.job_title || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Name</p><p className="font-semibold">{viewRow.name || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Email</p><p className="font-semibold">{viewRow.email || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Phone</p><p>{viewRow.phone || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Experience</p><p>{viewRow.experience || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Location</p><p>{[viewRow.state, viewRow.country].filter(Boolean).join(', ') || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Applied For</p><p className="font-semibold">{viewRow.jobListId?.job_title || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Name</p><p className="font-semibold">{viewRow.name || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Email</p><p className="font-semibold">{viewRow.email || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Phone</p><p>{viewRow.phone || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Experience</p><p>{viewRow.experience || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Location</p><p>{[viewRow.state, viewRow.country].filter(Boolean).join(', ') || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Status</p><span className={`badge ${STATUS_BADGES[viewRow.applicationStatus] || 'badge-warning'} capitalize`}>{viewRow.applicationStatus}</span></div>
               <div><p className="text-xs text-gray-500">Applied On</p><p>{new Date(viewRow.createdAt).toLocaleDateString()}</p></div>
-              <div><p className="text-xs text-gray-500">Current CTC</p><p>{viewRow.currentCtc || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Expected CTC</p><p>{viewRow.annualCtc || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Notice Period (days)</p><p>{viewRow.noticePeriodDays || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Employment Preference</p><p className="capitalize">{viewRow.jobPrefrence || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Work Preference</p><p className="capitalize">{viewRow.workType || '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Current CTC</p><p>{viewRow.currentCtc || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Expected CTC</p><p>{viewRow.annualCtc || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Notice Period (days)</p><p>{viewRow.noticePeriodDays || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Employment Preference</p><p className="capitalize">{viewRow.jobPrefrence || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Work Preference</p><p className="capitalize">{viewRow.workType || 'N/A'}</p></div>
             </div>
             {viewRow.coverLetter && (
               <div><p className="text-xs text-gray-500 mb-1">Cover Letter</p><p className="text-sm bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{viewRow.coverLetter}</p></div>

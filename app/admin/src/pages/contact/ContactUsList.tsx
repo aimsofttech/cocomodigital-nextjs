@@ -69,14 +69,14 @@ export default function ContactUsList() {
   };
 
   const columns = [
-    { key: 'name', label: 'Name', sortable: true, render: (row: any) => `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.name || '—' },
+    { key: 'name', label: 'Name', sortable: true, render: (row: any) => `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.name || 'N/A' },
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone_no', label: 'Phone', sortable: true, render: (row: any) => row.phone_no || row.phone || '—' },
-    { key: 'company_name', label: 'Company', sortable: true, render: (row: any) => row.company_name || '—' },
-    { key: 'media_budget', label: 'Budget', sortable: true, render: (row: any) => row.media_budget || '—' },
+    { key: 'phone_no', label: 'Phone', sortable: true, render: (row: any) => row.phone_no || row.phone || 'N/A' },
+    { key: 'company_name', label: 'Company', sortable: true, render: (row: any) => row.company_name || 'N/A' },
+    { key: 'media_budget', label: 'Budget', sortable: true, render: (row: any) => row.media_budget || 'N/A' },
     { key: 'createdAt', label: 'Date', sortable: true, render: (row: any) => {
       const d = row.createdAt || row.created_at;
-      return d ? new Date(d).toLocaleDateString() : '—';
+      return d ? new Date(d).toLocaleDateString() : 'N/A';
     } },
   ];
 
@@ -88,7 +88,7 @@ export default function ContactUsList() {
         <DataTable columns={columns} data={filteredData} loading={loading} pagination={pagination}
           onPageChange={setPage} onSearch={setSearch} pageSize={limit} onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
-            <div className="flex gap-1 justify-end">
+            <div className="flex gap-1 justify-start">
               <Tooltip content="View"><button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button></Tooltip>
               <Tooltip content="Delete"><button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button></Tooltip>
             </div>

@@ -50,10 +50,10 @@ export default function CommunityProgramModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'community_program_category_name', label: 'Category Name', sortable: true, render: (row: any) => row.community_program_category_name || row.category_name || '—' },
-    { key: 'community_program_category_description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block text-sm text-gray-600">{row.community_program_category_description || '—'}</span> },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || '—' },
+    { key: 'community_program_category_name', label: 'Category Name', sortable: true, render: (row: any) => row.community_program_category_name || row.category_name || 'N/A' },
+    { key: 'community_program_category_description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block text-sm text-gray-600">{row.community_program_category_description || 'N/A'}</span> },
+    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
+    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

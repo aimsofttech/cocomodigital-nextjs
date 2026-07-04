@@ -52,10 +52,10 @@ export default function CommunityProgramItemModuleList() {
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.community_program_item_video_thumbnail || row.item_image} alt="continuity" /> },
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.community_program_item_video_url || row.community_program_item_video_file || row.item_video_url} thumbnail={row.community_program_item_video_thumbnail || row.item_image} /> },
-    { key: 'description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block">{row.community_program_item_description || row.item_title || row.title || '—'}</span> },
-    { key: 'community_program_category_name', label: 'Continuity Category', render: (row: any) => row.community_program_category_name || '—' },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || '—' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || '—' },
+    { key: 'description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block">{row.community_program_item_description || row.item_title || row.title || 'N/A'}</span> },
+    { key: 'community_program_category_name', label: 'Continuity Category', render: (row: any) => row.community_program_category_name || 'N/A' },
+    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
+    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

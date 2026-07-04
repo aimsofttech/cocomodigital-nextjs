@@ -52,9 +52,9 @@ export default function ServiceItemList() {
   const columns = [
     { key: 'group_service_item_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.group_service_item_thumbnail} /> },
     { key: 'group_service_item_title', label: 'Title', sortable: true },
-    { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || '-' },
-    { key: 'service_category_name', label: 'Service Categories', render: (row: any) => row.service_category_name || '-' },
-    { key: 'group_category_name', label: 'Group Categories', render: (row: any) => row.group_category_name || '-' },
+    { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || 'N/A' },
+    { key: 'service_category_name', label: 'Service Categories', render: (row: any) => row.service_category_name || 'N/A' },
+    { key: 'group_category_name', label: 'Group Categories', render: (row: any) => row.group_category_name || 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {

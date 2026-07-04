@@ -47,7 +47,7 @@ export default function ItemList() {
     { key: 'main_image', label: 'Image', render: (row: any) => <ImageCell src={row.main_image} alt={row.blog_title} /> },
     { key: 'blog_title', label: 'Title', sortable: true },
     { key: 'blog_category_name', label: 'Category', sortable: true },
-    { key: 'blog_sub_category_name', label: 'Sub Category', render: (row: any) => row.blog_sub_category_name || '—' },
+    { key: 'blog_sub_category_name', label: 'Sub Category', render: (row: any) => row.blog_sub_category_name || 'N/A' },
     { key: 'blog_item_slug', label: 'Slug', sortable: true },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },

@@ -69,14 +69,14 @@ export default function FreeConsultationList() {
   };
 
   const columns = [
-    { key: 'name', label: 'Name', sortable: true, render: (row: any) => row.name || `${row.first_name || ''} ${row.last_name || ''}`.trim() || '—' },
+    { key: 'name', label: 'Name', sortable: true, render: (row: any) => row.name || `${row.first_name || ''} ${row.last_name || ''}`.trim() || 'N/A' },
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || row.phone_no || '—' },
-    { key: 'company', label: 'Company', sortable: true, render: (row: any) => row.company || row.company_name || '—' },
-    { key: 'budget', label: 'Budget', sortable: true, render: (row: any) => row.budget || '—' },
+    { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || row.phone_no || 'N/A' },
+    { key: 'company', label: 'Company', sortable: true, render: (row: any) => row.company || row.company_name || 'N/A' },
+    { key: 'budget', label: 'Budget', sortable: true, render: (row: any) => row.budget || 'N/A' },
     { key: 'createdAt', label: 'Submitted', sortable: true, render: (row: any) => {
       const d = row.createdAt || row.created_at;
-      return d ? new Date(d).toLocaleDateString() : '—';
+      return d ? new Date(d).toLocaleDateString() : 'N/A';
     } },
   ];
 
@@ -88,7 +88,7 @@ export default function FreeConsultationList() {
         <DataTable columns={columns} data={filteredData} loading={loading} pagination={pagination}
           onPageChange={setPage} onSearch={setSearch} pageSize={limit} onPageSizeChange={handlePageSizeChange}
           actions={(row: any) => (
-            <div className="flex gap-1 justify-end">
+            <div className="flex gap-1 justify-start">
               <Tooltip content="View"><button onClick={() => setSelected(row)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><EyeIcon className="w-4 h-4" /></button></Tooltip>
               <Tooltip content="Delete"><button onClick={() => setDeleteId(row._id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><TrashIcon className="w-4 h-4" /></button></Tooltip>
             </div>
@@ -99,12 +99,12 @@ export default function FreeConsultationList() {
         {selected && (
           <div className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.name || `${selected.first_name || ''} ${selected.last_name || ''}`.trim() || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || selected.phone_no || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Company</p><p>{selected.company || selected.company_name || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Budget</p><p>{selected.budget || '—'}</p></div>
-              <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : '—'}</p></div>
+              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.name || `${selected.first_name || ''} ${selected.last_name || ''}`.trim() || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || selected.phone_no || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Company</p><p>{selected.company || selected.company_name || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Budget</p><p>{selected.budget || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : 'N/A'}</p></div>
             </div>
             {(selected.message || selected.msg) && <div><p className="text-xs text-gray-500 mb-1">Message</p><p className="bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selected.message || selected.msg}</p></div>}
           </div>

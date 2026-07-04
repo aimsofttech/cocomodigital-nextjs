@@ -1,6 +1,8 @@
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { formatDateTime } from '@/components/ui/ViewDetailsModal';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { topBannerApi } from '@/services/adminApi';
 import toast from 'react-hot-toast';
@@ -33,6 +35,33 @@ export default function TopBannerList() {
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
+      viewDetails={(row: any) => ({
+        title: 'Top Banner Details',
+        media: row.videoThumbnail
+          ? <img src={row.videoThumbnail} alt="Banner thumbnail" className="max-h-56 rounded-xl object-contain" />
+          : undefined,
+        fields: [
+          { label: 'Heading', value: row.heading, full: true },
+          { label: 'Sub Heading', value: row.subHeading, full: true },
+          {
+            label: 'Video URL',
+            full: true,
+            value: row.videoUrl ? (
+              <a href={row.videoUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">
+                {row.videoUrl}
+              </a>
+            ) : undefined,
+          },
+          { label: 'Button Text', value: row.buttonText },
+          { label: 'Button URL', value: row.buttonUrl },
+          { label: 'Country', value: row.country },
+          { label: 'Display Order', value: row.displayOrder },
+          { label: 'Status', value: <StatusBadge status={row.status} /> },
+          { label: 'Slug', value: row.slug },
+          { label: 'Created At', value: formatDateTime(row.createdAt) },
+          { label: 'Updated At', value: formatDateTime(row.updatedAt) },
+        ],
+      })}
       renderModal={({ id, onSuccess, onCancel }) => <TopBannerForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Top Banner' : 'Add Top Banner'}
       modalSize="lg" onRefresh={fetchAll} />

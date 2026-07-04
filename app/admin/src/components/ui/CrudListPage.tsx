@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
 import DataTable, { Column } from './DataTable';
 import ConfirmDialog from './ConfirmDialog';
 import PageHeader from './PageHeader';
 import Modal from './Modal';
 import Tooltip from './Tooltip';
+import ViewDetailsModal, { ViewDetailsConfig } from './ViewDetailsModal';
 import TableFilter, {
   FilterField,
   FilterValues,
@@ -56,6 +57,9 @@ interface CrudListPageProps<T = any> {
   renderExpanded?: (row: T) => React.ReactNode;
   /** When provided, Export/Import (CSV) buttons appear in the header. */
   csv?: CsvConfig;
+  /** When provided, each row gets an eye icon that opens a read-only
+      details modal built from this config. Available to every list page. */
+  viewDetails?: (row: T) => ViewDetailsConfig;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -70,6 +74,7 @@ export default function CrudListPage<T extends { _id?: string }>({
   extraActions, rowActions, disableAdd, disableDelete, disableEdit,
   filterFields, onServerFilterChange,
   renderModal, modalTitle, modalSize = 'lg', onRefresh, renderExpanded, csv,
+  viewDetails,
 }: CrudListPageProps<T>) {
   const { pathname } = useLocation();
   const sessionKey = getSessionKey(pathname);
@@ -93,6 +98,10 @@ export default function CrudListPage<T extends { _id?: string }>({
   });
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // ── View-details modal state (eye icon) ───────────────────────────────────
+  const [viewRow, setViewRow] = useState<T | null>(null);
+  const viewConfig = viewDetails && viewRow ? viewDetails(viewRow) : null;
 
   // ── Modal state ───────────────────────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
@@ -174,8 +183,19 @@ export default function CrudListPage<T extends { _id?: string }>({
 
   // ── Row actions ───────────────────────────────────────────────────────────
   const defaultActions = (row: T) => (
-    <div className="flex items-center justify-end gap-1">
+    <div className="flex items-center justify-start gap-1">
       {rowActions?.(row)}
+      {viewDetails && (
+        <Tooltip content="View">
+          <button
+            type="button"
+            onClick={() => setViewRow(row)}
+            className="p-1.5 rounded-md hover:bg-emerald-50 text-emerald-600 transition-colors"
+          >
+            <EyeIcon className="w-4 h-4" />
+          </button>
+        </Tooltip>
+      )}
       {!disableEdit && (renderModal ? (
         <Tooltip content="Edit">
           <button
@@ -270,7 +290,7 @@ export default function CrudListPage<T extends { _id?: string }>({
           onPageSizeChange={handlePageSizeChange}
           renderExpanded={renderExpanded}
           actions={
-            (!disableEdit && (editPath || renderModal)) || !disableDelete || rowActions
+            (!disableEdit && (editPath || renderModal)) || !disableDelete || rowActions || viewDetails
               ? defaultActions
               : undefined
           }
@@ -283,6 +303,17 @@ export default function CrudListPage<T extends { _id?: string }>({
         onConfirm={handleDelete}
         loading={submitting}
       />
+
+      {viewDetails && (
+        <ViewDetailsModal
+          isOpen={!!viewRow}
+          onClose={() => setViewRow(null)}
+          title={viewConfig?.title ?? 'Details'}
+          media={viewConfig?.media}
+          fields={viewConfig?.fields ?? []}
+          size={viewConfig?.size}
+        />
+      )}
 
       {renderModal && (
         <Modal

@@ -45,15 +45,15 @@ export default function ApplicantDetail() {
           <div className="grid grid-cols-2 gap-4">
             <div><p className="text-xs text-gray-500">Name</p><p className="font-semibold">{applicant.name}</p></div>
             <div><p className="text-xs text-gray-500">Email</p><p className="font-semibold">{applicant.email}</p></div>
-            <div><p className="text-xs text-gray-500">Phone</p><p>{applicant.phone || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">Experience</p><p>{applicant.experience || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">Location</p><p>{[applicant.state, applicant.country].filter(Boolean).join(', ') || '—'}</p></div>
+            <div><p className="text-xs text-gray-500">Phone</p><p>{applicant.phone || 'N/A'}</p></div>
+            <div><p className="text-xs text-gray-500">Experience</p><p>{applicant.experience || 'N/A'}</p></div>
+            <div><p className="text-xs text-gray-500">Location</p><p>{[applicant.state, applicant.country].filter(Boolean).join(', ') || 'N/A'}</p></div>
             <div><p className="text-xs text-gray-500">Applied On</p><p>{new Date(applicant.createdAt).toLocaleDateString()}</p></div>
-            <div><p className="text-xs text-gray-500">Current CTC</p><p>{applicant.currentCtc || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">Expected CTC</p><p>{applicant.annualCtc || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">Notice Period (days)</p><p>{applicant.noticePeriodDays || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">Employment Preference</p><p className="capitalize">{applicant.jobPrefrence || '—'}</p></div>
-            <div><p className="text-xs text-gray-500">Work Preference</p><p className="capitalize">{applicant.workType || '—'}</p></div>
+            <div><p className="text-xs text-gray-500">Current CTC</p><p>{applicant.currentCtc || 'N/A'}</p></div>
+            <div><p className="text-xs text-gray-500">Expected CTC</p><p>{applicant.annualCtc || 'N/A'}</p></div>
+            <div><p className="text-xs text-gray-500">Notice Period (days)</p><p>{applicant.noticePeriodDays || 'N/A'}</p></div>
+            <div><p className="text-xs text-gray-500">Employment Preference</p><p className="capitalize">{applicant.jobPrefrence || 'N/A'}</p></div>
+            <div><p className="text-xs text-gray-500">Work Preference</p><p className="capitalize">{applicant.workType || 'N/A'}</p></div>
           </div>
           {applicant.coverLetter && (
             <div><p className="text-xs text-gray-500 mb-1">Cover Letter</p><p className="text-sm bg-gray-50 p-3 rounded-lg">{applicant.coverLetter}</p></div>
@@ -69,7 +69,7 @@ export default function ApplicantDetail() {
           )}
         </div>
         <div className="card space-y-4">
-          <div><p className="text-xs text-gray-500">Job</p><p className="font-semibold">{applicant.jobListId?.job_title || '—'}</p></div>
+          <div><p className="text-xs text-gray-500">Job</p><p className="font-semibold">{applicant.jobListId?.job_title || 'N/A'}</p></div>
           <div><p className="text-xs text-gray-500 mb-2">Current Status</p><span className={`badge ${statusColors[applicant.applicationStatus] || 'badge-warning'}`}>{applicant.applicationStatus}</span></div>
           <div><p className="text-xs text-gray-500 mb-2">Update Status</p>
             <div className="space-y-2">

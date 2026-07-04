@@ -46,8 +46,8 @@ export default function PosterMediaList() {
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} alt="poster" /> },
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.marketing_item_video_url || row.marketing_item_upload_video_url} thumbnail={row.image} /> },
-    { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || '—' },
-    { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || '—' },
+    { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
+    { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
