@@ -79,7 +79,7 @@ const successStories = async (req, res) => {
 };
 
 const categories = async (req, res) => {
-  const cats = await ServiceCategory.find({ status: 1 }).sort({ display_order: 1 });
+  const cats = await ServiceCategory.find({ status: 1 }).sort({ displayOrder: 1 });
   const result = [];
   for (const cat of cats) {
     const items = await ServiceItem.find({ service_category_id: cat._id, status: 1 }).sort({ display_order: 1 });

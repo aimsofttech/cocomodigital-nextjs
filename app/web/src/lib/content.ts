@@ -226,10 +226,10 @@ interface MongoServiceItem {
 
 interface MongoServiceCategory {
   _id?: string;
-  service_category_name?: string;
-  service_icon?: string;
+  name?: string;
+  icon?: string;
   slug?: string | null;
-  display_order?: number;
+  displayOrder?: number;
   items?: MongoServiceItem[];
 }
 
@@ -250,15 +250,15 @@ const adaptServiceItem = (m: MongoServiceItem, categoryId?: string) => ({
 
 const adaptServiceCategory = (m: MongoServiceCategory) => ({
   id: m._id,
-  category_name: m.service_category_name,
-  slug: m.slug ?? slugify(m.service_category_name),
-  order: m.display_order,
+  category_name: m.name,
+  slug: m.slug ?? slugify(m.name),
+  order: m.displayOrder,
   /* Mongo has no featured flag. The header megamenu shows the main
      skill categories as tabs and appends "Our Other Services"
      separately, so every category except that one is "featured". */
-  featuredOnHomepage: m.service_category_name !== "Our Other Services",
-  homepageOrder: m.display_order ?? 999,
-  legacyIconUrl: m.service_icon ?? "",
+  featuredOnHomepage: m.name !== "Our Other Services",
+  homepageOrder: m.displayOrder ?? 999,
+  legacyIconUrl: m.icon ?? "",
   items: Array.isArray(m.items)
     ? m.items.map((it) => adaptServiceItem(it, m._id))
     : [],

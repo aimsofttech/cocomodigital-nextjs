@@ -14,7 +14,7 @@ const { buildS3Url } = require('../../utils/s3Upload');
 const buildUrl = (key) => (key ? buildS3Url(key) : '');
 
 const serviceHomePriority = async (req, res) => {
-  const categories = await ServiceCategory.find({ status: 1 }).sort({ display_order: 1 });
+  const categories = await ServiceCategory.find({ status: 1 }).sort({ displayOrder: 1 });
   const result = [];
   for (const cat of categories) {
     const items = await ServiceItem.find({ service_category_id: cat._id, status: 1 }).sort({ display_order: 1 })

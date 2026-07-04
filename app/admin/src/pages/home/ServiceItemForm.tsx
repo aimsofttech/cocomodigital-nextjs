@@ -47,7 +47,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
         <label className="form-label">Select Department <span className="text-red-500">*</span></label>
         <select {...register('service_category_id', { required: 'Required' })} className="form-select">
           <option value="">Select department</option>
-          {categories.map((c: any) => <option key={c._id} value={c._id}>{c.service_category_name}</option>)}
+          {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
         </select>
         {errors.service_category_id && <p className="form-error">{String(errors.service_category_id.message)}</p>}
       </div>

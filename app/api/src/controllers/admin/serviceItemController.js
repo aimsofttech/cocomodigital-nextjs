@@ -35,14 +35,14 @@ const withDepartment = async (rows) => {
   if (!or.length) return rows;
 
   const departments = await ServiceCategory.find({ $or: or })
-    .select('service_category_name id')
+    .select('name id')
     .lean();
 
   const nameByObjectId = {};
   const nameByLegacyId = {};
   departments.forEach((d) => {
-    nameByObjectId[String(d._id)] = d.service_category_name;
-    if (d.id !== undefined && d.id !== null) nameByLegacyId[Number(d.id)] = d.service_category_name;
+    nameByObjectId[String(d._id)] = d.name;
+    if (d.id !== undefined && d.id !== null) nameByLegacyId[Number(d.id)] = d.name;
   });
 
   return rows.map((r) => {

@@ -73,7 +73,7 @@ export default function ServiceCategoryForm({ onSuccess, onCancel, editId }: Pro
           <select {...register('explore_our_service_category_id', { required: 'Required' })} className="form-select">
             <option value="">Select department</option>
             {departments.map((d: any) => (
-              <option key={d._id} value={d._id}>{d.service_category_name}</option>
+              <option key={d._id} value={d._id}>{d.name}</option>
             ))}
           </select>
           {errors.explore_our_service_category_id && <p className="form-error">{String(errors.explore_our_service_category_id.message)}</p>}

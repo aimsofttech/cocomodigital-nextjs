@@ -21,9 +21,9 @@ export default function ServiceDepartmentList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'service_icon', label: 'Icon', render: (row: any) => <ImageCell src={row.service_icon} bg="bg-cocoma-dark" /> },
-    { key: 'service_category_name', label: 'Category Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'icon', label: 'Icon', render: (row: any) => <ImageCell src={row.icon} bg="bg-cocoma-dark" /> },
+    { key: 'name', label: 'Category Name', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

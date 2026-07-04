@@ -30,8 +30,13 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Top Banner',         path: '/home/top-banner',         icon: RectangleGroupIcon },
       { label: 'Brands',             path: '/home/brands',             icon: TagIcon },
-      { label: 'Service Department', path: '/home/service-department', icon: BuildingOffice2Icon },
-      { label: 'Service Category',   path: '/home/service-category',   icon: Squares2X2Icon },
+      {
+        label: 'Services', icon: BriefcaseIcon,
+        children: [
+          { label: 'Service Department', path: '/home/service-department', icon: BuildingOffice2Icon },
+          { label: 'Service Category',   path: '/home/service-category',   icon: Squares2X2Icon },
+        ],
+      },
       { label: 'Video',              path: '/home/video',              icon: VideoCameraIcon },
       { label: 'Success Stories',    path: '/home/client',             icon: StarIcon },
       {
@@ -162,14 +167,18 @@ interface NavGroupProps {
   level?: number;
 }
 
+// Whether any descendant path (at any nesting depth) matches the given
+// pathname (prefix-match so /marketing/item/123/images counts as matching
+// /marketing/item).
+const hasActiveDescendant = (item: NavItem, pathname: string): boolean =>
+  !!item.children?.some(
+    (c) => (c.path && pathname.startsWith(c.path)) || hasActiveDescendant(c, pathname)
+  );
+
 function NavGroup({ item, level = 0 }: NavGroupProps) {
   const location = useLocation();
 
-  // Whether any child path matches the current location (prefix-match so
-  // /marketing/item/123/images counts as matching /marketing/item).
-  const isChildActive = !!item.children?.some(
-    (c) => c.path && location.pathname.startsWith(c.path)
-  );
+  const isChildActive = hasActiveDescendant(item, location.pathname);
 
   // Start open when a child is active; user can manually toggle after that.
   const [open, setOpen] = useState(isChildActive);
@@ -279,7 +288,7 @@ function CollapsedItem({ item }: CollapsedItemProps) {
   const path = item.path ?? item.children?.[0]?.path ?? '#';
   const isActive = item.path
     ? location.pathname === item.path || location.pathname.startsWith(item.path + '/')
-    : !!item.children?.some((c) => c.path && location.pathname.startsWith(c.path));
+    : hasActiveDescendant(item, location.pathname);
 
   return (
     <div className="relative group">

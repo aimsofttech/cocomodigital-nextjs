@@ -43,19 +43,19 @@ export default function ServiceDepartmentForm({ onSuccess, onCancel, editId }: P
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Service Department Name <span className="text-red-500">*</span></label>
-        <input {...register('service_category_name', { required: 'Required' })} className="form-input" placeholder="Enter department name" />
-        {errors.service_category_name && <p className="form-error">{String(errors.service_category_name.message)}</p>}
+        <input {...register('name', { required: 'Required' })} className="form-input" placeholder="Enter department name" />
+        {errors.name && <p className="form-error">{String(errors.name.message)}</p>}
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div>
         <label className="form-label">Icon</label>
-        <ImageUpload name="service_icon" uploadType="image" folder="service-department" value={watch('service_icon')} onChange={(url) => setValue('service_icon', url, { shouldDirty: true })} />
-        <input {...register('service_icon')} className="form-input mt-2" placeholder="Or paste an icon URL (https://...)" />
+        <ImageUpload name="icon" uploadType="image" folder="service-department" value={watch('icon')} onChange={(url) => setValue('icon', url, { shouldDirty: true })} />
+        <input {...register('icon')} className="form-input mt-2" placeholder="Or paste an icon URL (https://...)" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Display Order</label>
-          <input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" />
+          <input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" />
         </div>
         <div>
           <label className="form-label">Status</label>

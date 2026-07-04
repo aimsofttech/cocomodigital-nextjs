@@ -111,7 +111,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
             className="form-select"
           >
             <option value="">Select department</option>
-            {departments.map((d: any) => <option key={d._id} value={d._id}>{d.service_category_name}</option>)}
+            {departments.map((d: any) => <option key={d._id} value={d._id}>{d.name}</option>)}
           </select>
           {errors.exploreOurServiceCategoryId && <p className="form-error">{String(errors.exploreOurServiceCategoryId.message)}</p>}
         </div>

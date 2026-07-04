@@ -106,7 +106,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
             className="form-select"
           >
             <option value="">All departments</option>
-            {departments.map((d: any) => <option key={d._id} value={d._id}>{d.service_category_name}</option>)}
+            {departments.map((d: any) => <option key={d._id} value={d._id}>{d.name}</option>)}
           </select>
         </div>
         <div>

@@ -59,7 +59,8 @@ export interface Brand extends BaseModel {
 }
 
 export interface ServiceCategory extends BaseModel {
-  service_category_name: string;
+  name: string;
+  icon?: string;
 }
 
 export interface ServiceItem extends BaseModel {
