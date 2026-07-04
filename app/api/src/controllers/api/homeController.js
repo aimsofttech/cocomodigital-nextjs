@@ -15,7 +15,7 @@ const index = async (req, res) => {
   const country = countryExists ? lang : 'en-us';
 
   const [topBannerRaw, serviceItems, videoRaw, clients] = await Promise.all([
-    TopBanner.findOne({ status: 1, country }).sort({ displayOrder: 1 }).select('id bookCallTemplateId country heading subHeading buttonText buttonUrl videoThumbnail videoUrl displayOrder status'),
+    TopBanner.findOne({ status: 1, country }).sort({ displayOrder: 1 }).select('id bookCallTemplateId country heading subHeading buttonText buttonUrl videoThumbnail videoUrl displayOrder status createdAt updatedAt'),
     ServiceItem.find({ status: 1, ...(serviceCategoryId ? { service_category_id: serviceCategoryId } : {}) }).sort({ display_order: 1 }).select('id service_category_id service_image service_video_url service_title service_slug button_text display_order status'),
     Video.findOne({ status: 1 }).sort({ display_order: 1 }).select('id video_thumbnail video_url display_order status'),
     Client.find({ status: 1 }).sort({ display_order: 1 }).limit(6).select('id client_img client_title client_slug display_order status'),
