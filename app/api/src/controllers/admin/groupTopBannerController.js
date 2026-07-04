@@ -2,13 +2,14 @@ const GroupTopBanner = require('../../models/GroupTopBanner');
 const ServiceCategory = require('../../models/ServiceCategory');
 const ServiceItem = require('../../models/ServiceItem');
 const createCrudController = require('./crudFactory');
-// `exploreOurServiceItemId` scopes banners to a Service Category, so the
-// banners can be filtered from the Group Service Category "Navigate To" links.
+// `exploreOurServiceItemId` scopes banners to a Service Category (used by the
+// "Navigate To" links and the list filter); `exploreOurServiceCategoryId`
+// scopes them to a Department (list filter).
 module.exports = createCrudController(GroupTopBanner, {
   imageFields: ['image'],
   searchFields: ['heading'],
   defaultSort: { displayOrder: 1 },
-  parentField: 'exploreOurServiceItemId',
+  parentField: ['exploreOurServiceItemId', 'exploreOurServiceCategoryId'],
   // Resolve the linked Department and Service Category display names for the list.
   lookups: [
     {

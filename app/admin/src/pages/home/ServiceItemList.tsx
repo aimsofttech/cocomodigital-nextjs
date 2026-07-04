@@ -37,10 +37,8 @@ export default function ServiceItemList() {
       key: 'serviceCategoryId',
       label: 'Service Department',
       type: 'select' as const,
-      options: [
-        { value: '', label: 'All Departments' },
-        ...departments.map((d: any) => ({ value: String(d._id), label: d.name })),
-      ],
+      /* TableFilter prepends its own "All Service Department" placeholder option. */
+      options: departments.map((d: any) => ({ value: String(d._id), label: d.name })),
     },
   ];
   const columns = [

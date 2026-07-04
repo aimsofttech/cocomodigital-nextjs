@@ -51,8 +51,11 @@ export function ImageCell({ src, alt = 'image', size = 'w-36 h-24', bg = '' }: {
       />
       {open && (
         <Modal isOpen onClose={() => setOpen(false)} title="Image Preview" size="xl">
+          {/* Cap the media to the space the modal body actually has
+              (90vh shell − header − paddings) so the preview never
+              scrolls, horizontally or vertically. */}
           <div className={`flex items-center justify-center p-2 min-h-32 ${bg ? `${bg} rounded-lg` : ''}`}>
-            <img src={url} alt={alt} className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-lg" />
+            <img src={url} alt={alt} className="max-w-full max-h-[calc(90vh-11rem)] object-contain rounded-lg shadow-lg" />
           </div>
         </Modal>
       )}
@@ -102,7 +105,10 @@ export function VideoCell({ src, thumbnail, size = 'w-36 h-24' }: { src?: string
 
       {open && (
         <Modal isOpen onClose={() => setOpen(false)} title="Video Preview" size="xl">
-          <div className="rounded-xl overflow-hidden bg-black aspect-video">
+          {/* Cap the player to the space the modal body actually has
+              (90vh shell − header − paddings) so the preview never
+              scrolls; portrait uploads letterbox via object-contain. */}
+          <div className="rounded-xl overflow-hidden bg-black aspect-video w-full max-h-[calc(90vh-10rem)]">
             {isYt && ytId ? (
               <iframe
                 src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`}
@@ -111,7 +117,7 @@ export function VideoCell({ src, thumbnail, size = 'w-36 h-24' }: { src?: string
                 allowFullScreen
               />
             ) : (
-              <video src={videoUrl} controls autoPlay className="w-full h-full" />
+              <video src={videoUrl} controls autoPlay className="w-full h-full object-contain" />
             )}
           </div>
         </Modal>
