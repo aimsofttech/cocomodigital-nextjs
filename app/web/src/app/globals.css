@@ -11276,7 +11276,7 @@
 
     align-items: flex-start;
 
-    margin-top: 3.2rem;
+    padding-top: 0px;
 
   }
 
@@ -11482,7 +11482,7 @@
 
     .home-video-main-wrapper {
 
-      margin-top: 2rem;
+      padding-top: 2rem;
 
     }
 

@@ -215,27 +215,27 @@ export async function fetchHomePageData(
     category_name: c.category_name,
     slug: c.slug,
   }));
-  /* "Our Other Services" feeds the around-the-channel rail. When
-     featuredOnHomepage filtering is in play, this category is
-     typically NOT featured, so we look it up separately. */
-  let otherServicesCategory = allCategories.find(
-    (c) => c.category_name === "Our Other Services",
-  );
-  if (!otherServicesCategory) {
-    const orphanRes = await getServiceCategories({
-      where: { slug: { equals: "our-other-services" } },
-      limit: 1,
-    });
-    if (orphanRes.docs[0]) {
-      otherServicesCategory = {
-        id: orphanRes.docs[0].id,
-        category_name: orphanRes.docs[0].category_name,
-        slug: orphanRes.docs[0].slug,
-      };
-    }
-  }
+  /* The "Other Services" department feeds the around-the-channel
+     rail (legacy admin label: "Our Other Services"). Match by name
+     or slug so the rail keeps working regardless of which label the
+     department carries, and exclude it from the main service rails
+     above — its services render in "Around the channel" instead. */
+  const isOtherServicesCategory = (c: {
+    category_name?: string;
+    slug?: string;
+  }) => {
+    const name = (c.category_name || "").trim().toLowerCase();
+    const slug = (c.slug || "").trim().toLowerCase();
+    return (
+      name === "other services" ||
+      name === "our other services" ||
+      slug === "other-services" ||
+      slug === "our-other-services"
+    );
+  };
+  const otherServicesCategory = allCategories.find(isOtherServicesCategory);
   const serviceCategories = allCategories.filter(
-    (c) => c.category_name !== "Our Other Services",
+    (c) => !isOtherServicesCategory(c),
   );
 
   /* Phase 5+ fix 2026-05-22: group HomeYoutubeCards by `subtitle`
