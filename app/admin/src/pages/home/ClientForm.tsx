@@ -49,36 +49,36 @@ export default function ClientForm({ onSuccess, onCancel, editId }: Props = {}) 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Success Stories Title <span className="text-red-500">*</span></label>
-          <input {...register('client_title', { required: 'Required' })} className="form-input" placeholder="Enter success story title" />
-          {errors.client_title && <p className="form-error">{String(errors.client_title.message)}</p>}
+          <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter success story title" />
+          {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
-        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} name="client_slug" label="Slug" />
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
       <div>
         <label className="form-label">Description</label>
-        <input type="hidden" {...register('client_description')} />
-        <RichTextEditor value={watch('client_description')} onChange={(html) => setValue('client_description', html, { shouldDirty: true })} placeholder="Write the success story description…" minHeight={320} />
+        <input type="hidden" {...register('description')} />
+        <RichTextEditor value={watch('description')} onChange={(html) => setValue('description', html, { shouldDirty: true })} placeholder="Write the success story description…" minHeight={320} />
       </div>
-      <ImageUpload name="client_img" label="Success Stories Image" uploadType="image" folder="home" value={watch('client_img')} onChange={(url) => setValue('client_img', url)} />
+      <ImageUpload name="image" label="Success Stories Image" uploadType="image" folder="home" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Author Template</label>
-          <select {...register('author_template_id')} className="form-select">
+          <select {...register('authorTemplateId')} className="form-select">
             <option value="">Select author template</option>
             {authors.map((a: any) => <option key={a._id} value={a._id}>{a.template_name || a.author_name}</option>)}
           </select>
         </div>
         <div>
           <label className="form-label">Book Call Template</label>
-          <select {...register('book_call_template_id')} className="form-select">
+          <select {...register('bookCallTemplateId')} className="form-select">
             <option value="">Select book call template</option>
             {bookCalls.map((b: any) => <option key={b._id} value={b._id}>{b.book_name}</option>)}
           </select>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
-        <div><label className="form-label">Service Order</label><input {...register('service_display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Service Order</label><input {...register('serviceDisplayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

@@ -1606,18 +1606,19 @@ export const getHomeGrowthStats = async (opts?: { revalidate?: number }) => {
 };
 
 /** Homepage "Latest Success Stories" rail — rich client case-study
-    data from the API's /home/client endpoint (client_title / client_img
-    / client_slug / client_description). */
+    data from the API's /home/client endpoint (title / image / slug /
+    description). Adapted to the legacy client_* card shape the Home
+    view components consume. */
 export const getHomeClients = async (opts?: { revalidate?: number }) => {
   const data = await apiGet<{ client?: any[] }>("/home/client", {
     revalidate: opts?.revalidate,
   });
   return (data?.client ?? []).map((c: any) => ({
     id: c._id,
-    slug: c.client_slug,
-    client_img: buildImg(c.client_img),
-    client_title: c.client_title,
-    client_description: c.client_description,
+    slug: c.slug,
+    client_img: buildImg(c.image),
+    client_title: c.title,
+    client_description: c.description,
   }));
 };
 

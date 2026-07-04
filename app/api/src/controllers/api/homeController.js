@@ -18,7 +18,7 @@ const index = async (req, res) => {
     TopBanner.findOne({ status: 1, country }).sort({ displayOrder: 1 }).select('id bookCallTemplateId country heading subHeading buttonText buttonUrl videoThumbnail videoUrl displayOrder status createdAt updatedAt'),
     ServiceItem.find({ status: 1, ...(serviceCategoryId ? { serviceCategoryId } : {}) }).sort({ displayOrder: 1 }).select('id serviceCategoryId image videoUrl title slug buttonText displayOrder status'),
     Video.findOne({ status: 1 }).sort({ displayOrder: 1 }).select('id thumbnail url displayOrder status'),
-    Client.find({ status: 1 }).sort({ display_order: 1 }).limit(6).select('id client_img client_title client_slug display_order status'),
+    Client.find({ status: 1 }).sort({ displayOrder: 1 }).limit(6).select('id image title slug displayOrder status'),
   ]);
 
   // Resolve the linked Book Call template (if any) for the banner.
@@ -47,7 +47,7 @@ const index = async (req, res) => {
   } : null;
 
   const other_service = serviceItems.map((s) => ({ ...s.toObject(), image: buildUrl(s.image) }));
-  const clientData = clients.map((c) => ({ ...c.toObject(), client_img: buildUrl(c.client_img), slug: c.client_slug }));
+  const clientData = clients.map((c) => ({ ...c.toObject(), image: buildUrl(c.image) }));
 
   res.json({ status: 'success', data: { topBanner, other_service, video, client: clientData } });
 };
@@ -62,17 +62,12 @@ const growthStats = async (req, res) => {
 };
 
 const client = async (req, res) => {
-  const clients = await Client.find({ status: 1 }).sort({ display_order: 1 })
-    .select('id author_template_id book_call_template_id client_img client_title client_slug client_description display_order status');
+  const clients = await Client.find({ status: 1 }).sort({ displayOrder: 1 })
+    .select('id authorTemplateId bookCallTemplateId image title slug description displayOrder status');
 
   const data = clients.map((c) => ({
     ...c.toObject(),
-    image: buildUrl(c.client_img),
-    title: c.client_title,
-    slug: c.client_slug,
-    description: c.client_description,
-    author_id: c.author_template_id,
-    book_call_id: c.book_call_template_id,
+    image: buildUrl(c.image),
   }));
 
   res.json({ status: 'success', data: { client: data } });

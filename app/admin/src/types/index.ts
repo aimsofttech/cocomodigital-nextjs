@@ -78,12 +78,11 @@ export interface Video extends BaseModel {
 }
 
 export interface Client extends BaseModel {
-  client_title: string;
-  client_slug?: string;
-  client_img?: string;
-  client_description?: string;
-  author_template_id?: string;
-  book_call_template_id?: string;
+  title: string;
+  image?: string;
+  description?: string;
+  authorTemplateId?: string;
+  bookCallTemplateId?: string;
 }
 
 export interface MarketingHouseCategory extends BaseModel {
