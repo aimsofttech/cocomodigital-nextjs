@@ -4,7 +4,7 @@ import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import StatusBadge from '@/components/ui/StatusBadge';
-import { formatDateTime } from '@/components/ui/ViewDetailsModal';
+import { formatDateTime, DetailImage } from '@/components/ui/ViewDetailsModal';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { groupTopBannerApi } from '@/services/adminApi';
@@ -57,9 +57,7 @@ export default function TopBannerList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       viewDetails={(row: any) => ({
         title: 'Group Top Banner Details',
-        media: row.image
-          ? <img src={row.image} alt="Banner" className="max-h-56 rounded-xl object-contain" />
-          : undefined,
+        media: <DetailImage src={row.image} alt="Banner" />,
         fields: [
           { label: 'Heading', value: row.heading, full: true },
           { label: 'Sub Heading', value: row.subHeading, full: true },

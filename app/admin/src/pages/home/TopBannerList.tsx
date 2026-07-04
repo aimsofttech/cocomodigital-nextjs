@@ -2,7 +2,7 @@ import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import StatusBadge from '@/components/ui/StatusBadge';
-import { formatDateTime } from '@/components/ui/ViewDetailsModal';
+import { formatDateTime, DetailImage } from '@/components/ui/ViewDetailsModal';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { topBannerApi } from '@/services/adminApi';
 import toast from 'react-hot-toast';
@@ -37,9 +37,8 @@ export default function TopBannerList() {
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       viewDetails={(row: any) => ({
         title: 'Top Banner Details',
-        media: row.videoThumbnail
-          ? <img src={row.videoThumbnail} alt="Banner thumbnail" className="max-h-56 rounded-xl object-contain" />
-          : undefined,
+        size: 'xl',
+        media: <DetailImage src={row.videoThumbnail} alt="Banner thumbnail" />,
         fields: [
           { label: 'Heading', value: row.heading, full: true },
           { label: 'Sub Heading', value: row.subHeading, full: true },
@@ -64,6 +63,6 @@ export default function TopBannerList() {
       })}
       renderModal={({ id, onSuccess, onCancel }) => <TopBannerForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Top Banner' : 'Add Top Banner'}
-      modalSize="lg" onRefresh={fetchAll} />
+      modalSize="xl" onRefresh={fetchAll} />
   );
 }
