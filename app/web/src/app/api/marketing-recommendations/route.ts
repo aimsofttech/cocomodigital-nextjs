@@ -10,8 +10,8 @@
  *     from sibling categories without N round trips.
  *   - We need a stable shape ({id, slug, title, poster_image,
  *     category_id}) — flatten Media doc → URL once, server-side.
- *   - Cache the response with Next.js's `revalidate` so repeat
- *     navigations don't re-query the API.
+ *   - Serve fresh data on every request (no route-level cache) so
+ *     admin edits to marketing items appear immediately.
  *
  * Strategy:
  *   1. Look up the parent doc by slug.
@@ -28,7 +28,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMarketingHouseItem, getMarketingHouseItems, imageUrl } from "@/src/lib/content";
 
-export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
 interface RecommendationDoc {
   id: number | string;

@@ -6,7 +6,7 @@ interface BlogManifest {
   posts?: Array<{ title?: string; slug?: string; excerpt?: string; tags?: string[] }>;
 }
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   /* Categories + services straight from the API — drives the

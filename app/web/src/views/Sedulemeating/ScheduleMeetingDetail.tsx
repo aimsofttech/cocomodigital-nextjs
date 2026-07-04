@@ -1,6 +1,6 @@
 // @ts-nocheck
 "use client";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useLocation } from "@/src/lib/navigation";
 import { useCart } from "@/src/lib/cart";
@@ -50,25 +50,44 @@ const ScheduleMeetingDetails = () => {
   const location = useLocation();
   const { clear: clearCart } = useCart();
 
-  /* Capture navigation state ONCE on mount: the cart, plus any slot the
-     /ScheduleMeeting picker already chose (passed via persisted nav state).
-     Reading it once — not on every render — means clearing the persisted
-     state below can't wipe the cart/slot mid-flow. */
-  const [navOnce] = useState<Record<string, any>>(() => (location.state as any) || {});
+  /* Capture navigation state: the cart, plus any slot the /ScheduleMeeting
+     picker already chose (passed via persisted nav state). useLocation()
+     deliberately returns state: null on the very first client render (to
+     avoid a hydration mismatch) and fills it in from sessionStorage in an
+     effect shortly after — so we can't read it synchronously via a lazy
+     useState initializer, that would always see it as empty. Instead we
+     apply it exactly once, in an effect, as soon as it becomes available. */
+  const [navOnce, setNavOnce] = useState<Record<string, any>>({});
+  const navOnceAppliedRef = useRef(false);
+  useEffect(() => {
+    if (navOnceAppliedRef.current) return;
+    if (location.state) {
+      navOnceAppliedRef.current = true;
+      setNavOnce(location.state as any);
+    }
+  }, [location.state]);
   const cartItems = navOnce.cartItems || [];
-  const incomingDate = navOnce.date ? new Date(navOnce.date) : null;
-  const hasIncomingSlot = Boolean(
-    incomingDate && !isNaN(incomingDate.getTime()) && navOnce.time
-  );
 
   /* Stage: picker → form → confirmed. When the user already picked a slot on
      /ScheduleMeeting, jump straight to the details form so they don't have to
      choose the time a second time. */
-  const [stage,    setStage]    = useState<Stage>(hasIncomingSlot ? "form" : "picker");
-  const [pickedDate,   setPickedDate]   = useState<Date | null>(hasIncomingSlot ? incomingDate : null);
-  const [pickedTime,   setPickedTime]   = useState<string>(hasIncomingSlot ? navOnce.time : "");
-  const [pickedTz,     setPickedTz]     = useState<string>(hasIncomingSlot ? (navOnce.timeZone || "") : "");
+  const [stage,    setStage]    = useState<Stage>("picker");
+  const [pickedDate,   setPickedDate]   = useState<Date | null>(null);
+  const [pickedTime,   setPickedTime]   = useState<string>("");
+  const [pickedTz,     setPickedTz]     = useState<string>("");
   const [bookingInfo,  setBookingInfo]  = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const incomingDate = navOnce.date ? new Date(navOnce.date) : null;
+    const hasIncomingSlot = Boolean(
+      incomingDate && !isNaN(incomingDate.getTime()) && navOnce.time
+    );
+    if (!hasIncomingSlot) return;
+    setPickedDate(incomingDate);
+    setPickedTime(navOnce.time);
+    setPickedTz(navOnce.timeZone || "");
+    setStage("form");
+  }, [navOnce]);
 
   /* Consume the persisted nav state so a later refresh or direct visit to
      /schedule-meeting doesn't resurrect a stale slot or cart. */

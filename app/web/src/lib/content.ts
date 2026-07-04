@@ -1573,6 +1573,22 @@ export const getSiteSettings = (opts?: { revalidate?: number; depth?: number }) 
 export const getHomepageContent = (opts?: { revalidate?: number; depth?: number }) =>
   getGlobal<any>("homepage-content", opts);
 
+/** Homepage hero — the admin-managed Top Banner (admin panel →
+    Home → Top Banners) served by the API's GET /home endpoint.
+    Returns the active banner doc (heading / sub_heading /
+    banner_video_url / banner_video_thumbnail / banner_button_text)
+    or null when no active banner exists. */
+export const getHomeTopBanner = async (opts?: {
+  revalidate?: number;
+  lang?: string;
+}) => {
+  const data = await apiGet<{ top_banner?: any }>("/home", {
+    revalidate: opts?.revalidate,
+    searchParams: opts?.lang ? { lang: opts.lang } : undefined,
+  });
+  return data?.top_banner ?? null;
+};
+
 /** Homepage "Latest Success Stories" rail — rich client case-study
     data from the API's /home/client endpoint (client_title / client_img
     / client_slug / client_description). */

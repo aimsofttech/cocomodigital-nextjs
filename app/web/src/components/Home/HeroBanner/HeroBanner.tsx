@@ -3,12 +3,13 @@ import Image from "next/image";
 import SecondaryLink from "../../common/SecondaryLink/SecondaryLink";
 import EditLink from "../../Edit-Link/Edit-Link";
 import { lazy, Suspense, useState } from "react";
+import { cleanVideoUrl } from "../../../lib/videoUrl";
 
 const ReactPlayer = lazy(() => import("react-player"));
 
 export default function HeroBanner({ data }) {
-  const { heading, subHeading, image, videoUrl, btnText, adminPath } =
-    data || {};
+  const { heading, subHeading, image, btnText, adminPath } = data || {};
+  const videoUrl = cleanVideoUrl(data?.videoUrl);
 
   // Must start muted for autoplay
   const [isMuted, setIsMuted] = useState(true);

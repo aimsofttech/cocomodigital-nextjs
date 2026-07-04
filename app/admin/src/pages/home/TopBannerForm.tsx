@@ -14,6 +14,18 @@ interface Props {
   editId?: string;
 }
 
+/* YouTube links copied while a playlist is open carry `&list=…&index=…`
+   params, which break single-video playback on the website (the player
+   treats them as a playlist and fails with "Invalid video id"). Reduce
+   to the canonical watch?v=<id> form; non-YouTube URLs pass through. */
+const YOUTUBE_ID_PATTERN =
+  /(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+const cleanVideoUrl = (url?: string): string => {
+  if (!url) return '';
+  const match = url.match(YOUTUBE_ID_PATTERN);
+  return match ? `https://www.youtube.com/watch?v=${match[1]}` : url;
+};
+
 export default function TopBannerForm({ onSuccess, onCancel, editId }: Props = {}) {
   const { id: paramId } = useParams();
   const navigate = useNavigate();
@@ -45,6 +57,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId }: Props = {
 
   const onSubmit = async (formData: any) => {
     try {
+      formData.banner_video_url = cleanVideoUrl(formData.banner_video_url);
       if (isEdit && id) await topBannerApi.update(id, formData); else await topBannerApi.create(formData);
       toast.success(isEdit ? 'Updated successfully' : 'Created successfully');
       if (onSuccess) onSuccess(); else navigate('/home/top-banner');

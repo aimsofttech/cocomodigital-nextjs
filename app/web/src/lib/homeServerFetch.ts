@@ -1,12 +1,13 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface HomeTopBanner {
-  id: number;
+  id: number | string;
   heading?: string;
   sub_heading?: string;
   banner_video_url?: string;
+  banner_video_thumbnail?: string;
   banner_button_text?: string;
-  book_call_template_id?: number;
+  book_call_template_id?: number | string;
 }
 
 export interface OtherServiceItem {
@@ -123,6 +124,7 @@ export async function fetchHomePageData(
     getServices,
     getHomeYoutubeCards,
     getHomepageContent,
+    getHomeTopBanner,
     getHireUsContent,
     getBookCallTemplate,
     getHomeClients,
@@ -137,12 +139,16 @@ export async function fetchHomePageData(
   // from in one round-trip.
   const [
     homepageGlobal,
+    topBannerDoc,
     youtubeFromPayload,
     payloadCategoriesResult,
     brandsResult,
     hireUsContent,
   ] = await Promise.all([
     getHomepageContent({ depth: 2 }),
+    /* Hero banner — admin-managed TopBanner (admin panel → Home →
+       Top Banners) via the API's GET /home. */
+    getHomeTopBanner(),
     /* limit: 100 so all 66 imported home-youtube-cards come back
        in one round-trip (was 50, capped at "Featured" generation).
        sort by legacyId preserves original Laravel section order
@@ -170,42 +176,26 @@ export async function fetchHomePageData(
     brand_image: imageUrl(b),
   }));
 
-  /* Top banner — pure the API now, no Laravel merge. Renders only
-     if Pearl has filled in HomepageContent.hero in admin; otherwise
-     undefined → Home view shows its built-in skeleton/fallback. */
-  const payloadHero: any = (homepageGlobal as any)?.hero ?? {};
-  const heroBackgroundImageUrl =
-    typeof payloadHero.background_image === "object" &&
-    payloadHero.background_image?.url
-      ? payloadHero.background_image.url
-      : undefined;
-  /* Phase 5r: HeroBanner ALWAYS renders. When Pearl hasn't filled
-     HomepageContent.hero in admin (Phase 5g dropped the Laravel
-     fallback that previously hydrated this), fall back to the
-     hardcoded brand pitch so the homepage never renders as an
-     empty black void. As soon as Pearl fills any single field in
-     the admin Hero group, her value overrides the corresponding
-     fallback. */
-  const HERO_FALLBACK = {
-    heading: "India's leading YouTube & Social-media growth studio",
-    sub_heading:
-      "12B+ organic views. 35,000+ videos. 45M+ subscribers built — for Amazon Prime Video, IMDb, MX Player, B4U, and India's leading OTT platforms.",
-    banner_video_url:
-      "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/Home-video/1751473566_Cocoma%20Showreel%20-%20Compressed.mp4",
-    banner_button_text: "Plan your growth",
-  } as const;
-  const mergedTopBanner: HomeTopBanner = {
-    id: 0,
-    heading: payloadHero.headline ?? HERO_FALLBACK.heading,
-    sub_heading: payloadHero.subheadline ?? HERO_FALLBACK.sub_heading,
-    banner_video_url:
-      payloadHero.background_video_url ??
-      heroBackgroundImageUrl ??
-      HERO_FALLBACK.banner_video_url,
-    banner_button_text:
-      payloadHero.primary_cta_text || HERO_FALLBACK.banner_button_text,
-    book_call_template_id: (payloadHero as any).book_call_template_id,
-  };
+  /* Top banner — fully dynamic from the admin-managed TopBanner
+     collection (admin panel → Home → Top Banners, served by the
+     API's GET /home). No hardcoded fallback: what the admin saves
+     is exactly what renders. An empty banner_video_url means "no
+     video" (HeroBanner then shows the thumbnail image, or nothing);
+     no active banner at all → undefined → Home view renders its
+     skeleton placeholder. */
+  const mergedTopBanner: HomeTopBanner | undefined = topBannerDoc
+    ? {
+        id: topBannerDoc._id ?? topBannerDoc.id ?? 0,
+        heading: topBannerDoc.heading,
+        sub_heading: topBannerDoc.sub_heading,
+        banner_video_url: topBannerDoc.banner_video_url || undefined,
+        banner_video_thumbnail:
+          topBannerDoc.banner_video_thumbnail || undefined,
+        banner_button_text: topBannerDoc.banner_button_text,
+        book_call_template_id:
+          topBannerDoc.book_call_template_id ?? undefined,
+      }
+    : undefined;
 
   /* Adapt the API ServiceCategory → legacy shape the Home view
      expects ({id, category_name}).
@@ -383,7 +373,7 @@ export async function fetchHomePageData(
   /* Growth-stats video. Sourced from the homepage-content global when
      present; otherwise a hardcoded fallback so the "Growth at a glance"
      + video section always renders (the section is gated on this value
-     in Home.tsx). Mirrors HERO_FALLBACK above. */
+     in Home.tsx). */
   const GROWTH_VIDEO_FALLBACK: GrowthVideo = {
     id: 0,
     video_url: "https://youtu.be/PNH0V6bvMEM",

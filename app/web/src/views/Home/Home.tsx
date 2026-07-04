@@ -61,11 +61,11 @@ export default function Home({ serverData }: HomeProps) {
           <HeroBanner
             data={{
               heading: homeData.top_banner.heading,
-              image: "",
+              image: homeData.top_banner.banner_video_thumbnail ?? "",
               subHeading: homeData.top_banner.sub_heading,
               videoUrl: homeData.top_banner.banner_video_url,
               btnText: homeData.top_banner.banner_button_text,
-              adminPath: `${ADMIN_URL}/home/top_banner/show/${homeData.top_banner.id}`,
+              adminPath: `${ADMIN_URL}/home/top-banner/edit/${homeData.top_banner.id}`,
             }}
           />
         ) : (
