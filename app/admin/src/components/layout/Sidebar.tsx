@@ -33,8 +33,8 @@ const navigation: NavItem[] = [
       {
         label: 'Services', icon: BriefcaseIcon,
         children: [
-          { label: 'Service Department', path: '/home/service-department', icon: BuildingOffice2Icon },
-          { label: 'Service Category',   path: '/home/service-category',   icon: Squares2X2Icon },
+          { label: 'Service Departments', path: '/home/service-department', icon: BuildingOffice2Icon },
+          { label: 'Service Categories',  path: '/home/service-category',   icon: Squares2X2Icon },
         ],
       },
       { label: 'Video',              path: '/home/video',              icon: VideoCameraIcon },
@@ -95,8 +95,8 @@ const navigation: NavItem[] = [
     label: 'Group Services', icon: BuildingStorefrontIcon,
     children: [
       { label: 'Top Banner',       path: '/group-service/top-banner',       icon: RectangleGroupIcon },
-      { label: 'Service Department', path: '/group-service/service-department', icon: BuildingOffice2Icon },
-      { label: 'Service Category',   path: '/group-service/service-category',   icon: Squares2X2Icon },
+      { label: 'Service Departments', path: '/group-service/service-department', icon: BuildingOffice2Icon },
+      { label: 'Service Categories',  path: '/group-service/service-category',   icon: Squares2X2Icon },
       { label: 'Group Categories', path: '/group-service/category',         icon: TagIcon },
       { label: 'Group Service Items', path: '/group-service/item',           icon: ListBulletIcon },
       {
