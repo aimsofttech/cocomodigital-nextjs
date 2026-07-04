@@ -2,13 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const stats = [
-  { prefix: "", value: 45, suffix: "M+", label: "Subscribers Built" },
-  { prefix: "", value: 12, suffix: "B+", label: "Organic Views" },
-  { prefix: "$", value: 600, suffix: "K+", label: "Ad Revenue · 2025" },
-  { prefix: "", value: 35, suffix: "K+", label: "Videos Produced" },
-  { prefix: "", value: 70, suffix: "%", label: "Partnerships Recurring" },
-];
+/* Stat tiles are admin-managed (admin panel → Home → Growth at a
+   glance → Stats) and passed in via the `stats` prop:
+   { prefix, value, suffix, label } — rendered as
+   `${prefix}${value}${suffix}` with a count-up animation. */
+
+export interface StatItem {
+  id?: string;
+  prefix: string;
+  value: number;
+  suffix: string;
+  label: string;
+}
 
 const TILT_ANGLES = [-1.5, 1, -1, 1.5, -1];
 
@@ -17,12 +22,10 @@ const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 const ANIMATION_MS = 2200;
 const FALLBACK_TRIGGER_MS = 4000;
 
-const formatStat = (
-  item: (typeof stats)[number],
-  n: number
-): string => `${item.prefix}${n}${item.suffix}`;
+const formatStat = (item: StatItem, n: number): string =>
+  `${item.prefix}${n}${item.suffix}`;
 
-const StatsSection = () => {
+const StatsSection = ({ stats = [] }: { stats?: StatItem[] }) => {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   const numberRefs = useRef<(HTMLHeadingElement | null)[]>([]);
@@ -30,6 +33,8 @@ const StatsSection = () => {
   const [animationDone, setAnimationDone] = useState(false);
 
   useEffect(() => {
+    if (!stats.length) return;
+
     let started = false;
     let cancelled = false;
 
@@ -128,7 +133,9 @@ const StatsSection = () => {
 
       window.removeEventListener("scroll", checkVisible);
     };
-  }, []);
+  }, [stats]);
+
+  if (!stats.length) return null;
 
   return (
     <section className="stats-section-wrapper" ref={sectionRef}>
@@ -136,11 +143,11 @@ const StatsSection = () => {
         <div className="stats-container">
           {stats.map((item, index) => (
             <div
-              key={item.label}
+              key={item.id || item.label}
               className="stat-card"
               style={
                 {
-                  "--stat-tilt": `${TILT_ANGLES[index] || 0
+                  "--stat-tilt": `${TILT_ANGLES[index % TILT_ANGLES.length] || 0
                     }deg`,
                 } as React.CSSProperties
               }

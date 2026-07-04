@@ -32,6 +32,7 @@ export const dashboardApi = { getStats: () => api.get(`${BASE}/dashboard`) };
 export const topBannerApi = createCrudService('top-banner');
 export const brandApi = createCrudService('brands');
 export const serviceCategoryApi = createCrudService('service-department');
+export const growthStatApi = createCrudService('growth-stats');
 export const serviceItemApi = createCrudService('service-category');
 export const videoApi = createCrudService('video');
 export const clientApi = createCrudService('client');

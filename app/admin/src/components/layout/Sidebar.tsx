@@ -37,8 +37,13 @@ const navigation: NavItem[] = [
           { label: 'Service Categories',  path: '/home/service-category',   icon: Squares2X2Icon },
         ],
       },
-      { label: 'Video',              path: '/home/video',              icon: VideoCameraIcon },
-      { label: 'Success Stories',    path: '/home/client',             icon: StarIcon },
+      {
+        label: 'Growth at a glance', icon: ChartBarIcon,
+        children: [
+          { label: 'Growth Numbers', path: '/home/growth-stats', icon: TrophyIcon },
+          { label: 'Video', path: '/home/video', icon: VideoCameraIcon },
+        ],
+      },
       {
         label: 'Media Portfolio', icon: FilmIcon,
         children: [
@@ -46,6 +51,7 @@ const navigation: NavItem[] = [
           { label: 'Section Items',      path: '/settings/home-section-items', icon: ListBulletIcon },
         ],
       },
+      { label: 'Success Stories',    path: '/home/client',             icon: StarIcon },
     ],
   },
   {

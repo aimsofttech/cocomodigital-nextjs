@@ -53,6 +53,15 @@ const index = async (req, res) => {
   res.json({ status: 'success', data: { topBanner, other_service, video, client: clientData } });
 };
 
+// "Growth at a glance" stat tiles — active only, in display order.
+const growthStats = async (req, res) => {
+  const stats = await require('../../models/GrowthStat')
+    .find({ status: 1 })
+    .sort({ displayOrder: 1 })
+    .select('prefix value suffix label displayOrder status');
+  res.json({ status: 'success', data: { growthStats: stats } });
+};
+
 const client = async (req, res) => {
   const clients = await Client.find({ status: 1 }).sort({ display_order: 1 })
     .select('id author_template_id book_call_template_id client_img client_title client_slug client_description display_order status');
@@ -94,4 +103,4 @@ const monthlyPerformanceShowcase = async (req, res) => {
   res.json({ status: 'success', data: { monthly_performance: result } });
 };
 
-module.exports = { index, client, monthlyPerformanceShowcase };
+module.exports = { index, client, monthlyPerformanceShowcase, growthStats };

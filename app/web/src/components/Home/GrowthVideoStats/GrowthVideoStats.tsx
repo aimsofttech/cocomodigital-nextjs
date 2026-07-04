@@ -4,12 +4,12 @@ import Image from "next/image";
 import { ADMIN_URL } from "../../../utils/constant";
 import EditLink from "../../Edit-Link/Edit-Link";
 import { Suspense, lazy, useMemo } from "react";
-import StatsSection from "../StatsSection/StatsSection";
+import StatsSection, { StatItem } from "../StatsSection/StatsSection";
 
 // Lazy load ReactPlayer for performance
 const ReactPlayer = lazy(() => import("react-player"));
 
-const GrowthVideoStats = ({ VideoData = {} }) => {
+const GrowthVideoStats = ({ VideoData = {}, stats = [] }: { VideoData?: any; stats?: StatItem[] }) => {
   // Memoize video URL
   const videoUrl = useMemo(() => VideoData?.video_url || "", [VideoData?.video_url]);
   const videoThumbnail = VideoData?.video_thumbnail || "";
@@ -22,7 +22,7 @@ const GrowthVideoStats = ({ VideoData = {} }) => {
           <EditLink path={`${ADMIN_URL}/home/video/show/${VideoData?.id}`} />
         </h1>
 
-        <StatsSection />
+        <StatsSection stats={stats} />
 
         {videoUrl ? (
           <div className="video-wrapper">

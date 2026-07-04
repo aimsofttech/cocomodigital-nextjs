@@ -24,6 +24,14 @@ export interface GrowthVideo {
   video_thumbnail?: string;
 }
 
+export interface GrowthStatItem {
+  id?: string;
+  prefix: string;
+  value: number;
+  suffix: string;
+  label: string;
+}
+
 export interface ClientCaseStudyItem {
   id: number | string;
   slug?: string;
@@ -90,6 +98,7 @@ export interface HomePageServerData {
   bookCallData: BookCallData | null;
   hireUsItems: HireUsItem[];
   brands: BrandItem[];
+  growthStats: GrowthStatItem[];
 }
 
 // ─── Main fetch ───────────────────────────────────────────────────────────────
@@ -125,6 +134,7 @@ export async function fetchHomePageData(
     getHomeYoutubeCards,
     getHomepageContent,
     getHomeTopBanner,
+    getHomeGrowthStats,
     getHireUsContent,
     getBookCallTemplate,
     getHomeClients,
@@ -140,6 +150,7 @@ export async function fetchHomePageData(
   const [
     homepageGlobal,
     topBannerDoc,
+    growthStats,
     youtubeFromPayload,
     payloadCategoriesResult,
     brandsResult,
@@ -149,6 +160,9 @@ export async function fetchHomePageData(
     /* Hero banner — admin-managed TopBanner (admin panel → Home →
        Top Banners) via the API's GET /home. */
     getHomeTopBanner(),
+    /* "Growth at a glance" stat tiles — admin-managed (Home →
+       Growth at a glance → Stats). */
+    getHomeGrowthStats(),
     /* limit: 100 so all 66 imported home-youtube-cards come back
        in one round-trip (was 50, capped at "Featured" generation).
        sort by legacyId preserves original Laravel section order
@@ -462,5 +476,6 @@ export async function fetchHomePageData(
     bookCallData,
     hireUsItems,
     brands,
+    growthStats,
   };
 }

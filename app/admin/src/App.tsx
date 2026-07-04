@@ -21,6 +21,8 @@ const ServiceDepartmentForm = lazy(() => import('@/pages/home/ServiceDepartmentF
 const ServiceItemList = lazy(() => import('@/pages/home/ServiceItemList'));
 const ServiceItemForm = lazy(() => import('@/pages/home/ServiceItemForm'));
 const VideoList = lazy(() => import('@/pages/home/VideoList'));
+const GrowthStatList = lazy(() => import('@/pages/home/GrowthStatList'));
+const GrowthStatForm = lazy(() => import('@/pages/home/GrowthStatForm'));
 const VideoForm = lazy(() => import('@/pages/home/VideoForm'));
 const ClientList = lazy(() => import('@/pages/home/ClientList'));
 const ClientForm = lazy(() => import('@/pages/home/ClientForm'));
@@ -219,6 +221,9 @@ export default function App() {
           <Route path="home/service-category/add" element={<ServiceItemForm />} />
           <Route path="home/service-category/edit/:id" element={<ServiceItemForm />} />
           <Route path="home/video" element={<VideoList />} />
+          <Route path="home/growth-stats" element={<GrowthStatList />} />
+          <Route path="home/growth-stats/add" element={<GrowthStatForm />} />
+          <Route path="home/growth-stats/edit/:id" element={<GrowthStatForm />} />
           <Route path="home/video/add" element={<VideoForm />} />
           <Route path="home/video/edit/:id" element={<VideoForm />} />
           <Route path="home/client" element={<ClientList />} />

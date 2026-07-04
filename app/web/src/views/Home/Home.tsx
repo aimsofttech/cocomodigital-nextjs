@@ -98,7 +98,7 @@ export default function Home({ serverData }: HomeProps) {
 
         {/* Video Stats */}
         {homeData?.video ? (
-          <GrowthVideoStats VideoData={homeData.video} />
+          <GrowthVideoStats VideoData={homeData.video} stats={serverData.growthStats} />
         ) : (
           <div
             className="home-section-skeleton home-section-skeleton--video"

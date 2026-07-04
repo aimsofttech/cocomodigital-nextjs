@@ -1589,6 +1589,22 @@ export const getHomeTopBanner = async (opts?: {
   return data?.topBanner ?? null;
 };
 
+/** Homepage "Growth at a glance" stat tiles — admin-managed (admin
+    panel → Home → Growth at a glance → Stats) via GET /home/growth-stats.
+    Each stat renders as `${prefix}${value}${suffix}` above its label. */
+export const getHomeGrowthStats = async (opts?: { revalidate?: number }) => {
+  const data = await apiGet<{ growthStats?: any[] }>("/home/growth-stats", {
+    revalidate: opts?.revalidate,
+  });
+  return (data?.growthStats ?? []).map((s: any) => ({
+    id: s._id,
+    prefix: s.prefix ?? "",
+    value: Number(s.value) || 0,
+    suffix: s.suffix ?? "",
+    label: s.label ?? "",
+  }));
+};
+
 /** Homepage "Latest Success Stories" rail — rich client case-study
     data from the API's /home/client endpoint (client_title / client_img
     / client_slug / client_description). */
