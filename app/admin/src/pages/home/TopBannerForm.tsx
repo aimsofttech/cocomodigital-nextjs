@@ -57,7 +57,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId }: Props = {
 
   const onSubmit = async (formData: any) => {
     try {
-      formData.banner_video_url = cleanVideoUrl(formData.banner_video_url);
+      formData.videoUrl = cleanVideoUrl(formData.videoUrl);
       if (isEdit && id) await topBannerApi.update(id, formData); else await topBannerApi.create(formData);
       toast.success(isEdit ? 'Updated successfully' : 'Created successfully');
       if (onSuccess) onSuccess(); else navigate('/home/top-banner');
@@ -78,16 +78,16 @@ export default function TopBannerForm({ onSuccess, onCancel, editId }: Props = {
       </div>
       <div>
         <label className="form-label">Sub Heading</label>
-        <input {...register('sub_heading')} className="form-input" placeholder="Enter sub heading" />
+        <input {...register('subHeading')} className="form-input" placeholder="Enter sub heading" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Button Text</label>
-          <input {...register('banner_button_text')} className="form-input" placeholder="Enter button text" />
+          <input {...register('buttonText')} className="form-input" placeholder="Enter button text" />
         </div>
         <div>
           <label className="form-label">Select Book Call Template</label>
-          <select {...register('book_call_template_id')} className="form-select">
+          <select {...register('bookCallTemplateId')} className="form-select">
             <option value="">— None —</option>
             {bookCalls.map((bc) => (
               <option key={bc._id} value={bc._id}>
@@ -100,16 +100,16 @@ export default function TopBannerForm({ onSuccess, onCancel, editId }: Props = {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Banner Video URL</label>
-          <input {...register('banner_video_url')} className="form-input" placeholder="YouTube or video URL" />
+          <input {...register('videoUrl')} className="form-input" placeholder="YouTube or video URL" />
         </div>
         <div>
           <label className="form-label">Country</label>
           <input {...register('country')} className="form-input" defaultValue="en-us" placeholder="e.g. en-us" />
         </div>
       </div>
-      <ImageUpload name="banner_video_thumbnail" label="Thumbnail" uploadType="image" folder="home" value={watch('banner_video_thumbnail')} onChange={(url) => setValue('banner_video_thumbnail', url)} />
+      <ImageUpload name="videoThumbnail" label="Thumbnail" uploadType="image" folder="home" value={watch('videoThumbnail')} onChange={(url) => setValue('videoThumbnail', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select" defaultValue="1"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

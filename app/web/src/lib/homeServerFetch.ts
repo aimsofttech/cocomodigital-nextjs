@@ -3,11 +3,11 @@
 export interface HomeTopBanner {
   id: number | string;
   heading?: string;
-  sub_heading?: string;
-  banner_video_url?: string;
-  banner_video_thumbnail?: string;
-  banner_button_text?: string;
-  book_call_template_id?: number | string;
+  subHeading?: string;
+  videoUrl?: string;
+  videoThumbnail?: string;
+  buttonText?: string;
+  bookCallTemplateId?: number | string;
 }
 
 export interface OtherServiceItem {
@@ -33,7 +33,7 @@ export interface ClientCaseStudyItem {
 }
 
 export interface HomeData {
-  top_banner?: HomeTopBanner;
+  topBanner?: HomeTopBanner;
   other_service?: OtherServiceItem[];
   video?: GrowthVideo;
   client?: ClientCaseStudyItem[];
@@ -101,7 +101,7 @@ export interface HomePageServerData {
  *   - serviceCategories       → service-categories collection
  *   - servicesByCategory      → services collection (per category)
  *   - youtubeData             → home-youtube-cards collection
- *   - homeData.top_banner     → homepage-content global (hero group)
+ *   - homeData.topBanner      → admin Top Banner via the API GET /home
  *   - homeData.other_service  → services collection (Our Other Services category)
  *   - homeData.video          → homepage-content global (growth_video group)
  *   - homeData.client         → success-stories collection (top 6 by order)
@@ -179,21 +179,19 @@ export async function fetchHomePageData(
   /* Top banner — fully dynamic from the admin-managed TopBanner
      collection (admin panel → Home → Top Banners, served by the
      API's GET /home). No hardcoded fallback: what the admin saves
-     is exactly what renders. An empty banner_video_url means "no
-     video" (HeroBanner then shows the thumbnail image, or nothing);
-     no active banner at all → undefined → Home view renders its
+     is exactly what renders. An empty videoUrl means "no video"
+     (HeroBanner then shows the thumbnail image, or nothing); no
+     active banner at all → undefined → Home view renders its
      skeleton placeholder. */
   const mergedTopBanner: HomeTopBanner | undefined = topBannerDoc
     ? {
         id: topBannerDoc._id ?? topBannerDoc.id ?? 0,
         heading: topBannerDoc.heading,
-        sub_heading: topBannerDoc.sub_heading,
-        banner_video_url: topBannerDoc.banner_video_url || undefined,
-        banner_video_thumbnail:
-          topBannerDoc.banner_video_thumbnail || undefined,
-        banner_button_text: topBannerDoc.banner_button_text,
-        book_call_template_id:
-          topBannerDoc.book_call_template_id ?? undefined,
+        subHeading: topBannerDoc.subHeading,
+        videoUrl: topBannerDoc.videoUrl || undefined,
+        videoThumbnail: topBannerDoc.videoThumbnail || undefined,
+        buttonText: topBannerDoc.buttonText,
+        bookCallTemplateId: topBannerDoc.bookCallTemplateId ?? undefined,
       }
     : undefined;
 
@@ -280,7 +278,7 @@ export async function fetchHomePageData(
      template) when laravelBanner doesn't have one. Once
      HomepageContent.hero gets a book_call_template number field,
      prefer that here. */
-  const templateId = mergedTopBanner?.book_call_template_id ?? 1;
+  const templateId = mergedTopBanner?.bookCallTemplateId ?? 1;
 
   /* Pearl's explicit picks for the homepage rails (Phase 5i —
      dedicated schemas on HomepageContent.sections). When set,
@@ -416,7 +414,7 @@ export async function fetchHomePageData(
   const homeData: HomeData | null =
     mergedTopBanner || otherService.length > 0 || growthVideo || clients.length > 0
       ? {
-          top_banner: mergedTopBanner,
+          topBanner: mergedTopBanner,
           other_service: otherService.length > 0 ? otherService : undefined,
           video: growthVideo,
           client: clients.length > 0 ? clients : undefined,

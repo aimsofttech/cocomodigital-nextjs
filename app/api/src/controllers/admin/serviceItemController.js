@@ -67,8 +67,8 @@ const withBannerNav = async (rows) => {
   const map = new Map();
   try {
     const agg = await GroupTopBanner.aggregate([
-      { $match: { explore_our_service_item_id: { $in: ids } } },
-      { $group: { _id: '$explore_our_service_item_id', count: { $sum: 1 } } },
+      { $match: { exploreOurServiceItemId: { $in: ids } } },
+      { $group: { _id: '$exploreOurServiceItemId', count: { $sum: 1 } } },
     ]);
     agg.forEach((r) => map.set(String(r._id), r.count));
   } catch (err) {

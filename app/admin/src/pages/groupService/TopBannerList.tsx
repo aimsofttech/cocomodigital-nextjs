@@ -14,18 +14,18 @@ export default function TopBannerList() {
   const serviceItemId = searchParams.get('serviceItemId') || '';
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupTopBannerApi, true, serviceItemId ? { explore_our_service_item_id: serviceItemId } : {});
+    useCrud(groupTopBannerApi, true, serviceItemId ? { exploreOurServiceItemId: serviceItemId } : {});
 
   // Re-apply the scope when the URL id changes.
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(serviceItemId ? { explore_our_service_item_id: serviceItemId } : {});
+    setFilterParams(serviceItemId ? { exploreOurServiceItemId: serviceItemId } : {});
   }, [serviceItemId, setFilterParams]);
 
   // Keep the scope when other filters change.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(serviceItemId ? { explore_our_service_item_id: serviceItemId } : {}), ...params });
+    setFilterParams({ ...(serviceItemId ? { exploreOurServiceItemId: serviceItemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -39,13 +39,13 @@ export default function TopBannerList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'group_banner_img', label: 'Image', render: (row: any) => <ImageCell src={row.group_banner_img} size="w-36 h-24" /> },
-    { key: 'group_banner_video', label: 'Video', render: (row: any) => <VideoCell src={row.group_banner_video} thumbnail={row.group_banner_img} size="w-36 h-24" /> },
-    { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || '-' },
-    { key: 'service_category_name', label: 'Service Category', render: (row: any) => row.service_category_name || '-' },
-    { key: 'group_banner_heading', label: 'Heading', sortable: true },
-    { key: 'group_banner_subheading', label: 'Sub Heading', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} size="w-36 h-24" /> },
+    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.video} thumbnail={row.image} size="w-36 h-24" /> },
+    { key: 'departmentName', label: 'Department', render: (row: any) => row.departmentName || '-' },
+    { key: 'serviceCategoryName', label: 'Service Category', render: (row: any) => row.serviceCategoryName || '-' },
+    { key: 'heading', label: 'Heading', sortable: true },
+    { key: 'subHeading', label: 'Sub Heading', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

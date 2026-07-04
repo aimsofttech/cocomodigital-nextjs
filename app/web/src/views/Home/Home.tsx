@@ -57,15 +57,15 @@ export default function Home({ serverData }: HomeProps) {
       <div className="home-main">
 
         {/* Hero Banner */}
-        {homeData?.top_banner ? (
+        {homeData?.topBanner ? (
           <HeroBanner
             data={{
-              heading: homeData.top_banner.heading,
-              image: homeData.top_banner.banner_video_thumbnail ?? "",
-              subHeading: homeData.top_banner.sub_heading,
-              videoUrl: homeData.top_banner.banner_video_url,
-              btnText: homeData.top_banner.banner_button_text,
-              adminPath: `${ADMIN_URL}/home/top-banner/edit/${homeData.top_banner.id}`,
+              heading: homeData.topBanner.heading,
+              image: homeData.topBanner.videoThumbnail ?? "",
+              subHeading: homeData.topBanner.subHeading,
+              videoUrl: homeData.topBanner.videoUrl,
+              btnText: homeData.topBanner.buttonText,
+              adminPath: `${ADMIN_URL}/home/top-banner/edit/${homeData.topBanner.id}`,
             }}
           />
         ) : (

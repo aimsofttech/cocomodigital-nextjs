@@ -21,11 +21,11 @@ export default function TopBannerList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'banner_video_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.banner_video_thumbnail} /> },
-    { key: 'banner_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.banner_video_url} thumbnail={row.banner_video_thumbnail} /> },
+    { key: 'videoThumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.videoThumbnail} /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl} thumbnail={row.videoThumbnail} /> },
     { key: 'heading', label: 'Heading', sortable: true },
     { key: 'country', label: 'Country', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} label={row.heading} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

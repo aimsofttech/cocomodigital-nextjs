@@ -69,22 +69,22 @@ const groupService = async (req, res) => {
   // this exact service item; fall back to its category's banner.
   let banners = await GroupTopBanner.find({
     status: 1,
-    explore_our_service_item_id: { $in: [serviceItem._id, String(serviceItem._id)] },
-  }).sort({ display_order: 1 });
+    exploreOurServiceItemId: { $in: [serviceItem._id, String(serviceItem._id)] },
+  }).sort({ displayOrder: 1 });
   if (banners.length === 0 && serviceItem.service_category_id) {
     banners = await GroupTopBanner.find({
       status: 1,
-      explore_our_service_category_id: {
+      exploreOurServiceCategoryId: {
         $in: [serviceItem.service_category_id, String(serviceItem.service_category_id)],
       },
-    }).sort({ display_order: 1 });
+    }).sort({ displayOrder: 1 });
   }
-  const top_banner = banners.map((b) => ({
+  const topBanner = banners.map((b) => ({
     ...b.toObject(),
-    group_banner_img: buildUrl(b.group_banner_img),
+    image: buildUrl(b.image),
   }));
 
-  res.json({ status: 'success', data: { service: serviceItem, categories: result, top_banner } });
+  res.json({ status: 'success', data: { service: serviceItem, categories: result, topBanner } });
 };
 
 const getSingleService = async (req, res) => {

@@ -43,13 +43,13 @@ export interface AuthUser {
 
 export interface TopBanner extends BaseModel {
   heading: string;
-  sub_heading?: string;
-  banner_button_text?: string;
-  banner_button_url?: string;
-  banner_video_thumbnail?: string;
-  banner_video_url?: string;
+  subHeading?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  videoThumbnail?: string;
+  videoUrl?: string;
   country: string;
-  book_call_template_id?: string;
+  bookCallTemplateId?: string;
 }
 
 export interface Brand extends BaseModel {

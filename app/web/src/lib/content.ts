@@ -1169,7 +1169,7 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       const data = await apiGet<{
         service?: any;
         categories?: any[];
-        top_banner?: any[];
+        topBanner?: any[];
       }>(`/service/group-service/${encodeURIComponent(slug)}`);
       const s = data?.service;
       if (!s) return null;
@@ -1182,16 +1182,16 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
         image: buildImg(s.service_image),
         legacyImageUrl: buildImg(s.service_image),
         category: { id: s.service_category_id },
-        group_top_banner: (data.top_banner ?? []).map((b: any) => ({
-          heading: b.group_banner_heading,
-          subheading: b.group_banner_subheading,
-          image: buildImg(b.group_banner_img),
-          legacyImageUrl: buildImg(b.group_banner_img),
-          video: b.group_banner_video,
-          video_url: b.group_banner_video,
-          button_text: b.group_banner_button_text,
-          cta_text: b.group_banner_button_text,
-          cta_url: b.group_banner_button_url,
+        group_top_banner: (data.topBanner ?? []).map((b: any) => ({
+          heading: b.heading,
+          subheading: b.subHeading,
+          image: buildImg(b.image),
+          legacyImageUrl: buildImg(b.image),
+          video: b.video,
+          video_url: b.video,
+          button_text: b.buttonText,
+          cta_text: b.buttonText,
+          cta_url: b.buttonUrl,
         })),
         /* The "FOR <audience>" sliding sections: group_services_category
            (sections) → group_service_item (cards). The page/Services
@@ -1575,18 +1575,18 @@ export const getHomepageContent = (opts?: { revalidate?: number; depth?: number 
 
 /** Homepage hero — the admin-managed Top Banner (admin panel →
     Home → Top Banners) served by the API's GET /home endpoint.
-    Returns the active banner doc (heading / sub_heading /
-    banner_video_url / banner_video_thumbnail / banner_button_text)
-    or null when no active banner exists. */
+    Returns the active banner doc (heading / subHeading / videoUrl /
+    videoThumbnail / buttonText) or null when no active banner
+    exists. */
 export const getHomeTopBanner = async (opts?: {
   revalidate?: number;
   lang?: string;
 }) => {
-  const data = await apiGet<{ top_banner?: any }>("/home", {
+  const data = await apiGet<{ topBanner?: any }>("/home", {
     revalidate: opts?.revalidate,
     searchParams: opts?.lang ? { lang: opts.lang } : undefined,
   });
-  return data?.top_banner ?? null;
+  return data?.topBanner ?? null;
 };
 
 /** Homepage "Latest Success Stories" rail — rich client case-study

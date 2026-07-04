@@ -15,7 +15,7 @@ const index = async (req, res) => {
   const country = countryExists ? lang : 'en-us';
 
   const [topBannerRaw, serviceItems, videoRaw, clients] = await Promise.all([
-    TopBanner.findOne({ status: 1, country }).sort({ display_order: 1 }).select('id book_call_template_id country heading sub_heading banner_button_text banner_button_url banner_video_thumbnail banner_video_url display_order status'),
+    TopBanner.findOne({ status: 1, country }).sort({ displayOrder: 1 }).select('id bookCallTemplateId country heading subHeading buttonText buttonUrl videoThumbnail videoUrl displayOrder status'),
     ServiceItem.find({ status: 1, ...(serviceCategoryId ? { service_category_id: serviceCategoryId } : {}) }).sort({ display_order: 1 }).select('id service_category_id service_image service_video_url service_title service_slug button_text display_order status'),
     Video.findOne({ status: 1 }).sort({ display_order: 1 }).select('id video_thumbnail video_url display_order status'),
     Client.find({ status: 1 }).sort({ display_order: 1 }).limit(6).select('id client_img client_title client_slug display_order status'),
@@ -23,8 +23,8 @@ const index = async (req, res) => {
 
   // Resolve the linked Book Call template (if any) for the banner.
   let bookCallTemplate = null;
-  if (topBannerRaw && topBannerRaw.book_call_template_id) {
-    const bc = await BookCall.findById(topBannerRaw.book_call_template_id).catch(() => null);
+  if (topBannerRaw && topBannerRaw.bookCallTemplateId) {
+    const bc = await BookCall.findById(topBannerRaw.bookCallTemplateId).catch(() => null);
     if (bc) {
       const obj = bc.toObject();
       bookCallTemplate = {
@@ -37,8 +37,8 @@ const index = async (req, res) => {
 
   const topBanner = topBannerRaw ? {
     ...topBannerRaw.toObject(),
-    banner_video_thumbnail: buildUrl(topBannerRaw.banner_video_thumbnail),
-    book_call_template: bookCallTemplate,
+    videoThumbnail: buildUrl(topBannerRaw.videoThumbnail),
+    bookCallTemplate,
   } : null;
 
   const video = videoRaw ? {
@@ -50,7 +50,7 @@ const index = async (req, res) => {
   const other_service = serviceItems.map((s) => ({ ...s.toObject(), service_image: buildUrl(s.service_image), slug: s.service_slug, service_button_text: s.button_text }));
   const clientData = clients.map((c) => ({ ...c.toObject(), client_img: buildUrl(c.client_img), slug: c.client_slug }));
 
-  res.json({ status: 'success', data: { top_banner: topBanner, other_service, video, client: clientData } });
+  res.json({ status: 'success', data: { topBanner, other_service, video, client: clientData } });
 };
 
 const client = async (req, res) => {

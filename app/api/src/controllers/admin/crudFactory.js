@@ -191,6 +191,10 @@ const createCrudController = (Model, options = {}) => {
   // All fields that may hold S3 references (images + videos), de-duplicated.
   const mediaFields = [...new Set([...imageFields, ...videoFields])];
 
+  // Audit field for the creating user. Newer camelCase schemas declare
+  // `userId`; legacy schemas use `user_id`.
+  const userField = Model.schema && Model.schema.paths.userId ? 'userId' : 'user_id';
+
   return {
     index: async (req, res) => {
       const page = parseInt(req.query.page) || 1;
@@ -244,7 +248,7 @@ const createCrudController = (Model, options = {}) => {
           if (files[0]) body[field] = files[0].location || files[0].key || files[0].path;
         });
       }
-      body.user_id = req.user._id;
+      body[userField] = req.user._id;
 
       if (slug) await applySlug(Model, body, slugSource, null, slugField);
 
@@ -354,7 +358,7 @@ const createCrudController = (Model, options = {}) => {
           for (const [k, v] of Object.entries(injected)) {
             if (body[k] === undefined) body[k] = v;
           }
-          body.user_id = req.user._id;
+          body[userField] = req.user._id;
           if (slug) await applySlug(Model, body, slugSource, null, slugField);
           await Model.create(body);
           created += 1;

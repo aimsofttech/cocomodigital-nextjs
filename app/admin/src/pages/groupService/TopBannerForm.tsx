@@ -31,16 +31,16 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
         reset({
           ...item,
           status: String(item.status ?? '1'),
-          explore_our_service_category_id: item.explore_our_service_category_id ?? '',
-          explore_our_service_item_id: item.explore_our_service_item_id ?? '',
+          exploreOurServiceCategoryId: item.exploreOurServiceCategoryId ?? '',
+          exploreOurServiceItemId: item.exploreOurServiceItemId ?? '',
         });
-        if (item.group_banner_video_type === 'url') setVideoTab('url');
+        if (item.videoType === 'url') setVideoTab('url');
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
 
-  const selectedDept = watch('explore_our_service_category_id');
-  const selectedSvcItem = watch('explore_our_service_item_id');
+  const selectedDept = watch('exploreOurServiceCategoryId');
+  const selectedSvcItem = watch('exploreOurServiceItemId');
 
   // Preselect the Service Category when adding from a scoped link. Wait until the
   // options are loaded — setting a <select> value before its <option>s exist
@@ -48,7 +48,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
   const lockedApplied = useRef(false);
   useEffect(() => {
     if (isEdit || !lockedServiceItemId || !serviceItems.length || lockedApplied.current) return;
-    setValue('explore_our_service_item_id', lockedServiceItemId);
+    setValue('exploreOurServiceItemId', lockedServiceItemId);
     lockedApplied.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lockedServiceItemId, isEdit, serviceItems]);
@@ -58,7 +58,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
   useEffect(() => {
     if (!selectedSvcItem || !serviceItems.length || !departments.length || selectedDept) return;
     const it = serviceItems.find((s: any) => String(s._id) === String(selectedSvcItem));
-    if (it?.service_category_id) setValue('explore_our_service_category_id', String(it.service_category_id));
+    if (it?.service_category_id) setValue('exploreOurServiceCategoryId', String(it.service_category_id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSvcItem, serviceItems, departments, selectedDept]);
 
@@ -67,27 +67,27 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
     (it: any) => !selectedDept || String(it.service_category_id) === String(selectedDept) || String(it._id) === String(selectedSvcItem)
   );
 
-  const deptReg = register('explore_our_service_category_id', { required: 'Required' });
+  const deptReg = register('exploreOurServiceCategoryId', { required: 'Required' });
 
   const switchVideoTab = (tab: VideoTab) => {
     setVideoTab(tab);
-    setValue('group_banner_video', '');
-    setValue('group_banner_video_type', tab);
+    setValue('video', '');
+    setValue('videoType', tab);
   };
 
   const onSubmit = async (formData: any) => {
     try {
       // Explicit payload keeps the request to the real banner fields only.
       const payload = {
-        explore_our_service_category_id: formData.explore_our_service_category_id,
-        explore_our_service_item_id: formData.explore_our_service_item_id,
-        group_banner_heading: formData.group_banner_heading,
-        group_banner_subheading: formData.group_banner_subheading,
-        group_banner_img: formData.group_banner_img,
-        group_banner_video: formData.group_banner_video || '',
-        group_banner_video_type: formData.group_banner_video ? videoTab : '',
-        group_banner_button_text: formData.group_banner_button_text,
-        display_order: Number(formData.display_order) || 0,
+        exploreOurServiceCategoryId: formData.exploreOurServiceCategoryId,
+        exploreOurServiceItemId: formData.exploreOurServiceItemId,
+        heading: formData.heading,
+        subHeading: formData.subHeading,
+        image: formData.image,
+        video: formData.video || '',
+        videoType: formData.video ? videoTab : '',
+        buttonText: formData.buttonText,
+        displayOrder: Number(formData.displayOrder) || 0,
         status: Number(formData.status),
       };
       if (isEdit && id) await groupTopBannerApi.update(id, payload);
@@ -113,37 +113,37 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
             <option value="">Select department</option>
             {departments.map((d: any) => <option key={d._id} value={d._id}>{d.service_category_name}</option>)}
           </select>
-          {errors.explore_our_service_category_id && <p className="form-error">{String(errors.explore_our_service_category_id.message)}</p>}
+          {errors.exploreOurServiceCategoryId && <p className="form-error">{String(errors.exploreOurServiceCategoryId.message)}</p>}
         </div>
         <div>
           <label className="form-label">Service Category Name <span className="text-red-500">*</span></label>
-          <select {...register('explore_our_service_item_id', { required: 'Required' })} className="form-select">
+          <select {...register('exploreOurServiceItemId', { required: 'Required' })} className="form-select">
             <option value="">Select category</option>
             {svcItemOptions.map((it: any) => <option key={it._id} value={it._id}>{it.service_title}</option>)}
           </select>
-          {errors.explore_our_service_item_id && <p className="form-error">{String(errors.explore_our_service_item_id.message)}</p>}
+          {errors.exploreOurServiceItemId && <p className="form-error">{String(errors.exploreOurServiceItemId.message)}</p>}
         </div>
       </div>
 
       <div>
         <label className="form-label">Banner Heading <span className="text-red-500">*</span></label>
-        <input {...register('group_banner_heading', { required: 'Required' })} className="form-input" placeholder="Enter Banner Heading" />
-        {errors.group_banner_heading && <p className="form-error">{String(errors.group_banner_heading.message)}</p>}
+        <input {...register('heading', { required: 'Required' })} className="form-input" placeholder="Enter Banner Heading" />
+        {errors.heading && <p className="form-error">{String(errors.heading.message)}</p>}
       </div>
 
       <div>
         <label className="form-label">Banner Sub Heading</label>
-        <textarea {...register('group_banner_subheading')} className="form-textarea" rows={3} placeholder="Enter Banner Subheading" />
+        <textarea {...register('subHeading')} className="form-textarea" rows={3} placeholder="Enter Banner Subheading" />
       </div>
 
       <ImageUpload
-        name="group_banner_img"
+        name="image"
         label="Banner Image (Upload only JPG, PNG, JPEG, GIF — 706px × 665px)"
         uploadType="image"
         folder="group-service"
         accept="image/jpeg,image/png,image/gif"
-        value={watch('group_banner_img')}
-        onChange={(url) => setValue('group_banner_img', url)}
+        value={watch('image')}
+        onChange={(url) => setValue('image', url)}
       />
 
       <div>
@@ -155,12 +155,12 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
         <div className="border border-t-0 border-gray-200 rounded-b-lg p-4">
           {videoTab === 'upload' ? (
             <ImageUpload
-              name="group_banner_video"
+              name="video"
               label="Choose Video File (MP4, WEBM, OGG - Max 50MB)"
               uploadType="video"
               folder="group-service"
-              value={watch('group_banner_video')}
-              onChange={(url) => { setValue('group_banner_video', url); setValue('group_banner_video_type', 'upload'); }}
+              value={watch('video')}
+              onChange={(url) => { setValue('video', url); setValue('videoType', 'upload'); }}
             />
           ) : (
             <div>
@@ -168,8 +168,8 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
               <input
                 className="form-input"
                 placeholder="https://youtube.com/... or video URL"
-                value={watch('group_banner_video') || ''}
-                onChange={(e) => { setValue('group_banner_video', e.target.value); setValue('group_banner_video_type', 'url'); }}
+                value={watch('video') || ''}
+                onChange={(e) => { setValue('video', e.target.value); setValue('videoType', 'url'); }}
               />
             </div>
           )}
@@ -179,11 +179,11 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Banner CTA Button</label>
-          <input {...register('group_banner_button_text')} className="form-input" placeholder="Enter Banner CTA Button Text" />
+          <input {...register('buttonText')} className="form-input" placeholder="Enter Banner CTA Button Text" />
         </div>
         <div>
           <label className="form-label">Banner Display Order</label>
-          <input {...register('display_order')} type="number" className="form-input" placeholder="Order number. e.g. 1, 2, 3" defaultValue={0} />
+          <input {...register('displayOrder')} type="number" className="form-input" placeholder="Order number. e.g. 1, 2, 3" defaultValue={0} />
         </div>
       </div>
 
