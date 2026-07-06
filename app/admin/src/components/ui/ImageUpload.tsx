@@ -5,6 +5,20 @@ import uploadApi from '@/services/uploadApi';
 
 type MediaType = 'image' | 'video';
 
+/** Recommended upload specs, shown as a helper line and soft-validated on
+    select (warnings only — uploads are never blocked). */
+export interface RecommendedSpec {
+  width: number;
+  height: number;
+  /** Display aspect ratio, e.g. '2:3'. */
+  ratio?: string;
+  /** e.g. 'JPG, PNG, WebP'. */
+  formats?: string;
+  maxSizeMB?: number;
+  /** Extra context, e.g. 'cropped to fit — exact ratio matters'. */
+  note?: string;
+}
+
 interface ImageUploadProps {
   /** Field name (informational). */
   name?: string;
@@ -20,7 +34,19 @@ interface ImageUploadProps {
   accept?: string;
   required?: boolean;
   disabled?: boolean;
+  /** Recommended dimensions/format guidance shown under the field. */
+  recommended?: RecommendedSpec;
 }
+
+// Read the pixel dimensions of a local image file (null on failure).
+const readImageSize = (file: File) =>
+  new Promise<{ w: number; h: number } | null>((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve({ w: img.naturalWidth, h: img.naturalHeight }); };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
 
 /**
  * Single media uploader. On select, the file is uploaded to S3 immediately via
@@ -38,6 +64,7 @@ export default function ImageUpload({
   accept,
   required,
   disabled,
+  recommended,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   // URLs uploaded during this form session (safe to delete on replace/remove).
@@ -52,6 +79,25 @@ export default function ImageUpload({
     const file = e.target.files?.[0];
     if (inputRef.current) inputRef.current.value = '';
     if (!file) return;
+
+    // Soft validation against the recommended specs — warn, never block.
+    if (recommended) {
+      if (recommended.maxSizeMB && file.size > recommended.maxSizeMB * 1024 * 1024) {
+        toast(`This file is ${(file.size / 1024 / 1024).toFixed(1)} MB — larger than the recommended max of ${recommended.maxSizeMB} MB. It may load slowly on the website.`, { icon: '⚠️', duration: 6000 });
+      }
+      if (!isVideo) {
+        const dims = await readImageSize(file);
+        if (dims) {
+          const recRatio = recommended.width / recommended.height;
+          const fileRatio = dims.w / dims.h;
+          if (Math.abs(fileRatio - recRatio) / recRatio > 0.2) {
+            toast(`Image is ${dims.w}×${dims.h}px — its shape differs from the recommended ${recommended.width}×${recommended.height}px${recommended.ratio ? ` (${recommended.ratio})` : ''}. It may look cropped or letterboxed on the website.`, { icon: '⚠️', duration: 7000 });
+          } else if (dims.w < recommended.width * 0.6) {
+            toast(`Image is ${dims.w}×${dims.h}px — smaller than the recommended ${recommended.width}×${recommended.height}px, so it may look blurry on the website.`, { icon: '⚠️', duration: 6000 });
+          }
+        }
+      }
+    }
 
     setUploading(true);
     setProgress(0);
@@ -148,6 +194,15 @@ export default function ImageUpload({
           )}
         </div>
       </div>
+      {recommended && (
+        <p className="mt-1.5 text-[11px] leading-4 text-gray-500">
+          Recommended: <span className="font-medium text-gray-700">{recommended.width} × {recommended.height} px</span>
+          {recommended.ratio && <> (ratio {recommended.ratio})</>}
+          {recommended.formats && <> • {recommended.formats}</>}
+          {recommended.maxSizeMB && <> • max {recommended.maxSizeMB} MB</>}
+          {recommended.note && <> — {recommended.note}</>}
+        </p>
+      )}
       <input
         ref={inputRef}
         type="file"

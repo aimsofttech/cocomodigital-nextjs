@@ -48,7 +48,7 @@ export default function OtherActivityCategoryForm({ onSuccess, onCancel, editId 
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel ? onCancel() : navigate(-1)} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );
@@ -56,7 +56,7 @@ export default function OtherActivityCategoryForm({ onSuccess, onCancel, editId 
   if (isModal) return form;
   return (
     <div>
-      <PageHeader title={isEdit ? 'Edit Add-on Activities Category' : 'Add Add-on Activities Category'} breadcrumbs={[{ label: 'Add-on Activities Category', path: '../' }, { label: isEdit ? 'Edit' : 'Add' }]} />
+      <PageHeader title={isEdit ? 'Update Add-on Activities Category' : 'Add Add-on Activities Category'} breadcrumbs={[{ label: 'Add-on Activities Category', path: '../' }, { label: isEdit ? 'Edit' : 'Add' }]} />
       <div className="card max-w-2xl">{form}</div>
     </div>
   );

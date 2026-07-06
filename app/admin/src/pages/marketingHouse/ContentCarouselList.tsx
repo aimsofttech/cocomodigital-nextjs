@@ -34,7 +34,7 @@ export default function ContentCarouselList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ContentCarouselForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Content Carousel' : 'Add Content Carousel'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Content Carousel' : 'Add Content Carousel'}
       csv={{
         api: marketingHouseContentCarouselApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

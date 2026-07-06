@@ -34,7 +34,7 @@ export default function ImageList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ImageForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Image' : 'Add Marketing Image'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Marketing Image' : 'Add Marketing Image'}
       csv={{
         api: marketingHouseImageApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

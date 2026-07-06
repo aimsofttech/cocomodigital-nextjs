@@ -176,7 +176,8 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
         <div key={n} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <ImageUpload
             name={`image${n}`}
-            label={`Image ${n} (JPG, PNG, JPEG, GIF — 583px x 580px)`}
+            label={`Image ${n}`}
+            recommended={{ width: 1200, height: 800, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }}
             uploadType="image"
             folder="marketing-house"
             value={watch(`image${n}`)}
@@ -194,7 +195,7 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel?.()} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );

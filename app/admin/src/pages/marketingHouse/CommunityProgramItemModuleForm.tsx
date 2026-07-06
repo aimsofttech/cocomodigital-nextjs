@@ -177,7 +177,9 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
         )}
       </div>
 
-      <ImageUpload name="videoThumbnail" label="Thumbnail Image" uploadType="image" folder="marketing-house"
+      <ImageUpload name="videoThumbnail" label="Thumbnail Image"
+        recommended={{ width: 600, height: 400, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown in the continuity slider cards' }}
+        uploadType="image" folder="marketing-house"
         value={watch('videoThumbnail')} onChange={(url) => setValue('videoThumbnail', url)} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -186,7 +188,7 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel?.()} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );

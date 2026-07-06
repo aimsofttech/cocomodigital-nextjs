@@ -57,7 +57,7 @@ export default function PosterMediaList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <PosterMediaForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Poster Media' : 'Add Poster Media'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Poster Media' : 'Add Poster Media'}
       csv={{
         api: marketingHouseImageApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

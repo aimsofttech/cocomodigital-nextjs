@@ -122,14 +122,14 @@ export default function IdeaStrategyPlanningForm({ onSuccess, onCancel, editId, 
         <label className="form-label">Description</label>
         <RichTextEditor value={watch('description')} onChange={(html) => setValue('description', html)} placeholder="Describe the idea / strategy…" minHeight={220} />
       </div>
-      <ImageUpload name="image" label="Image" uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Image" recommended={{ width: 960, height: 800, ratio: '6:5', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown beside the activity text' }} uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel?.()} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );

@@ -33,7 +33,7 @@ export default function StaticsList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <StaticsForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Statics' : 'Add Marketing Statics'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Marketing Statics' : 'Add Marketing Statics'}
       csv={{
         api: marketingHouseStaticsApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

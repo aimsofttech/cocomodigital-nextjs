@@ -36,7 +36,7 @@ export default function OtherActivityItemList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Item' : 'Add Add-on Activities Item'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Add-on Activities Item' : 'Add Add-on Activities Item'}
       csv={{
         api: marketingHouseOtherActivityItemApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

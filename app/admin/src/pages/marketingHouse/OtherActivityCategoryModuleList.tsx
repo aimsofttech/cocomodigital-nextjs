@@ -73,7 +73,7 @@ export default function OtherActivityCategoryModuleList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityCategoryModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Category' : 'Add Add-on Activities Category'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Add-on Activities Category' : 'Add Add-on Activities Category'}
       csv={{
         api: marketingHouseOtherActivityCategoryApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

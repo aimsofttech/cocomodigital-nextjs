@@ -126,7 +126,7 @@ export default function CommunityProgramModuleForm({ onSuccess, onCancel, editId
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel?.()} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );

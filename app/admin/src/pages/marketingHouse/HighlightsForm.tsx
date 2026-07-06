@@ -111,7 +111,7 @@ export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItem
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel ? onCancel() : navigate(-1)} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );
@@ -119,7 +119,7 @@ export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItem
   if (isModal) return form;
   return (
     <div>
-      <PageHeader title={isEdit ? 'Edit Highlight' : 'Add Highlight'} breadcrumbs={[{ label: 'Highlights', path: '/marketing/highlights' }, { label: isEdit ? 'Edit' : 'Add' }]} />
+      <PageHeader title={isEdit ? 'Update Highlight' : 'Add Highlight'} breadcrumbs={[{ label: 'Highlights', path: '/marketing/highlights' }, { label: isEdit ? 'Edit' : 'Add' }]} />
       <div className="card max-w-2xl">{form}</div>
     </div>
   );

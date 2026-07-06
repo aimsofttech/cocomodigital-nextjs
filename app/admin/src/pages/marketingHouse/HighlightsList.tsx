@@ -70,7 +70,7 @@ export default function HighlightsList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <HighlightsForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Highlight' : 'Add Highlight'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Highlight' : 'Add Highlight'}
       csv={{
         api: marketingHouseStaticsApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

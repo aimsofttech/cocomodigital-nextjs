@@ -32,7 +32,7 @@ export default function CategoryList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <CategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Category' : 'Add Marketing Category'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Marketing Category' : 'Add Marketing Category'}
       csv={{ api: marketingHouseCategoryApi, filename: 'marketing-categories' }}
       modalSize="lg" onRefresh={fetchAll} />
   );

@@ -127,14 +127,14 @@ export default function ContentCarouselModuleForm({ onSuccess, onCancel, editId,
         <div><label className="form-label">Carousel Title</label><input {...register('carousel_title')} className="form-input" placeholder="Enter carousel title" /></div>
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <ImageUpload name="image" label="Carousel Image" uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Carousel Image" recommended={{ width: 1200, height: 900, ratio: '4:3', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel?.()} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );

@@ -174,7 +174,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       </div>
 
       {/* ── Poster image ─────────────────────────────────────────── */}
-      <ImageUpload name="posterImage" label="Poster Image (JPG, PNG, JPEG, GIF — 248px x 368px)" uploadType="image" folder="marketing-house"
+      <ImageUpload name="posterImage" label="Poster Image" recommended={{ width: 600, height: 900, ratio: '2:3', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown cropped to a 2:3 box — exact ratio matters' }} uploadType="image" folder="marketing-house"
         value={watch('posterImage')} onChange={(url) => setValue('posterImage', url)} />
 
       {/* ── Video (URL or upload) ────────────────────────────────── */}
@@ -243,7 +243,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
 
   return (
     <div>
-      <PageHeader title={isEdit ? 'Edit Marketing Campaign' : 'Add Marketing Campaign'}
+      <PageHeader title={isEdit ? 'Update Marketing Campaign' : 'Add Marketing Campaign'}
         breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns', path: '/marketing/item' }, { label: isEdit ? 'Edit' : 'Add' }]} />
       <div className="card max-w-4xl">{form}</div>
     </div>

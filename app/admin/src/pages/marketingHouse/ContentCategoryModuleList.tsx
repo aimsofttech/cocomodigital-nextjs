@@ -55,7 +55,7 @@ export default function ContentCategoryModuleList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <ContentCategoryModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Content Category' : 'Add Content Category'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Content Category' : 'Add Content Category'}
       csv={{
         api: marketingHouseContentCategoryApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

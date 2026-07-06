@@ -237,6 +237,7 @@ export default function BulkUpload() {
             <ImageUpload
               name="default_thumbnail"
               label="Default Thumbnail"
+              recommended={{ width: 600, height: 900, ratio: '2:3', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown cropped to a 2:3 box — exact ratio matters' }}
               uploadType="image"
               folder="marketing_house"
               value={thumbnail}

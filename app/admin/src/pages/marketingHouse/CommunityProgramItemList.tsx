@@ -35,7 +35,7 @@ export default function CommunityProgramItemList() {
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <CommunityProgramItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Community Program Item' : 'Add Community Program Item'}
+      modalTitle={(mode) => mode === 'edit' ? 'Update Community Program Item' : 'Add Community Program Item'}
       csv={{
         api: marketingHouseCommunityProgramItemApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

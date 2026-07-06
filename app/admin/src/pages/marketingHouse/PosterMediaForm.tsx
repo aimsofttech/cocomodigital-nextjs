@@ -123,7 +123,7 @@ export default function PosterMediaForm({ onSuccess, onCancel, editId, lockedIte
         </div>
       )}
 
-      <ImageUpload name="image" label="Image" uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Image" recommended={{ width: 1280, height: 720, ratio: '16:9', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown in the campaign hero slider' }} uploadType="image" folder="marketing-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
 
       {/* Video: external URL or uploaded file */}
       <div>
@@ -148,7 +148,7 @@ export default function PosterMediaForm({ onSuccess, onCancel, editId, lockedIte
       </div>
       <div className="flex gap-3 pt-2">
         <button type="button" onClick={() => onCancel?.()} className="btn-secondary flex-1">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : 'Save'}</button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">{isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Save')}</button>
       </div>
     </form>
   );
