@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
-import { creativeHouseItemApi } from '@/services/adminApi';
+import { creativeHouseItemApi, creativeHouseCategoryApi } from '@/services/adminApi';
 
 // Item-sections reachable from a creative item; clicking opens that page scoped
 // to the item via the `creativeHouseItemId` query param.
@@ -22,6 +23,14 @@ const targetHref = (segment: string, itemId: string) =>
 
 export default function ItemList() {
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(creativeHouseItemApi);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  // Categories for the server-side Category filter dropdown.
+  useEffect(() => {
+    creativeHouseCategoryApi.getAll({ limit: 100 })
+      .then(({ data }) => setCategories(data.data || []))
+      .catch(() => {});
+  }, []);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -33,7 +42,17 @@ export default function ItemList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }, { key: 'year', label: 'Year', type: 'year' as const }];
+  // Status / Category / Year are applied by the API (server-side); the date
+  // range refines the currently loaded page client-side.
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'creativeHouseCategoryId', label: 'Category', type: 'select' as const,
+      options: [{ value: '', label: 'All Categories' }, ...categories.map((c: any) => ({ value: c._id, label: c.name }))],
+    },
+    { key: 'year', label: 'Year', type: 'year' as const, serverSide: true },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
     { key: 'videoUrl', label: 'Video', render: (row: any) => {

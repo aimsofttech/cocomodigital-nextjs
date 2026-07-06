@@ -19,7 +19,10 @@ export default function CategoryList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'icon', label: 'Icon', render: (row: any) => <ImageCell src={row.icon} bg="bg-gray-800" size='w-12 h-12' /> },
     { key: 'name', label: 'Category Name', sortable: true },

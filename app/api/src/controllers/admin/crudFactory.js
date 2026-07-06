@@ -215,10 +215,13 @@ const createCrudController = (Model, options = {}) => {
       for (const pf of parentFields) {
         const parentId = req.query[pf] || req.params[pf];
         if (parentId === undefined || parentId === null || parentId === '') continue;
-        const pid = String(parentId);
-        filter[pf] = mongoose.Types.ObjectId.isValid(pid)
-          ? { $in: [pid, new mongoose.Types.ObjectId(pid)] }
-          : pid;
+        // Accept a single id or a comma-separated list (used by derived filters,
+        // e.g. "records whose parent item belongs to category X").
+        const pids = String(parentId).split(',').filter(Boolean);
+        filter[pf] = {
+          $in: pids.flatMap((pid) =>
+            mongoose.Types.ObjectId.isValid(pid) ? [pid, new mongoose.Types.ObjectId(pid)] : [pid]),
+        };
       }
       if (status !== undefined && status !== '') filter.status = parseInt(status);
       for (const ff of filterFields) {
@@ -312,10 +315,13 @@ const createCrudController = (Model, options = {}) => {
       for (const pf of parentFields) {
         const parentId = req.query[pf] || req.params[pf];
         if (parentId === undefined || parentId === null || parentId === '') continue;
-        const pid = String(parentId);
-        filter[pf] = mongoose.Types.ObjectId.isValid(pid)
-          ? { $in: [pid, new mongoose.Types.ObjectId(pid)] }
-          : pid;
+        // Accept a single id or a comma-separated list (used by derived filters,
+        // e.g. "records whose parent item belongs to category X").
+        const pids = String(parentId).split(',').filter(Boolean);
+        filter[pf] = {
+          $in: pids.flatMap((pid) =>
+            mongoose.Types.ObjectId.isValid(pid) ? [pid, new mongoose.Types.ObjectId(pid)] : [pid]),
+        };
       }
       if (req.query.status !== undefined && req.query.status !== '') filter.status = parseInt(req.query.status);
       if (req.query.search && searchFields.length) {

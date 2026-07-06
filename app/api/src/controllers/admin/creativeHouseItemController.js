@@ -13,6 +13,7 @@ const base = createCrudController(CreativeHouseItem, {
   searchFields: ['title', 'videoTitle', 'slug'],
   defaultSort: { displayOrder: 1 },
   parentField: 'creativeHouseCategoryId',
+  filterFields: ['year'],
 });
 
 // Item-sections reachable from a creative item — each linked via

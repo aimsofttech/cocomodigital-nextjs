@@ -18,7 +18,10 @@ export default function ProjectList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'banner_title_template_id', label: 'Banner Template ID', sortable: true },
     { key: 'bookCallTemplateId', label: 'Book Call ID', sortable: true },

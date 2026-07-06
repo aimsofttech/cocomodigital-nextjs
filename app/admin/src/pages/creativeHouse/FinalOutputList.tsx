@@ -5,7 +5,7 @@ import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
-import { creativeHouseFinalOutputApi, creativeHouseItemApi } from '@/services/adminApi';
+import { creativeHouseFinalOutputApi, creativeHouseItemApi, creativeHouseCategoryApi } from '@/services/adminApi';
 import FinalOutputForm from './FinalOutputForm';
 
 export default function FinalOutputList() {
@@ -17,6 +17,23 @@ export default function FinalOutputList() {
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
     useCrud(creativeHouseFinalOutputApi, true, itemId ? { creativeHouseItemId: itemId } : {});
+  const [itemOptions, setItemOptions] = useState<any[]>([]);
+
+  // All creative items for the server-side Item filter dropdown.
+  useEffect(() => {
+    creativeHouseItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setItemOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  // Categories for the Category filter (resolved to the category's item ids,
+  // since these records link to items rather than categories directly).
+  const [categories, setCategories] = useState<any[]>([]);
+  useEffect(() => {
+    creativeHouseCategoryApi.getAll({ limit: 100 })
+      .then(({ data }) => setCategories(data.data || []))
+      .catch(() => {});
+  }, []);
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -31,8 +48,20 @@ export default function FinalOutputList() {
       .catch(() => setItemName(''));
   }, [itemId]);
 
-  const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { creativeHouseItemId: itemId } : {}), ...params });
+  const handleFilterChange = async (params: Record<string, any>) => {
+    const merged: Record<string, any> = { ...(itemId ? { creativeHouseItemId: itemId } : {}), ...params };
+    // Category filter: these records link to items, so resolve the category to
+    // its item ids and filter by them (comma list; 'none' matches nothing).
+    if (merged.creativeHouseCategoryId) {
+      try {
+        const { data } = await creativeHouseItemApi.getAll({ creativeHouseCategoryId: merged.creativeHouseCategoryId, limit: 500 });
+        const ids = (data.data || []).map((it: any) => it._id);
+        merged.creativeHouseItemId = ids.length ? ids.join(',') : 'none';
+      } catch { /* keep other filters working */ }
+      delete merged.creativeHouseCategoryId;
+    }
+    setFilterParams(merged);
+  };
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -44,7 +73,18 @@ export default function FinalOutputList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'creativeHouseCategoryId', label: 'Category', type: 'select' as const,
+      options: [{ value: '', label: 'All Categories' }, ...categories.map((c: any) => ({ value: c._id, label: c.name }))],
+    },
+    {
+      key: 'creativeHouseItemId', label: 'Item', type: 'select' as const,
+      options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: it._id, label: it.title || it.videoTitle || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
     { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.uploadVideoUrl} thumbnail={row.thumbnail} /> },
