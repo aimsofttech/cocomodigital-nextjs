@@ -44,7 +44,7 @@ export default function CategoryForm({ onSuccess, onCancel, editId }: Props = {}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <ImageUpload name="icon" label="Icon" uploadType="image" folder="marketing-house" value={watch('icon')} onChange={(url) => setValue('icon', url)} />
+      <ImageUpload name="icon" label="Icon (JPG, PNG, JPEG, GIF — 50px x 50px)" uploadType="image" folder="marketing-house" value={watch('icon')} onChange={(url) => setValue('icon', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

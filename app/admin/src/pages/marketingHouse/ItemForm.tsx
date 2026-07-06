@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import {
   marketingHouseItemApi, marketingHouseCategoryApi,
   authorTemplateApi, bookCallApi, ourAdvantageApi,
@@ -22,6 +23,20 @@ interface Props {
 // name fields: author/our-advantage → template_name, book-call → book_name).
 const tName = (t: any) =>
   t.template_name || t.book_name || t.author_name || t.name || t.title || t._id;
+
+// Small "open the module's listing page" link shown next to a field label.
+// Opens in a new tab so the form being filled is not lost.
+const moduleLink = (path: string, name: string) => (
+  <Link
+    to={path}
+    target="_blank"
+    rel="noopener noreferrer"
+    title={`Open the ${name} module`}
+    className="inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 hover:text-primary-700 whitespace-nowrap"
+  >
+    <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" /> {name}
+  </Link>
+);
 
 export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
   const { id: paramId } = useParams();
@@ -92,9 +107,14 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* ── Category + templates ─────────────────────────────────── */}
+      {/* Each label carries a link to its module's listing page (opens in a
+          new tab so the half-filled form is not lost). */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label className="form-label">Category <span className="text-red-500">*</span></label>
+          <label className="form-label flex items-center justify-between gap-2">
+            <span>Category <span className="text-red-500">*</span></span>
+            {moduleLink('/marketing/category', 'Categories')}
+          </label>
           <select {...register('marketingHouseCategoryId', { required: 'Required' })} className="form-select">
             <option value="">Select Category Name</option>
             {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -102,21 +122,30 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
           {errors.marketingHouseCategoryId && <p className="form-error">{String(errors.marketingHouseCategoryId.message)}</p>}
         </div>
         <div>
-          <label className="form-label">Author</label>
+          <label className="form-label flex items-center justify-between gap-2">
+            <span>Author</span>
+            {moduleLink('/templates/author', 'Author')}
+          </label>
           <select {...register('authorTemplateId')} className="form-select">
             <option value="">Select Author</option>
             {authors.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
         </div>
         <div>
-          <label className="form-label">Book Call</label>
+          <label className="form-label flex items-center justify-between gap-2">
+            <span>Book Call</span>
+            {moduleLink('/templates/book-call', 'Book Call')}
+          </label>
           <select {...register('bookCallTemplateId')} className="form-select">
             <option value="">Select Template</option>
             {bookCalls.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
         </div>
         <div>
-          <label className="form-label">Our Advantage</label>
+          <label className="form-label flex items-center justify-between gap-2">
+            <span>Our Advantage</span>
+            {moduleLink('/templates/our-advantage', 'Our Advantage')}
+          </label>
           <select {...register('ourAdvantageTemplateId')} className="form-select">
             <option value="">Select Template</option>
             {advantages.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}

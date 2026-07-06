@@ -138,13 +138,14 @@ export default function Wizard() {
     [counts, itemId],
   );
 
-  // ── Stepper chip ────────────────────────────────────────────────────────────
+  // ── Stepper chip (chips are joined by a light connector line) ──────────────
   const stepChip = (index: number, label: string, done: boolean) => {
     const active = index === step;
     const clickable = index === 0 || Boolean(itemId);
     return (
+      <div key={index} className="flex items-center flex-shrink-0">
+        {index > 0 && <span className="w-5 h-0.5 flex-shrink-0 bg-primary-600" />}
       <button
-        key={index}
         type="button"
         disabled={!clickable}
         onClick={() => goTo(index)}
@@ -155,17 +156,18 @@ export default function Wizard() {
             : done
               ? 'border-primary-200 bg-primary-50 text-primary-700 hover:bg-primary-100'
               : clickable
-                ? 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                ? 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
+                : 'border-gray-200 bg-gray-50 text-gray-900 cursor-not-allowed'
         }`}
       >
         <span className={`inline-flex items-center justify-center w-[1.125rem] h-[1.125rem] min-w-[1.125rem] rounded-full text-[10px] font-semibold ${
-          active ? 'bg-white/20 text-white' : done ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-500'
+          active ? 'bg-white/20 text-white' : done ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-900'
         }`}>
           {done && !active ? <CheckIcon className="w-3 h-3" /> : index + 1}
         </span>
         {label}
       </button>
+      </div>
     );
   };
 
@@ -189,7 +191,7 @@ export default function Wizard() {
           </p>
           <p className="text-xs text-gray-500">{doneCount}/{TOTAL_STEPS} sections filled</p>
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center overflow-x-auto pb-1">
           {stepChip(0, 'Campaign Details', Boolean(itemId))}
           {SECTION_STEPS.map((s, i) => stepChip(i + 1, s.label, (counts[s.key] ?? 0) > 0))}
         </div>
@@ -197,7 +199,7 @@ export default function Wizard() {
 
       {/* ── Step content ──────────────────────────────────────────────────── */}
       {step === 0 ? (
-        <div className="card max-w-4xl">
+        <div className="card w-full">
           <div className="mb-4">
             <h2 className="text-base font-semibold text-gray-900">{itemId ? 'Campaign Details' : 'New Campaign Details'}</h2>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -275,7 +277,7 @@ export default function Wizard() {
       ) : null}
 
       {/* ── Wizard navigation ─────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-3 mt-4 max-w-4xl">
+      <div className="flex items-center justify-between gap-3 mt-4 w-full">
         <button
           type="button"
           onClick={() => goTo(step - 1)}
