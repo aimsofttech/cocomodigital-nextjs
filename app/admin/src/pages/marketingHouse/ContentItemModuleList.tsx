@@ -9,7 +9,7 @@ import { marketingHouseContentItemApi, marketingHouseItemApi } from '@/services/
 import ContentItemModuleForm from './ContentItemModuleForm';
 
 export default function ContentItemModuleList() {
-  // When navigated from a Marketing Item, the item id arrives as a query param
+  // When navigated from a Marketing Campaign, the item id arrives as a query param
   // and scopes the whole page (list + create/edit) to that item.
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
@@ -54,12 +54,12 @@ export default function ContentItemModuleList() {
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.url || row.upload_video_url || row.item_video_url} thumbnail={row.image || row.image} /> },
     { key: 'content_created_name', label: 'Content Category', render: (row: any) => row.content_created_name || 'N/A' },
     { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
-    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Campaign', render: (row: any) => row.itemName || 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `Content Items — ${itemName}` : 'Content Items'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'Content Items' }]}
+    <CrudListPage title={itemName ? `Content Items — ${itemName}` : 'Content Items'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Content Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}

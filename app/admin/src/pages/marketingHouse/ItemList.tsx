@@ -11,7 +11,7 @@ type NavTarget = { label: string; segment: string; count?: number | null };
 
 // Each navigation segment maps to its dedicated sidebar page; clicking a target
 // opens that page scoped to the item via the `marketingHouseItemId` query param
-// (same pattern as Marketing Items → Highlights).
+// (same pattern as Marketing Campaigns → Highlights).
 const SEGMENT_ROUTE: Record<string, string> = {
   'statics': '/marketing/highlights',
   'images': '/marketing/poster-media',
@@ -106,7 +106,7 @@ export default function ItemList() {
     return (
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2.5">
-          Item Sections — {row.title}
+          Campaigns Section — {row.title}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
           {targets.map((t) => {
@@ -140,7 +140,7 @@ export default function ItemList() {
   };
 
   return (
-    <CrudListPage title="Marketing Items" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Items' }]}
+    <CrudListPage title="Marketing Campaigns" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns' }]}
       addPath="/marketing/item/add" editPath={(row: any) => `/marketing/item/edit/${row._id}`}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}

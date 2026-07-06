@@ -8,7 +8,7 @@ import { marketingHouseStaticsApi, marketingHouseItemApi } from '@/services/admi
 import HighlightsForm from './HighlightsForm';
 
 export default function HighlightsList() {
-  // When navigated from a Marketing Item, the item id arrives as a query param
+  // When navigated from a Marketing Campaign, the item id arrives as a query param
   // and scopes the whole page (list + create/edit) to that item.
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';

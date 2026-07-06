@@ -9,7 +9,7 @@ interface Props {
   onSuccess?: () => void;
   onCancel?: () => void;
   editId?: string;
-  /** When set (navigated from a Marketing Item), the item is preselected and locked. */
+  /** When set (navigated from a Marketing Campaign), the item is preselected and locked. */
   lockedItemId?: string;
 }
 
@@ -70,20 +70,20 @@ export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItem
 
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* Marketing Item relationship */}
+      {/* Marketing Campaign relationship */}
       <div>
-        <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
+        <label className="form-label">Marketing Campaign <span className="text-red-500">*</span></label>
         {lockedItemId ? (
           <>
             <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName} disabled readOnly />
             {/* Keep the value in submitted form state even though the select is hidden. */}
             <input type="hidden" {...register('marketingHouseItemId')} />
-            <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
+            <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Campaign.</p>
           </>
         ) : (
           <>
             <select {...register('marketingHouseItemId', { required: 'Required' })} className="form-select">
-              <option value="">Select Marketing Item</option>
+              <option value="">Select Marketing Campaign</option>
               {items.map((it: any) => <option key={it._id} value={it._id}>{itemLabel(it)}</option>)}
             </select>
             {errors.marketingHouseItemId && <p className="form-error">{String(errors.marketingHouseItemId.message)}</p>}

@@ -8,7 +8,7 @@ import { marketingHouseFaqApi, marketingHouseItemApi } from '@/services/adminApi
 import MarketingFaqForm from './MarketingFaqForm';
 
 export default function MarketingFaqList() {
-  // When navigated from a Marketing Item, the item id arrives as a query param
+  // When navigated from a Marketing Campaign, the item id arrives as a query param
   // and scopes the whole page (list + create/edit) to that item.
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
@@ -59,7 +59,7 @@ export default function MarketingFaqList() {
 
   const breadcrumbs = itemId
     ? [{ label: 'Marketing Campaigns' }, { label: 'Items', path: '/marketing/item' }, { label: itemName || 'Item' }, { label: 'FAQ' }]
-    : [{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'FAQ' }];
+    : [{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'FAQ' }];
 
   return (
     <CrudListPage title={itemName ? `FAQ — ${itemName}` : 'FAQ'} breadcrumbs={breadcrumbs}

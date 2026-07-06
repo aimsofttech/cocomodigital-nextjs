@@ -12,7 +12,8 @@ import SlugField from '@/components/ui/SlugField';
 import toast from 'react-hot-toast';
 
 interface Props {
-  onSuccess?: () => void;
+  /** Called after save; receives the saved record (e.g. to read the new _id). */
+  onSuccess?: (saved?: any) => void;
   onCancel?: () => void;
   editId?: string;
 }
@@ -80,9 +81,9 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       fd.append(k, String(v));
     });
     try {
-      if (isEdit && id) await marketingHouseItemApi.update(id, fd); else await marketingHouseItemApi.create(fd);
+      const res = isEdit && id ? await marketingHouseItemApi.update(id, fd) : await marketingHouseItemApi.create(fd);
       toast.success(isEdit ? 'Updated' : 'Created');
-      if (onSuccess) onSuccess(); else navigate('/marketing/item');
+      if (onSuccess) onSuccess(res?.data?.data); else navigate('/marketing/item');
     } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
   };
 
@@ -213,8 +214,8 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
 
   return (
     <div>
-      <PageHeader title={isEdit ? 'Edit Marketing Item' : 'Add Marketing Item'}
-        breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Items', path: '/marketing/item' }, { label: isEdit ? 'Edit' : 'Add' }]} />
+      <PageHeader title={isEdit ? 'Edit Marketing Campaign' : 'Add Marketing Campaign'}
+        breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns', path: '/marketing/item' }, { label: isEdit ? 'Edit' : 'Add' }]} />
       <div className="card max-w-4xl">{form}</div>
     </div>
   );

@@ -9,7 +9,7 @@ import { marketingHouseOtherActivityItemApi, marketingHouseItemApi } from '@/ser
 import OtherActivityItemModuleForm from './OtherActivityItemModuleForm';
 
 export default function OtherActivityItemModuleList() {
-  // When navigated from a Marketing Item, the item id arrives as a query param
+  // When navigated from a Marketing Campaign, the item id arrives as a query param
   // and scopes the whole page (list + create/edit) to that item.
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
@@ -71,12 +71,12 @@ export default function OtherActivityItemModuleList() {
     } },
     { key: 'other_activity_name', label: 'Activity Category', render: (row: any) => row.other_activity_name || 'N/A' },
     { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
-    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Campaign', render: (row: any) => row.itemName || 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `Add-on Activities Items — ${itemName}` : 'Add-on Activities Items'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'Add-on Activities Items' }]}
+    <CrudListPage title={itemName ? `Add-on Activities Items — ${itemName}` : 'Add-on Activities Items'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Add-on Activities Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}

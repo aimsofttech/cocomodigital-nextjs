@@ -42,7 +42,7 @@ export default function ProjectForm({ onSuccess, onCancel, editId }: Props = {})
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
-        <label className="form-label">Marketing Item (Optional)</label>
+        <label className="form-label">Marketing Campaign (Optional)</label>
         <select {...register('marketingHouseItemId')} className="form-select">
           <option value="">None</option>
           {items.map((i: any) => <option key={i._id} value={i._id}>{i.title || i.title}</option>)}

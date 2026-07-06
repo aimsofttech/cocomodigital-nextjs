@@ -45,7 +45,7 @@ export default function OtherActivityCategoryModuleList() {
   const columns = [
     { key: 'name', label: 'Category Name', sortable: true, render: (row: any) => row.name || 'N/A' },
     { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
-    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Campaign', render: (row: any) => row.itemName || 'N/A' },
     {
       key: 'items_count', label: 'Add-on Activities Items', render: (row: any) => {
         const count = typeof row.items_count === 'number' ? row.items_count : 0;
@@ -68,7 +68,7 @@ export default function OtherActivityCategoryModuleList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `Add-on Activities Categories — ${itemName}` : 'Add-on Activities Categories'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'Add-on Activities Categories' }]}
+    <CrudListPage title={itemName ? `Add-on Activities Categories — ${itemName}` : 'Add-on Activities Categories'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Add-on Activities Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}

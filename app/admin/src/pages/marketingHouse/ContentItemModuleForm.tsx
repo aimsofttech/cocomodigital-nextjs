@@ -115,15 +115,15 @@ export default function ContentItemModuleForm({ onSuccess, onCancel, editId, loc
           {errors.marketingHouseCategoryId && <p className="form-error">{String(errors.marketingHouseCategoryId.message)}</p>}
         </div>
       )}
-      {/* Marketing Item + Content Category in a row */}
+      {/* Marketing Campaign + Content Category in a row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
+          <label className="form-label">Marketing Campaign <span className="text-red-500">*</span></label>
           {lockedItemId ? (
             <>
               <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly />
               <input type="hidden" {...register('marketingHouseItemId')} />
-              <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
+              <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Campaign.</p>
             </>
           ) : (
             <>

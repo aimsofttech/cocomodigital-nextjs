@@ -28,13 +28,13 @@ const navigation: NavItem[] = [
   {
     label: 'Home', icon: HomeIcon,
     children: [
-      { label: 'Top Banner',         path: '/home/top-banner',         icon: RectangleGroupIcon },
-      { label: 'Brands',             path: '/home/brands',             icon: TagIcon },
+      { label: 'Top Banner', path: '/home/top-banner', icon: RectangleGroupIcon },
+      { label: 'Brands', path: '/home/brands', icon: TagIcon },
       {
         label: 'Services', icon: BriefcaseIcon,
         children: [
           { label: 'Service Departments', path: '/home/service-department', icon: BuildingOffice2Icon },
-          { label: 'Service Categories',  path: '/home/service-category',   icon: Squares2X2Icon },
+          { label: 'Service Categories', path: '/home/service-category', icon: Squares2X2Icon },
         ],
       },
       {
@@ -47,52 +47,52 @@ const navigation: NavItem[] = [
       {
         label: 'Media Portfolio', icon: FilmIcon,
         children: [
-          { label: 'Categories', path: '/settings/home-sections',      icon: RectangleStackIcon },
-          { label: 'Items',      path: '/settings/home-section-items', icon: ListBulletIcon },
+          { label: 'Categories', path: '/settings/home-sections', icon: RectangleStackIcon },
+          { label: 'Items', path: '/settings/home-section-items', icon: ListBulletIcon },
         ],
       },
-      { label: 'Success Stories',    path: '/home/client',             icon: StarIcon },
+      { label: 'Success Stories', path: '/home/client', icon: StarIcon },
     ],
   },
   {
     label: 'Marketing Campaigns', icon: MegaphoneIcon,
     children: [
-      { label: 'Categories',       path: '/marketing/category',         icon: TagIcon },
-      { label: 'Items',            path: '/marketing/item',             icon: ListBulletIcon },
-      { label: 'Bulk Upload',      path: '/marketing/bulk-upload',      icon: ArrowUpTrayIcon },
+      { label: 'Categories', path: '/marketing/category', icon: TagIcon },
+      { label: 'Campaigns', path: '/marketing/item', icon: ListBulletIcon },
+      { label: 'Create Campaign', path: '/marketing/wizard', icon: SparklesIcon },
+      { label: 'Bulk Upload', path: '/marketing/bulk-upload', icon: ArrowUpTrayIcon },
       {
-        label: 'Item Sections', icon: RectangleStackIcon,
+        label: 'Campaigns Section', icon: RectangleStackIcon,
         children: [
-          { label: 'Highlights',             path: '/marketing/highlights',             icon: StarIcon },
-          { label: 'Poster Media',           path: '/marketing/poster-media',           icon: PhotoIcon },
+          { label: 'Highlights', path: '/marketing/highlights', icon: StarIcon },
+          { label: 'Poster Media', path: '/marketing/poster-media', icon: PhotoIcon },
           { label: 'Idea Strategy Planning', path: '/marketing/idea-strategy-planning', icon: SparklesIcon },
-          { label: 'PreLaunched Activity',   path: '/marketing/pre-launch-activity',    icon: RocketLaunchIcon },
-          { label: 'Performance',            path: '/marketing/performance',            icon: ChartBarIcon },
+          { label: 'PreLaunched Activity', path: '/marketing/pre-launch-activity', icon: RocketLaunchIcon },
+          { label: 'Performance', path: '/marketing/performance', icon: ChartBarIcon },
           { label: 'Add-on Activities Categories', path: '/marketing/add-on-activities-category', icon: Squares2X2Icon },
-          { label: 'Add-on Activities Items',      path: '/marketing/add-on-activities-item',     icon: ListBulletIcon },
-          { label: 'Content Categories',          path: '/marketing/content-category',        icon: TagIcon },
-          { label: 'Content Items',               path: '/marketing/content-item',            icon: RectangleStackIcon },
-          { label: 'Continuity Category',         path: '/marketing/community-program',       icon: UserGroupIcon },
-          { label: 'Continuity Items',            path: '/marketing/community-program-item',  icon: ListBulletIcon },
-          { label: 'FAQ',                         path: '/marketing/faq',                     icon: QuestionMarkCircleIcon },
+          { label: 'Add-on Activities Items', path: '/marketing/add-on-activities-item', icon: ListBulletIcon },
+          { label: 'Content Categories', path: '/marketing/content-category', icon: TagIcon },
+          { label: 'Content Items', path: '/marketing/content-item', icon: RectangleStackIcon },
+          { label: 'Continuity Category', path: '/marketing/community-program', icon: UserGroupIcon },
+          { label: 'Continuity Items', path: '/marketing/community-program-item', icon: ListBulletIcon },
+          { label: 'FAQ', path: '/marketing/faq', icon: QuestionMarkCircleIcon },
         ],
       },
-      { label: 'Projects',         path: '/marketing/project',          icon: RocketLaunchIcon },
     ],
   },
   {
     label: 'Creative House', icon: PaintBrushIcon,
     children: [
       { label: 'Categories', path: '/creative/category', icon: TagIcon },
-      { label: 'Items',      path: '/creative/item',     icon: ListBulletIcon },
+      { label: 'Items', path: '/creative/item', icon: ListBulletIcon },
       {
         label: 'Item Sections', icon: RectangleStackIcon,
         children: [
-          { label: 'Creative Approach', path: '/creative/approach',     icon: SparklesIcon },
-          { label: 'Project Media',     path: '/creative/final-output', icon: FilmIcon },
+          { label: 'Creative Approach', path: '/creative/approach', icon: SparklesIcon },
+          { label: 'Project Media', path: '/creative/final-output', icon: FilmIcon },
         ],
       },
-      { label: 'Projects',   path: '/creative/project',  icon: RocketLaunchIcon },
+      { label: 'Projects', path: '/creative/project', icon: RocketLaunchIcon },
     ],
   },
   // Development House is shown but disabled — not consumed by the web app yet.
@@ -100,19 +100,19 @@ const navigation: NavItem[] = [
   {
     label: 'Group Services', icon: BuildingStorefrontIcon,
     children: [
-      { label: 'Top Banner',       path: '/group-service/top-banner',       icon: RectangleGroupIcon },
+      { label: 'Top Banner', path: '/group-service/top-banner', icon: RectangleGroupIcon },
       { label: 'Service Departments', path: '/group-service/service-department', icon: BuildingOffice2Icon },
-      { label: 'Service Categories',  path: '/group-service/service-category',   icon: Squares2X2Icon },
-      { label: 'Group Categories', path: '/group-service/category',         icon: TagIcon },
-      { label: 'Group Service Items', path: '/group-service/item',           icon: ListBulletIcon },
+      { label: 'Service Categories', path: '/group-service/service-category', icon: Squares2X2Icon },
+      { label: 'Group Categories', path: '/group-service/category', icon: TagIcon },
+      { label: 'Group Service Items', path: '/group-service/item', icon: ListBulletIcon },
       {
         label: 'Item Section', icon: RectangleStackIcon,
         children: [
-          { label: 'Service Media',             path: '/group-service/single-service-image', icon: PhotoIcon },
-          { label: 'Recent Work',       path: '/group-service/recent-work',          icon: FilmIcon },
-          { label: 'Portfolio Category', path: '/group-service/portfolio-category',   icon: BriefcaseIcon },
-          { label: 'Portfolio Items',    path: '/group-service/portfolio-item',       icon: ListBulletIcon },
-          { label: 'FAQ',                       path: '/group-service/faq',                  icon: QuestionMarkCircleIcon },
+          { label: 'Service Media', path: '/group-service/single-service-image', icon: PhotoIcon },
+          { label: 'Recent Work', path: '/group-service/recent-work', icon: FilmIcon },
+          { label: 'Portfolio Category', path: '/group-service/portfolio-category', icon: BriefcaseIcon },
+          { label: 'Portfolio Items', path: '/group-service/portfolio-item', icon: ListBulletIcon },
+          { label: 'FAQ', path: '/group-service/faq', icon: QuestionMarkCircleIcon },
         ],
       },
     ],
@@ -120,17 +120,17 @@ const navigation: NavItem[] = [
   {
     label: 'Blog', icon: BookOpenIcon,
     children: [
-      { label: 'Categories',     path: '/blog/category',     icon: TagIcon },
+      { label: 'Categories', path: '/blog/category', icon: TagIcon },
       { label: 'Sub Categories', path: '/blog/sub-category', icon: Squares2X2Icon },
-      { label: 'Posts',          path: '/blog/item',         icon: NewspaperIcon },
+      { label: 'Posts', path: '/blog/item', icon: NewspaperIcon },
     ],
   },
   {
     label: 'Jobs', icon: BriefcaseIcon,
     children: [
-      { label: 'Categories',   path: '/jobs/category',   icon: TagIcon },
-      { label: 'Job Listings', path: '/jobs/list',       icon: ListBulletIcon },
-      { label: 'Applicants',   path: '/jobs/applicants', icon: UsersIcon },
+      { label: 'Categories', path: '/jobs/category', icon: TagIcon },
+      { label: 'Job Listings', path: '/jobs/list', icon: ListBulletIcon },
+      { label: 'Applicants', path: '/jobs/applicants', icon: UsersIcon },
     ],
   },
   {
@@ -143,25 +143,25 @@ const navigation: NavItem[] = [
   {
     label: 'Templates', icon: DocumentTextIcon,
     children: [
-      { label: 'Author',             path: '/templates/author',                   icon: UserIcon },
-      { label: 'Banner Title',       path: '/templates/banner-title',             icon: RectangleGroupIcon },
-      { label: 'Book Call',          path: '/templates/book-call',                icon: PhoneIcon },
-      { label: 'User Choice',        path: '/templates/user-choice',              icon: CursorArrowRaysIcon },
-      { label: 'Our Advantage',      path: '/templates/our-advantage',            icon: TrophyIcon },
-      { label: 'Success Stories',    path: '/templates/success-stories-project',  icon: StarIcon },
-      { label: 'FAQs',               path: '/templates/faq',                      icon: QuestionMarkCircleIcon },
-      { label: 'WhatsApp Templates', path: '/templates/whatsapp',                 icon: ChatBubbleLeftRightIcon },
-      { label: 'Admin Posts',        path: '/templates/admin-post',               icon: NewspaperIcon },
-      { label: 'Pages',              path: '/templates/page',                     icon: DocumentTextIcon },
+      { label: 'Author', path: '/templates/author', icon: UserIcon },
+      { label: 'Banner Title', path: '/templates/banner-title', icon: RectangleGroupIcon },
+      { label: 'Book Call', path: '/templates/book-call', icon: PhoneIcon },
+      { label: 'User Choice', path: '/templates/user-choice', icon: CursorArrowRaysIcon },
+      { label: 'Our Advantage', path: '/templates/our-advantage', icon: TrophyIcon },
+      { label: 'Success Stories', path: '/templates/success-stories-project', icon: StarIcon },
+      { label: 'FAQs', path: '/templates/faq', icon: QuestionMarkCircleIcon },
+      { label: 'WhatsApp Templates', path: '/templates/whatsapp', icon: ChatBubbleLeftRightIcon },
+      { label: 'Admin Posts', path: '/templates/admin-post', icon: NewspaperIcon },
+      { label: 'Pages', path: '/templates/page', icon: DocumentTextIcon },
     ],
   },
   {
     label: 'Contact', icon: EnvelopeIcon,
     children: [
-      { label: 'Contact Us',        path: '/contact/contact-us',        icon: EnvelopeIcon },
+      { label: 'Contact Us', path: '/contact/contact-us', icon: EnvelopeIcon },
       { label: 'Free Consultation', path: '/contact/free-consultation', icon: CalendarIcon },
-      { label: 'Meeting Requests',  path: '/contact/meetings',          icon: PhoneIcon },
-      { label: 'Form Submissions',  path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
+      { label: 'Meeting Requests', path: '/contact/meetings', icon: PhoneIcon },
+      { label: 'Form Submissions', path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
     ],
   },
 ];
@@ -233,9 +233,8 @@ function NavGroup({ item, level = 0 }: NavGroupProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`sidebar-link w-full justify-between ${indent} ${
-          isChildActive ? 'text-primary-700 bg-primary-50' : ''
-        }`}
+        className={`sidebar-link w-full justify-between ${indent} ${isChildActive ? 'text-primary-700 bg-primary-50' : ''
+          }`}
       >
         <span className="flex items-center gap-3 min-w-0">
           {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
@@ -248,9 +247,8 @@ function NavGroup({ item, level = 0 }: NavGroupProps) {
 
       {/* Child list with smooth height animation */}
       <div
-        className={`overflow-hidden transition-all duration-200 ${
-          open ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`overflow-hidden transition-all duration-200 ${open ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <div className="mt-0.5 space-y-0.5 pl-2 pb-1">
           {item.children.map((child) => (
@@ -301,11 +299,10 @@ function CollapsedItem({ item }: CollapsedItemProps) {
       <NavLink
         to={path}
         title={item.label}
-        className={`flex items-center justify-center w-10 h-10 mx-auto rounded-lg transition-colors ${
-          isActive
-            ? 'bg-primary-50 text-primary-700'
-            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-        }`}
+        className={`flex items-center justify-center w-10 h-10 mx-auto rounded-lg transition-colors ${isActive
+          ? 'bg-primary-50 text-primary-700'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+          }`}
       >
         <Icon className="w-5 h-5" />
       </NavLink>
@@ -365,9 +362,8 @@ export default function Sidebar({ collapsed, mobileOpen, onMobileClose }: Sideba
 
       {/* ── Full nav (mobile always, desktop when not collapsed) ── */}
       <nav
-        className={`flex-1 overflow-y-auto p-3 space-y-0.5 ${
-          collapsed ? 'lg:hidden' : 'block'
-        }`}
+        className={`flex-1 overflow-y-auto p-3 space-y-0.5 ${collapsed ? 'lg:hidden' : 'block'
+          }`}
       >
         {navigation.map((item) => (
           <NavGroup key={item.label} item={item} />
@@ -376,9 +372,8 @@ export default function Sidebar({ collapsed, mobileOpen, onMobileClose }: Sideba
 
       {/* ── Icon-only nav (desktop collapsed mode only) ─────────── */}
       <nav
-        className={`hidden flex-col flex-1 overflow-y-auto py-3 px-1 space-y-1 ${
-          collapsed ? 'lg:flex' : ''
-        }`}
+        className={`hidden flex-col flex-1 overflow-y-auto py-3 px-1 space-y-1 ${collapsed ? 'lg:flex' : ''
+          }`}
       >
         {navigation.map((item) => (
           <CollapsedItem key={item.label} item={item} />

@@ -49,7 +49,7 @@ export default function ContentCategoryModuleForm({ onSuccess, onCancel, editId,
       .catch(() => toast.error('Failed to load items'));
   }, [selectedCategory]);
 
-  // When locked to a specific Marketing Item, force the field value and resolve
+  // When locked to a specific Marketing Campaign, force the field value and resolve
   // the item's display name for the read-only input.
   useEffect(() => {
     if (!lockedItemId) return;
@@ -84,10 +84,10 @@ export default function ContentCategoryModuleForm({ onSuccess, onCancel, editId,
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {lockedItemId ? (
         <div>
-          <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
+          <label className="form-label">Marketing Campaign <span className="text-red-500">*</span></label>
           <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly />
           <input type="hidden" {...register('marketingHouseItemId')} />
-          <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
+          <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Campaign.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -104,7 +104,7 @@ export default function ContentCategoryModuleForm({ onSuccess, onCancel, editId,
             {errors.marketingHouseCategoryId && <p className="form-error">{String(errors.marketingHouseCategoryId.message)}</p>}
           </div>
           <div>
-            <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
+            <label className="form-label">Marketing Campaign <span className="text-red-500">*</span></label>
             <select {...register('marketingHouseItemId', { required: 'Required' })} className="form-select" disabled={!selectedCategory}>
               <option value="">{selectedCategory ? 'Select item' : 'Select a category first'}</option>
               {items.map((it: any) => <option key={it._id} value={it._id}>{itemName(it)}</option>)}

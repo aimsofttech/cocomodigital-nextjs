@@ -46,7 +46,7 @@ export default function Dashboard() {
     { label: 'Videos', ...stats?.totalVideo, path: '/home/video', color: 'orange' },
     { label: 'Clients', ...stats?.totalClient, path: '/home/client', color: 'pink' },
     { label: 'Marketing Categories', ...stats?.totalMarketingCategory, path: '/marketing/category', color: 'red' },
-    { label: 'Marketing Items', ...stats?.totalMarketingItem, path: '/marketing/item', color: 'yellow' },
+    { label: 'Marketing Campaigns', ...stats?.totalMarketingItem, path: '/marketing/item', color: 'yellow' },
     { label: 'Creative Categories', ...stats?.totalCreativeCategory, path: '/creative/category', color: 'indigo' },
     { label: 'Creative Items', ...stats?.totalCreativeItem, path: '/creative/item', color: 'blue' },
     { label: 'Blog Categories', ...stats?.totalBlogCategory, path: '/blog/category', color: 'green' },

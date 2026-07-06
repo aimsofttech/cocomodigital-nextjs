@@ -83,10 +83,10 @@ export default function PreLaunchActivityForm({ onSuccess, onCancel, editId, loc
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {lockedItemId ? (
         <div>
-          <label className="form-label">Marketing Item <span className="text-red-500">*</span></label>
-          <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly placeholder="Marketing Item" />
+          <label className="form-label">Marketing Campaign <span className="text-red-500">*</span></label>
+          <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly placeholder="Marketing Campaign" />
           <input type="hidden" {...register('marketingHouseItemId')} />
-          <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
+          <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Campaign.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

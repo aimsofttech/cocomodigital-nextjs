@@ -8,7 +8,7 @@ import { marketingHouseCommunityProgramApi, marketingHouseItemApi } from '@/serv
 import CommunityProgramModuleForm from './CommunityProgramModuleForm';
 
 export default function CommunityProgramModuleList() {
-  // When navigated from a Marketing Item, the item id arrives as a query param
+  // When navigated from a Marketing Campaign, the item id arrives as a query param
   // and scopes the whole page (list + create/edit) to that item.
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
@@ -53,12 +53,12 @@ export default function CommunityProgramModuleList() {
     { key: 'name', label: 'Category Name', sortable: true, render: (row: any) => row.name || row.name || 'N/A' },
     { key: 'description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block text-sm text-gray-600">{row.description || 'N/A'}</span> },
     { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
-    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Campaign', render: (row: any) => row.itemName || 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title={itemName ? `Continuity Category — ${itemName}` : 'Continuity Category'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Item Sections' }, { label: 'Continuity Category' }]}
+    <CrudListPage title={itemName ? `Continuity Category — ${itemName}` : 'Continuity Category'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Continuity Category' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
