@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
-import { groupRecentWorkApi } from '@/services/adminApi';
+import { groupRecentWorkApi, groupServiceItemApi } from '@/services/adminApi';
 import RecentWorkForm from './RecentWorkForm';
 
 export default function RecentWorkList() {
@@ -34,7 +34,22 @@ export default function RecentWorkList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All group service items for the server-side Item filter dropdown.
+  const [itemOptions, setItemOptions] = useState<any[]>([]);
+  useEffect(() => {
+    groupServiceItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setItemOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'groupServiceItemId', label: 'Item', type: 'select' as const,
+      options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: String(it._id), label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.videoThumbnail} /> },
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.video} thumbnail={row.image || row.videoThumbnail} /> },

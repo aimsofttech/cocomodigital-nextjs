@@ -1,9 +1,10 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
-import { groupServiceCategoryApi } from '@/services/adminApi';
+import { groupServiceCategoryApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
 import ServiceCategoryForm from './ServiceCategoryForm';
 
 // Pages reachable from a group service category. Opens scoped to this category
@@ -24,7 +25,26 @@ export default function ServiceCategoryList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // Home departments + service categories drive the server-side explore filters.
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [serviceItems, setServiceItems] = useState<any[]>([]);
+  useEffect(() => {
+    serviceCategoryApi.getAll({ limit: 200 }).then(({ data }) => setDepartments(data.data || [])).catch(() => {});
+    serviceItemApi.getAll({ limit: 500 }).then(({ data }) => setServiceItems(data.data || [])).catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'exploreOurServiceCategoryId', label: 'Department', type: 'select' as const,
+      options: [{ value: '', label: 'All Departments' }, ...departments.map((d: any) => ({ value: String(d._id), label: d.name }))],
+    },
+    {
+      key: 'exploreOurServiceItemId', label: 'Service Category', type: 'select' as const,
+      options: [{ value: '', label: 'All Service Categories' }, ...serviceItems.map((it: any) => ({ value: String(it._id), label: it.title }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'name', label: 'Group Service Categories', sortable: true },
     { key: 'departmentName', label: 'Department', render: (row: any) => row.departmentName || 'N/A' },

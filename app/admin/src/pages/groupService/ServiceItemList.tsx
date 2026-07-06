@@ -1,12 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
-import { groupServiceItemApi } from '@/services/adminApi';
-import ServiceItemForm from './ServiceItemForm';
+import { groupServiceItemApi, groupServiceCategoryApi } from '@/services/adminApi';
 
 // Item-sections reachable from a Group Service Item, scoped via ?groupServiceItemId.
 const SEGMENT_ROUTE: Record<string, string> = {
@@ -48,9 +47,27 @@ export default function ServiceItemList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // Group categories for the server-side Category filter dropdown.
+  const [groupCats, setGroupCats] = useState<any[]>([]);
+  useEffect(() => {
+    groupServiceCategoryApi.getAll({ limit: 200 })
+      .then(({ data }) => setGroupCats(data.data || []))
+      .catch(() => { });
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'groupServiceCategoryId', label: 'Group Category', type: 'select' as const,
+      options: [{ value: '', label: 'All Group Categories' }, ...groupCats.map((c: any) => ({ value: String(c._id), label: c.name }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
-    { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
+    {
+      key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail}
+        size="w-40 h-22 min-w-[10rem] max-w-none flex-shrink-0" />
+    },
     { key: 'title', label: 'Title', sortable: true },
     { key: 'departmentName', label: 'Department', render: (row: any) => row.departmentName || 'N/A' },
     { key: 'serviceCategoryName', label: 'Service Categories', render: (row: any) => row.serviceCategoryName || 'N/A' },
@@ -80,11 +97,10 @@ export default function ServiceItemList() {
   ];
   return (
     <CrudListPage title="Group Service Items" breadcrumbs={[{ label: 'Group Service' }, { label: 'Items' }]}
+      addPath="/group-service/wizard" editPath={(row: any) => `/group-service/wizard?itemId=${row._id}&step=0`}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
-      renderModal={({ id, onSuccess, onCancel }) => <ServiceItemForm editId={id} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Group Service Item' : 'Add Group Service Item'}
-      modalSize="xl" onRefresh={fetchAll} />
+      onRefresh={fetchAll} />
   );
 }

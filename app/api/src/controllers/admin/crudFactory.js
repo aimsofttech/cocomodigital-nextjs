@@ -219,8 +219,12 @@ const createCrudController = (Model, options = {}) => {
         // e.g. "records whose parent item belongs to category X").
         const pids = String(parentId).split(',').filter(Boolean);
         filter[pf] = {
-          $in: pids.flatMap((pid) =>
-            mongoose.Types.ObjectId.isValid(pid) ? [pid, new mongoose.Types.ObjectId(pid)] : [pid]),
+          $in: pids.flatMap((pid) => {
+            const variants = [pid];
+            if (mongoose.Types.ObjectId.isValid(pid)) variants.push(new mongoose.Types.ObjectId(pid));
+            if (/^\d+$/.test(pid)) variants.push(Number(pid)); // legacy numeric FKs
+            return variants;
+          }),
         };
       }
       if (status !== undefined && status !== '') filter.status = parseInt(status);
@@ -319,8 +323,12 @@ const createCrudController = (Model, options = {}) => {
         // e.g. "records whose parent item belongs to category X").
         const pids = String(parentId).split(',').filter(Boolean);
         filter[pf] = {
-          $in: pids.flatMap((pid) =>
-            mongoose.Types.ObjectId.isValid(pid) ? [pid, new mongoose.Types.ObjectId(pid)] : [pid]),
+          $in: pids.flatMap((pid) => {
+            const variants = [pid];
+            if (mongoose.Types.ObjectId.isValid(pid)) variants.push(new mongoose.Types.ObjectId(pid));
+            if (/^\d+$/.test(pid)) variants.push(Number(pid)); // legacy numeric FKs
+            return variants;
+          }),
         };
       }
       if (req.query.status !== undefined && req.query.status !== '') filter.status = parseInt(req.query.status);

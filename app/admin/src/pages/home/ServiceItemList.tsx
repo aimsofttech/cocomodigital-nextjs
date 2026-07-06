@@ -40,6 +40,8 @@ export default function ServiceItemList() {
       /* TableFilter prepends its own "All Service Department" placeholder option. */
       options: departments.map((d: any) => ({ value: String(d._id), label: d.name })),
     },
+
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
   ];
   const columns = [
     /* Service images are wide banner cards — render them large (384×192)

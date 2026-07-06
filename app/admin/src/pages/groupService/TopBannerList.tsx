@@ -75,6 +75,8 @@ export default function TopBannerList() {
       type: 'select' as const,
       options: categoryOptions.map((it: any) => ({ value: String(it._id), label: it.title })),
     },
+
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
   ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} size="w-36 h-20" /> },

@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
-import { groupServiceItemFaqApi } from '@/services/adminApi';
+import { groupServiceItemFaqApi, groupServiceItemApi } from '@/services/adminApi';
 import FaqForm from './FaqForm';
 
 export default function FaqList() {
@@ -33,7 +33,22 @@ export default function FaqList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All group service items for the server-side Item filter dropdown.
+  const [itemOptions, setItemOptions] = useState<any[]>([]);
+  useEffect(() => {
+    groupServiceItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setItemOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'groupServiceItemId', label: 'Item', type: 'select' as const,
+      options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: String(it._id), label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'question', label: 'Question', sortable: true },
     { key: 'displayOrder', label: 'Order', sortable: true },

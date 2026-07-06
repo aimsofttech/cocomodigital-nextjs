@@ -98,8 +98,13 @@ const navigation: NavItem[] = [
     label: 'Group Services', icon: BuildingStorefrontIcon,
     children: [
       { label: 'Top Banner', path: '/group-service/top-banner', icon: RectangleGroupIcon },
-      { label: 'Service Departments', path: '/group-service/service-department', icon: BuildingOffice2Icon },
-      { label: 'Service Categories', path: '/group-service/service-category', icon: Squares2X2Icon },
+      {
+        label: 'Services', icon: BriefcaseIcon,
+        children: [
+          { label: 'Service Departments', path: '/group-service/service-department', icon: BuildingOffice2Icon },
+          { label: 'Service Categories', path: '/group-service/service-category', icon: Squares2X2Icon },
+        ],
+      },
       { label: 'Group Categories', path: '/group-service/category', icon: TagIcon },
       { label: 'Group Service Items', path: '/group-service/item', icon: ListBulletIcon },
       {

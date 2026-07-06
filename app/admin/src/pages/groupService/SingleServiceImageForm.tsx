@@ -30,7 +30,7 @@ export default function SingleServiceImageForm({ onSuccess, onCancel, editId, lo
         const item = data.data;
         editItemId.current = item.groupServiceItemId ? String(item.groupServiceItemId) : '';
         reset({ ...item, status: String(item.status), groupServiceItemId: editItemId.current });
-        if (item.single_service_video_type === 'url') setVideoTab('url');
+        if (item.videoType === 'url') setVideoTab('url');
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
@@ -53,14 +53,14 @@ export default function SingleServiceImageForm({ onSuccess, onCancel, editId, lo
   const switchVideoTab = (tab: VideoTab) => {
     setVideoTab(tab);
     setValue('videoUrl', '');
-    setValue('single_service_video_type', tab);
+    setValue('videoType', tab);
   };
 
   const onSubmit = async (formData: any) => {
     const payload = {
       ...formData,
       groupServiceItemId: formData.groupServiceItemId || scopedItemId,
-      single_service_video_type: formData.videoUrl ? videoTab : '',
+      videoType: formData.videoUrl ? videoTab : '',
     };
     try {
       if (isEdit && id) await groupSingleServiceImageApi.update(id, payload);
@@ -105,7 +105,7 @@ export default function SingleServiceImageForm({ onSuccess, onCancel, editId, lo
               uploadType="video"
               folder="group-service"
               value={watch('videoUrl')}
-              onChange={(url) => { setValue('videoUrl', url); setValue('single_service_video_type', 'upload'); }}
+              onChange={(url) => { setValue('videoUrl', url); setValue('videoType', 'upload'); }}
             />
           ) : (
             <div>
@@ -114,7 +114,7 @@ export default function SingleServiceImageForm({ onSuccess, onCancel, editId, lo
                 className="form-input"
                 placeholder="https://youtube.com/... or video URL"
                 value={watch('videoUrl') || ''}
-                onChange={(e) => { setValue('videoUrl', e.target.value); setValue('single_service_video_type', 'url'); }}
+                onChange={(e) => { setValue('videoUrl', e.target.value); setValue('videoType', 'url'); }}
               />
             </div>
           )}

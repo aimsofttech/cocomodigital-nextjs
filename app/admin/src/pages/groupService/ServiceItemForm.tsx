@@ -8,7 +8,13 @@ import SlugField from '@/components/ui/SlugField';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import toast from 'react-hot-toast';
 
-interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; lockedCategoryId?: string; }
+interface Props {
+  /** Called after save; receives the saved record (e.g. to read the new _id). */
+  onSuccess?: (saved?: any) => void;
+  onCancel?: () => void;
+  editId?: string;
+  lockedCategoryId?: string;
+}
 
 export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCategoryId }: Props = {}) {
   const { id: paramId } = useParams();
@@ -88,10 +94,9 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
         displayOrder: Number(formData.displayOrder) || 0,
         status: Number(formData.status),
       };
-      if (isEdit && id) await groupServiceItemApi.update(id, payload);
-      else await groupServiceItemApi.create(payload);
+      const res = isEdit && id ? await groupServiceItemApi.update(id, payload) : await groupServiceItemApi.create(payload);
       toast.success(isEdit ? 'Updated' : 'Created');
-      if (onSuccess) onSuccess(); else navigate(-1);
+      if (onSuccess) onSuccess(res?.data?.data); else navigate(-1);
     } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
   };
 

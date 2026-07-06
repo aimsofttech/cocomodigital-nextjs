@@ -58,6 +58,7 @@ const PLANS = [
     single_service_description: 'description',
     single_service_upload_video: 'uploadVideoUrl',
     single_service_video_url: 'videoUrl',
+    single_service_video_type: 'videoType',
   }]],
   ['group_single_service_recent_work', [{
     ...COMMON, ...FK,

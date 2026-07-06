@@ -98,6 +98,7 @@ const GroupServiceCategoryList = lazy(() => import('@/pages/groupService/Service
 const GroupServiceCategoryForm = lazy(() => import('@/pages/groupService/ServiceCategoryForm'));
 const GroupServiceItemList = lazy(() => import('@/pages/groupService/ServiceItemList'));
 const GroupServiceItemForm = lazy(() => import('@/pages/groupService/ServiceItemForm'));
+const GroupServiceWizard = lazy(() => import('@/pages/groupService/Wizard'));
 const GroupSingleServiceImageList = lazy(() => import('@/pages/groupService/SingleServiceImageList'));
 const GroupSingleServiceImageForm = lazy(() => import('@/pages/groupService/SingleServiceImageForm'));
 const GroupRecentWorkList = lazy(() => import('@/pages/groupService/RecentWorkList'));
@@ -334,6 +335,7 @@ export default function App() {
           <Route path="group-service/category/add" element={<GroupServiceCategoryForm />} />
           <Route path="group-service/category/edit/:id" element={<GroupServiceCategoryForm />} />
           <Route path="group-service/item" element={<GroupServiceItemList />} />
+          <Route path="group-service/wizard" element={<GroupServiceWizard />} />
           <Route path="group-service/item/add" element={<GroupServiceItemForm />} />
           <Route path="group-service/item/edit/:id" element={<GroupServiceItemForm />} />
           {/* Service Item Sections — flat pages, scoped via ?groupServiceItemId */}

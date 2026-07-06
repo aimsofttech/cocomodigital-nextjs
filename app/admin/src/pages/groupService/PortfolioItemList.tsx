@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
-import { groupPortfolioItemApi } from '@/services/adminApi';
+import { groupPortfolioItemApi, groupServiceItemApi, groupPortfolioCategoryApi } from '@/services/adminApi';
 import PortfolioItemForm from './PortfolioItemForm';
 
 export default function PortfolioItemList() {
@@ -41,7 +41,34 @@ export default function PortfolioItemList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All group service items for the server-side Item filter dropdown.
+  const [itemOptions, setItemOptions] = useState<any[]>([]);
+  useEffect(() => {
+    groupServiceItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setItemOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  // Portfolio categories for the server-side Category filter dropdown.
+  const [pcatOptions, setPcatOptions] = useState<any[]>([]);
+  useEffect(() => {
+    groupPortfolioCategoryApi.getAll({ limit: 200 })
+      .then(({ data }) => setPcatOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'groupServiceItemId', label: 'Item', type: 'select' as const,
+      options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: String(it._id), label: it.title || it.slug || it._id }))],
+    },
+    {
+      key: 'portfolioCategoryId', label: 'Portfolio Category', type: 'select' as const,
+      options: [{ value: '', label: 'All Categories' }, ...pcatOptions.map((c: any) => ({ value: String(c._id), label: c.name }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.videoThumbnail} /> },
     { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.videoUrl} thumbnail={row.image || row.videoThumbnail} /> },
