@@ -138,36 +138,37 @@ export default function Wizard() {
     [counts, itemId],
   );
 
-  // ── Stepper chip (chips are joined by a light connector line) ──────────────
-  const stepChip = (index: number, label: string, done: boolean) => {
+  // ── Vertical stepper row (rows are joined by a theme-colored line) ─────────
+  const stepRow = (index: number, label: string, done: boolean) => {
     const active = index === step;
     const clickable = index === 0 || Boolean(itemId);
+    const isLast = index === TOTAL_STEPS - 1;
     return (
-      <div key={index} className="flex items-center flex-shrink-0">
-        {index > 0 && <span className="w-5 h-0.5 flex-shrink-0 bg-primary-600" />}
-      <button
-        type="button"
-        disabled={!clickable}
-        onClick={() => goTo(index)}
-        title={clickable ? label : 'Save the campaign details first'}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium whitespace-nowrap transition-colors ${
-          active
-            ? 'border-primary-600 bg-primary-600 text-white'
-            : done
-              ? 'border-primary-200 bg-primary-50 text-primary-700 hover:bg-primary-100'
-              : clickable
-                ? 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
-                : 'border-gray-200 bg-gray-50 text-gray-900 cursor-not-allowed'
-        }`}
-      >
-        <span className={`inline-flex items-center justify-center w-[1.125rem] h-[1.125rem] min-w-[1.125rem] rounded-full text-[10px] font-semibold ${
-          active ? 'bg-white/20 text-white' : done ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-900'
-        }`}>
-          {done && !active ? <CheckIcon className="w-3 h-3" /> : index + 1}
-        </span>
-        {label}
-      </button>
-      </div>
+      <li key={index} className="relative pb-1.5 last:pb-0">
+        {!isLast && <span aria-hidden className="absolute left-[16px] top-8 bottom-0 w-0.5 bg-primary-600" />}
+        <button
+          type="button"
+          disabled={!clickable}
+          onClick={() => goTo(index)}
+          title={clickable ? label : 'Save the campaign details first'}
+          className={`relative w-full flex items-center gap-2.5 pl-1 pr-2 py-1.5 rounded-lg text-left text-xs transition-colors ${
+            active
+              ? 'bg-primary-600 text-white font-medium'
+              : done
+                ? 'text-green-700 font-bold hover:bg-green-50'
+                : clickable
+                  ? 'text-gray-900 font-medium hover:bg-gray-50'
+                  : 'text-gray-900 font-medium cursor-not-allowed'
+          }`}
+        >
+          <span className={`inline-flex items-center justify-center w-6 h-6 min-w-[1.5rem] rounded-full text-[10px] font-semibold ${
+            active ? 'bg-white/20 text-white' : done ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-900'
+          }`}>
+            {done && !active ? <CheckIcon className="w-3.5 h-3.5" strokeWidth={3} /> : index + 1}
+          </span>
+          <span className="truncate">{label}</span>
+        </button>
+      </li>
     );
   };
 
@@ -183,125 +184,132 @@ export default function Wizard() {
         ) : undefined}
       />
 
-      {/* ── Stepper ───────────────────────────────────────────────────────── */}
-      <div className="card mb-4 p-3">
-        <div className="flex items-center justify-between gap-3 mb-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-            Step {step + 1} of {TOTAL_STEPS}
-          </p>
-          <p className="text-xs text-gray-500">{doneCount}/{TOTAL_STEPS} sections filled</p>
-        </div>
-        <div className="flex items-center overflow-x-auto pb-1">
-          {stepChip(0, 'Campaign Details', Boolean(itemId))}
-          {SECTION_STEPS.map((s, i) => stepChip(i + 1, s.label, (counts[s.key] ?? 0) > 0))}
-        </div>
-      </div>
-
-      {/* ── Step content ──────────────────────────────────────────────────── */}
-      {step === 0 ? (
-        <div className="card w-full">
-          <div className="mb-4">
-            <h2 className="text-base font-semibold text-gray-900">{itemId ? 'Campaign Details' : 'New Campaign Details'}</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {itemId
-                ? 'Update the basic information of this campaign, then continue to the sections.'
-                : 'Fill the basic information. Saving creates the campaign and unlocks the section steps.'}
-            </p>
-          </div>
-          <ItemForm
-            key={`item-${itemId}-${formKey}`}
-            editId={itemId || undefined}
-            onSuccess={handleItemSaved}
-            onCancel={() => navigate('/marketing/item')}
-          />
-        </div>
-      ) : !itemId ? (
-        <div className="card max-w-xl text-center py-10">
-          <p className="text-sm text-gray-600 mb-4">Save the campaign details first to unlock this step.</p>
-          <button type="button" onClick={() => goTo(0)} className="btn-primary btn-sm">Go to Campaign Details</button>
-        </div>
-      ) : currentSection ? (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-start">
-          <div className="card xl:col-span-2">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-base font-semibold text-gray-900">{currentSection.label}</h2>
-                <p className="text-sm text-gray-500 mt-0.5">{currentSection.hint} This step is optional — you can skip it and add records later.</p>
-              </div>
-              <Link
-                to={`${currentSection.managePath}?marketingHouseItemId=${itemId}`}
-                className="btn-secondary btn-sm flex items-center gap-1.5 flex-shrink-0"
-                title="Open the full page for this section (edit / delete records)"
-              >
-                <ArrowTopRightOnSquareIcon className="w-4 h-4" /> Manage
-              </Link>
-            </div>
-            <currentSection.Form
-              key={`${currentSection.key}-${formKey}`}
-              lockedItemId={itemId}
-              onSuccess={handleSectionSaved}
-              onCancel={() => setFormKey((k) => k + 1)}
-            />
-          </div>
-
-          {/* Saved records for this section (scoped to the campaign) */}
-          <div className="card">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2.5">
-              Added in this campaign
-            </p>
-            {(counts[currentSection.key] ?? 0) > 0 ? (
-              <>
-                <p className="text-sm text-gray-700 mb-2">
-                  <span className="inline-flex items-center justify-center min-w-[1.375rem] h-5 px-1.5 rounded-full bg-primary-100 text-primary-700 text-xs font-semibold mr-1.5">
-                    {counts[currentSection.key]}
-                  </span>
-                  record(s) saved
+      {/* ── Layout: form content on the left, vertical stepper on the right ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        {/* LEFT — step content + navigation (~75%) */}
+        <div className="lg:col-span-3 space-y-4">
+          {step === 0 ? (
+            <div className="card w-full">
+              <div className="mb-4">
+                <h2 className="text-base font-semibold text-gray-900">{itemId ? 'Campaign Details' : 'New Campaign Details'}</h2>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {itemId
+                    ? 'Update the basic information of this campaign, then continue to the sections.'
+                    : 'Fill the basic information. Saving creates the campaign and unlocks the section steps.'}
                 </p>
-                <ul className="space-y-1.5">
-                  {(previews[currentSection.key] || []).map((rec: any) => (
-                    <li key={rec._id} className="flex items-center gap-2 text-xs text-gray-600 px-2.5 py-1.5 rounded-md bg-gray-50 border border-gray-100">
-                      <CheckIcon className="w-3.5 h-3.5 text-primary-600 flex-shrink-0" />
-                      <span className="truncate">{recordLabel(rec)}</span>
-                    </li>
-                  ))}
-                </ul>
-                {(counts[currentSection.key] ?? 0) > (previews[currentSection.key]?.length ?? 0) && (
-                  <p className="text-[11px] text-gray-400 mt-2">Showing first {previews[currentSection.key]?.length} — use Manage to see all.</p>
-                )}
-              </>
+              </div>
+              <ItemForm
+                key={`item-${itemId}-${formKey}`}
+                editId={itemId || undefined}
+                onSuccess={handleItemSaved}
+                onCancel={() => navigate('/marketing/item')}
+              />
+            </div>
+          ) : !itemId ? (
+            <div className="card text-center py-10">
+              <p className="text-sm text-gray-600 mb-4">Save the campaign details first to unlock this step.</p>
+              <button type="button" onClick={() => goTo(0)} className="btn-primary btn-sm">Go to Campaign Details</button>
+            </div>
+          ) : currentSection ? (
+            <div className="card">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-gray-900">{currentSection.label}</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">{currentSection.hint} This step is optional — you can skip it and add records later.</p>
+                </div>
+                <Link
+                  to={`${currentSection.managePath}?marketingHouseItemId=${itemId}`}
+                  className="btn-secondary btn-sm flex items-center gap-1.5 flex-shrink-0"
+                  title="Open the full page for this section (edit / delete records)"
+                >
+                  <ArrowTopRightOnSquareIcon className="w-4 h-4" /> Manage
+                </Link>
+              </div>
+              <currentSection.Form
+                key={`${currentSection.key}-${formKey}`}
+                lockedItemId={itemId}
+                onSuccess={handleSectionSaved}
+                onCancel={() => setFormKey((k) => k + 1)}
+              />
+            </div>
+          ) : null}
+
+          {/* ── Wizard navigation ─────────────────────────────────────────── */}
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => goTo(step - 1)}
+              disabled={step === 0}
+              className="btn-secondary btn-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ArrowLeftIcon className="w-4 h-4" /> Previous
+            </button>
+            {step < TOTAL_STEPS - 1 ? (
+              <button
+                type="button"
+                onClick={() => goTo(step + 1)}
+                disabled={!itemId}
+                title={itemId ? undefined : 'Save the campaign details first'}
+                className="btn-primary btn-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {currentSection && (counts[currentSection.key] ?? 0) === 0 ? 'Skip / Next' : 'Next'}
+                <ArrowRightIcon className="w-4 h-4" />
+              </button>
             ) : (
-              <p className="text-sm text-gray-400">Nothing added yet. Save the form to add the first record, or skip this step.</p>
+              <button type="button" onClick={handleFinish} className="btn-primary btn-sm flex items-center gap-1.5">
+                <FlagIcon className="w-4 h-4" /> Finish
+              </button>
             )}
           </div>
         </div>
-      ) : null}
 
-      {/* ── Wizard navigation ─────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-3 mt-4 w-full">
-        <button
-          type="button"
-          onClick={() => goTo(step - 1)}
-          disabled={step === 0}
-          className="btn-secondary btn-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <ArrowLeftIcon className="w-4 h-4" /> Previous
-        </button>
-        {step < TOTAL_STEPS - 1 ? (
-          <button
-            type="button"
-            onClick={() => goTo(step + 1)}
-            disabled={!itemId}
-            title={itemId ? undefined : 'Save the campaign details first'}
-            className="btn-primary btn-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {currentSection && (counts[currentSection.key] ?? 0) === 0 ? 'Skip / Next' : 'Next'}
-            <ArrowRightIcon className="w-4 h-4" />
-          </button>
-        ) : (
-          <button type="button" onClick={handleFinish} className="btn-primary btn-sm flex items-center gap-1.5">
-            <FlagIcon className="w-4 h-4" /> Finish
-          </button>
-        )}
+        {/* RIGHT — vertical stepper + saved records (~25%, sticky) */}
+        <div className="space-y-4 lg:sticky lg:top-4">
+          <div className="card p-4">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                Step {step + 1} of {TOTAL_STEPS}
+              </p>
+              <p className="text-xs text-gray-500">{doneCount}/{TOTAL_STEPS} filled</p>
+            </div>
+            <ul>
+              {stepRow(0, 'Campaign Details', Boolean(itemId))}
+              {SECTION_STEPS.map((s, i) => stepRow(i + 1, s.label, (counts[s.key] ?? 0) > 0))}
+            </ul>
+          </div>
+
+          {/* Saved records for the current section (scoped to the campaign) */}
+          {itemId && currentSection && (
+            <div className="card">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-2.5">
+                Added in this campaign
+              </p>
+              {(counts[currentSection.key] ?? 0) > 0 ? (
+                <>
+                  <p className="text-sm text-gray-700 mb-2">
+                    <span className="inline-flex items-center justify-center min-w-[1.375rem] h-5 px-1.5 rounded-full bg-primary-100 text-primary-700 text-xs font-semibold mr-1.5">
+                      {counts[currentSection.key]}
+                    </span>
+                    record(s) saved
+                  </p>
+                  <ul className="space-y-1.5">
+                    {(previews[currentSection.key] || []).map((rec: any) => (
+                      <li key={rec._id} className="flex items-center gap-2 text-xs text-gray-600 px-2.5 py-1.5 rounded-md bg-gray-50 border border-gray-100">
+                        <CheckIcon className="w-3.5 h-3.5 text-primary-600 flex-shrink-0" />
+                        <span className="truncate">{recordLabel(rec)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {(counts[currentSection.key] ?? 0) > (previews[currentSection.key]?.length ?? 0) && (
+                    <p className="text-[11px] text-gray-400 mt-2">Showing first {previews[currentSection.key]?.length} — use Manage to see all.</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-gray-400">Nothing added yet. Save the form to add the first record, or skip this step.</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

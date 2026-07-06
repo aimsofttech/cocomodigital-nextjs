@@ -24,7 +24,7 @@ interface Props {
 const tName = (t: any) =>
   t.template_name || t.book_name || t.author_name || t.name || t.title || t._id;
 
-// Small "open the module's listing page" link shown next to a field label.
+// Icon-only "open the module's listing page" link shown next to a field label.
 // Opens in a new tab so the form being filled is not lost.
 const moduleLink = (path: string, name: string) => (
   <Link
@@ -32,9 +32,9 @@ const moduleLink = (path: string, name: string) => (
     target="_blank"
     rel="noopener noreferrer"
     title={`Open the ${name} module`}
-    className="inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 hover:text-primary-700 whitespace-nowrap"
+    className="inline-flex items-center text-primary-600 hover:text-primary-700"
   >
-    <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" /> {name}
+    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
   </Link>
 );
 
@@ -153,16 +153,6 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
         </div>
       </div>
 
-      {/* ── Highlights ───────────────────────────────────────────── */}
-      <div>
-        <label className="form-label">Highlights Title</label>
-        <input {...register('statsTitle')} className="form-input" placeholder="e.g. Teri baton mein uljh jiya! YouTube Marketing Case Studies" />
-      </div>
-      <div>
-        <label className="form-label">Highlights Description</label>
-        <textarea {...register('statsDescription')} className="form-textarea" placeholder="Enter a short description" />
-      </div>
-
       {/* ── Title + slug ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -171,6 +161,16 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
           {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} label="Slug Name" name="slug" />
+      </div>
+
+      {/* ── Highlights ───────────────────────────────────────────── */}
+      <div>
+        <label className="form-label">Highlights Title</label>
+        <input {...register('statsTitle')} className="form-input" placeholder="e.g. Teri baton mein uljh jiya! YouTube Marketing Case Studies" />
+      </div>
+      <div>
+        <label className="form-label">Highlights Description</label>
+        <textarea {...register('statsDescription')} className="form-textarea" placeholder="Enter a short description" />
       </div>
 
       {/* ── Poster image ─────────────────────────────────────────── */}
