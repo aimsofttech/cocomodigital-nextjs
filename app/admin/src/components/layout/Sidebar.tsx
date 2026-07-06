@@ -59,7 +59,6 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Categories', path: '/marketing/category', icon: TagIcon },
       { label: 'Campaigns', path: '/marketing/item', icon: ListBulletIcon },
-      { label: 'Create Campaign', path: '/marketing/wizard', icon: SparklesIcon },
       { label: 'Bulk Upload', path: '/marketing/bulk-upload', icon: ArrowUpTrayIcon },
       {
         label: 'Campaigns Section', icon: RectangleStackIcon,

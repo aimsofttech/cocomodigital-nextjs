@@ -67,8 +67,6 @@ export default function CommunityProgramModuleForm({ onSuccess, onCancel, editId
     ['name', 'description', 'slug', 'displayOrder', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
-    // The model requires `name`; keep it in sync with the real field.
-    if (formData.name) fd.append('name', formData.name);
     try {
       if (isEdit && editId) await marketingHouseCommunityProgramApi.update(editId, fd);
       else await marketingHouseCommunityProgramApi.create(fd);

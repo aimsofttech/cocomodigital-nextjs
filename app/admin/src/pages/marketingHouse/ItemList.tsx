@@ -140,7 +140,7 @@ export default function ItemList() {
 
   return (
     <CrudListPage title="Marketing Campaigns" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns' }]}
-      addPath="/marketing/item/add" editPath={(row: any) => `/marketing/item/edit/${row._id}`}
+      addPath="/marketing/wizard" editPath={(row: any) => `/marketing/wizard?itemId=${row._id}&step=0`}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
