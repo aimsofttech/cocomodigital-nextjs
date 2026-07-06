@@ -3,17 +3,17 @@ const CreativeHouseItem = require('../../models/CreativeHouseItem');
 const createCrudController = require('./crudFactory');
 
 module.exports = createCrudController(CreativeHouseApproach, {
-  imageFields: ['approach_thumbnail'],
-  videoFields: ['approach_upload_video_url'],
-  searchFields: ['approach_heading', 'approach_title'],
-  defaultSort: { display_order: 1 },
-  parentField: 'creative_house_item_id',
+  imageFields: ['thumbnail'],
+  videoFields: ['uploadVideoUrl'],
+  searchFields: ['heading', 'title'],
+  defaultSort: { displayOrder: 1 },
+  parentField: 'creativeHouseItemId',
   // Surface the parent item's title so the list can show which item each
   // approach belongs to.
   lookups: [{
-    localField: 'creative_house_item_id',
+    localField: 'creativeHouseItemId',
     model: CreativeHouseItem,
-    nameField: ['creative_house_title', 'creative_house_video_title'],
-    as: 'creative_house_item_name',
+    nameField: ['title', 'videoTitle'],
+    as: 'itemName',
   }],
 });

@@ -21,8 +21,8 @@ export default function ProjectList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'banner_title_template_id', label: 'Banner Template ID', sortable: true },
-    { key: 'book_call_template_id', label: 'Book Call ID', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'bookCallTemplateId', label: 'Book Call ID', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

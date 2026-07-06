@@ -16,26 +16,26 @@ export default function ApproachList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(creativeHouseApproachApi, true, itemId ? { creative_house_item_id: itemId } : {});
+    useCrud(creativeHouseApproachApi, true, itemId ? { creativeHouseItemId: itemId } : {});
 
   // Re-apply the filter when the URL id changes (navigating between items).
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { creative_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { creativeHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   // Fetch the item title for the heading / breadcrumb context.
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     creativeHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.creative_house_title || data.data?.creative_house_video_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.videoTitle || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   // Keep the item scope when other filters change.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { creative_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { creativeHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -49,12 +49,12 @@ export default function ApproachList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'approach_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.approach_thumbnail} /> },
-    { key: 'approach_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.approach_video_url || row.approach_upload_video_url} thumbnail={row.approach_thumbnail} /> },
-    { key: 'creative_house_item_name', label: 'Creative Item', sortable: true, render: (row: any) => <span className="block w-40 whitespace-normal break-words">{row.creative_house_item_name || 'N/A'}</span> },
-    { key: 'approach_heading', label: 'Heading', sortable: true, render: (row: any) => <span className="block w-48 whitespace-normal break-words">{row.approach_heading || 'N/A'}</span> },
-    { key: 'approach_description', label: 'Description', render: (row: any) => <span className="block w-64 whitespace-normal break-words" title={row.approach_description}>{row.approach_description || 'N/A'}</span> },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.uploadVideoUrl} thumbnail={row.thumbnail} /> },
+    { key: 'itemName', label: 'Creative Item', sortable: true, render: (row: any) => <span className="block w-40 whitespace-normal break-words">{row.itemName || 'N/A'}</span> },
+    { key: 'heading', label: 'Heading', sortable: true, render: (row: any) => <span className="block w-48 whitespace-normal break-words">{row.heading || 'N/A'}</span> },
+    { key: 'description', label: 'Description', render: (row: any) => <span className="block w-64 whitespace-normal break-words" title={row.description}>{row.description || 'N/A'}</span> },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   const breadcrumbs = itemId

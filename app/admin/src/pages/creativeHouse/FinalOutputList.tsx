@@ -16,23 +16,23 @@ export default function FinalOutputList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(creativeHouseFinalOutputApi, true, itemId ? { creative_house_item_id: itemId } : {});
+    useCrud(creativeHouseFinalOutputApi, true, itemId ? { creativeHouseItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { creative_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { creativeHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     creativeHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.creative_house_title || data.data?.creative_house_video_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.videoTitle || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { creative_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { creativeHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -46,11 +46,11 @@ export default function FinalOutputList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'final_output_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.final_output_thumbnail} /> },
-    { key: 'final_output_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.final_output_video_url || row.final_output_upload_video_url} thumbnail={row.final_output_thumbnail} /> },
-    { key: 'creative_house_item_name', label: 'Creative Item', sortable: true, render: (row: any) => <span className="block w-40 whitespace-normal break-words">{row.creative_house_item_name || 'N/A'}</span> },
-    { key: 'final_output_title', label: 'Title', sortable: true, render: (row: any) => <span className="block w-48 whitespace-normal break-words">{row.final_output_title || 'N/A'}</span> },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.uploadVideoUrl} thumbnail={row.thumbnail} /> },
+    { key: 'itemName', label: 'Creative Item', sortable: true, render: (row: any) => <span className="block w-40 whitespace-normal break-words">{row.itemName || 'N/A'}</span> },
+    { key: 'title', label: 'Title', sortable: true, render: (row: any) => <span className="block w-48 whitespace-normal break-words">{row.title || 'N/A'}</span> },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   const breadcrumbs = itemId

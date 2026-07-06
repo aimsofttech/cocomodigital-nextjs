@@ -26,7 +26,7 @@ export default function BriefAndRequirement({ RequireMentData }) {
           </div>
           <div className="text-center">
             <p className="invite-for-edit-content-line">
-              {RequireMentData?.requirement_description}
+              {RequireMentData?.requirementDescription}
             </p>
           </div>
         </div>

@@ -36,18 +36,18 @@ export default function ItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }, { key: 'year', label: 'Year', type: 'year' as const }];
   const columns = [
-    { key: 'creative_house_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.creative_house_thumbnail} /> },
-    { key: 'creative_house_video_url', label: 'Video', render: (row: any) => {
+    { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => {
       // A creative item's video may live in any of: a direct/YouTube URL, an
       // uploaded video file, or just a stored YouTube id (legacy rows). Resolve
       // in that order so the cell shows a preview for every row that has a video.
-      const videoSrc = row.creative_house_video_url
-        || row.creative_house_upload_video_url
-        || (row.creative_house_youtube_id ? `https://www.youtube.com/watch?v=${row.creative_house_youtube_id}` : '');
-      return <VideoCell src={videoSrc} thumbnail={row.creative_house_thumbnail} />;
+      const videoSrc = row.videoUrl
+        || row.uploadVideoUrl
+        || (row.youtubeId ? `https://www.youtube.com/watch?v=${row.youtubeId}` : '');
+      return <VideoCell src={videoSrc} thumbnail={row.thumbnail} />;
     } },
-    { key: 'creative_house_video_title', label: 'Video Title', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'videoTitle', label: 'Video Title', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {
       key: 'navigate', label: 'Navigate To', render: (row: any) => {

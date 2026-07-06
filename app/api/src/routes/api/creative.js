@@ -5,6 +5,6 @@ router.get('/', ctrl.index);
 router.get('/home-priority', ctrl.creativeHomePriority);
 router.get('/filter-data', ctrl.creativeFilterData);
 router.get('/items', ctrl.creativeHouseItem);
-router.get('/single/:creative_house_slug', ctrl.getSingleCreativeHouse);
+router.get('/single/:slug', ctrl.getSingleCreativeHouse);
 
 module.exports = router;

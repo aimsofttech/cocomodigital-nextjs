@@ -35,7 +35,7 @@ export default function ContentCreated({
     if (seeded) return;
     /* /creative-house filter rail — just the skill categories.
        Maps the API `service-categories` → legacy
-       { creative_house_category_name, slug } shape so the existing
+       { name, slug } shape so the existing
        view doesn't need shape changes.
 
        Phase 5+ 2026-05-23: the rail used to include all 16 service-
@@ -55,8 +55,8 @@ export default function ContentCreated({
         const body = await res.json();
         const creativeCategory = (body.docs || []).map((c: any) => ({
           id: c.id,
-          creative_house_category_name: c.creative_house_category_name || c.name,
-          creative_house_category_slug: c.slug,
+          name: c.name || c.name,
+          slug: c.slug,
           slug: c.slug,
         }));
         setCreativeHouseDetails({ creativeCategory });

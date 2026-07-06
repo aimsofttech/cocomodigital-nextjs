@@ -113,17 +113,17 @@ export interface MarketingHouseStatics extends BaseModel {
 }
 
 export interface CreativeHouseCategory extends BaseModel {
-  creative_house_category_name: string;
+  name: string;
 }
 
 export interface CreativeHouseItem extends BaseModel {
-  creative_house_category_id: string | CreativeHouseCategory;
-  creative_house_title: string;
-  creative_house_slug?: string;
-  creative_house_thumbnail?: string;
-  creative_house_video_url?: string;
-  creative_house_youtube_id?: string;
-  creative_house_description?: string;
+  creativeHouseCategoryId: string | CreativeHouseCategory;
+  title: string;
+  slug?: string;
+  thumbnail?: string;
+  videoUrl?: string;
+  youtubeId?: string;
+  description?: string;
 }
 
 export interface BlogCategory extends BaseModel {

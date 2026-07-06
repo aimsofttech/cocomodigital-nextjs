@@ -36,8 +36,8 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
   // Switch the video method and clear the other field so only one is submitted.
   const selectVideoTab = (tab: 'url' | 'upload') => {
     setVideoTab(tab);
-    if (tab === 'url') setValue('creative_house_upload_video_url', '');
-    else setValue('creative_house_video_url', '');
+    if (tab === 'url') setValue('uploadVideoUrl', '');
+    else setValue('videoUrl', '');
   };
 
   useEffect(() => {
@@ -45,9 +45,9 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
     creativeHouseCategoryApi.getAll({ limit: 100 }).then(({ data }) => setCategories(data.data || [])).catch(() => {});
     authorTemplateApi.getAll({ limit: 200 }).then(({ data }) => setAuthors(data.data || [])).catch(() => {});
     bookCallApi.getAll({ limit: 200 }).then(({ data }) => setBookCalls(data.data || [])).catch(() => {});
-    // Client logos = gallery images tagged with image_type 'requirement_title'.
+    // Client logos = gallery images tagged with image_type 'requirementTitle'.
     galleryImageApi.getAll({ limit: 500 }).then(({ data }) =>
-      setClientLogos((data.data || []).filter((g: any) => g.image_type === 'requirement_title'))
+      setClientLogos((data.data || []).filter((g: any) => g.image_type === 'requirementTitle'))
     ).catch(() => {});
 
     if (isEdit && id) {
@@ -57,14 +57,14 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
         reset({
           ...item,
           status: String(item.status ?? 1),
-          creative_house_title: item.creative_house_title ?? item.creative_house_video_title ?? '',
-          creative_house_category_id: item.creative_house_category_id?._id || item.creative_house_category_id,
-          author_template_id: item.author_template_id?._id || item.author_template_id || '',
-          book_call_template_id: item.book_call_template_id?._id || item.book_call_template_id || '',
-          requirement_title: item.requirement_title?._id || item.requirement_title || '',
+          title: item.title ?? item.videoTitle ?? '',
+          creativeHouseCategoryId: item.creativeHouseCategoryId?._id || item.creativeHouseCategoryId,
+          authorTemplateId: item.authorTemplateId?._id || item.authorTemplateId || '',
+          bookCallTemplateId: item.bookCallTemplateId?._id || item.bookCallTemplateId || '',
+          requirementTitle: item.requirementTitle?._id || item.requirementTitle || '',
         });
         // Default to the upload tab when the item has an uploaded video.
-        setVideoTab(item.creative_house_upload_video_url ? 'upload' : 'url');
+        setVideoTab(item.uploadVideoUrl ? 'upload' : 'url');
       }).catch(() => toast.error('Failed to load')).finally(() => setLoading(false));
     }
   }, [id]);
@@ -88,22 +88,22 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="form-label">Category Name <span className="text-red-500">*</span></label>
-          <select {...register('creative_house_category_id', { required: 'Required' })} className="form-select">
+          <select {...register('creativeHouseCategoryId', { required: 'Required' })} className="form-select">
             <option value="">Select Category</option>
-            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.creative_house_category_name}</option>)}
+            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
-          {errors.creative_house_category_id && <p className="form-error">{String(errors.creative_house_category_id.message)}</p>}
+          {errors.creativeHouseCategoryId && <p className="form-error">{String(errors.creativeHouseCategoryId.message)}</p>}
         </div>
         <div>
           <label className="form-label">Author</label>
-          <select {...register('author_template_id')} className="form-select">
+          <select {...register('authorTemplateId')} className="form-select">
             <option value="">Select Author</option>
             {authors.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
         </div>
         <div>
           <label className="form-label">Book Call</label>
-          <select {...register('book_call_template_id')} className="form-select">
+          <select {...register('bookCallTemplateId')} className="form-select">
             <option value="">Select Category</option>
             {bookCalls.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
@@ -114,16 +114,16 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Video Title <span className="text-red-500">*</span></label>
-          <input {...register('creative_house_title', { required: 'Required' })} className="form-input" placeholder="Enter video title, e.g., 'How we edited Puspa Trailer'" />
-          {errors.creative_house_title && <p className="form-error">{String(errors.creative_house_title.message)}</p>}
+          <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter video title, e.g., 'How we edited Puspa Trailer'" />
+          {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
-        <SlugField name="creative_house_slug" label="Slug Name" register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
+        <SlugField name="slug" label="Slug Name" register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
 
       {/* ── Thumbnail ────────────────────────────────────────────── */}
-      <ImageUpload name="creative_house_thumbnail" label="Video Thumbnail (Upload only JPG, PNG, JPEG, GIF — 987x554)"
-        uploadType="image" folder="creative-house" value={watch('creative_house_thumbnail')}
-        onChange={(url) => setValue('creative_house_thumbnail', url)} />
+      <ImageUpload name="thumbnail" label="Video Thumbnail (Upload only JPG, PNG, JPEG, GIF — 987x554)"
+        uploadType="image" folder="creative-house" value={watch('thumbnail')}
+        onChange={(url) => setValue('thumbnail', url)} />
 
       {/* ── Video (URL or upload — only one) ─────────────────────── */}
       <div>
@@ -135,11 +135,11 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
             className={`px-3 py-1.5 rounded-md text-sm font-medium ${videoTab === 'upload' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600'}`}>Upload Video</button>
         </div>
         {videoTab === 'url' ? (
-          <input {...register('creative_house_video_url')} className="form-input" placeholder="Enter a video URL if you're not uploading a video file" />
+          <input {...register('videoUrl')} className="form-input" placeholder="Enter a video URL if you're not uploading a video file" />
         ) : (
-          <ImageUpload name="creative_house_upload_video_url" label="Choose Video File (MP4, WEBM, OGG)"
-            uploadType="video" folder="creative-house" value={watch('creative_house_upload_video_url')}
-            onChange={(url) => setValue('creative_house_upload_video_url', url)} />
+          <ImageUpload name="uploadVideoUrl" label="Choose Video File (MP4, WEBM, OGG)"
+            uploadType="video" folder="creative-house" value={watch('uploadVideoUrl')}
+            onChange={(url) => setValue('uploadVideoUrl', url)} />
         )}
       </div>
 
@@ -149,7 +149,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
           Client Logo
           <span className="ml-1 text-xs font-normal text-gray-400">(Add new logos from Gallery → Images → Client Requirement Title)</span>
         </label>
-        <select {...register('requirement_title')} className="form-select">
+        <select {...register('requirementTitle')} className="form-select">
           <option value="">Select Logo</option>
           {clientLogos.map((g: any) => <option key={g._id} value={g._id}>{g.image_title || g.slug || g._id}</option>)}
         </select>
@@ -158,12 +158,12 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       {/* ── Requirement Description ──────────────────────────────── */}
       <div>
         <label className="form-label">Requirement Description</label>
-        <textarea {...register('requirement_description')} className="form-textarea" placeholder="Briefly describe the project requirements, target audience, and style preferences..." />
+        <textarea {...register('requirementDescription')} className="form-textarea" placeholder="Briefly describe the project requirements, target audience, and style preferences..." />
       </div>
 
       {/* ── Order + Status ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="Order number. e.g 1, 2, 3" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="Order number. e.g 1, 2, 3" defaultValue={0} /></div>
         <div>
           <label className="form-label">Status</label>
           <select {...register('status')} className="form-select"><option value="">Select status</option><option value="1">Active</option><option value="0">Inactive</option></select>

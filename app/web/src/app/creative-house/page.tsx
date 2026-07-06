@@ -9,27 +9,26 @@ import {
 export const metadata = buildMetadata(getStaticSeo("/creative-house"));
 
 /* Adapter: the API CreativeHouseItem → the legacy shape the
-   CreativeHouseProject component uses (creative_house_video_title,
-   creative_house_thumbnail, creative_house_video_url, slug, id). */
+   CreativeHouseProject component uses (videoTitle,
+   thumbnail, videoUrl, slug, id). */
 const adaptItem = (i: any) => ({
   id: i.id,
   slug: i.slug,
-  creative_house_video_title: i.title,
-  creative_house_thumbnail: imageUrl(i),
-  creative_house_video_url: i.video_url,
-  creative_house_upload_video_url: i.upload_video,
-  creative_house_youtube_id: i.youtube_id,
+  videoTitle: i.title,
+  thumbnail: imageUrl(i),
+  videoUrl: i.video_url,
+  uploadVideoUrl: i.upload_video,
+  youtubeId: i.youtube_id,
   display_order: i.order,
   category_id: typeof i.category === "object" ? i.category?.id : i.category,
-  creative_house_category_name:
+  name:
     typeof i.category === "object" ? i.category?.category_name : undefined,
 });
 
 /* Adapter: the API CreativeHouseCategory → filter-panel shape. */
 const adaptCategory = (c: any) => ({
   id: c.id,
-  creative_house_category_name: c.creative_house_category_name ?? c.name,
-  creative_house_category_slug: c.creative_house_category_slug ?? c.slug,
+  name: c.name,
   slug: c.slug,
 });
 

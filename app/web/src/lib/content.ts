@@ -451,22 +451,22 @@ const buildImg = (v?: string | null): string =>
 
 interface MongoCreativeItem {
   _id?: string;
-  creative_house_slug?: string;
-  creative_house_video_title?: string;
-  creative_house_video_url?: string;
-  creative_house_upload_video_url?: string;
-  creative_house_youtube_id?: string;
-  creative_house_thumbnail?: string;
-  display_order?: number;
-  creative_house_category_id?: string;
+  slug?: string;
+  videoTitle?: string;
+  videoUrl?: string;
+  uploadVideoUrl?: string;
+  youtubeId?: string;
+  thumbnail?: string;
+  displayOrder?: number;
+  creativeHouseCategoryId?: string;
 }
 
 interface MongoCreativeCategory {
   _id?: string;
-  creative_house_category_name?: string;
-  creative_house_category_slug?: string;
-  creative_house_icon?: string;
-  display_order?: number;
+  name?: string;
+  slug?: string;
+  icon?: string;
+  displayOrder?: number;
   items?: MongoCreativeItem[];
 }
 
@@ -476,23 +476,23 @@ const adaptCreativeItem = (
 ) => ({
   ...it,
   id: it._id,
-  slug: it.creative_house_slug,
-  title: it.creative_house_video_title,
-  video_url: it.creative_house_video_url,
+  slug: it.slug,
+  title: it.videoTitle,
+  video_url: it.videoUrl,
   // Uploaded video (raw S3 key from the api) → absolute URL; plus the YouTube
   // id. Carried so card grids can show a play indicator for every item that
   // has a video, regardless of which field holds it.
-  upload_video: buildImg(it.creative_house_upload_video_url),
-  youtube_id: it.creative_house_youtube_id,
-  order: it.display_order,
-  legacyImageUrl: buildImg(it.creative_house_thumbnail),
+  upload_video: buildImg(it.uploadVideoUrl),
+  youtube_id: it.youtubeId,
+  order: it.displayOrder,
+  legacyImageUrl: buildImg(it.thumbnail),
   category: cat
     ? {
         id: cat._id,
-        category_name: cat.creative_house_category_name,
-        slug: cat.creative_house_category_slug,
+        category_name: cat.name,
+        slug: cat.slug,
       }
-    : { id: it.creative_house_category_id },
+    : { id: it.creativeHouseCategoryId },
 });
 
 /* Detail adapter for the SingleVideo page. The api's
@@ -510,42 +510,42 @@ const adaptCreativeDetail = (d: any) => {
   return {
     ...item,
     id: item._id,
-    slug: item.creative_house_slug ?? item.slug,
-    title: item.creative_house_video_title ?? item.creative_house_title,
+    slug: item.slug,
+    title: item.videoTitle ?? item.title,
     /* HowWeEdit hero player. thumbnail is already an absolute S3 URL
        from the controller; upload_video is a raw object key. buildImg
        passes absolute URLs through and prefixes bare keys. */
-    thumbnail: buildImg(item.creative_house_thumbnail),
-    upload_video: buildImg(item.creative_house_upload_video_url),
-    video_url: item.creative_house_video_url,
+    thumbnail: buildImg(item.thumbnail),
+    upload_video: buildImg(item.uploadVideoUrl),
+    video_url: item.videoUrl,
     /* BriefAndRequirement brand logo. The api resolves the legacy
-       `requirement_title` int FK against the gallery table and returns
+       `requirementTitle` int FK against the gallery table and returns
        the absolute logo URL as `requirement_logo`; empty string when
        the item has no brief logo (the section then hides the image). */
     requirement_logo: buildImg(item.requirement_logo),
-    requirement_description: item.requirement_description,
+    requirementDescription: item.requirementDescription,
     /* BookCallBanner reads a numeric template id; the legacy fk is the
        stable public id. author_id is preserved for back-compat. */
     book_call_id:
-      item._legacy_fks?.book_call_template_id ?? item.book_call_template_id,
-    author_id: item.author_template_id,
+      item._legacy_fks?.book_call_template_id ?? item.bookCallTemplateId,
+    author_id: item.authorTemplateId,
     /* CreativeApproach slider items. */
     creative_house_approach: approaches.map((a: any) => ({
       id: a._id,
-      creative_house_item_id: a.creative_house_item_id,
-      heading: a.approach_heading ?? a.approach_title,
-      description: a.approach_description,
-      thumbnail: buildImg(a.approach_thumbnail || a.approach_image),
-      upload_video: buildImg(a.approach_upload_video_url),
-      video_url: a.approach_video_url,
+      creativeHouseItemId: a.creativeHouseItemId,
+      heading: a.heading ?? a.title,
+      description: a.description,
+      thumbnail: buildImg(a.thumbnail || a.image),
+      upload_video: buildImg(a.uploadVideoUrl),
+      video_url: a.videoUrl,
     })),
     /* FinalOutput (Project Media) slider items. */
     creative_house_final_output: finalOutputs.map((f: any) => ({
       id: f._id,
-      title: f.final_output_title ?? f.output_title,
-      thumbnail: buildImg(f.final_output_thumbnail || f.output_image),
-      upload_video: buildImg(f.final_output_upload_video_url),
-      video_url: f.final_output_video_url ?? f.output_video_url,
+      title: f.title,
+      thumbnail: buildImg(f.thumbnail || f.image),
+      upload_video: buildImg(f.uploadVideoUrl),
+      video_url: f.videoUrl,
     })),
     /* No services sub-collection on the api yet; the curated
        SERVICE_FORMATS grid in CreativeHouseServices is the static
@@ -930,10 +930,10 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       });
       const docs = (cats ?? []).map((c) => ({
         id: c._id,
-        name: c.creative_house_category_name,
-        creative_house_category_name: c.creative_house_category_name,
-        slug: c.creative_house_category_slug,
-        creative_house_category_slug: c.creative_house_category_slug,
+        name: c.name,
+        name: c.name,
+        slug: c.slug,
+        slug: c.slug,
         order: c.display_order,
       }));
       return listResult(docs, opts.limit);

@@ -25,7 +25,7 @@ export default function ProjectForm({ onSuccess, onCancel, editId }: Props = {})
     if (isEdit && id) {
       creativeHouseProjectApi.getOne(id).then(({ data }) => {
         const item = data.data;
-        reset({ ...item, status: String(item.status), creative_house_item_id: item.creative_house_item_id?._id || item.creative_house_item_id, creative_house_category_id: item.creative_house_category_id?._id || item.creative_house_category_id });
+        reset({ ...item, status: String(item.status), creativeHouseItemId: item.creativeHouseItemId?._id || item.creativeHouseItemId, creativeHouseCategoryId: item.creativeHouseCategoryId?._id || item.creativeHouseCategoryId });
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
@@ -46,32 +46,32 @@ export default function ProjectForm({ onSuccess, onCancel, editId }: Props = {})
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Creative Item (Optional)</label>
-          <select {...register('creative_house_item_id')} className="form-select">
+          <select {...register('creativeHouseItemId')} className="form-select">
             <option value="">None</option>
-            {items.map((i: any) => <option key={i._id} value={i._id}>{i.creative_house_title}</option>)}
+            {items.map((i: any) => <option key={i._id} value={i._id}>{i.title}</option>)}
           </select>
         </div>
         <div>
           <label className="form-label">Creative Category (Optional)</label>
-          <select {...register('creative_house_category_id')} className="form-select">
+          <select {...register('creativeHouseCategoryId')} className="form-select">
             <option value="">None</option>
-            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.creative_house_category_name}</option>)}
+            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
         </div>
       </div>
       <div>
         <label className="form-label">Project Title <span className="text-red-500">*</span></label>
-        <input {...register('project_title', { required: 'Required' })} className="form-input" placeholder="Enter project title" />
-        {errors.project_title && <p className="form-error">{String(errors.project_title.message)}</p>}
+        <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter project title" />
+        {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <div><label className="form-label">Description</label><textarea {...register('project_description')} className="form-textarea" placeholder="Write a short description…" /></div>
+      <div><label className="form-label">Description</label><textarea {...register('description')} className="form-textarea" placeholder="Write a short description…" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Video URL</label><input {...register('project_video_url')} className="form-input" placeholder="https://youtube.com/..." /></div>
+        <div><label className="form-label">Video URL</label><input {...register('videoUrl')} className="form-input" placeholder="https://youtube.com/..." /></div>
       </div>
-      <ImageUpload name="project_image" label="Project Image" uploadType="image" folder="creative-house" value={watch('project_image')} onChange={(url) => setValue('project_image', url)} />
+      <ImageUpload name="image" label="Project Image" uploadType="image" folder="creative-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

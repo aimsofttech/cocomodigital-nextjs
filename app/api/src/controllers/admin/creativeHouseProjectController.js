@@ -3,6 +3,6 @@ const createCrudController = require('./crudFactory');
 
 module.exports = createCrudController(CreativeHouseProject, {
   imageFields: [],
-  searchFields: ['project_title'],
-  defaultSort: { display_order: 1 },
+  searchFields: ['title'],
+  defaultSort: { displayOrder: 1 },
 });

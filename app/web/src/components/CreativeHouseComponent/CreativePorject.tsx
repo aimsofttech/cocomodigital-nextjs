@@ -68,11 +68,11 @@ const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItem
         const items = (body.docs || []).map((i: any) => ({
           id: i.id,
           slug: i.slug,
-          creative_house_video_title: i.title,
-          creative_house_thumbnail: (i.image && i.image.url) || i.legacyImageUrl,
-          creative_house_video_url: i.video_url,
-          creative_house_upload_video_url: i.upload_video,
-          creative_house_youtube_id: i.youtube_id,
+          videoTitle: i.title,
+          thumbnail: (i.image && i.image.url) || i.legacyImageUrl,
+          videoUrl: i.video_url,
+          uploadVideoUrl: i.upload_video,
+          youtubeId: i.youtube_id,
           display_order: i.order,
         }));
         setFilteredItems(items);
@@ -200,7 +200,7 @@ const FilterBar = ({
                 className={className}
                 aria-pressed={isActive}
               >
-                {category?.creative_house_category_name}
+                {category?.name}
               </button>
             ) : (
               <Link
@@ -208,7 +208,7 @@ const FilterBar = ({
                 to={`/creative-house/${category?.slug}`}
                 className={className}
               >
-                {category?.creative_house_category_name}
+                {category?.name}
               </Link>
             );
           })}
@@ -253,19 +253,19 @@ const VideoGrid = ({ videos }) => {
               >
                 <Image
                   src={
-                    item?.creative_house_thumbnail?.startsWith("http")
-                      ? item?.creative_house_thumbnail
-                      : `https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/${item?.creative_house_thumbnail}`
+                    item?.thumbnail?.startsWith("http")
+                      ? item?.thumbnail
+                      : `https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/${item?.thumbnail}`
                   }
                   className="object-cover"
-                  alt={item?.creative_house_video_title || "Creative thumbnail"}
+                  alt={item?.videoTitle || "Creative thumbnail"}
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   priority={index < 4}
                 />
-                {(item?.creative_house_upload_video_url ||
-                  item?.creative_house_video_url ||
-                  item?.creative_house_youtube_id) && <PlayBtn />}
+                {(item?.uploadVideoUrl ||
+                  item?.videoUrl ||
+                  item?.youtubeId) && <PlayBtn />}
               </Link>
               <div className="absolute top-0 right-0 mr-1">
                 <EditLink
@@ -274,8 +274,8 @@ const VideoGrid = ({ videos }) => {
               {/* Hover Content */}
               {/* <div className="card-CreativeHouse-show-afterImage-Hover">
               <div>
-                <h6>{item.creative_house_video_title}</h6>
-                <p>{item.requirement_description}</p>
+                <h6>{item.videoTitle}</h6>
+                <p>{item.requirementDescription}</p>
               </div>
             </div> */}
             </div>

@@ -133,7 +133,7 @@ const CreativeSlider = ({ CreativeSliderData }) => {
                       <h4 className="single-video-creative-approach-title">
                         {item?.heading}
                         <EditLink
-                          path={`${ADMIN_URL}/home/creative_house/creative_house_approach/show/${item?.creative_house_item_id}/${item?.id}`}
+                          path={`${ADMIN_URL}/home/creative_house/creative_house_approach/show/${item?.creativeHouseItemId}/${item?.id}`}
                         />
                       </h4>
                     </div>

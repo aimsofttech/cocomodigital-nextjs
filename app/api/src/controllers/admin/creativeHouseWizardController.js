@@ -8,10 +8,10 @@ const wizardStore = {};
 
 const storeStep1 = async (req, res) => {
   const userId = req.user._id.toString();
-  const { creative_house_category_id, creative_house_title, creative_house_video_url, creative_house_description } = req.body;
+  const { creativeHouseCategoryId, title, videoUrl, description } = req.body;
 
-  const slug = generateSlug(creative_house_title);
-  const ytId = creative_house_video_url ? getYoutubeVideoId(creative_house_video_url) : null;
+  const slug = generateSlug(title);
+  const ytId = videoUrl ? getYoutubeVideoId(videoUrl) : null;
   let thumbnailKey = null;
   if (ytId && !req.file) {
     thumbnailKey = await uploadYoutubeThumbnailToS3(
@@ -23,13 +23,13 @@ const storeStep1 = async (req, res) => {
 
   wizardStore[userId] = {
     step1: {
-      creative_house_category_id,
-      creative_house_title,
-      creative_house_slug: slug,
-      creative_house_video_url,
-      creative_house_youtube_id: ytId || '',
-      creative_house_thumbnail: req.file ? (req.file.key || req.file.path) : thumbnailKey,
-      creative_house_description,
+      creativeHouseCategoryId,
+      title,
+      slug: slug,
+      videoUrl,
+      youtubeId: ytId || '',
+      thumbnail: req.file ? (req.file.key || req.file.path) : thumbnailKey,
+      description,
     },
   };
 
@@ -48,22 +48,22 @@ const storeStep3 = async (req, res) => {
   if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
 
   const data = wizardStore[userId];
-  const item = await CreativeHouseItem.create({ ...data.step1, user_id: req.user._id, status: 0 });
+  const item = await CreativeHouseItem.create({ ...data.step1, userId: req.user._id, status: 0 });
 
   if (data.step2?.approaches) {
     for (const a of data.step2.approaches) {
-      await CreativeHouseApproach.create({ ...a, creative_house_item_id: item._id, user_id: req.user._id });
+      await CreativeHouseApproach.create({ ...a, creativeHouseItemId: item._id, userId: req.user._id });
     }
   }
 
   if (req.body?.final_outputs) {
     for (const fo of req.body.final_outputs) {
-      const ytId = fo.output_video_url ? getYoutubeVideoId(fo.output_video_url) : null;
+      const ytId = fo.videoUrl ? getYoutubeVideoId(fo.videoUrl) : null;
       await CreativeHouseFinalOutput.create({
         ...fo,
-        output_youtube_id: ytId || '',
-        creative_house_item_id: item._id,
-        user_id: req.user._id,
+        youtubeId: ytId || '',
+        creativeHouseItemId: item._id,
+        userId: req.user._id,
       });
     }
   }
