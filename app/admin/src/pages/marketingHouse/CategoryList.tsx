@@ -21,7 +21,7 @@ export default function CategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'icon', label: 'Icon', render: (row: any) => <ImageCell src={row.icon} bg="bg-black" /> },
+    { key: 'icon', label: 'Icon', render: (row: any) => <ImageCell src={row.icon} bg="bg-black" size="w-10 h-10" /> },
     { key: 'name', label: 'Category Name', sortable: true },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },

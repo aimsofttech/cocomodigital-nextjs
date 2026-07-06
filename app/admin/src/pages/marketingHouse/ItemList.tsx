@@ -5,7 +5,6 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { marketingHouseItemApi } from '@/services/adminApi';
-import ItemForm from './ItemForm';
 
 // Navigation target shape returned by the API per item (label + live record count).
 type NavTarget = { label: string; segment: string; count?: number | null };
@@ -142,13 +141,12 @@ export default function ItemList() {
 
   return (
     <CrudListPage title="Marketing Items" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Items' }]}
+      addPath="/marketing/item/add" editPath={(row: any) => `/marketing/item/edit/${row._id}`}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderExpanded={renderExpanded}
-      renderModal={({ id, onSuccess, onCancel }) => <ItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Item' : 'Add Marketing Item'}
       csv={{ api: marketingHouseItemApi, filename: 'marketing-items' }}
-      modalSize="2xl" onRefresh={fetchAll} />
+      onRefresh={fetchAll} />
   );
 }
