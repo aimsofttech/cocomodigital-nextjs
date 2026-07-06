@@ -21,9 +21,19 @@ export default function FinalOutputForm({ onSuccess, onCancel, editId, lockedIte
   const isEdit = Boolean(id);
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<any[]>([]);
+  const [lockedName, setLockedName] = useState('');
   // Video can be supplied by URL OR uploaded file — never both.
   const [videoTab, setVideoTab] = useState<'url' | 'upload'>('url');
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
+
+  // Resolve the locked item's display name (the wizard / scoped pages pass it).
+  useEffect(() => {
+    if (!itemId) { setLockedName(''); return; }
+    setValue('creativeHouseItemId', itemId);
+    creativeHouseItemApi.getOne(itemId)
+      .then(({ data }) => setLockedName(data.data?.title || data.data?.videoTitle || itemId))
+      .catch(() => setLockedName(itemId));
+  }, [itemId, setValue]);
 
   const selectVideoTab = (tab: 'url' | 'upload') => {
     setVideoTab(tab);
@@ -58,6 +68,8 @@ export default function FinalOutputForm({ onSuccess, onCancel, editId, lockedIte
   }, [items]);
 
   const onSubmit = async (formData: any) => {
+    // Always carry the relationship; force the locked id when present.
+    if (itemId) formData.creativeHouseItemId = itemId;
     const fd = new FormData();
     Object.entries(formData).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== '') fd.append(k, String(v)); });
     try {
@@ -74,11 +86,22 @@ export default function FinalOutputForm({ onSuccess, onCancel, editId, lockedIte
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Creative Item <span className="text-red-500">*</span></label>
-        <select {...register('creativeHouseItemId', { required: 'Required' })} className="form-select" disabled={Boolean(itemId)}>
-          <option value="">Select Creative Item</option>
-          {items.map((i: any) => <option key={i._id} value={i._id}>{itemName(i)}</option>)}
-        </select>
-        {errors.creativeHouseItemId && <p className="form-error">{String(errors.creativeHouseItemId.message)}</p>}
+        {itemId ? (
+          <>
+            <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || itemId} disabled readOnly />
+            {/* Keep the value in submitted form state even though the select is hidden. */}
+            <input type="hidden" {...register('creativeHouseItemId')} />
+            <p className="mt-1 text-xs text-gray-500">Locked to the selected Creative Item.</p>
+          </>
+        ) : (
+          <>
+            <select {...register('creativeHouseItemId', { required: 'Required' })} className="form-select">
+              <option value="">Select Creative Item</option>
+              {items.map((i: any) => <option key={i._id} value={i._id}>{itemName(i)}</option>)}
+            </select>
+            {errors.creativeHouseItemId && <p className="form-error">{String(errors.creativeHouseItemId.message)}</p>}
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

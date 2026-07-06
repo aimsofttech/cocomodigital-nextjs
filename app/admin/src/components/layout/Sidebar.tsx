@@ -90,7 +90,6 @@ const navigation: NavItem[] = [
           { label: 'Project Media', path: '/creative/final-output', icon: FilmIcon },
         ],
       },
-      { label: 'Projects', path: '/creative/project', icon: RocketLaunchIcon },
     ],
   },
   // Development House is shown but disabled — not consumed by the web app yet.

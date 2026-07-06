@@ -10,7 +10,7 @@ const buildUrl = (key) => (key ? buildS3Url(key) : '');
 
 /* The "Brief & Requirement" brand logo. The legacy `requirementTitle`
    column on a creative-house item is an integer FK into the gallery
-   table (rows where image_type = 'requirementTitle'), but the MySQL→
+   table (rows where image_type = 'requirement_title'), but the MySQL→
    Mongo migration never converted this FK, so it survives as a bare
    int. The migration also stripped the gallery rows' MySQL ids while
    preserving insertion order, so we resolve by ordering: sorted by
@@ -39,7 +39,7 @@ const resolveRequirementLogo = async (requirementTitle) => {
   // galleries (the MySQL→Mongo migration dropped the ids but kept order).
   const reqId = Number(requirementTitle);
   if (Number.isInteger(reqId) && reqId >= REQUIREMENT_LOGO_BASE_ID) {
-    const logos = await Gallery.find({ image_type: 'requirementTitle' })
+    const logos = await Gallery.find({ image_type: 'requirement_title' })
       .sort({ _id: 1 })
       .lean();
     const key = galleryImageKey(logos[reqId - REQUIREMENT_LOGO_BASE_ID]);
@@ -97,9 +97,16 @@ const getSingleCreativeHouse = async (req, res) => {
   const item = await CreativeHouseItem.findOne({ slug, status: 1 }).populate('creativeHouseCategoryId', 'name');
   if (!item) return res.status(404).json({ status: 'error', message: 'Not found' });
 
+  // `creativeHouseItemId` on the sub-collections is Mixed: migrated rows hold
+  // ObjectIds while admin-created rows persist the id as a plain string. Match
+  // BOTH representations so records added via the admin always surface (same
+  // pattern as the marketing campaign controller).
+  const s = String(item._id);
+  const itemIds = mongoose.Types.ObjectId.isValid(s) ? [s, new mongoose.Types.ObjectId(s)] : [s];
+
   const [approaches, finalOutputs, requirementLogo] = await Promise.all([
-    CreativeHouseApproach.find({ creativeHouseItemId: item._id, status: 1 }).sort({ displayOrder: 1 }),
-    CreativeHouseFinalOutput.find({ creativeHouseItemId: item._id, status: 1 }).sort({ displayOrder: 1 }),
+    CreativeHouseApproach.find({ creativeHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
+    CreativeHouseFinalOutput.find({ creativeHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
     resolveRequirementLogo(item.requirementTitle),
   ]);
 
@@ -111,8 +118,8 @@ const getSingleCreativeHouse = async (req, res) => {
         thumbnail: buildUrl(item.thumbnail),
         requirement_logo: requirementLogo,
       },
-      approaches: approaches.map((a) => ({ ...a.toObject(), image: buildUrl(a.image) })),
-      final_outputs: finalOutputs.map((f) => ({ ...f.toObject(), image: buildUrl(f.image) })),
+      approaches: approaches.map((a) => ({ ...a.toObject(), image: buildUrl(a.image), thumbnail: buildUrl(a.thumbnail) })),
+      final_outputs: finalOutputs.map((f) => ({ ...f.toObject(), image: buildUrl(f.image), thumbnail: buildUrl(f.thumbnail) })),
     },
   });
 };

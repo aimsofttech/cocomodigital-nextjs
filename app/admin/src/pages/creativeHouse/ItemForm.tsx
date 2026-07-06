@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import {
   creativeHouseItemApi, creativeHouseCategoryApi,
   authorTemplateApi, bookCallApi, galleryImageApi,
@@ -11,12 +12,31 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SlugField from '@/components/ui/SlugField';
 import toast from 'react-hot-toast';
 
-interface Props { onSuccess?: () => void; onCancel?: () => void; editId?: string; }
+interface Props {
+  /** Called after save; receives the saved record (e.g. to read the new _id). */
+  onSuccess?: (saved?: any) => void;
+  onCancel?: () => void;
+  editId?: string;
+}
 
 // Best-effort display label for the template dropdowns (records use different
 // name fields: author → template_name/author_name, book-call → book_name).
 const tName = (t: any) =>
   t.template_name || t.book_name || t.author_name || t.name || t.title || t._id;
+
+// Icon-only "open the module's listing page" link shown next to a field label.
+// Opens in a new tab so the form being filled is not lost.
+const moduleLink = (path: string, name: string) => (
+  <Link
+    to={path}
+    target="_blank"
+    rel="noopener noreferrer"
+    title={`Open the ${name} module`}
+    className="inline-flex items-center text-primary-600 hover:text-primary-700"
+  >
+    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+  </Link>
+);
 
 export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
   const { id: paramId } = useParams();
@@ -45,9 +65,10 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
     creativeHouseCategoryApi.getAll({ limit: 100 }).then(({ data }) => setCategories(data.data || [])).catch(() => {});
     authorTemplateApi.getAll({ limit: 200 }).then(({ data }) => setAuthors(data.data || [])).catch(() => {});
     bookCallApi.getAll({ limit: 200 }).then(({ data }) => setBookCalls(data.data || [])).catch(() => {});
-    // Client logos = gallery images tagged with image_type 'requirementTitle'.
+    // Client logos = gallery images tagged with image_type 'requirement_title'
+    // (the Gallery module keeps its legacy tag values — unrelated to the creative key rename).
     galleryImageApi.getAll({ limit: 500 }).then(({ data }) =>
-      setClientLogos((data.data || []).filter((g: any) => g.image_type === 'requirementTitle'))
+      setClientLogos((data.data || []).filter((g: any) => g.image_type === 'requirement_title'))
     ).catch(() => {});
 
     if (isEdit && id) {
@@ -73,10 +94,9 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
     const fd = new FormData();
     Object.entries(formData).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== '') fd.append(k, String(v)); });
     try {
-      if (isEdit && id) await creativeHouseItemApi.update(id, fd);
-      else await creativeHouseItemApi.create(fd);
+      const res = isEdit && id ? await creativeHouseItemApi.update(id, fd) : await creativeHouseItemApi.create(fd);
       toast.success(isEdit ? 'Updated' : 'Created');
-      if (onSuccess) onSuccess(); else navigate(-1);
+      if (onSuccess) onSuccess(res?.data?.data); else navigate(-1);
     } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
   };
 
@@ -87,7 +107,10 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       {/* ── Category + Author + Book Call ────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
-          <label className="form-label">Category Name <span className="text-red-500">*</span></label>
+          <label className="form-label flex items-center justify-between gap-2">
+            <span>Category Name <span className="text-red-500">*</span></span>
+            {moduleLink('/creative/category', 'Categories')}
+          </label>
           <select {...register('creativeHouseCategoryId', { required: 'Required' })} className="form-select">
             <option value="">Select Category</option>
             {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -95,14 +118,20 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
           {errors.creativeHouseCategoryId && <p className="form-error">{String(errors.creativeHouseCategoryId.message)}</p>}
         </div>
         <div>
-          <label className="form-label">Author</label>
+          <label className="form-label flex items-center justify-between gap-2">
+            <span>Author</span>
+            {moduleLink('/templates/author', 'Author')}
+          </label>
           <select {...register('authorTemplateId')} className="form-select">
             <option value="">Select Author</option>
             {authors.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
         </div>
         <div>
-          <label className="form-label">Book Call</label>
+          <label className="form-label flex items-center justify-between gap-2">
+            <span>Book Call</span>
+            {moduleLink('/templates/book-call', 'Book Call')}
+          </label>
           <select {...register('bookCallTemplateId')} className="form-select">
             <option value="">Select Category</option>
             {bookCalls.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
@@ -166,7 +195,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="Order number. e.g 1, 2, 3" defaultValue={0} /></div>
         <div>
           <label className="form-label">Status</label>
-          <select {...register('status')} className="form-select"><option value="">Select status</option><option value="1">Active</option><option value="0">Inactive</option></select>
+          <select {...register('status')} defaultValue="1" className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select>
         </div>
       </div>
 
