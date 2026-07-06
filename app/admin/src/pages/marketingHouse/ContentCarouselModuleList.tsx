@@ -14,23 +14,23 @@ export default function ContentCarouselModuleList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseContentCarouselApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseContentCarouselApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -44,11 +44,11 @@ export default function ContentCarouselModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'carousel_image', label: 'Image', render: (row: any) => <ImageCell src={row.carousel_image || row.image} alt={row.carousel_title} /> },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.image} alt={row.carousel_title} /> },
     { key: 'carousel_title', label: 'Title', sortable: true, render: (row: any) => row.carousel_title || row.title || 'N/A' },
-    { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -60,8 +60,8 @@ export default function ContentCarouselModuleList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Carousel' : 'Add Content Carousel'}
       csv={{
         api: marketingHouseContentCarouselApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'content-carousel',
       }}
       modalSize="lg" onRefresh={fetchAll} />

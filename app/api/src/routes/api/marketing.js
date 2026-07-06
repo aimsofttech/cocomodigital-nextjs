@@ -5,7 +5,7 @@ router.get('/', ctrl.index);
 router.get('/home-priority', ctrl.marketingHomePriority);
 router.get('/filter-data', ctrl.marketingFilterData);
 router.get('/items', ctrl.marketingHouseItem);
-router.get('/single/:marketing_house_slug', ctrl.getSingleMarketingHouse);
+router.get('/single/:slug', ctrl.getSingleMarketingHouse);
 router.get('/other-activity-items', ctrl.getMarketingOtherActivityItem);
 router.get('/continuity-program-items', ctrl.getMarketingContinuityProgramItem);
 router.get('/content-created-carousels', ctrl.getMarketingContentCreatedCarousel);

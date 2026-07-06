@@ -22,9 +22,9 @@ export default function ContentCategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'category_name', label: 'Category Name', sortable: true },
-    { key: 'navigate_to', label: 'Navigate To', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'name', label: 'Category Name', sortable: true },
+    { key: 'navigateTo', label: 'Navigate To', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -36,8 +36,8 @@ export default function ContentCategoryList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Category' : 'Add Content Category'}
       csv={{
         api: marketingHouseContentCategoryApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'content-categories',
       }}
       modalSize="lg" onRefresh={fetchAll} />

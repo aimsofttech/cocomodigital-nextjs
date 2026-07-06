@@ -21,7 +21,7 @@
  *                      for that row is rolled back, so a row is all-or-nothing.
  *
  * The category / author / book-call selected in the form are sent as body fields
- * and applied to every row (a row may override the category via a `category_name`
+ * and applied to every row (a row may override the category via a `name`
  * column). This mirrors the legacy "Upload Marketing" screen while extending it
  * to the full Marketing House data model.
  */
@@ -52,7 +52,7 @@ const { fileToRecords, coerce } = require('../../utils/csv');
 // column name, `model` the collection to insert into, `fields` the columns a
 // user may fill per section entry, and `required` the fields each entry must
 // have for the row to be valid. Every child is linked back to its parent item
-// through `marketing_house_item_id`.
+// through `marketingHouseItemId`.
 const SECTIONS = [
   {
     key: 'highlights',
@@ -86,7 +86,7 @@ const SECTIONS = [
     key: 'performance',
     label: 'Performance',
     model: MarketingHousePerformance,
-    fields: ['performance_title', 'performance_description', 'performance_video_url', 'performance_image'],
+    fields: ['performance_title', 'performanceDescription', 'performance_video_url', 'performance_image'],
     required: [],
   },
   {
@@ -109,7 +109,7 @@ const SECTIONS = [
 // These sections are a list of *categories*, each holding a nested list of
 // *items*. Each grouped column is one JSON array of category objects of the
 // shape: { <categoryFields…>, items: [ { <itemFields…> [, <carousel.key>: [...] ] } ] }.
-// The category is created first (linked to the item via marketing_house_item_id),
+// The category is created first (linked to the item via marketingHouseItemId),
 // then each of its items is created (linked to BOTH the item and the new
 // category id). `itemCategoryFkFields` lists EVERY field name the category id
 // must be written to — admin list pages scope by the `marketing_house_*` variant
@@ -119,30 +119,30 @@ const GROUPED_SECTIONS = [
     key: 'other_activities',
     label: 'Add-on (Other) Activities',
     categoryModel: MarketingHouseOtherActivityCategory,
-    categoryFields: ['category_name'],
-    categoryRequired: ['category_name'],
+    categoryFields: ['name'],
+    categoryRequired: ['name'],
     itemModel: MarketingHouseOtherActivityItem,
     itemFields: ['title', 'image', 'image1', 'image2', 'image3', 'image4', 'video_url', 'youtube_id', 'description'],
     itemRequired: ['title'],
-    itemCategoryFkFields: ['other_activity_category_id', 'marketing_house_other_activity_category_id'],
+    itemCategoryFkFields: ['otherActivityCategoryId', 'marketingHouseOtherActivityCategoryId'],
     itemYoutube: { source: 'video_url', target: 'youtube_id' },
   },
   {
     key: 'content_created',
     label: 'Content Created',
     categoryModel: MarketingHouseContentCreatedCategory,
-    categoryFields: ['category_name'],
-    categoryRequired: ['category_name'],
+    categoryFields: ['name'],
+    categoryRequired: ['name'],
     itemModel: MarketingHouseContentCreatedItem,
-    itemFields: ['item_title', 'item_image', 'item_video_url', 'item_youtube_id', 'url', 'upload_video_url'],
+    itemFields: ['item_title', 'image', 'item_video_url', 'item_youtube_id', 'url', 'upload_video_url'],
     itemRequired: [],
-    itemCategoryFkFields: ['content_created_category_id', 'marketing_house_content_created_category_id'],
+    itemCategoryFkFields: ['content_created_category_id', 'marketingHouseContentCreatedCategoryId'],
     itemYoutube: { source: 'url', target: 'item_youtube_id' },
     // Each content item may carry its own nested carousel images.
     carousel: {
       key: 'carousels',
       model: MarketingHouseContentCreatedItemCarousel,
-      fields: ['carousel_title', 'carousel_image'],
+      fields: ['carousel_title', 'image'],
       required: [],
       itemFkField: 'content_created_item_id',
     },
@@ -151,29 +151,29 @@ const GROUPED_SECTIONS = [
     key: 'community_program',
     label: 'Continuity (Community) Program',
     categoryModel: MarketingHouseCommunityProgramCategory,
-    categoryFields: ['category_name', 'category_image'],
-    categoryRequired: ['category_name'],
+    categoryFields: ['name', 'image'],
+    categoryRequired: ['name'],
     itemModel: MarketingHouseCommunityProgramCategoryItem,
     itemFields: [
-      'item_title', 'item_image', 'item_video_url', 'item_youtube_id',
-      'community_program_item_description', 'community_program_item_video_url',
-      'community_program_item_video_file', 'community_program_item_video_thumbnail',
+      'item_title', 'image', 'item_video_url', 'item_youtube_id',
+      'description', 'videoUrl',
+      'videoFile', 'videoThumbnail',
     ],
     itemRequired: [],
-    itemCategoryFkFields: ['community_program_category_id'],
-    itemYoutube: { source: 'community_program_item_video_url', target: 'item_youtube_id' },
+    itemCategoryFkFields: ['communityProgramCategoryId'],
+    itemYoutube: { source: 'videoUrl', target: 'item_youtube_id' },
   },
 ];
 
 // Core item columns (besides the section columns above) understood on a row.
 const ITEM_COLUMNS = [
-  'marketing_house_title',
-  'marketing_house_description',
-  'marketing_house_description2',
-  'marketing_house_video_url',
-  'marketing_house_thumbnail',
-  'category_name',
-  'display_order',
+  'title',
+  'description',
+  'description2',
+  'videoUrl',
+  'thumbnail',
+  'name',
+  'displayOrder',
   'status',
 ];
 
@@ -207,18 +207,18 @@ const ensureUniqueItemSlug = async (base) => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // eslint-disable-next-line no-await-in-loop
-    const exists = await MarketingHouseItem.findOne({ marketing_house_slug: slug }).select('_id').lean();
+    const exists = await MarketingHouseItem.findOne({ slug: slug }).select('_id').lean();
     if (!exists) return slug;
     counter += 1;
     slug = `${base}-${counter}`;
   }
 };
 
-// Resolve the category for a row: an explicit per-row `category_name` wins,
+// Resolve the category for a row: an explicit per-row `name` wins,
 // otherwise the form-selected category id applies to every row. Returns the
 // category _id (string) or null when none could be resolved.
 const resolveCategoryId = async (row, defaultCategoryId, categoryCache) => {
-  const name = row.category_name;
+  const name = row.name;
   if (!isBlank(name)) {
     const key = String(name).trim().toLowerCase();
     if (categoryCache.has(key)) return categoryCache.get(key);
@@ -240,10 +240,10 @@ const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const validateRow = async (row, ctx) => {
   const errors = [];
 
-  const title = row.marketing_house_title;
-  if (isBlank(title)) errors.push('marketing_house_title is required');
+  const title = row.title;
+  if (isBlank(title)) errors.push('title is required');
 
-  // Category must be resolvable (from the form or a category_name column).
+  // Category must be resolvable (from the form or a name column).
   let categoryId = null;
   try {
     categoryId = await resolveCategoryId(row, ctx.defaultCategoryId, ctx.categoryCache);
@@ -252,9 +252,9 @@ const validateRow = async (row, ctx) => {
   }
   if (!categoryId) {
     errors.push(
-      isBlank(row.category_name)
-        ? 'a category is required (select one in the form or add a category_name column)'
-        : `category_name "${row.category_name}" does not match any existing category`
+      isBlank(row.name)
+        ? 'a category is required (select one in the form or add a name column)'
+        : `name "${row.name}" does not match any existing category`
     );
   }
 
@@ -358,17 +358,17 @@ const readRows = (file) => {
 
 // Build the body fields shared by validate + import from the request.
 const buildContext = (req) => ({
-  defaultCategoryId: !isBlank(req.body.marketing_house_category_id)
-    ? String(req.body.marketing_house_category_id).trim()
+  defaultCategoryId: !isBlank(req.body.marketingHouseCategoryId)
+    ? String(req.body.marketingHouseCategoryId).trim()
     : null,
-  authorTemplateId: !isBlank(req.body.author_template_id)
-    ? String(req.body.author_template_id).trim()
+  authorTemplateId: !isBlank(req.body.authorTemplateId)
+    ? String(req.body.authorTemplateId).trim()
     : null,
-  bookCallTemplateId: !isBlank(req.body.book_call_template_id)
-    ? String(req.body.book_call_template_id).trim()
+  bookCallTemplateId: !isBlank(req.body.bookCallTemplateId)
+    ? String(req.body.bookCallTemplateId).trim()
     : null,
   // Optional fallback thumbnail (uploaded via the form) applied to any row that
-  // doesn't supply its own `marketing_house_thumbnail`.
+  // doesn't supply its own `thumbnail`.
   defaultThumbnail: !isBlank(req.body.default_thumbnail)
     ? String(req.body.default_thumbnail).trim()
     : null,
@@ -387,13 +387,13 @@ const downloadTemplate = async (req, res) => {
   ];
 
   const example = {
-    marketing_house_title: 'Half CA Web Series',
-    marketing_house_description: 'A flagship YouTube campaign for Half CA.',
-    marketing_house_description2: 'Secondary description (optional).',
-    marketing_house_video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    marketing_house_thumbnail: 'https://example.com/thumb.jpg',
-    category_name: '',
-    display_order: '1',
+    title: 'Half CA Web Series',
+    description: 'A flagship YouTube campaign for Half CA.',
+    description2: 'Secondary description (optional).',
+    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    thumbnail: 'https://example.com/thumb.jpg',
+    name: '',
+    displayOrder: '1',
     status: '1',
     highlights: JSON.stringify([
       { statics_title: 'Views', statics_value: '2M+', statics_description: 'Total views' },
@@ -410,7 +410,7 @@ const downloadTemplate = async (req, res) => {
     performance: JSON.stringify([
       {
         performance_title: 'Reach',
-        performance_description: 'Campaign reach',
+        performanceDescription: 'Campaign reach',
         performance_video_url: '',
         performance_image: '',
       },
@@ -423,7 +423,7 @@ const downloadTemplate = async (req, res) => {
     ]),
     other_activities: JSON.stringify([
       {
-        category_name: 'Influencer Collabs',
+        name: 'Influencer Collabs',
         items: [
           { title: 'Reel with X', description: 'Collab reel', image: '', video_url: '', youtube_id: '' },
         ],
@@ -431,14 +431,14 @@ const downloadTemplate = async (req, res) => {
     ]),
     content_created: JSON.stringify([
       {
-        category_name: 'Trailers',
+        name: 'Trailers',
         items: [
           {
             item_title: 'Official Trailer',
-            item_image: '',
+            image: '',
             url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             carousels: [
-              { carousel_title: 'Frame 1', carousel_image: 'https://example.com/c1.jpg' },
+              { carousel_title: 'Frame 1', image: 'https://example.com/c1.jpg' },
             ],
           },
         ],
@@ -446,10 +446,10 @@ const downloadTemplate = async (req, res) => {
     ]),
     community_program: JSON.stringify([
       {
-        category_name: 'Fan Club',
-        category_image: '',
+        name: 'Fan Club',
+        image: '',
         items: [
-          { item_title: 'Episode 1', item_image: '', community_program_item_description: 'First episode' },
+          { item_title: 'Episode 1', image: '', description: 'First episode' },
         ],
       },
     ]),
@@ -492,7 +492,7 @@ const validate = async (req, res) => {
     if (r.valid) validCount += 1;
     rowReports.push({
       row: i + 2, // +1 (1-based) +1 (header) → spreadsheet row number
-      title: rows[i].marketing_house_title || '',
+      title: rows[i].title || '',
       valid: r.valid,
       errors: r.errors,
     });
@@ -516,35 +516,35 @@ const validate = async (req, res) => {
 const importRow = async (row, validated, ctx) => {
   const created = []; // { model, id } — for rollback
   try {
-    const title = String(row.marketing_house_title).trim();
-    const videoUrl = !isBlank(row.marketing_house_video_url) ? String(row.marketing_house_video_url).trim() : '';
+    const title = String(row.title).trim();
+    const videoUrl = !isBlank(row.videoUrl) ? String(row.videoUrl).trim() : '';
     const ytId = videoUrl ? getYoutubeVideoId(videoUrl) : null;
     const slug = await ensureUniqueItemSlug(generateSlug(title));
-    const thumbnail = !isBlank(row.marketing_house_thumbnail)
-      ? String(row.marketing_house_thumbnail).trim()
+    const thumbnail = !isBlank(row.thumbnail)
+      ? String(row.thumbnail).trim()
       : (ctx.defaultThumbnail || '');
 
     const itemBody = {
-      marketing_house_category_id: validated.categoryId,
-      marketing_house_title: title,
+      marketingHouseCategoryId: validated.categoryId,
+      title: title,
       title, // bare-name mirror (used by listing/search)
-      marketing_house_slug: slug,
+      slug: slug,
       slug,
-      marketing_house_description: !isBlank(row.marketing_house_description) ? row.marketing_house_description : undefined,
-      description: !isBlank(row.marketing_house_description) ? row.marketing_house_description : undefined,
-      marketing_house_description2: !isBlank(row.marketing_house_description2) ? row.marketing_house_description2 : undefined,
-      marketing_house_video_url: videoUrl || undefined,
-      marketing_video: videoUrl || undefined,
-      marketing_house_youtube_id: ytId || undefined,
-      marketing_video_type: ytId || undefined,
-      marketing_house_thumbnail: thumbnail || undefined,
-      poster_image: thumbnail || undefined,
-      display_order: !isBlank(row.display_order) ? parseInt(row.display_order, 10) || 0 : 0,
+      description: !isBlank(row.description) ? row.description : undefined,
+      description: !isBlank(row.description) ? row.description : undefined,
+      description2: !isBlank(row.description2) ? row.description2 : undefined,
+      videoUrl: videoUrl || undefined,
+      video: videoUrl || undefined,
+      youtubeId: ytId || undefined,
+      videoType: ytId || undefined,
+      thumbnail: thumbnail || undefined,
+      posterImage: thumbnail || undefined,
+      displayOrder: !isBlank(row.displayOrder) ? parseInt(row.displayOrder, 10) || 0 : 0,
       status: !isBlank(row.status) ? (parseInt(row.status, 10) ? 1 : 0) : 1,
-      user_id: ctx.userId,
+      userId: ctx.userId,
     };
-    if (ctx.authorTemplateId) itemBody.author_template_id = ctx.authorTemplateId;
-    if (ctx.bookCallTemplateId) itemBody.book_call_template_id = ctx.bookCallTemplateId;
+    if (ctx.authorTemplateId) itemBody.authorTemplateId = ctx.authorTemplateId;
+    if (ctx.bookCallTemplateId) itemBody.bookCallTemplateId = ctx.bookCallTemplateId;
 
     const item = await MarketingHouseItem.create(itemBody);
     created.push({ model: MarketingHouseItem, id: item._id });
@@ -554,11 +554,11 @@ const importRow = async (row, validated, ctx) => {
     for (const sec of SECTIONS) {
       const entries = validated.sections[sec.key] || [];
       for (const entry of entries) {
-        const body = { marketing_house_item_id: itemId, user_id: ctx.userId };
+        const body = { marketingHouseItemId: itemId, userId: ctx.userId };
         for (const f of sec.fields) {
           if (!isBlank(entry[f])) body[f] = entry[f];
         }
-        if (!isBlank(entry.display_order)) body.display_order = parseInt(entry.display_order, 10) || 0;
+        if (!isBlank(entry.displayOrder)) body.displayOrder = parseInt(entry.displayOrder, 10) || 0;
         body.status = !isBlank(entry.status) ? (parseInt(entry.status, 10) ? 1 : 0) : 1;
         // eslint-disable-next-line no-await-in-loop
         const doc = await sec.model.create(body);
@@ -570,11 +570,11 @@ const importRow = async (row, validated, ctx) => {
     for (const grp of GROUPED_SECTIONS) {
       const cats = (validated.groups && validated.groups[grp.key]) || [];
       for (const cat of cats) {
-        const catBody = { marketing_house_item_id: itemId, user_id: ctx.userId };
+        const catBody = { marketingHouseItemId: itemId, userId: ctx.userId };
         for (const f of grp.categoryFields) {
           if (!isBlank(cat[f])) catBody[f] = cat[f];
         }
-        if (!isBlank(cat.display_order)) catBody.display_order = parseInt(cat.display_order, 10) || 0;
+        if (!isBlank(cat.displayOrder)) catBody.displayOrder = parseInt(cat.displayOrder, 10) || 0;
         catBody.status = !isBlank(cat.status) ? (parseInt(cat.status, 10) ? 1 : 0) : 1;
         // eslint-disable-next-line no-await-in-loop
         const catDoc = await grp.categoryModel.create(catBody);
@@ -583,7 +583,7 @@ const importRow = async (row, validated, ctx) => {
 
         const items = Array.isArray(cat.items) ? cat.items : [];
         for (const it of items) {
-          const itBody = { marketing_house_item_id: itemId, user_id: ctx.userId };
+          const itBody = { marketingHouseItemId: itemId, userId: ctx.userId };
           // Link the item to its new category under every FK field name in use.
           for (const fk of grp.itemCategoryFkFields) itBody[fk] = catId;
           for (const f of grp.itemFields) {
@@ -594,7 +594,7 @@ const importRow = async (row, validated, ctx) => {
             const yt = getYoutubeVideoId(String(it[grp.itemYoutube.source]));
             if (yt) itBody[grp.itemYoutube.target] = yt;
           }
-          if (!isBlank(it.display_order)) itBody.display_order = parseInt(it.display_order, 10) || 0;
+          if (!isBlank(it.displayOrder)) itBody.displayOrder = parseInt(it.displayOrder, 10) || 0;
           itBody.status = !isBlank(it.status) ? (parseInt(it.status, 10) ? 1 : 0) : 1;
           // eslint-disable-next-line no-await-in-loop
           const itDoc = await grp.itemModel.create(itBody);
@@ -605,14 +605,14 @@ const importRow = async (row, validated, ctx) => {
             const carousels = Array.isArray(it[grp.carousel.key]) ? it[grp.carousel.key] : [];
             for (const car of carousels) {
               const carBody = {
-                marketing_house_item_id: itemId,
+                marketingHouseItemId: itemId,
                 [grp.carousel.itemFkField]: String(itDoc._id),
-                user_id: ctx.userId,
+                userId: ctx.userId,
               };
               for (const f of grp.carousel.fields) {
                 if (!isBlank(car[f])) carBody[f] = car[f];
               }
-              if (!isBlank(car.display_order)) carBody.display_order = parseInt(car.display_order, 10) || 0;
+              if (!isBlank(car.displayOrder)) carBody.displayOrder = parseInt(car.displayOrder, 10) || 0;
               carBody.status = !isBlank(car.status) ? (parseInt(car.status, 10) ? 1 : 0) : 1;
               // eslint-disable-next-line no-await-in-loop
               const carDoc = await grp.carousel.model.create(carBody);
@@ -656,7 +656,7 @@ const importBulk = async (req, res) => {
     const validated = await validateRow(rows[i], ctx);
     if (!validated.valid) {
       failed += 1;
-      results.push({ row: rowNum, title: rows[i].marketing_house_title || '', status: 'failed', errors: validated.errors });
+      results.push({ row: rowNum, title: rows[i].title || '', status: 'failed', errors: validated.errors });
       continue;
     }
     try {
@@ -665,7 +665,7 @@ const importBulk = async (req, res) => {
       created += 1;
       results.push({
         row: rowNum,
-        title: rows[i].marketing_house_title || '',
+        title: rows[i].title || '',
         status: 'created',
         itemId: r.itemId,
         sectionsCreated: r.sectionsCreated,
@@ -674,7 +674,7 @@ const importBulk = async (req, res) => {
       failed += 1;
       results.push({
         row: rowNum,
-        title: rows[i].marketing_house_title || '',
+        title: rows[i].title || '',
         status: 'failed',
         errors: [err.message],
       });

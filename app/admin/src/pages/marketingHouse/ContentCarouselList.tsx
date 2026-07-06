@@ -24,8 +24,8 @@ export default function ContentCarouselList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
-    { key: 'carousel_order', label: 'Carousel Order', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'carouselOrder', label: 'Carousel Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -37,8 +37,8 @@ export default function ContentCarouselList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Carousel' : 'Add Content Carousel'}
       csv={{
         api: marketingHouseContentCarouselApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'content-carousels',
       }}
       modalSize="lg" onRefresh={fetchAll} />

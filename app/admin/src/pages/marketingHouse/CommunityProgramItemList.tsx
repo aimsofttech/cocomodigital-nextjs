@@ -23,10 +23,10 @@ export default function CommunityProgramItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'community_program_item_video_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.community_program_item_video_thumbnail} /> },
-    { key: 'community_program_item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.community_program_item_video_url} thumbnail={row.community_program_item_video_thumbnail} /> },
-    { key: 'community_program_item_description', label: 'Description', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.community_program_item_description || 'N/A'}</span> },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'videoThumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.videoThumbnail} /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl} thumbnail={row.videoThumbnail} /> },
+    { key: 'description', label: 'Description', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.description || 'N/A'}</span> },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -38,8 +38,8 @@ export default function CommunityProgramItemList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Community Program Item' : 'Add Community Program Item'}
       csv={{
         api: marketingHouseCommunityProgramItemApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'community-program-items',
       }}
       modalSize="lg" onRefresh={fetchAll} />

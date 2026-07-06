@@ -8,22 +8,22 @@ const createCrudController = require('./crudFactory');
 // the related item/category into readable names (record → item → category).
 module.exports = createCrudController(Faq, {
   searchFields: ['question', 'answer'],
-  defaultSort: { display_order: 1 },
-  parentField: 'marketing_house_item_id',
-  baseFilter: { marketing_house_item_id: { $ne: null } },
+  defaultSort: { displayOrder: 1 },
+  parentField: 'marketingHouseItemId',
+  baseFilter: { marketingHouseItemId: { $ne: null } },
   lookups: [
     {
-      localField: 'marketing_house_item_id',
+      localField: 'marketingHouseItemId',
       model: MarketingHouseItem,
-      nameField: ['title', 'marketing_house_title'],
-      as: 'marketing_house_item_name',
-      extract: { marketing_house_category_id: 'marketing_house_category_id' },
+      nameField: ['title', 'title'],
+      as: 'itemName',
+      extract: { marketingHouseCategoryId: 'marketingHouseCategoryId' },
     },
     {
-      localField: 'marketing_house_category_id',
+      localField: 'marketingHouseCategoryId',
       model: MarketingHouseCategory,
-      nameField: ['category_name', 'name'],
-      as: 'marketing_house_category_name',
+      nameField: ['name', 'name'],
+      as: 'categoryName',
     },
   ],
 });

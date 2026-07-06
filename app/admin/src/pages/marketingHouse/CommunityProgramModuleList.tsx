@@ -15,28 +15,28 @@ export default function CommunityProgramModuleList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseCommunityProgramApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseCommunityProgramApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   // Re-apply the filter only when the URL id actually changes (e.g. navigating
   // between items without a remount). Skipped on mount since it's already seeded.
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   // Best-effort fetch of the item title for title context.
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   // Merge the locked item filter with any status filter the user toggles, so the
   // item scope is never lost when other filters change.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -50,11 +50,11 @@ export default function CommunityProgramModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'community_program_category_name', label: 'Category Name', sortable: true, render: (row: any) => row.community_program_category_name || row.category_name || 'N/A' },
-    { key: 'community_program_category_description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block text-sm text-gray-600">{row.community_program_category_description || 'N/A'}</span> },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'name', label: 'Category Name', sortable: true, render: (row: any) => row.name || row.name || 'N/A' },
+    { key: 'description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block text-sm text-gray-600">{row.description || 'N/A'}</span> },
+    { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -66,8 +66,8 @@ export default function CommunityProgramModuleList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Continuity Category' : 'Add Continuity Category'}
       csv={{
         api: marketingHouseCommunityProgramApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'community-programs',
       }}
       modalSize="lg" onRefresh={fetchAll} />

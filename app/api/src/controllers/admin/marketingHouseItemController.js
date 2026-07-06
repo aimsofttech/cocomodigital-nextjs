@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const createCrudController = require('./crudFactory');
 const { generateSlug } = require('../../utils/helpers');
@@ -7,7 +7,7 @@ const { parseCsvOrExcel } = require('../../utils/helpers');
 
 // Navigation targets reachable from a marketing item. Each entry maps a
 // front-end route segment + label to the collection whose records belong to the
-// item (all linked via `marketing_house_item_id`). The "Navigate To" column on
+// item (all linked via `marketingHouseItemId`). The "Navigate To" column on
 // the items table is driven by this config plus the live counts computed below,
 // so options stay in sync with the actual sub-module collections rather than a
 // hard-coded front-end list.
@@ -28,7 +28,7 @@ const NAV_TARGETS = [
 
 // Compute the record count per navigation target for every item on the page and
 // attach a `navigation` array ([{ segment, label, count }]) to each item.
-// `marketing_house_item_id` is a Mixed field that may hold either a string or an
+// `marketingHouseItemId` is a Mixed field that may hold either a string or an
 // ObjectId, so we match both variants. Counts are gathered with a single grouped
 // aggregation per target collection (12 queries per page, independent of the
 // number of items) to keep listing performance flat. A target that fails to
@@ -47,8 +47,8 @@ const attachNavigationCounts = async (items) => {
     NAV_TARGETS.map(async (t) => {
       try {
         const rows = await t.model.aggregate([
-          { $match: { marketing_house_item_id: { $in: idVariants } } },
-          { $group: { _id: '$marketing_house_item_id', count: { $sum: 1 } } },
+          { $match: { marketingHouseItemId: { $in: idVariants } } },
+          { $group: { _id: '$marketingHouseItemId', count: { $sum: 1 } } },
         ]);
         const map = new Map();
         rows.forEach((r) => map.set(String(r._id), r.count));
@@ -73,10 +73,10 @@ const attachNavigationCounts = async (items) => {
 };
 
 const base = createCrudController(MarketingHouseItem, {
-  imageFields: ['poster_image'],
-  searchFields: ['title', 'marketing_house_slug'],
-  defaultSort: { display_order: 1 },
-  parentField: 'marketing_house_category_id',
+  imageFields: ['posterImage'],
+  searchFields: ['title', 'slug'],
+  defaultSort: { displayOrder: 1 },
+  parentField: 'marketingHouseCategoryId',
 });
 
 // Wrap the factory index so the paginated/filtered/searched result is augmented
@@ -97,15 +97,15 @@ const indexWithNavCounts = async (req, res) => {
 };
 
 // The items listing/search and the legacy migrated data use the bare field
-// names (`title`, `poster_image`, `marketing_video`, `description`), while the
-// schema declares the `marketing_house_*` equivalents — and `marketing_house_title`
+// names (`title`, `posterImage`, `video`, `description`), while the
+// schema declares the `marketing_house_*` equivalents — and `title`
 // is required. Mirror each pair both ways so validation passes and either name
 // resolves to the same value regardless of which the client sends.
 const FIELD_MIRRORS = [
-  ['title', 'marketing_house_title'],
-  ['poster_image', 'marketing_house_thumbnail'],
-  ['marketing_video', 'marketing_house_video_url'],
-  ['description', 'marketing_house_description'],
+  ['title', 'title'],
+  ['posterImage', 'thumbnail'],
+  ['video', 'videoUrl'],
+  ['description', 'description'],
 ];
 const mirrorItemFields = (body) => {
   for (const [a, b] of FIELD_MIRRORS) {
@@ -117,20 +117,20 @@ const mirrorItemFields = (body) => {
 };
 
 const storeWithSlugAndYoutube = async (req, res) => {
-  if (!req.body.marketing_house_slug && req.body.title) {
-    req.body.marketing_house_slug = generateSlug(req.body.title);
+  if (!req.body.slug && req.body.title) {
+    req.body.slug = generateSlug(req.body.title);
   }
-  if (req.body.marketing_video) {
-    const ytId = getYoutubeVideoId(req.body.marketing_video);
+  if (req.body.video) {
+    const ytId = getYoutubeVideoId(req.body.video);
     if (ytId) {
-      req.body.marketing_video_type = ytId;
+      req.body.videoType = ytId;
       if (!req.file) {
         const thumbKey = await uploadYoutubeThumbnailToS3(
           `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
           `${ytId}_${Date.now()}`,
           'marketing_thumbnails'
         );
-        if (thumbKey) req.body.poster_image = thumbKey;
+        if (thumbKey) req.body.posterImage = thumbKey;
       }
     }
   }
@@ -153,17 +153,17 @@ const bulkUpload = async (req, res) => {
       const videoUrl = row[0];
       if (!videoUrl) continue;
       const ytId = getYoutubeVideoId(videoUrl);
-      const display_order = row[1] ? parseInt(row[1]) : 0;
+      const displayOrder = row[1] ? parseInt(row[1]) : 0;
       const status = row[2] ? parseInt(row[2]) : 1;
       const item = await MarketingHouseItem.create({
-        marketing_house_category_id: req.body.marketing_house_category_id,
-        marketing_video: videoUrl,
-        marketing_house_youtube_id: ytId || '',
+        marketingHouseCategoryId: req.body.marketingHouseCategoryId,
+        video: videoUrl,
+        youtubeId: ytId || '',
         title: ytId || videoUrl,
-        marketing_house_slug: generateSlug(ytId || videoUrl),
-        display_order,
+        slug: generateSlug(ytId || videoUrl),
+        displayOrder,
         status,
-        user_id: req.user._id,
+        userId: req.user._id,
       });
       results.push(item);
     }

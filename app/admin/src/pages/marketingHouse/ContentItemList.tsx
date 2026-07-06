@@ -25,7 +25,7 @@ export default function ContentItemList() {
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
     { key: 'url', label: 'URL', sortable: true, render: (row: any) => row.url ? <a href={row.url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.url}</a> : 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -37,8 +37,8 @@ export default function ContentItemList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Item' : 'Add Content Item'}
       csv={{
         api: marketingHouseContentItemApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'content-items',
       }}
       modalSize="lg" onRefresh={fetchAll} />

@@ -26,7 +26,7 @@ export default function IdeaStrategyList() {
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
     { key: 'title', label: 'Title', sortable: true },
     { key: 'description', label: 'Description', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.description || 'N/A'}</span> },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -38,8 +38,8 @@ export default function IdeaStrategyList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Idea Strategy' : 'Add Idea Strategy'}
       csv={{
         api: marketingHouseIdeaStrategyApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'idea-strategy',
       }}
       modalSize="lg" onRefresh={fetchAll} />

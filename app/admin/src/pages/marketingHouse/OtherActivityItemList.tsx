@@ -27,7 +27,7 @@ export default function OtherActivityItemList() {
     { key: 'video1', label: 'Video 1', render: (row: any) => <VideoCell src={row.video1} thumbnail={row.image1} /> },
     { key: 'title', label: 'Title', sortable: true },
     { key: 'description', label: 'Description', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.description || 'N/A'}</span> },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -39,8 +39,8 @@ export default function OtherActivityItemList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Item' : 'Add Add-on Activities Item'}
       csv={{
         api: marketingHouseOtherActivityItemApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'other-activity-items',
       }}
       modalSize="lg" onRefresh={fetchAll} />

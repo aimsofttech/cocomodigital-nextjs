@@ -1,4 +1,4 @@
-﻿const MarketingHouseCommunityProgramCategoryItem = require('../../models/MarketingHouseCommunityProgramCategoryItem');
+const MarketingHouseCommunityProgramCategoryItem = require('../../models/MarketingHouseCommunityProgramCategoryItem');
 const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const MarketingHouseCommunityProgramCategory = require('../../models/MarketingHouseCommunityProgramCategory');
@@ -7,44 +7,44 @@ const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s
 const { parseCsvOrExcel } = require('../../utils/helpers');
 
 const base = createCrudController(MarketingHouseCommunityProgramCategoryItem, {
-  imageFields: ['item_image', 'community_program_item_video_thumbnail'],
+  imageFields: ['image', 'videoThumbnail'],
   // Uploaded video file is an S3 asset (build URL on read, clean on replace/delete).
-  // `community_program_item_video_url` is a plain external link.
-  videoFields: ['community_program_item_video_file'],
-  searchFields: ['community_program_item_description', 'item_title', 'title'],
-  defaultSort: { display_order: 1 },
-  parentField: 'marketing_house_item_id',
+  // `videoUrl` is a plain external link.
+  videoFields: ['videoFile'],
+  searchFields: ['description', 'item_title', 'title'],
+  defaultSort: { displayOrder: 1 },
+  parentField: 'marketingHouseItemId',
   // Resolve related names (record → item → category) plus the linked continuity
   // (community program) category. The item lookup surfaces the item's category id
   // via `extract`, which the category lookup then resolves to a name. Applied to
   // list + show.
   lookups: [
     {
-      localField: 'marketing_house_item_id',
+      localField: 'marketingHouseItemId',
       model: MarketingHouseItem,
-      nameField: ['title', 'marketing_house_title'],
-      as: 'marketing_house_item_name',
-      extract: { marketing_house_category_id: 'marketing_house_category_id' },
+      nameField: ['title', 'title'],
+      as: 'itemName',
+      extract: { marketingHouseCategoryId: 'marketingHouseCategoryId' },
     },
     {
-      localField: 'marketing_house_category_id',
+      localField: 'marketingHouseCategoryId',
       model: MarketingHouseCategory,
-      nameField: ['category_name', 'name'],
-      as: 'marketing_house_category_name',
+      nameField: ['name', 'name'],
+      as: 'categoryName',
     },
     {
-      localField: 'community_program_category_id',
+      localField: 'communityProgramCategoryId',
       model: MarketingHouseCommunityProgramCategory,
-      // The category's name is stored as `community_program_category_name`.
-      nameField: ['community_program_category_name', 'category_name', 'name'],
-      as: 'community_program_category_name',
+      // The category's name is stored as `name`.
+      nameField: ['name', 'name', 'name'],
+      as: 'name',
     },
   ],
 });
 
 const storeWithYoutube = async (req, res) => {
-  if (req.body.community_program_item_video_url) {
-    const ytId = getYoutubeVideoId(req.body.community_program_item_video_url);
+  if (req.body.videoUrl) {
+    const ytId = getYoutubeVideoId(req.body.videoUrl);
     if (ytId) {
       req.body._youtube_unused = ytId;
       if (!req.file) {
@@ -53,7 +53,7 @@ const storeWithYoutube = async (req, res) => {
           `${ytId}_${Date.now()}`,
           'community_thumbnails'
         );
-        if (thumbKey) req.body.community_program_item_video_thumbnail = thumbKey;
+        if (thumbKey) req.body.videoThumbnail = thumbKey;
       }
     }
   }
@@ -69,7 +69,7 @@ const bulkUpload = async (req, res) => {
       const videoUrl = row[0];
       if (!videoUrl) continue;
       const ytId = getYoutubeVideoId(videoUrl);
-      const display_order = row[1] ? parseInt(row[1]) : 0;
+      const displayOrder = row[1] ? parseInt(row[1]) : 0;
       const status = row[2] ? parseInt(row[2]) : 1;
       let thumbnailKey = null;
       if (ytId) {
@@ -80,14 +80,14 @@ const bulkUpload = async (req, res) => {
         );
       }
       const item = await MarketingHouseCommunityProgramCategoryItem.create({
-        marketing_house_item_id: req.body.marketing_house_item_id,
-        community_program_category_id: req.body.community_program_category_id,
-        community_program_item_video_url: videoUrl,
+        marketingHouseItemId: req.body.marketingHouseItemId,
+        communityProgramCategoryId: req.body.communityProgramCategoryId,
+        videoUrl: videoUrl,
         _youtube_unused: ytId || '',
-        community_program_item_video_thumbnail: thumbnailKey,
-        display_order,
+        videoThumbnail: thumbnailKey,
+        displayOrder,
         status,
-        user_id: req.user._id,
+        userId: req.user._id,
       });
       results.push(item);
     }

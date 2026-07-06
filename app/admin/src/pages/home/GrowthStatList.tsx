@@ -30,7 +30,7 @@ export default function GrowthStatList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} label={row.label} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Growth Numbers" breadcrumbs={[{ label: 'Home' }, { label: 'Growth at a glance' }, { label: 'Growth Numbers' }]}
+    <CrudListPage title="Growth Numbers" breadcrumbs={[{ label: 'Home' }, { label: 'Growth at Glance' }, { label: 'Growth Numbers' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}

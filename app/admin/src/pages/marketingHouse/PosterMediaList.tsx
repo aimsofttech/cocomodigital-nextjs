@@ -14,23 +14,23 @@ export default function PosterMediaList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseImageApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseImageApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -45,10 +45,10 @@ export default function PosterMediaList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} alt="poster" /> },
-    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.marketing_item_video_url || row.marketing_item_upload_video_url} thumbnail={row.image} /> },
-    { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.uploadVideoUrl} thumbnail={row.image} /> },
+    { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -60,8 +60,8 @@ export default function PosterMediaList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Poster Media' : 'Add Poster Media'}
       csv={{
         api: marketingHouseImageApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'poster-media',
       }}
       modalSize="lg" onRefresh={fetchAll} />

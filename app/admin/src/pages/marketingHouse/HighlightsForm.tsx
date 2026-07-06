@@ -13,7 +13,7 @@ interface Props {
   lockedItemId?: string;
 }
 
-const itemLabel = (it: any) => it?.title || it?.marketing_house_title || it?.marketing_house_slug || it?._id || '';
+const itemLabel = (it: any) => it?.title || it?.title || it?.slug || it?._id || '';
 
 export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItemId }: Props = {}) {
   const { id: paramId } = useParams();
@@ -37,24 +37,24 @@ export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItem
         reset({
           ...rec,
           status: String(rec.status ?? 1),
-          marketing_house_item_id: rec.marketing_house_item_id ?? lockedItemId ?? '',
+          marketingHouseItemId: rec.marketingHouseItemId ?? lockedItemId ?? '',
         });
       }).catch(() => toast.error('Failed to load'));
     } else if (lockedItemId) {
-      setValue('marketing_house_item_id', lockedItemId);
+      setValue('marketingHouseItemId', lockedItemId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   // Keep the locked value applied (e.g. opening the add modal).
   useEffect(() => {
-    if (lockedItemId) setValue('marketing_house_item_id', lockedItemId);
+    if (lockedItemId) setValue('marketingHouseItemId', lockedItemId);
   }, [lockedItemId, setValue]);
 
   const onSubmit = async (formData: any) => {
     // Always carry the relationship; force the locked id when present.
     const payload = { ...formData };
-    if (lockedItemId) payload.marketing_house_item_id = lockedItemId;
+    if (lockedItemId) payload.marketingHouseItemId = lockedItemId;
     try {
       if (isEdit && id) await marketingHouseStaticsApi.update(id, payload);
       else await marketingHouseStaticsApi.create(payload);
@@ -65,7 +65,7 @@ export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItem
     }
   };
 
-  const selectedId = watch('marketing_house_item_id');
+  const selectedId = watch('marketingHouseItemId');
   const lockedName = itemLabel(items.find((it) => String(it._id) === String(lockedItemId))) || lockedItemId;
 
   const form = (
@@ -77,16 +77,16 @@ export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItem
           <>
             <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName} disabled readOnly />
             {/* Keep the value in submitted form state even though the select is hidden. */}
-            <input type="hidden" {...register('marketing_house_item_id')} />
+            <input type="hidden" {...register('marketingHouseItemId')} />
             <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
           </>
         ) : (
           <>
-            <select {...register('marketing_house_item_id', { required: 'Required' })} className="form-select">
+            <select {...register('marketingHouseItemId', { required: 'Required' })} className="form-select">
               <option value="">Select Marketing Item</option>
               {items.map((it: any) => <option key={it._id} value={it._id}>{itemLabel(it)}</option>)}
             </select>
-            {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
+            {errors.marketingHouseItemId && <p className="form-error">{String(errors.marketingHouseItemId.message)}</p>}
             {selectedId && !items.some((it) => String(it._id) === String(selectedId)) && (
               <p className="mt-1 text-xs text-amber-600">Currently linked item is not in the list (legacy reference): {String(selectedId)}</p>
             )}
@@ -106,7 +106,7 @@ export default function HighlightsForm({ onSuccess, onCancel, editId, lockedItem
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

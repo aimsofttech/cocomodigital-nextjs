@@ -25,7 +25,7 @@ export default function StaticsForm({ onSuccess, onCancel, editId }: Props = {})
   }, [id]);
 
   const onSubmit = async (data: any) => {
-    const payload = { ...data, ...(itemId ? { marketing_house_item_id: itemId } : {}) };
+    const payload = { ...data, ...(itemId ? { marketingHouseItemId: itemId } : {}) };
     try {
       if (isEdit && id) await marketingHouseStaticsApi.update(id, payload);
       else await marketingHouseStaticsApi.create(payload);
@@ -47,7 +47,7 @@ export default function StaticsForm({ onSuccess, onCancel, editId }: Props = {})
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div><label className="form-label">Description</label><textarea {...register('statics_description')} className="form-textarea" placeholder="Write a short description…" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

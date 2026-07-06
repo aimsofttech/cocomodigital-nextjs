@@ -24,7 +24,7 @@ export default function StaticsList() {
   const columns = [
     { key: 'value', label: 'Value', sortable: true },
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -36,8 +36,8 @@ export default function StaticsList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Statics' : 'Add Marketing Statics'}
       csv={{
         api: marketingHouseStaticsApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'marketing-statics',
       }}
       modalSize="lg" onRefresh={fetchAll} />

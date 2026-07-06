@@ -38,7 +38,7 @@ const navigation: NavItem[] = [
         ],
       },
       {
-        label: 'Growth at a glance', icon: ChartBarIcon,
+        label: 'Growth at Glance', icon: ChartBarIcon,
         children: [
           { label: 'Growth Numbers', path: '/home/growth-stats', icon: TrophyIcon },
           { label: 'Video', path: '/home/video', icon: VideoCameraIcon },
@@ -47,8 +47,8 @@ const navigation: NavItem[] = [
       {
         label: 'Media Portfolio', icon: FilmIcon,
         children: [
-          { label: 'Section Categories', path: '/settings/home-sections',      icon: RectangleStackIcon },
-          { label: 'Section Items',      path: '/settings/home-section-items', icon: ListBulletIcon },
+          { label: 'Categories', path: '/settings/home-sections',      icon: RectangleStackIcon },
+          { label: 'Items',      path: '/settings/home-section-items', icon: ListBulletIcon },
         ],
       },
       { label: 'Success Stories',    path: '/home/client',             icon: StarIcon },

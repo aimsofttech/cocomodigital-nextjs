@@ -13,23 +13,23 @@ export default function ContentCategoryModuleList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseContentCategoryApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseContentCategoryApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -43,10 +43,10 @@ export default function ContentCategoryModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'category_name', label: 'Category Name', sortable: true, render: (row: any) => row.category_name || 'N/A' },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'name', label: 'Category Name', sortable: true, render: (row: any) => row.name || 'N/A' },
+    { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -58,8 +58,8 @@ export default function ContentCategoryModuleList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Category' : 'Add Content Category'}
       csv={{
         api: marketingHouseContentCategoryApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'content-categories',
       }}
       modalSize="xl" onRefresh={fetchAll} />

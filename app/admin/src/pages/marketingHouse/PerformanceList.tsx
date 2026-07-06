@@ -25,8 +25,8 @@ export default function PerformanceList() {
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
     { key: 'title', label: 'Title', sortable: true },
-    { key: 'sub_title', label: 'Sub Title', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'subTitle', label: 'Sub Title', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -38,8 +38,8 @@ export default function PerformanceList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Performance' : 'Add Performance'}
       csv={{
         api: marketingHousePerformanceApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'performance',
       }}
       modalSize="lg" onRefresh={fetchAll} />

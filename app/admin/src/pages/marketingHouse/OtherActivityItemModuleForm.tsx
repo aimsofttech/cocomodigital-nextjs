@@ -15,8 +15,8 @@ interface Props {
   lockedCategoryId?: string;
 }
 
-// Item records expose their name under `title` (or legacy `marketing_house_title`).
-const itemName = (it: any) => it.title || it.marketing_house_title || 'Untitled';
+// Item records expose their name under `title` (or legacy `title`).
+const itemName = (it: any) => it.title || it.title || 'Untitled';
 
 export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editId, lockedItemId, lockedCategoryId }: Props = {}) {
   const isEdit = Boolean(editId);
@@ -26,8 +26,8 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
   const [lockedName, setLockedName] = useState('');
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
 
-  const selectedCategory = watch('marketing_house_category_id');
-  const selectedItem = watch('marketing_house_item_id');
+  const selectedCategory = watch('marketingHouseCategoryId');
+  const selectedItem = watch('marketingHouseItemId');
 
   // Load all marketing categories once for the category selector.
   useEffect(() => {
@@ -44,9 +44,9 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
         reset({
           ...rec,
           status: String(rec.status),
-          marketing_house_category_id: rec.marketing_house_category_id ? String(rec.marketing_house_category_id) : '',
-          marketing_house_item_id: rec.marketing_house_item_id ? String(rec.marketing_house_item_id) : '',
-          marketing_house_other_activity_category_id: rec.marketing_house_other_activity_category_id ? String(rec.marketing_house_other_activity_category_id) : '',
+          marketingHouseCategoryId: rec.marketingHouseCategoryId ? String(rec.marketingHouseCategoryId) : '',
+          marketingHouseItemId: rec.marketingHouseItemId ? String(rec.marketingHouseItemId) : '',
+          marketingHouseOtherActivityCategoryId: rec.marketingHouseOtherActivityCategoryId ? String(rec.marketingHouseOtherActivityCategoryId) : '',
         });
       }).catch(() => toast.error('Failed to load'));
     }
@@ -57,16 +57,16 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
   // automatically scopes the sub-category options to this item.
   useEffect(() => {
     if (!lockedItemId) return;
-    setValue('marketing_house_item_id', lockedItemId);
+    setValue('marketingHouseItemId', lockedItemId);
     marketingHouseItemApi.getOne(lockedItemId)
-      .then(({ data }) => setLockedName(data.data?.title || data.data?.marketing_house_title || lockedItemId))
+      .then(({ data }) => setLockedName(data.data?.title || data.data?.title || lockedItemId))
       .catch(() => setLockedName(lockedItemId));
   }, [lockedItemId, setValue]);
 
   // Load the marketing items belonging to the selected category.
   useEffect(() => {
     if (!selectedCategory) { setItems([]); return; }
-    marketingHouseItemApi.getAll({ marketing_house_category_id: selectedCategory, limit: 200 })
+    marketingHouseItemApi.getAll({ marketingHouseCategoryId: selectedCategory, limit: 200 })
       .then(({ data }) => setItems(data.data || []))
       .catch(() => toast.error('Failed to load items'));
   }, [selectedCategory]);
@@ -74,7 +74,7 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
   // Load the other-activity categories belonging to the selected marketing item.
   useEffect(() => {
     if (!selectedItem) { setActivityCategories([]); return; }
-    marketingHouseOtherActivityCategoryApi.getAll({ marketing_house_item_id: selectedItem, limit: 200 })
+    marketingHouseOtherActivityCategoryApi.getAll({ marketingHouseItemId: selectedItem, limit: 200 })
       .then(({ data }) => setActivityCategories(data.data || []))
       .catch(() => toast.error('Failed to load activity categories'));
   }, [selectedItem]);
@@ -83,19 +83,19 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
   // activity category once its options have loaded.
   useEffect(() => {
     if (lockedCategoryId && !isEdit && activityCategories.length) {
-      setValue('marketing_house_other_activity_category_id', lockedCategoryId);
+      setValue('marketingHouseOtherActivityCategoryId', lockedCategoryId);
     }
   }, [lockedCategoryId, isEdit, activityCategories, setValue]);
 
-  const categoryReg = register('marketing_house_category_id', lockedItemId ? {} : { required: 'Required' });
-  const itemReg = register('marketing_house_item_id', { required: 'Required' });
+  const categoryReg = register('marketingHouseCategoryId', lockedItemId ? {} : { required: 'Required' });
+  const itemReg = register('marketingHouseItemId', { required: 'Required' });
 
   const onSubmit = async (formData: any) => {
-    if (lockedItemId) formData.marketing_house_item_id = lockedItemId;
-    if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
+    if (lockedItemId) formData.marketingHouseItemId = lockedItemId;
+    if (!lockedItemId && !formData.marketingHouseItemId) { toast.error('Please select an item'); return; }
     const fd = new FormData();
-    fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['marketing_house_other_activity_category_id', 'title', 'description', 'slug', 'display_order', 'status'].forEach((k) => {
+    fd.append('marketingHouseItemId', formData.marketingHouseItemId);
+    ['marketingHouseOtherActivityCategoryId', 'title', 'description', 'slug', 'displayOrder', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
     // Up to 4 image (uploaded) + video (URL) pairs — always send (empty allowed)
@@ -119,13 +119,13 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
           <label className="form-label">Marketing Category <span className="text-red-500">*</span></label>
           <select
             {...categoryReg}
-            onChange={(e) => { categoryReg.onChange(e); setValue('marketing_house_item_id', ''); setValue('marketing_house_other_activity_category_id', ''); }}
+            onChange={(e) => { categoryReg.onChange(e); setValue('marketingHouseItemId', ''); setValue('marketingHouseOtherActivityCategoryId', ''); }}
             className="form-select"
           >
             <option value="">Select category</option>
-            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
+            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name || c.name}</option>)}
           </select>
-          {errors.marketing_house_category_id && <p className="form-error">{String(errors.marketing_house_category_id.message)}</p>}
+          {errors.marketingHouseCategoryId && <p className="form-error">{String(errors.marketingHouseCategoryId.message)}</p>}
         </div>
       )}
       {/* Marketing Item + Activity Category in a row */}
@@ -135,29 +135,29 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
           {lockedItemId ? (
             <>
               <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly placeholder="Marketing Item" />
-              <input type="hidden" {...register('marketing_house_item_id')} />
+              <input type="hidden" {...register('marketingHouseItemId')} />
               <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
             </>
           ) : (
             <>
               <select
                 {...itemReg}
-                onChange={(e) => { itemReg.onChange(e); setValue('marketing_house_other_activity_category_id', ''); }}
+                onChange={(e) => { itemReg.onChange(e); setValue('marketingHouseOtherActivityCategoryId', ''); }}
                 className="form-select"
                 disabled={!selectedCategory}
               >
                 <option value="">{selectedCategory ? 'Select item' : 'Select a category first'}</option>
                 {items.map((it: any) => <option key={it._id} value={it._id}>{itemName(it)}</option>)}
               </select>
-              {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
+              {errors.marketingHouseItemId && <p className="form-error">{String(errors.marketingHouseItemId.message)}</p>}
             </>
           )}
         </div>
         <div>
           <label className="form-label">Activity Category</label>
-          <select {...register('marketing_house_other_activity_category_id')} className="form-select" disabled={!selectedItem}>
+          <select {...register('marketingHouseOtherActivityCategoryId')} className="form-select" disabled={!selectedItem}>
             <option value="">{selectedItem ? 'Select activity category' : 'Select an item first'}</option>
-            {activityCategories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
+            {activityCategories.map((c: any) => <option key={c._id} value={c._id}>{c.name || c.name}</option>)}
           </select>
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function OtherActivityItemModuleForm({ onSuccess, onCancel, editI
         </div>
       ))}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

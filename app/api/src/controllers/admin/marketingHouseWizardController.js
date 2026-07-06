@@ -14,10 +14,10 @@ const wizardStore = {};
 
 const storeStep1 = async (req, res) => {
   const userId = req.user._id.toString();
-  const { marketing_house_category_id, marketing_house_title, marketing_house_video_url, marketing_house_description } = req.body;
+  const { marketingHouseCategoryId, title, videoUrl, description } = req.body;
 
-  const slug = generateSlug(marketing_house_title);
-  const ytId = marketing_house_video_url ? getYoutubeVideoId(marketing_house_video_url) : null;
+  const slug = generateSlug(title);
+  const ytId = videoUrl ? getYoutubeVideoId(videoUrl) : null;
   let thumbnailKey = null;
   if (ytId && !req.file) {
     thumbnailKey = await uploadYoutubeThumbnailToS3(
@@ -29,13 +29,13 @@ const storeStep1 = async (req, res) => {
 
   wizardStore[userId] = {
     step1: {
-      marketing_house_category_id,
-      marketing_house_title,
-      marketing_house_slug: slug,
-      marketing_house_video_url,
-      marketing_house_youtube_id: ytId || '',
-      marketing_house_thumbnail: req.file ? (req.file.key || req.file.path) : thumbnailKey,
-      marketing_house_description,
+      marketingHouseCategoryId,
+      title,
+      slug: slug,
+      videoUrl,
+      youtubeId: ytId || '',
+      thumbnail: req.file ? (req.file.key || req.file.path) : thumbnailKey,
+      description,
     },
   };
 
@@ -82,27 +82,27 @@ const storeStep7 = async (req, res) => {
   if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
 
   const data = wizardStore[userId];
-  const item = await MarketingHouseItem.create({ ...data.step1, user_id: req.user._id, status: 0 });
+  const item = await MarketingHouseItem.create({ ...data.step1, userId: req.user._id, status: 0 });
 
   // Create related records from other steps
   if (data.step2?.statics) {
     for (const s of data.step2.statics) {
-      await MarketingHouseStatics.create({ ...s, marketing_house_item_id: item._id, user_id: req.user._id });
+      await MarketingHouseStatics.create({ ...s, marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
   if (data.step3?.performance) {
     for (const p of data.step3.performance) {
-      await MarketingHousePerformance.create({ ...p, marketing_house_item_id: item._id, user_id: req.user._id });
+      await MarketingHousePerformance.create({ ...p, marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
   if (data.step4?.pre_launch) {
     for (const p of data.step4.pre_launch) {
-      await MarketingHousePreLaunchActivity.create({ ...p, marketing_house_item_id: item._id, user_id: req.user._id });
+      await MarketingHousePreLaunchActivity.create({ ...p, marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
   if (data.step5?.idea_strategy) {
     for (const idea of data.step5.idea_strategy) {
-      await MarketingHouseIdeaStrategyPlanning.create({ ...idea, marketing_house_item_id: item._id, user_id: req.user._id });
+      await MarketingHouseIdeaStrategyPlanning.create({ ...idea, marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
 

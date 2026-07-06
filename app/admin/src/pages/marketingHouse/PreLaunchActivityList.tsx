@@ -14,23 +14,23 @@ export default function PreLaunchActivityList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHousePreLaunchApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHousePreLaunchApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -46,9 +46,9 @@ export default function PreLaunchActivityList() {
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} alt={row.title} /> },
     { key: 'title', label: 'Title', sortable: true, render: (row: any) => row.title || 'N/A' },
-    { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -60,8 +60,8 @@ export default function PreLaunchActivityList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit PreLaunched Activity' : 'Add PreLaunched Activity'}
       csv={{
         api: marketingHousePreLaunchApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'pre-launch-activities',
       }}
       modalSize="xl" onRefresh={fetchAll} />

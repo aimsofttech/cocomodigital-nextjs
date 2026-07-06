@@ -17,26 +17,26 @@ export default function ContentItemModuleList() {
 
   // Seed the filter on first render so the initial fetch is already scoped to the item.
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseContentItemApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseContentItemApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   // Re-apply the filter only when the URL id actually changes. Skipped on mount since seeded.
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   // Best-effort fetch of the item title for title context.
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   // Merge the locked item filter with any status filter the user toggles.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -50,12 +50,12 @@ export default function ContentItemModuleList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.item_image} alt="content" /> },
-    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.url || row.upload_video_url || row.item_video_url} thumbnail={row.image || row.item_image} /> },
-    { key: 'content_created_category_name', label: 'Content Category', render: (row: any) => row.content_created_category_name || 'N/A' },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.image} alt="content" /> },
+    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.url || row.upload_video_url || row.item_video_url} thumbnail={row.image || row.image} /> },
+    { key: 'content_created_name', label: 'Content Category', render: (row: any) => row.content_created_name || 'N/A' },
+    { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -67,8 +67,8 @@ export default function ContentItemModuleList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Content Item' : 'Add Content Item'}
       csv={{
         api: marketingHouseContentItemApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'content-items',
       }}
       modalSize="xl" onRefresh={fetchAll} />

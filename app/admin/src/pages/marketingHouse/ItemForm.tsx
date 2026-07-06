@@ -51,11 +51,11 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
           ...item,
           status: String(item.status ?? 1),
           // Prefer the bare names the list/data use, falling back to the schema names.
-          title: item.title ?? item.marketing_house_title ?? '',
-          poster_image: item.poster_image ?? item.marketing_house_thumbnail ?? '',
-          marketing_video: item.marketing_video ?? item.marketing_house_video_url ?? '',
-          description: item.description ?? item.marketing_house_description ?? '',
-          marketing_house_category_id: item.marketing_house_category_id?._id || item.marketing_house_category_id,
+          title: item.title ?? item.title ?? '',
+          posterImage: item.posterImage ?? item.thumbnail ?? '',
+          video: item.video ?? item.videoUrl ?? '',
+          description: item.description ?? item.description ?? '',
+          marketingHouseCategoryId: item.marketingHouseCategoryId?._id || item.marketingHouseCategoryId,
         });
       }).catch(() => toast.error('Failed to load item')).finally(() => setLoading(false));
     }
@@ -65,7 +65,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
     const fd = new FormData();
     // Numeric / required / managed fields: never send these as an empty string
     // (would cast-error or fail validation). They always carry a value anyway.
-    const keepOnlyIfFilled = new Set(['display_order', 'status', 'marketing_house_category_id']);
+    const keepOnlyIfFilled = new Set(['displayOrder', 'status', 'marketingHouseCategoryId']);
     Object.entries(formData).forEach(([k, v]) => {
       // Never stringify objects/arrays into "[object Object]" — skip them.
       if (v !== null && typeof v === 'object') return;
@@ -94,29 +94,29 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label className="form-label">Category <span className="text-red-500">*</span></label>
-          <select {...register('marketing_house_category_id', { required: 'Required' })} className="form-select">
+          <select {...register('marketingHouseCategoryId', { required: 'Required' })} className="form-select">
             <option value="">Select Category Name</option>
-            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name}</option>)}
+            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
-          {errors.marketing_house_category_id && <p className="form-error">{String(errors.marketing_house_category_id.message)}</p>}
+          {errors.marketingHouseCategoryId && <p className="form-error">{String(errors.marketingHouseCategoryId.message)}</p>}
         </div>
         <div>
           <label className="form-label">Author</label>
-          <select {...register('author_template_id')} className="form-select">
+          <select {...register('authorTemplateId')} className="form-select">
             <option value="">Select Author</option>
             {authors.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
         </div>
         <div>
           <label className="form-label">Book Call</label>
-          <select {...register('book_call_template_id')} className="form-select">
+          <select {...register('bookCallTemplateId')} className="form-select">
             <option value="">Select Template</option>
             {bookCalls.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
         </div>
         <div>
           <label className="form-label">Our Advantage</label>
-          <select {...register('our_advantage_template_id')} className="form-select">
+          <select {...register('ourAdvantageTemplateId')} className="form-select">
             <option value="">Select Template</option>
             {advantages.map((t: any) => <option key={t._id} value={t._id}>{tName(t)}</option>)}
           </select>
@@ -126,11 +126,11 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       {/* ── Highlights ───────────────────────────────────────────── */}
       <div>
         <label className="form-label">Highlights Title</label>
-        <input {...register('stats_title')} className="form-input" placeholder="e.g. Teri baton mein uljh jiya! YouTube Marketing Case Studies" />
+        <input {...register('statsTitle')} className="form-input" placeholder="e.g. Teri baton mein uljh jiya! YouTube Marketing Case Studies" />
       </div>
       <div>
         <label className="form-label">Highlights Description</label>
-        <textarea {...register('stats_description')} className="form-textarea" placeholder="Enter a short description" />
+        <textarea {...register('statsDescription')} className="form-textarea" placeholder="Enter a short description" />
       </div>
 
       {/* ── Title + slug ─────────────────────────────────────────── */}
@@ -140,12 +140,12 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
           <input {...register('title', { required: 'Required' })} className="form-input" placeholder="Enter Campaign title" />
           {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
-        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} label="Slug Name" name="marketing_house_slug" />
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} label="Slug Name" name="slug" />
       </div>
 
       {/* ── Poster image ─────────────────────────────────────────── */}
-      <ImageUpload name="poster_image" label="Poster Image (JPG, PNG, JPEG, GIF — 248px x 368px)" uploadType="image" folder="marketing-house"
-        value={watch('poster_image')} onChange={(url) => setValue('poster_image', url)} />
+      <ImageUpload name="posterImage" label="Poster Image (JPG, PNG, JPEG, GIF — 248px x 368px)" uploadType="image" folder="marketing-house"
+        value={watch('posterImage')} onChange={(url) => setValue('posterImage', url)} />
 
       {/* ── Video (URL or upload) ────────────────────────────────── */}
       <div>
@@ -157,17 +157,17 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
             className={`px-3 py-1.5 rounded-md text-sm font-medium ${videoTab === 'upload' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600'}`}>Upload Video</button>
         </div>
         {videoTab === 'url' ? (
-          <input {...register('marketing_video')} className="form-input" placeholder="https://youtube.com/..." />
+          <input {...register('video')} className="form-input" placeholder="https://youtube.com/..." />
         ) : (
-          <ImageUpload name="marketing_video" label="Choose Video File (MP4, WEBM, OGG — Max 50MB)" uploadType="video" folder="marketing-house"
-            value={watch('marketing_video')} onChange={(url) => setValue('marketing_video', url)} />
+          <ImageUpload name="video" label="Choose Video File (MP4, WEBM, OGG — Max 50MB)" uploadType="video" folder="marketing-house"
+            value={watch('video')} onChange={(url) => setValue('video', url)} />
         )}
       </div>
 
       {/* ── Meta: client / release / cast ────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div><label className="form-label">Client</label><input {...register('client')} className="form-input" placeholder="e.g. Netflix, Excel Entertainment" /></div>
-        <div><label className="form-label">Release Date</label><input {...register('release_date')} className="form-input" placeholder="e.g. 29 Jan, 2025" /></div>
+        <div><label className="form-label">Release Date</label><input {...register('releaseDate')} className="form-input" placeholder="e.g. 29 Jan, 2025" /></div>
         <div><label className="form-label">Cast</label><input {...register('cast')} className="form-input" placeholder="e.g. Pankaj Tripathi, Ali Fazal" /></div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -180,22 +180,22 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       <div><label className="form-label">Description</label><textarea {...register('description')} className="form-textarea" placeholder="Short description or summary of the movie/web series" /></div>
 
       {/* ── Client requirements ──────────────────────────────────── */}
-      <div><label className="form-label">Client Requirement Text</label><input {...register('client_requirement_text')} className="form-input" placeholder="Enter a description of the client" /></div>
+      <div><label className="form-label">Client Requirement Text</label><input {...register('clientRequirementText')} className="form-input" placeholder="Enter a description of the client" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[1, 2, 3, 4, 5, 6].map((n) => (
           <div key={n}>
             <label className="form-label">Client Requirement {n}</label>
-            <input {...register(`client_requirement_${n}`)} className="form-input" placeholder={`Specific requirement ${n}`} />
+            <input {...register(`clientRequirement${n}`)} className="form-input" placeholder={`Specific requirement ${n}`} />
           </div>
         ))}
       </div>
 
       {/* ── Performance ──────────────────────────────────────────── */}
-      <div><label className="form-label">Performance Description</label><textarea {...register('performance_description')} className="form-textarea" placeholder="Enter performance details (engagement, reach, viewership, key highlights)" /></div>
+      <div><label className="form-label">Performance Description</label><textarea {...register('performanceDescription')} className="form-textarea" placeholder="Enter performance details (engagement, reach, viewership, key highlights)" /></div>
 
       {/* ── Order + status ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div>
           <label className="form-label">Status</label>
           <select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select>

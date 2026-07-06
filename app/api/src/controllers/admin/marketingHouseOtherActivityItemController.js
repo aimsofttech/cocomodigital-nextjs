@@ -1,4 +1,4 @@
-﻿const MarketingHouseOtherActivityItem = require('../../models/MarketingHouseOtherActivityItem');
+const MarketingHouseOtherActivityItem = require('../../models/MarketingHouseOtherActivityItem');
 const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const MarketingHouseOtherActivityCategory = require('../../models/MarketingHouseOtherActivityCategory');
@@ -10,34 +10,34 @@ const base = createCrudController(MarketingHouseOtherActivityItem, {
   // replace/delete. (`image` kept for any legacy single-image records.)
   imageFields: ['image', 'image1', 'image2', 'image3', 'image4'],
   searchFields: ['title'],
-  defaultSort: { display_order: 1 },
+  defaultSort: { displayOrder: 1 },
   // Scope the listing by the marketing item and/or the linked activity category.
   // Either can be passed as a query param; the factory matches both string and
   // ObjectId id forms, so it works for legacy and admin-written records alike.
-  parentField: ['marketing_house_item_id', 'marketing_house_other_activity_category_id'],
+  parentField: ['marketingHouseItemId', 'marketingHouseOtherActivityCategoryId'],
   // Resolve related names (record → item → category) plus the linked other-activity
   // category. The item lookup surfaces the item's category id via `extract`, which
   // the category lookup then resolves to a name. Applied to list + show.
   lookups: [
     {
-      localField: 'marketing_house_item_id',
+      localField: 'marketingHouseItemId',
       model: MarketingHouseItem,
-      nameField: ['title', 'marketing_house_title'],
-      as: 'marketing_house_item_name',
-      extract: { marketing_house_category_id: 'marketing_house_category_id' },
+      nameField: ['title', 'title'],
+      as: 'itemName',
+      extract: { marketingHouseCategoryId: 'marketingHouseCategoryId' },
     },
     {
-      localField: 'marketing_house_category_id',
+      localField: 'marketingHouseCategoryId',
       model: MarketingHouseCategory,
-      nameField: ['category_name', 'name'],
-      as: 'marketing_house_category_name',
+      nameField: ['name', 'name'],
+      as: 'categoryName',
     },
     {
-      // The linked activity category is stored as `marketing_house_other_activity_category_id`.
-      localField: 'marketing_house_other_activity_category_id',
+      // The linked activity category is stored as `marketingHouseOtherActivityCategoryId`.
+      localField: 'marketingHouseOtherActivityCategoryId',
       model: MarketingHouseOtherActivityCategory,
-      nameField: ['category_name', 'name'],
-      as: 'other_activity_category_name',
+      nameField: ['name', 'name'],
+      as: 'other_activity_name',
     },
   ],
 });

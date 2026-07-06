@@ -558,19 +558,19 @@ const adaptCreativeDetail = (d: any) => {
 
 interface MongoMarketingItem {
   _id?: string;
-  marketing_house_slug?: string;
+  slug?: string;
   title?: string;
-  poster_image?: string;
-  marketing_house_thumbnail?: string;
-  display_order?: number;
-  marketing_house_category_id?: string;
+  posterImage?: string;
+  thumbnail?: string;
+  displayOrder?: number;
+  marketingHouseCategoryId?: string;
 }
 
 interface MongoMarketingHouseCategory {
   _id?: string;
-  category_name?: string;
-  marketing_house_icon?: string;
-  display_order?: number;
+  name?: string;
+  icon?: string;
+  displayOrder?: number;
   items?: MongoMarketingItem[];
 }
 
@@ -580,13 +580,15 @@ const adaptMarketingItem = (
 ) => ({
   ...it,
   id: it._id,
-  slug: it.marketing_house_slug,
+  slug: it.slug,
   title: it.title,
-  order: it.display_order,
-  legacyImageUrl: buildImg(it.poster_image || it.marketing_house_thumbnail),
+  order: it.displayOrder,
+  /* Legacy key kept for the grid pages/components that read it. */
+  poster_image: it.posterImage,
+  legacyImageUrl: buildImg(it.posterImage || it.thumbnail),
   category: cat
-    ? { id: cat._id, name: cat.category_name }
-    : { id: it.marketing_house_category_id },
+    ? { id: cat._id, name: cat.name }
+    : { id: it.marketingHouseCategoryId },
 });
 
 /* ── Marketing-house DETAIL (single case-study page) ─────────────
@@ -605,20 +607,34 @@ const fetchMarketingDetail = (slug: string, revalidate?: number) =>
 const adaptMarketingDetail = (d: any) => {
   const item = d?.item ?? {};
   const catId =
-    typeof item.marketing_house_category_id === "object"
-      ? item.marketing_house_category_id?._id
-      : item.marketing_house_category_id;
+    typeof item.marketingHouseCategoryId === "object"
+      ? item.marketingHouseCategoryId?._id
+      : item.marketingHouseCategoryId;
   return {
     ...item,
     id: item._id,
-    slug: item.marketing_house_slug ?? item.slug,
-    title: item.title ?? item.marketing_house_title,
-    poster_image: buildImg(item.poster_image),
-    marketing_video: item.marketing_video,
-    legacyImageUrl: buildImg(item.poster_image || item.marketing_house_thumbnail),
+    slug: item.slug,
+    title: item.title,
+    poster_image: buildImg(item.posterImage),
+    video: item.video,
+    legacyImageUrl: buildImg(item.posterImage || item.thumbnail),
+    /* Legacy flat keys the page components still read — mapped from
+       the API's camelCase document keys. */
+    marketing_video: item.video,
+    marketing_video_type: item.videoType,
+    release_date: item.releaseDate,
+    performance_description: item.performanceDescription,
+    client_requirement_text: item.clientRequirementText,
+    client_requirement_desc: item.clientRequirementDesc,
+    client_requirement_1: item.clientRequirement1,
+    client_requirement_2: item.clientRequirement2,
+    client_requirement_3: item.clientRequirement3,
+    client_requirement_4: item.clientRequirement4,
+    client_requirement_5: item.clientRequirement5,
+    client_requirement_6: item.clientRequirement6,
     /* SingleWebSeriesData stats band reads highlights_* + highlights[] */
-    highlights_title: item.stats_title,
-    highlights_description: item.stats_description,
+    highlights_title: item.statsTitle,
+    highlights_description: item.statsDescription,
     highlights: arr<any>(d.statics).map((s) => ({
       value: s.value,
       name: s.name,
@@ -629,20 +645,21 @@ const adaptMarketingDetail = (d: any) => {
     /* Slider images (SingleWebSeriesData) */
     images: arr<any>(d.images).map((i) => ({
       image: buildImg(i.image),
-      upload_video: buildImg(i.marketing_item_upload_video_url),
-      video_url: i.marketing_item_video_url || "",
+      upload_video: buildImg(i.uploadVideoUrl),
+      video_url: i.videoUrl || "",
+      marketing_video: i.video,
     })),
     /* StrategyExecution "Our Activities" — ideas + pre-launch rows */
     ideas_strategy_planning: arr<any>(d.idea_strategy).map((i) => ({
       id: i._id,
-      marketing_house_item_id: i.marketing_house_item_id,
+      marketingHouseItemId: i.marketingHouseItemId,
       title: i.title,
       description: i.description,
       image: buildImg(i.image),
     })),
     pre_launch_activity: arr<any>(d.pre_launch).map((p) => ({
       id: p._id,
-      marketing_house_item_id: p.marketing_house_item_id,
+      marketingHouseItemId: p.marketingHouseItemId,
       title: p.title,
       description: p.description,
       image: buildImg(p.image),
@@ -651,24 +668,24 @@ const adaptMarketingDetail = (d: any) => {
     performance: arr<any>(d.performances).map((p) => ({
       id: p._id,
       title: p.title ?? p.performance_title,
-      sub_title: p.sub_title ?? "",
-      description: p.description ?? p.performance_description,
+      sub_title: p.subTitle ?? p.sub_title ?? "",
+      description: p.description ?? p.performanceDescription,
       image: buildImg(p.performance_image || p.image),
     })),
     /* Tab categories (items fetched per-tab via the sources below). */
     other_activity_category: arr<any>(d.other_activities).map((c) => ({
       id: c._id,
-      category_name: c.category_name,
+      category_name: c.name,
     })),
     content_created_category: arr<any>(d.content_created).map((c) => ({
       id: c._id,
-      category_name: c.category_name,
-      navigate_to: c.navigate_to,
+      category_name: c.name,
+      navigate_to: c.navigateTo,
     })),
     continuity_category: arr<any>(d.community_programs).map((c) => ({
       id: c._id,
-      category_name: c.community_program_category_name,
-      description: c.community_program_category_description,
+      category_name: c.name,
+      description: c.description,
     })),
     /* FAQ section reads the embedded faqs[] off the item doc. */
     faqs: arr<any>(d.faqs).map((f) => ({
@@ -984,14 +1001,14 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       }
       /* Title search — the /work/marketing-campaigns search box sends
          where[title][contains]. Match case-insensitively on the item
-         title (falling back to the legacy marketing_house_title field
+         title (falling back to the legacy title field
          on rows that don't carry `title`). */
       const titleQuery = where?.title?.contains ?? where?.title?.like;
       if (titleQuery) {
         const q = String(titleQuery).trim().toLowerCase();
         if (q) {
           items = items.filter((s) =>
-            (s.title || (s as any).marketing_house_title || "")
+            (s.title || (s as any).title || "")
               .toLowerCase()
               .includes(q),
           );
@@ -1027,7 +1044,7 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       if (!slug) return listResult([], opts.limit);
       const d = await fetchMarketingDetail(slug, opts.revalidate);
       const cats = arr<any>(d?.other_activities);
-      const cat = name ? cats.find((c) => c.category_name === name) : cats[0];
+      const cat = name ? cats.find((c) => c.name === name) : cats[0];
       /* Each activity row carries up to 4 image/video pairs; the
          renderer collapses N docs into one activity (title/desc from
          the first) with a media slider, so expand each pair into its
@@ -1069,18 +1086,18 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       const d = await fetchMarketingDetail(slug, opts.revalidate);
       const cats = arr<any>(d?.community_programs);
       const cat = name
-        ? cats.find((c) => c.community_program_category_name === name)
+        ? cats.find((c) => c.name === name)
         : cats[0];
       const docs = arr<any>(cat?.items).map((it) => ({
         id: it._id,
-        marketing_house_item_id: it.marketing_house_item_id,
+        marketingHouseItemId: it.marketingHouseItemId,
         thumbnail: buildImg(
-          it.community_program_item_video_thumbnail || it.item_image,
+          it.videoThumbnail || it.item_image,
         ),
-        upload_video: buildImg(it.community_program_item_video_file),
-        community_program_item_video_url: it.community_program_item_video_url,
-        community_program_item_description:
-          it.community_program_item_description,
+        upload_video: buildImg(it.videoFile),
+        videoUrl: it.videoUrl,
+        description:
+          it.description,
       }));
       return listResult(docs, opts.limit);
     },
@@ -1093,7 +1110,7 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       if (!slug) return pagedResult([], opts.limit, opts.page);
       const d = await fetchMarketingDetail(slug, opts.revalidate);
       const cats = arr<any>(d?.content_created);
-      const cat = name ? cats.find((c) => c.category_name === name) : cats[0];
+      const cat = name ? cats.find((c) => c.name === name) : cats[0];
       const docs = arr<any>(cat?.items).map((it) => ({
         id: it._id,
         image: buildImg(it.image),
@@ -1113,13 +1130,13 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       /* Carousels carry a content-created category id, not a name;
          resolve the active tab's category id by name first. */
       const cats = arr<any>(d?.content_created);
-      const cat = name ? cats.find((c) => c.category_name === name) : cats[0];
+      const cat = name ? cats.find((c) => c.name === name) : cats[0];
       const catId = cat?._id;
       const docs = arr<any>(d?.carousels)
         .filter(
           (c) =>
             !catId ||
-            c.marketing_house_content_created_category_id === catId,
+            c.marketingHouseContentCreatedCategoryId === catId,
         )
         .map((c) => ({
           id: c._id,

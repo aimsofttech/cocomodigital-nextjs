@@ -89,9 +89,9 @@ export default function BulkUpload() {
   const buildFormData = () => {
     const fd = new FormData();
     if (file) fd.append('file', file);
-    if (categoryId) fd.append('marketing_house_category_id', categoryId);
-    if (authorId) fd.append('author_template_id', authorId);
-    if (bookCallId) fd.append('book_call_template_id', bookCallId);
+    if (categoryId) fd.append('marketingHouseCategoryId', categoryId);
+    if (authorId) fd.append('authorTemplateId', authorId);
+    if (bookCallId) fd.append('bookCallTemplateId', bookCallId);
     if (thumbnail) fd.append('default_thumbnail', thumbnail);
     return fd;
   };
@@ -199,12 +199,12 @@ export default function BulkUpload() {
               </option>
               {categories.map((c: any) => (
                 <option key={c._id} value={c._id}>
-                  {c.category_name || c.name || c.marketing_house_title || 'Untitled'}
+                  {c.name || c.name || c.title || 'Untitled'}
                 </option>
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              Applied to every uploaded record (a row may override it with a <code>category_name</code> column).
+              Applied to every uploaded record (a row may override it with a <code>name</code> column).
             </p>
           </div>
 
@@ -243,7 +243,7 @@ export default function BulkUpload() {
               onChange={setThumbnail}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Optional. Used for any row that doesn't provide its own <code>marketing_house_thumbnail</code>.
+              Optional. Used for any row that doesn't provide its own <code>thumbnail</code>.
             </p>
           </div>
 
@@ -289,10 +289,10 @@ export default function BulkUpload() {
             One row = one complete Marketing Campaigns item. Core columns:
           </p>
           <ul className="text-xs text-gray-600 list-disc pl-4 space-y-0.5">
-            <li><code>marketing_house_title</code> (required)</li>
-            <li><code>marketing_house_description</code>, <code>marketing_house_description2</code></li>
-            <li><code>marketing_house_video_url</code>, <code>marketing_house_thumbnail</code></li>
-            <li><code>category_name</code>, <code>display_order</code>, <code>status</code></li>
+            <li><code>title</code> (required)</li>
+            <li><code>description</code>, <code>description2</code></li>
+            <li><code>videoUrl</code>, <code>thumbnail</code></li>
+            <li><code>name</code>, <code>displayOrder</code>, <code>status</code></li>
           </ul>
           <p className="text-sm text-gray-600">Single-level section columns (JSON array of objects):</p>
           <ul className="text-xs text-gray-600 list-disc pl-4 space-y-0.5">

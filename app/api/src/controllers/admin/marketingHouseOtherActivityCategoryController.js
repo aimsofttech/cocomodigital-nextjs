@@ -6,27 +6,27 @@ const MarketingHouseOtherActivityItem = require('../../models/MarketingHouseOthe
 const createCrudController = require('./crudFactory');
 
 const base = createCrudController(MarketingHouseOtherActivityCategory, {
-  searchFields: ['category_name'],
-  defaultSort: { display_order: 1 },
-  parentField: 'marketing_house_item_id',
+  searchFields: ['name'],
+  defaultSort: { displayOrder: 1 },
+  parentField: 'marketingHouseItemId',
   // Resolve the related marketing item/category into readable names (record →
   // item → category). The item lookup surfaces the item's category id via
   // `extract`, which the category lookup then resolves to a name. The resolved
   // names use `marketing_house_*` keys so they don't clash with this record's
-  // own `category_name` field. Applied to list + show.
+  // own `name` field. Applied to list + show.
   lookups: [
     {
-      localField: 'marketing_house_item_id',
+      localField: 'marketingHouseItemId',
       model: MarketingHouseItem,
-      nameField: ['title', 'marketing_house_title'],
-      as: 'marketing_house_item_name',
-      extract: { marketing_house_category_id: 'marketing_house_category_id' },
+      nameField: ['title', 'title'],
+      as: 'itemName',
+      extract: { marketingHouseCategoryId: 'marketingHouseCategoryId' },
     },
     {
-      localField: 'marketing_house_category_id',
+      localField: 'marketingHouseCategoryId',
       model: MarketingHouseCategory,
-      nameField: ['category_name', 'name'],
-      as: 'marketing_house_category_name',
+      nameField: ['name', 'name'],
+      as: 'categoryName',
     },
   ],
 });
@@ -46,8 +46,8 @@ const attachItemCounts = async (cats) => {
   let countMap = new Map();
   try {
     const rows = await MarketingHouseOtherActivityItem.aggregate([
-      { $match: { marketing_house_other_activity_category_id: { $in: idVariants } } },
-      { $group: { _id: '$marketing_house_other_activity_category_id', count: { $sum: 1 } } },
+      { $match: { marketingHouseOtherActivityCategoryId: { $in: idVariants } } },
+      { $group: { _id: '$marketingHouseOtherActivityCategoryId', count: { $sum: 1 } } },
     ]);
     rows.forEach((r) => countMap.set(String(r._id), r.count));
   } catch (err) {

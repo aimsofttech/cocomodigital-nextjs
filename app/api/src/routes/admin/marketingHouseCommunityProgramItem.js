@@ -7,8 +7,8 @@ const bulkUpload = require('multer')({ storage: require('multer').memoryStorage(
 
 router.get('/', protect, ctrl.index);
 router.get('/:id', protect, ctrl.show);
-router.post('/', protect, upload.single('item_image'), ctrl.store);
-router.put('/:id', protect, upload.single('item_image'), ctrl.update);
+router.post('/', protect, upload.single('image'), ctrl.store);
+router.put('/:id', protect, upload.single('image'), ctrl.update);
 router.delete('/:id', protect, ctrl.destroy);
 router.post('/bulk-upload', protect, bulkUpload.single('file'), ctrl.bulkUpload);
 

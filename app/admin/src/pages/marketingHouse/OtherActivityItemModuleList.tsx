@@ -20,8 +20,8 @@ export default function OtherActivityItemModuleList() {
 
   // Combined scope from whatever params are present (item and/or category).
   const scopeFilter: Record<string, any> = {
-    ...(itemId ? { marketing_house_item_id: itemId } : {}),
-    ...(categoryId ? { marketing_house_other_activity_category_id: categoryId } : {}),
+    ...(itemId ? { marketingHouseItemId: itemId } : {}),
+    ...(categoryId ? { marketingHouseOtherActivityCategoryId: categoryId } : {}),
   };
 
   // Seed the filter on first render so the initial fetch is already scoped.
@@ -41,7 +41,7 @@ export default function OtherActivityItemModuleList() {
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
@@ -69,10 +69,10 @@ export default function OtherActivityItemModuleList() {
       const text = String(row.description || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
       return <span className="text-xs text-gray-600 line-clamp-2 max-w-md min-w-[20rem] block" title={text}>{text || 'N/A'}</span>;
     } },
-    { key: 'other_activity_category_name', label: 'Activity Category', render: (row: any) => row.other_activity_category_name || 'N/A' },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'other_activity_name', label: 'Activity Category', render: (row: any) => row.other_activity_name || 'N/A' },
+    { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

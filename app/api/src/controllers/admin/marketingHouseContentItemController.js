@@ -1,4 +1,4 @@
-﻿const MarketingHouseContentCreatedItem = require('../../models/MarketingHouseContentCreatedItem');
+const MarketingHouseContentCreatedItem = require('../../models/MarketingHouseContentCreatedItem');
 const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const MarketingHouseContentCreatedCategory = require('../../models/MarketingHouseContentCreatedCategory');
@@ -7,36 +7,36 @@ const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s
 const { parseCsvOrExcel } = require('../../utils/helpers');
 
 const base = createCrudController(MarketingHouseContentCreatedItem, {
-  imageFields: ['image', 'item_image'],
+  imageFields: ['image', 'image'],
   // Uploaded video is an S3 asset (build URL on read, clean from S3 on replace/
   // delete). `url` is a plain external video link.
   videoFields: ['upload_video_url'],
   searchFields: ['item_title', 'title'],
-  defaultSort: { display_order: 1 },
-  parentField: 'marketing_house_item_id',
+  defaultSort: { displayOrder: 1 },
+  parentField: 'marketingHouseItemId',
   // Resolve related names (record → item → category) plus the linked content
   // category. The item lookup surfaces the item's category id via `extract`,
   // which the category lookup then resolves to a name. Applied to list + show.
   lookups: [
     {
-      localField: 'marketing_house_item_id',
+      localField: 'marketingHouseItemId',
       model: MarketingHouseItem,
-      nameField: ['title', 'marketing_house_title'],
-      as: 'marketing_house_item_name',
-      extract: { marketing_house_category_id: 'marketing_house_category_id' },
+      nameField: ['title', 'title'],
+      as: 'itemName',
+      extract: { marketingHouseCategoryId: 'marketingHouseCategoryId' },
     },
     {
-      localField: 'marketing_house_category_id',
+      localField: 'marketingHouseCategoryId',
       model: MarketingHouseCategory,
-      nameField: ['category_name', 'name'],
-      as: 'marketing_house_category_name',
+      nameField: ['name', 'name'],
+      as: 'categoryName',
     },
     {
-      // The linked content category is stored as `marketing_house_content_created_category_id`.
-      localField: 'marketing_house_content_created_category_id',
+      // The linked content category is stored as `marketingHouseContentCreatedCategoryId`.
+      localField: 'marketingHouseContentCreatedCategoryId',
       model: MarketingHouseContentCreatedCategory,
-      nameField: ['category_name', 'name'],
-      as: 'content_created_category_name',
+      nameField: ['name', 'name'],
+      as: 'content_created_name',
     },
   ],
 });
@@ -70,7 +70,7 @@ const bulkUpload = async (req, res) => {
       const videoUrl = row[0];
       if (!videoUrl) continue;
       const ytId = getYoutubeVideoId(videoUrl);
-      const display_order = row[1] ? parseInt(row[1]) : 0;
+      const displayOrder = row[1] ? parseInt(row[1]) : 0;
       const status = row[2] ? parseInt(row[2]) : 1;
       let thumbnailKey = null;
       if (ytId) {
@@ -81,13 +81,13 @@ const bulkUpload = async (req, res) => {
         );
       }
       const item = await MarketingHouseContentCreatedItem.create({
-        marketing_house_item_id: req.body.marketing_house_item_id,
+        marketingHouseItemId: req.body.marketingHouseItemId,
         url: videoUrl,
         item_youtube_id: ytId || '',
         image: thumbnailKey,
-        display_order,
+        displayOrder,
         status,
-        user_id: req.user._id,
+        userId: req.user._id,
       });
       results.push(item);
     }

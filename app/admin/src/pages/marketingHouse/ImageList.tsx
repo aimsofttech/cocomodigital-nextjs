@@ -24,8 +24,8 @@ export default function ImageList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
-    { key: 'marketing_item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.marketing_item_video_url} thumbnail={row.image} /> },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl} thumbnail={row.image} /> },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -37,8 +37,8 @@ export default function ImageList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Marketing Image' : 'Add Marketing Image'}
       csv={{
         api: marketingHouseImageApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'marketing-images',
       }}
       modalSize="lg" onRefresh={fetchAll} />

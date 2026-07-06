@@ -22,8 +22,8 @@ export default function OtherActivityCategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'category_name', label: 'Category Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'name', label: 'Category Name', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -35,8 +35,8 @@ export default function OtherActivityCategoryList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Category' : 'Add Add-on Activities Category'}
       csv={{
         api: marketingHouseOtherActivityCategoryApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'other-activity-categories',
       }}
       modalSize="lg" onRefresh={fetchAll} />

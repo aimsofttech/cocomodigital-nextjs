@@ -91,27 +91,25 @@ export interface MarketingHouseCategory extends BaseModel {
 }
 
 export interface MarketingHouseItem extends BaseModel {
-  marketing_house_category_id: string | MarketingHouseCategory;
-  marketing_house_title: string;
-  marketing_house_slug?: string;
-  marketing_house_thumbnail?: string;
-  marketing_house_video_url?: string;
-  marketing_house_youtube_id?: string;
-  marketing_house_description?: string;
-  marketing_house_description2?: string;
+  marketingHouseCategoryId: string | MarketingHouseCategory;
+  title: string;
+  thumbnail?: string;
+  videoUrl?: string;
+  youtubeId?: string;
+  description?: string;
+  description2?: string;
 }
 
 export interface MarketingHouseImage extends BaseModel {
-  marketing_house_item_id: string | MarketingHouseItem;
+  marketingHouseItemId: string | MarketingHouseItem;
   image?: string;
   image_title?: string;
 }
 
 export interface MarketingHouseStatics extends BaseModel {
-  marketing_house_item_id: string | MarketingHouseItem;
-  statics_title?: string;
-  statics_value?: string;
-  statics_description?: string;
+  marketingHouseItemId: string | MarketingHouseItem;
+  name?: string;
+  value?: string;
 }
 
 export interface CreativeHouseCategory extends BaseModel {
@@ -245,7 +243,7 @@ export interface OurAdvantage extends BaseModel {
 }
 
 export interface Faq extends BaseModel {
-  marketing_house_item_id?: string;
+  marketingHouseItemId?: string;
   slug?: string;
   question: string;
   answer: string;

@@ -6,27 +6,27 @@ const createCrudController = require('./crudFactory');
 module.exports = createCrudController(MarketingHouseImage, {
   imageFields: ['image'],
   // Uploaded video is an S3 asset: build its URL on read and clean it from S3 on
-  // replace/delete. The external `marketing_item_video_url` is a plain link.
-  videoFields: ['marketing_item_upload_video_url'],
+  // replace/delete. The external `videoUrl` is a plain link.
+  videoFields: ['uploadVideoUrl'],
   searchFields: ['image_title'],
-  defaultSort: { display_order: 1 },
-  parentField: 'marketing_house_item_id',
+  defaultSort: { displayOrder: 1 },
+  parentField: 'marketingHouseItemId',
   // Images only store the item id, so the category is resolved through the item
   // (image → item → category). The first lookup surfaces the item's category id
   // via `extract`, which the second lookup then resolves to the category name.
   lookups: [
     {
-      localField: 'marketing_house_item_id',
+      localField: 'marketingHouseItemId',
       model: MarketingHouseItem,
-      nameField: ['title', 'marketing_house_title'],
-      as: 'marketing_house_item_name',
-      extract: { marketing_house_category_id: 'marketing_house_category_id' },
+      nameField: ['title', 'title'],
+      as: 'itemName',
+      extract: { marketingHouseCategoryId: 'marketingHouseCategoryId' },
     },
     {
-      localField: 'marketing_house_category_id',
+      localField: 'marketingHouseCategoryId',
       model: MarketingHouseCategory,
-      nameField: ['category_name', 'name'],
-      as: 'marketing_house_category_name',
+      nameField: ['name', 'name'],
+      as: 'categoryName',
     },
   ],
 });

@@ -17,21 +17,21 @@ export default function HighlightsList() {
   // Seed the filter on first render so the initial (and only) fetch is already
   // scoped to the item — no wasted unfiltered request.
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseStaticsApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseStaticsApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   // Re-apply the filter only when the URL id actually changes (e.g. navigating
   // between items without a remount). Skipped on mount since it's already seeded.
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   // Best-effort fetch of the item title for breadcrumb / title context.
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
@@ -48,15 +48,15 @@ export default function HighlightsList() {
   // Merge the locked item filter with any status filter the user toggles, so the
   // item scope is never lost when other filters change.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'value', label: 'Value', sortable: true },
-    { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
 
@@ -73,8 +73,8 @@ export default function HighlightsList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Highlight' : 'Add Highlight'}
       csv={{
         api: marketingHouseStaticsApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'highlights',
       }}
       modalSize="lg" onRefresh={fetchAll} />

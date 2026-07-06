@@ -13,18 +13,18 @@ export default function OtherActivityCategoryModuleList() {
   const [itemName, setItemName] = useState('');
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseOtherActivityCategoryApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseOtherActivityCategoryApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
@@ -39,18 +39,18 @@ export default function OtherActivityCategoryModuleList() {
   };
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'category_name', label: 'Category Name', sortable: true, render: (row: any) => row.category_name || 'N/A' },
-    { key: 'marketing_house_category_name', label: 'Marketing Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Marketing Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
+    { key: 'name', label: 'Category Name', sortable: true, render: (row: any) => row.name || 'N/A' },
+    { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Marketing Item', render: (row: any) => row.itemName || 'N/A' },
     {
       key: 'items_count', label: 'Add-on Activities Items', render: (row: any) => {
         const count = typeof row.items_count === 'number' ? row.items_count : 0;
         const params = new URLSearchParams();
-        if (row.marketing_house_item_id) params.set('marketingHouseItemId', String(row.marketing_house_item_id));
+        if (row.marketingHouseItemId) params.set('marketingHouseItemId', String(row.marketingHouseItemId));
         params.set('otherActivityCategoryId', String(row._id));
         return (
           <Link
@@ -64,7 +64,7 @@ export default function OtherActivityCategoryModuleList() {
         );
       },
     },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
@@ -76,8 +76,8 @@ export default function OtherActivityCategoryModuleList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit Add-on Activities Category' : 'Add Add-on Activities Category'}
       csv={{
         api: marketingHouseOtherActivityCategoryApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'other-activity-categories',
       }}
       modalSize="xl" onRefresh={fetchAll} />

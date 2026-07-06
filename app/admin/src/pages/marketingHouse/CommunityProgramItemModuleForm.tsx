@@ -12,10 +12,10 @@ interface Props {
   lockedItemId?: string;
 }
 
-// Item records expose their name under `title` (or legacy `marketing_house_title`).
-const itemName = (it: any) => it.title || it.marketing_house_title || 'Untitled';
+// Item records expose their name under `title` (or legacy `title`).
+const itemName = (it: any) => it.title || it.title || 'Untitled';
 // Continuity (community program) categories store their name here.
-const programName = (p: any) => p.community_program_category_name || p.category_name || p.name || 'Untitled';
+const programName = (p: any) => p.name || p.name || p.name || 'Untitled';
 
 export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, editId, lockedItemId }: Props = {}) {
   const isEdit = Boolean(editId);
@@ -27,8 +27,8 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
   const [videoTab, setVideoTab] = useState<'url' | 'upload'>('url');
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
 
-  const selectedCategory = watch('marketing_house_category_id');
-  const selectedItem = watch('marketing_house_item_id');
+  const selectedCategory = watch('marketingHouseCategoryId');
+  const selectedItem = watch('marketingHouseItemId');
 
   // Load all marketing categories once for the category selector.
   useEffect(() => {
@@ -40,9 +40,9 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
   // resolve its display name for the read-only field.
   useEffect(() => {
     if (!lockedItemId) return;
-    setValue('marketing_house_item_id', lockedItemId);
+    setValue('marketingHouseItemId', lockedItemId);
     marketingHouseItemApi.getOne(lockedItemId)
-      .then(({ data }) => setLockedName(data.data?.title || data.data?.marketing_house_title || lockedItemId))
+      .then(({ data }) => setLockedName(data.data?.title || data.data?.title || lockedItemId))
       .catch(() => setLockedName(lockedItemId));
   }, [lockedItemId, setValue]);
 
@@ -54,11 +54,11 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
         reset({
           ...rec,
           status: String(rec.status),
-          marketing_house_category_id: rec.marketing_house_category_id ? String(rec.marketing_house_category_id) : '',
-          marketing_house_item_id: rec.marketing_house_item_id ? String(rec.marketing_house_item_id) : '',
-          community_program_category_id: rec.community_program_category_id ? String(rec.community_program_category_id) : '',
+          marketingHouseCategoryId: rec.marketingHouseCategoryId ? String(rec.marketingHouseCategoryId) : '',
+          marketingHouseItemId: rec.marketingHouseItemId ? String(rec.marketingHouseItemId) : '',
+          communityProgramCategoryId: rec.communityProgramCategoryId ? String(rec.communityProgramCategoryId) : '',
         });
-        if (rec.community_program_item_video_file) setVideoTab('upload');
+        if (rec.videoFile) setVideoTab('upload');
       }).catch(() => toast.error('Failed to load'));
     }
   }, [editId]);
@@ -66,7 +66,7 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
   // Load the marketing items belonging to the selected category.
   useEffect(() => {
     if (!selectedCategory) { setItems([]); return; }
-    marketingHouseItemApi.getAll({ marketing_house_category_id: selectedCategory, limit: 200 })
+    marketingHouseItemApi.getAll({ marketingHouseCategoryId: selectedCategory, limit: 200 })
       .then(({ data }) => setItems(data.data || []))
       .catch(() => toast.error('Failed to load items'));
   }, [selectedCategory]);
@@ -74,32 +74,32 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
   // Load the continuity (community program) categories belonging to the selected item.
   useEffect(() => {
     if (!selectedItem) { setPrograms([]); return; }
-    marketingHouseCommunityProgramApi.getAll({ marketing_house_item_id: selectedItem, limit: 200 })
+    marketingHouseCommunityProgramApi.getAll({ marketingHouseItemId: selectedItem, limit: 200 })
       .then(({ data }) => setPrograms(data.data || []))
       .catch(() => toast.error('Failed to load continuity categories'));
   }, [selectedItem]);
 
-  const categoryReg = register('marketing_house_category_id', lockedItemId ? {} : { required: 'Required' });
-  const itemReg = register('marketing_house_item_id', { required: 'Required' });
+  const categoryReg = register('marketingHouseCategoryId', lockedItemId ? {} : { required: 'Required' });
+  const itemReg = register('marketingHouseItemId', { required: 'Required' });
 
   // Switch video input method, clearing the other field so only one is submitted.
   const switchVideoTab = (tab: 'url' | 'upload') => {
     setVideoTab(tab);
-    if (tab === 'url') setValue('community_program_item_video_file', '');
-    else setValue('community_program_item_video_url', '');
+    if (tab === 'url') setValue('videoFile', '');
+    else setValue('videoUrl', '');
   };
 
   const onSubmit = async (formData: any) => {
-    if (lockedItemId) formData.marketing_house_item_id = lockedItemId;
-    if (!lockedItemId && !formData.marketing_house_item_id) { toast.error('Please select an item'); return; }
+    if (lockedItemId) formData.marketingHouseItemId = lockedItemId;
+    if (!lockedItemId && !formData.marketingHouseItemId) { toast.error('Please select an item'); return; }
     const fd = new FormData();
-    fd.append('marketing_house_item_id', formData.marketing_house_item_id);
-    ['community_program_category_id', 'community_program_item_description', 'community_program_item_video_thumbnail', 'display_order', 'status'].forEach((k) => {
+    fd.append('marketingHouseItemId', formData.marketingHouseItemId);
+    ['communityProgramCategoryId', 'description', 'videoThumbnail', 'displayOrder', 'status'].forEach((k) => {
       if (formData[k] !== undefined && formData[k] !== '') fd.append(k, String(formData[k]));
     });
     // Always send both video fields (empty allowed) so switching/clearing persists.
-    fd.append('community_program_item_video_url', formData.community_program_item_video_url ?? '');
-    fd.append('community_program_item_video_file', formData.community_program_item_video_file ?? '');
+    fd.append('videoUrl', formData.videoUrl ?? '');
+    fd.append('videoFile', formData.videoFile ?? '');
     try {
       if (isEdit && editId) await marketingHouseCommunityProgramItemApi.update(editId, fd);
       else await marketingHouseCommunityProgramItemApi.create(fd);
@@ -115,13 +115,13 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
           <label className="form-label">Marketing Category <span className="text-red-500">*</span></label>
           <select
             {...categoryReg}
-            onChange={(e) => { categoryReg.onChange(e); setValue('marketing_house_item_id', ''); setValue('community_program_category_id', ''); }}
+            onChange={(e) => { categoryReg.onChange(e); setValue('marketingHouseItemId', ''); setValue('communityProgramCategoryId', ''); }}
             className="form-select"
           >
             <option value="">Select category</option>
-            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.category_name || c.name}</option>)}
+            {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name || c.name}</option>)}
           </select>
-          {errors.marketing_house_category_id && <p className="form-error">{String(errors.marketing_house_category_id.message)}</p>}
+          {errors.marketingHouseCategoryId && <p className="form-error">{String(errors.marketingHouseCategoryId.message)}</p>}
         </div>
       )}
       {/* Marketing Item + Continuity Category in a row */}
@@ -131,34 +131,34 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
           {lockedItemId ? (
             <>
               <input className="form-input bg-gray-100 cursor-not-allowed" value={lockedName || lockedItemId} disabled readOnly />
-              <input type="hidden" {...register('marketing_house_item_id')} />
+              <input type="hidden" {...register('marketingHouseItemId')} />
               <p className="mt-1 text-xs text-gray-500">Locked to the selected Marketing Item.</p>
             </>
           ) : (
             <>
               <select
                 {...itemReg}
-                onChange={(e) => { itemReg.onChange(e); setValue('community_program_category_id', ''); }}
+                onChange={(e) => { itemReg.onChange(e); setValue('communityProgramCategoryId', ''); }}
                 className="form-select"
                 disabled={!selectedCategory}
               >
                 <option value="">{selectedCategory ? 'Select item' : 'Select a category first'}</option>
                 {items.map((it: any) => <option key={it._id} value={it._id}>{itemName(it)}</option>)}
               </select>
-              {errors.marketing_house_item_id && <p className="form-error">{String(errors.marketing_house_item_id.message)}</p>}
+              {errors.marketingHouseItemId && <p className="form-error">{String(errors.marketingHouseItemId.message)}</p>}
             </>
           )}
         </div>
         <div>
           <label className="form-label">Continuity Category</label>
-          <select {...register('community_program_category_id')} className="form-select" disabled={!selectedItem}>
+          <select {...register('communityProgramCategoryId')} className="form-select" disabled={!selectedItem}>
             <option value="">{selectedItem ? 'Select continuity category' : 'Select an item first'}</option>
             {programs.map((p: any) => <option key={p._id} value={p._id}>{programName(p)}</option>)}
           </select>
         </div>
       </div>
 
-      <div><label className="form-label">Description</label><textarea {...register('community_program_item_description')} className="form-textarea" rows={4} placeholder="Write a short description…" /></div>
+      <div><label className="form-label">Description</label><textarea {...register('description')} className="form-textarea" rows={4} placeholder="Write a short description…" /></div>
 
       {/* Video: external URL or uploaded file */}
       <div>
@@ -170,18 +170,18 @@ export default function CommunityProgramItemModuleForm({ onSuccess, onCancel, ed
             className={`px-3 py-1.5 rounded-md text-sm font-medium ${videoTab === 'upload' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600'}`}>Upload Video</button>
         </div>
         {videoTab === 'url' ? (
-          <input {...register('community_program_item_video_url')} className="form-input" placeholder="https://youtube.com/..." />
+          <input {...register('videoUrl')} className="form-input" placeholder="https://youtube.com/..." />
         ) : (
-          <ImageUpload name="community_program_item_video_file" label="Upload Video (MP4, WEBM, OGG)" uploadType="video" folder="marketing-house"
-            value={watch('community_program_item_video_file')} onChange={(url) => setValue('community_program_item_video_file', url)} />
+          <ImageUpload name="videoFile" label="Upload Video (MP4, WEBM, OGG)" uploadType="video" folder="marketing-house"
+            value={watch('videoFile')} onChange={(url) => setValue('videoFile', url)} />
         )}
       </div>
 
-      <ImageUpload name="community_program_item_video_thumbnail" label="Thumbnail Image" uploadType="image" folder="marketing-house"
-        value={watch('community_program_item_video_thumbnail')} onChange={(url) => setValue('community_program_item_video_thumbnail', url)} />
+      <ImageUpload name="videoThumbnail" label="Thumbnail Image" uploadType="image" folder="marketing-house"
+        value={watch('videoThumbnail')} onChange={(url) => setValue('videoThumbnail', url)} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

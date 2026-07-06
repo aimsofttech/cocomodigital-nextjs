@@ -16,26 +16,26 @@ export default function MarketingFaqList() {
 
   // Seed the filter on first render so the initial fetch is already scoped.
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseFaqApi, true, itemId ? { marketing_house_item_id: itemId } : {});
+    useCrud(marketingHouseFaqApi, true, itemId ? { marketingHouseItemId: itemId } : {});
 
   // Re-apply the filter only when the URL id actually changes (skipped on mount).
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { marketing_house_item_id: itemId } : {});
+    setFilterParams(itemId ? { marketingHouseItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   // Best-effort fetch of the item title for the page title context.
   useEffect(() => {
     if (!itemId) { setItemName(''); return; }
     marketingHouseItemApi.getOne(itemId)
-      .then(({ data }) => setItemName(data.data?.title || data.data?.marketing_house_title || ''))
+      .then(({ data }) => setItemName(data.data?.title || data.data?.title || ''))
       .catch(() => setItemName(''));
   }, [itemId]);
 
   // Merge the locked item filter with any status filter the user toggles.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { marketing_house_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -51,9 +51,9 @@ export default function MarketingFaqList() {
   const columns = [
     { key: 'question', label: 'Question', sortable: true, render: (row: any) => <span className="font-medium">{row.question || 'N/A'}</span> },
     { key: 'answer', label: 'Answer', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-md">{row.answer || 'N/A'}</span> },
-    { key: 'marketing_house_category_name', label: 'Category', render: (row: any) => row.marketing_house_category_name || 'N/A' },
-    { key: 'marketing_house_item_name', label: 'Item', render: (row: any) => row.marketing_house_item_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'itemName', label: 'Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
 
@@ -70,8 +70,8 @@ export default function MarketingFaqList() {
       modalTitle={(mode) => mode === 'edit' ? 'Edit FAQ' : 'Add FAQ'}
       csv={{
         api: marketingHouseFaqApi,
-        exportParams: itemId ? { marketing_house_item_id: itemId } : undefined,
-        importFields: itemId ? { marketing_house_item_id: itemId } : undefined,
+        exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,
+        importFields: itemId ? { marketingHouseItemId: itemId } : undefined,
         filename: 'faqs',
       }}
       modalSize="lg" onRefresh={fetchAll} />

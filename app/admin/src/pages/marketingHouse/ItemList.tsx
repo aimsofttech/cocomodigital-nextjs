@@ -79,11 +79,11 @@ export default function ItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }, { key: 'year', label: 'Year', type: 'year' as const }];
   const columns = [
-    { key: 'poster_image', label: 'Poster', render: (row: any) => <ImageCell src={row.poster_image} alt={row.title} size="w-36 h-24" /> },
-    { key: 'marketing_video', label: 'Video', render: (row: any) => <VideoCell src={row.marketing_video} thumbnail={row.poster_image} /> },
+    { key: 'posterImage', label: 'Poster', render: (row: any) => <ImageCell src={row.posterImage} alt={row.title} size="w-36 h-24" /> },
+    { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.video} thumbnail={row.posterImage} /> },
     { key: 'title', label: 'Title', sortable: true, render: (row: any) => <span className="font-medium text-gray-900">{row.title || 'N/A'}</span> },
     { key: 'year', label: 'Year', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     {
       key: 'sections', label: 'Sections', render: (row: any) => {
         const targets: NavTarget[] = Array.isArray(row.navigation) && row.navigation.length ? row.navigation : NAV_LINKS;
