@@ -4,13 +4,13 @@ const GroupSingleServicePortfolioItem = require('../../models/GroupSingleService
 const createCrudController = require('./crudFactory');
 
 const base = createCrudController(GroupSingleServicePortfolioCategory, {
-  searchFields: ['portfolio_category_name'],
-  defaultSort: { display_order: 1 },
-  parentField: 'group_service_item_id',
+  searchFields: ['name'],
+  defaultSort: { displayOrder: 1 },
+  parentField: 'groupServiceItemId',
 });
 
 // Attach a `navigation` array with the count of Portfolio Items in each category
-// (linked by portfolio_category_id). Drives the "Portfolio Items" navigate button.
+// (linked by portfolioCategoryId). Drives the "Portfolio Items" navigate button.
 const attachNavigation = async (cats) => {
   if (!cats.length) return cats;
   const idVariants = [];
@@ -22,8 +22,8 @@ const attachNavigation = async (cats) => {
   const map = new Map();
   try {
     const rows = await GroupSingleServicePortfolioItem.aggregate([
-      { $match: { portfolio_category_id: { $in: idVariants } } },
-      { $group: { _id: '$portfolio_category_id', count: { $sum: 1 } } },
+      { $match: { portfolioCategoryId: { $in: idVariants } } },
+      { $group: { _id: '$portfolioCategoryId', count: { $sum: 1 } } },
     ]);
     rows.forEach((r) => map.set(String(r._id), r.count));
   } catch (err) {

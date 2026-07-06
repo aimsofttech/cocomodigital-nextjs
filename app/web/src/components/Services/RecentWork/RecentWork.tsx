@@ -103,7 +103,7 @@ const RecentlyWorkedWith = ({ RecentWorkData }) => {
                   )}
                   <div className="absolute top-0 right-0 mr-2 mt-2">
                     <EditLink
-                      path={`${ADMIN_URL}/home/group/service/group_single_service_recent_work/show/${item?.id}/${item?.group_service_item_id}`} />
+                      path={`${ADMIN_URL}/home/group/service/group_single_service_recent_work/show/${item?.id}/${item?.groupServiceItemId}`} />
                   </div>
                 </div>
               </div>

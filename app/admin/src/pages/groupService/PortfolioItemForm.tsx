@@ -22,8 +22,8 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
   const editCatId = useRef('');
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<any>();
 
-  const selectedItem = watch('group_service_item_id');
-  const selectedCat = watch('portfolio_category_id');
+  const selectedItem = watch('groupServiceItemId');
+  const selectedCat = watch('portfolioCategoryId');
 
   useEffect(() => {
     groupServiceItemApi.getAll({ limit: 500 }).then(({ data }) => setItems(data.data || []));
@@ -31,17 +31,17 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
     if (isEdit && id) {
       groupPortfolioItemApi.getOne(id).then(({ data }) => {
         const item = data.data;
-        editCatId.current = item.portfolio_category_id?._id || item.portfolio_category_id || '';
+        editCatId.current = item.portfolioCategoryId?._id || item.portfolioCategoryId || '';
         editCatId.current = editCatId.current ? String(editCatId.current) : '';
-        reset({ ...item, status: String(item.status), portfolio_category_id: editCatId.current });
-        if (item.portfolio_item_video_type === 'url') setVideoTab('url');
+        reset({ ...item, status: String(item.status), portfolioCategoryId: editCatId.current });
+        if (item.videoType === 'url') setVideoTab('url');
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
 
   // Re-apply the selected category once options exist (avoids placeholder revert on edit).
   useEffect(() => {
-    if (isEdit && categories.length && editCatId.current) setValue('portfolio_category_id', editCatId.current);
+    if (isEdit && categories.length && editCatId.current) setValue('portfolioCategoryId', editCatId.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories, isEdit]);
 
@@ -49,7 +49,7 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
   const lockedApplied = useRef(false);
   useEffect(() => {
     if (isEdit || !lockedItemId || !items.length || lockedApplied.current) return;
-    setValue('group_service_item_id', lockedItemId);
+    setValue('groupServiceItemId', lockedItemId);
     lockedApplied.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lockedItemId, isEdit, items]);
@@ -59,7 +59,7 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
   const lockedCatApplied = useRef(false);
   useEffect(() => {
     if (isEdit || !lockedCategoryId || !categories.length || lockedCatApplied.current) return;
-    setValue('portfolio_category_id', lockedCategoryId);
+    setValue('portfolioCategoryId', lockedCategoryId);
     lockedCatApplied.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lockedCategoryId, isEdit, categories]);
@@ -68,31 +68,31 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
   useEffect(() => {
     if (!selectedCat || !categories.length || !items.length || selectedItem) return;
     const c = categories.find((x: any) => String(x._id) === String(selectedCat));
-    if (c?.group_service_item_id) setValue('group_service_item_id', String(c.group_service_item_id));
+    if (c?.groupServiceItemId) setValue('groupServiceItemId', String(c.groupServiceItemId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCat, categories, items, selectedItem]);
 
   // Portfolio Category options scoped to the chosen Group Service Item (keep current selection visible).
   const categoryOptions = categories.filter(
-    (c: any) => !selectedItem || String(c.group_service_item_id) === String(selectedItem) || String(c._id) === String(selectedCat)
+    (c: any) => !selectedItem || String(c.groupServiceItemId) === String(selectedItem) || String(c._id) === String(selectedCat)
   );
 
-  const itemReg = register('group_service_item_id', { required: 'Required' });
+  const itemReg = register('groupServiceItemId', { required: 'Required' });
 
   const switchVideoTab = (tab: VideoTab) => {
     setVideoTab(tab);
-    setValue('portfolio_item_video_url', '');
-    setValue('portfolio_item_video_type', tab);
+    setValue('videoUrl', '');
+    setValue('videoType', tab);
   };
 
   const onSubmit = async (formData: any) => {
     const payload = {
-      group_service_item_id: formData.group_service_item_id,
-      portfolio_category_id: formData.portfolio_category_id,
-      portfolio_item_image: formData.portfolio_item_image,
-      portfolio_item_video_url: formData.portfolio_item_video_url || '',
-      portfolio_item_video_type: formData.portfolio_item_video_url ? videoTab : '',
-      display_order: Number(formData.display_order) || 0,
+      groupServiceItemId: formData.groupServiceItemId,
+      portfolioCategoryId: formData.portfolioCategoryId,
+      image: formData.image,
+      videoUrl: formData.videoUrl || '',
+      videoType: formData.videoUrl ? videoTab : '',
+      displayOrder: Number(formData.displayOrder) || 0,
       status: Number(formData.status),
     };
     try {
@@ -113,25 +113,25 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
           <label className="form-label">Group Service Item <span className="text-red-500">*</span></label>
           <select
             {...itemReg}
-            onChange={(e) => { itemReg.onChange(e); setValue('portfolio_category_id', ''); }}
+            onChange={(e) => { itemReg.onChange(e); setValue('portfolioCategoryId', ''); }}
             className="form-select"
           >
             <option value="">Select service item</option>
-            {items.map((it: any) => <option key={it._id} value={it._id}>{it.group_service_item_title}</option>)}
+            {items.map((it: any) => <option key={it._id} value={it._id}>{it.title}</option>)}
           </select>
-          {errors.group_service_item_id && <p className="form-error">{String(errors.group_service_item_id.message)}</p>}
+          {errors.groupServiceItemId && <p className="form-error">{String(errors.groupServiceItemId.message)}</p>}
         </div>
         <div>
           <label className="form-label">Portfolio Category <span className="text-red-500">*</span></label>
-          <select {...register('portfolio_category_id', { required: 'Required' })} className="form-select">
+          <select {...register('portfolioCategoryId', { required: 'Required' })} className="form-select">
             <option value="">Select category</option>
-            {categoryOptions.map((c: any) => <option key={c._id} value={c._id}>{c.portfolio_category_name}</option>)}
+            {categoryOptions.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
-          {errors.portfolio_category_id && <p className="form-error">{String(errors.portfolio_category_id.message)}</p>}
+          {errors.portfolioCategoryId && <p className="form-error">{String(errors.portfolioCategoryId.message)}</p>}
         </div>
       </div>
 
-      <ImageUpload name="portfolio_item_image" label="Item Image" uploadType="image" folder="group-service" value={watch('portfolio_item_image')} onChange={(url) => setValue('portfolio_item_image', url)} />
+      <ImageUpload name="image" label="Item Image" uploadType="image" folder="group-service" value={watch('image')} onChange={(url) => setValue('image', url)} />
 
       <div>
         <label className="form-label">Video <span className="text-gray-400 font-normal">(Optional - Choose one method)</span></label>
@@ -142,12 +142,12 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
         <div className="border border-t-0 border-gray-200 rounded-b-lg p-4">
           {videoTab === 'upload' ? (
             <ImageUpload
-              name="portfolio_item_video_url"
+              name="videoUrl"
               label="Choose Video File (MP4, WEBM, OGG - Max 50MB)"
               uploadType="video"
               folder="group-service"
-              value={watch('portfolio_item_video_url')}
-              onChange={(url) => { setValue('portfolio_item_video_url', url); setValue('portfolio_item_video_type', 'upload'); }}
+              value={watch('videoUrl')}
+              onChange={(url) => { setValue('videoUrl', url); setValue('videoType', 'upload'); }}
             />
           ) : (
             <div>
@@ -155,8 +155,8 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
               <input
                 className="form-input"
                 placeholder="https://youtube.com/... or video URL"
-                value={watch('portfolio_item_video_url') || ''}
-                onChange={(e) => { setValue('portfolio_item_video_url', e.target.value); setValue('portfolio_item_video_type', 'url'); }}
+                value={watch('videoUrl') || ''}
+                onChange={(e) => { setValue('videoUrl', e.target.value); setValue('videoType', 'url'); }}
               />
             </div>
           )}
@@ -164,7 +164,7 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

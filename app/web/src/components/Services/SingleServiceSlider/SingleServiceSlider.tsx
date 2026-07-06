@@ -108,7 +108,7 @@ const SingleServiceSlider = ({ service }) => {
     <div className="service-details-banner-main-wrapper">
       <div className="service-details-banner-main">
         <div className="service-details-banner-title-subtitle-wrapper">
-          <h1 className="font-primary">{service?.group_service_item_title || service?.title}</h1>
+          <h1 className="font-primary">{service?.title || service?.title}</h1>
           {/* Sticker-language breadcrumb — UPPERCASE muted trail
               items, yellow chevron separators, bold current item.
               Replaces the previous plain "Home / Services / X"
@@ -179,7 +179,7 @@ const SingleServiceSlider = ({ service }) => {
                           style={{ backgroundColor: "white" }}
                         >
                           <EditLink
-                            path={`${ADMIN_URL}/home/group/service/group_single_service_image/show/${images?.id}/${images?.group_service_item_id}/${service?.category_id}`}
+                            path={`${ADMIN_URL}/home/group/service/group_single_service_image/show/${images?.id}/${images?.groupServiceItemId}/${service?.category_id}`}
                             className="mr-1"
                           />
                         </div>

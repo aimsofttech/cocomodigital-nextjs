@@ -14,16 +14,16 @@ export default function SingleServiceImageList() {
   const itemId = searchParams.get('groupServiceItemId') || '';
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupSingleServiceImageApi, true, itemId ? { group_service_item_id: itemId } : {});
+    useCrud(groupSingleServiceImageApi, true, itemId ? { groupServiceItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { group_service_item_id: itemId } : {});
+    setFilterParams(itemId ? { groupServiceItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { group_service_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { groupServiceItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -37,10 +37,10 @@ export default function SingleServiceImageList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'single_service_img', label: 'Image', render: (row: any) => <ImageCell src={row.single_service_img} /> },
-    { key: 'single_service_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.single_service_video_url} thumbnail={row.single_service_img} /> },
-    { key: 'single_service_description', label: 'Description', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl} thumbnail={row.image} /> },
+    { key: 'description', label: 'Description', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

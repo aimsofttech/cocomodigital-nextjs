@@ -34,34 +34,34 @@ const groupService = async (req, res) => {
 
   const categories = await GroupServiceCategory.find({
     status: 1,
-    explore_our_service_item_id: { $in: [serviceItem._id, String(serviceItem._id)] },
-  }).sort({ display_order: 1 });
+    exploreOurServiceItemId: { $in: [serviceItem._id, String(serviceItem._id)] },
+  }).sort({ displayOrder: 1 });
   const result = [];
   for (const cat of categories) {
     const catKeys = [cat._id, String(cat._id)];
     // Items can be linked two ways: directly on the item
-    // (group_service_category_id) or via the group_service_category_item
+    // (groupServiceCategoryId) or via the group_service_category_item
     // join table. Union both so every section shows all its services.
     const directItems = await GroupServiceItem.find({
       status: 1,
-      group_service_category_id: { $in: catKeys },
+      groupServiceCategoryId: { $in: catKeys },
     });
     const joinRows = await mongoose.connection
       .collection('group_service_category_item')
-      .find({ group_service_category_id: { $in: catKeys } })
+      .find({ groupServiceCategoryId: { $in: catKeys } })
       .toArray();
-    const joinItemIds = joinRows.map((j) => j.group_service_item_id).filter(Boolean);
+    const joinItemIds = joinRows.map((j) => j.groupServiceItemId).filter(Boolean);
     const joinItems = joinItemIds.length
       ? await GroupServiceItem.find({ status: 1, _id: { $in: joinItemIds } })
       : [];
     const byId = new Map();
     for (const i of [...directItems, ...joinItems]) byId.set(String(i._id), i);
     const items = Array.from(byId.values()).sort(
-      (a, b) => (a.display_order || 0) - (b.display_order || 0),
+      (a, b) => (a.displayOrder || 0) - (b.displayOrder || 0),
     );
     result.push({
       ...cat.toObject(),
-      items: items.map((i) => ({ ...i.toObject(), group_service_item_thumbnail: buildUrl(i.group_service_item_thumbnail) })),
+      items: items.map((i) => ({ ...i.toObject(), thumbnail: buildUrl(i.thumbnail) })),
     });
   }
 
@@ -88,32 +88,32 @@ const groupService = async (req, res) => {
 };
 
 const getSingleService = async (req, res) => {
-  const { group_service_slug } = req.params;
-  const serviceItem = await GroupServiceItem.findOne({ group_service_slug, status: 1 });
+  const { slug } = req.params;
+  const serviceItem = await GroupServiceItem.findOne({ slug, status: 1 });
   if (!serviceItem) return res.status(404).json({ status: 'error', message: 'Service not found' });
 
   const [images, recentWork, portfolioCategories, faqs] = await Promise.all([
-    GroupSingleServiceImage.find({ group_service_item_id: serviceItem._id, status: 1 }).sort({ display_order: 1 }),
-    GroupSingleServiceRecentWork.find({ group_service_item_id: serviceItem._id, status: 1 }).sort({ display_order: 1 }),
-    GroupSingleServicePortfolioCategory.find({ group_service_item_id: serviceItem._id, status: 1 }).sort({ display_order: 1 }),
-    GroupServiceItemFaq.find({ group_service_item_id: serviceItem._id, status: 1 }).sort({ display_order: 1 }),
+    GroupSingleServiceImage.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
+    GroupSingleServiceRecentWork.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
+    GroupSingleServicePortfolioCategory.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
+    GroupServiceItemFaq.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
   ]);
 
   const portfolioData = [];
   for (const cat of portfolioCategories) {
-    const items = await GroupSingleServicePortfolioItem.find({ portfolio_category_id: cat._id, status: 1 }).sort({ display_order: 1 });
+    const items = await GroupSingleServicePortfolioItem.find({ portfolioCategoryId: cat._id, status: 1 }).sort({ displayOrder: 1 });
     portfolioData.push({
       ...cat.toObject(),
-      items: items.map((i) => ({ ...i.toObject(), portfolio_item_image: buildUrl(i.portfolio_item_image) })),
+      items: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
     });
   }
 
   res.json({
     status: 'success',
     data: {
-      service: { ...serviceItem.toObject(), group_service_item_thumbnail: buildUrl(serviceItem.group_service_item_thumbnail) },
+      service: { ...serviceItem.toObject(), thumbnail: buildUrl(serviceItem.thumbnail) },
       images: images.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
-      recent_work: recentWork.map((r) => ({ ...r.toObject(), recent_work_image: buildUrl(r.recent_work_image) })),
+      recent_work: recentWork.map((r) => ({ ...r.toObject(), image: buildUrl(r.image) })),
       portfolio: portfolioData,
       faqs,
     },
@@ -121,11 +121,11 @@ const getSingleService = async (req, res) => {
 };
 
 const getPortfolioItem = async (req, res) => {
-  const { portfolio_category_id } = req.query;
+  const { portfolioCategoryId } = req.query;
   const filter = { status: 1 };
-  if (portfolio_category_id) filter.portfolio_category_id = portfolio_category_id;
-  const items = await GroupSingleServicePortfolioItem.find(filter).sort({ display_order: 1 });
-  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), portfolio_item_image: buildUrl(i.portfolio_item_image) })) });
+  if (portfolioCategoryId) filter.portfolioCategoryId = portfolioCategoryId;
+  const items = await GroupSingleServicePortfolioItem.find(filter).sort({ displayOrder: 1 });
+  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })) });
 };
 
 module.exports = { serviceHomePriority, groupService, getSingleService, getPortfolioItem };

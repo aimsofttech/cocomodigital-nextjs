@@ -2,16 +2,16 @@
 const createCrudController = require('./crudFactory');
 const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
 
-const base = createCrudController(GroupSingleServiceRecentWork, { imageFields: ['recent_work_video_thumbnail'], searchFields: ['recent_work_title'], defaultSort: { display_order: 1 }, parentField: 'group_service_item_id' });
+const base = createCrudController(GroupSingleServiceRecentWork, { imageFields: ['videoThumbnail'], searchFields: ['title'], defaultSort: { displayOrder: 1 }, parentField: 'groupServiceItemId' });
 
 const storeWithYoutube = async (req, res) => {
-  if (req.body.recent_work_video_url) {
-    const ytId = getYoutubeVideoId(req.body.recent_work_video_url);
+  if (req.body.videoUrl) {
+    const ytId = getYoutubeVideoId(req.body.videoUrl);
     if (ytId) {
-      req.body.recent_work_youtube_id = ytId;
+      req.body.youtubeId = ytId;
       if (!req.file) {
         const k = await uploadYoutubeThumbnailToS3(`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`, `${ytId}_${Date.now()}`, 'recent_work');
-        if (k) req.body.recent_work_image = k;
+        if (k) req.body.image = k;
       }
     }
   }

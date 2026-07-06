@@ -4,31 +4,31 @@ const createCrudController = require('./crudFactory');
 const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
 
 const base = createCrudController(GroupSingleServicePortfolioItem, {
-  imageFields: ['portfolio_video_thumbnail'],
-  searchFields: ['portfolio_item_title'],
-  defaultSort: { display_order: 1 },
-  // Scoped by either group_service_item_id (from the Group Service Items link) or
-  // portfolio_category_id (from the Portfolio Category link).
-  parentField: ['group_service_item_id', 'portfolio_category_id'],
+  imageFields: ['videoThumbnail'],
+  searchFields: ['title'],
+  defaultSort: { displayOrder: 1 },
+  // Scoped by either groupServiceItemId (from the Group Service Items link) or
+  // portfolioCategoryId (from the Portfolio Category link).
+  parentField: ['groupServiceItemId', 'portfolioCategoryId'],
   // Resolve the parent Portfolio Category name for the list/detail responses.
   lookups: [
     {
-      localField: 'portfolio_category_id',
+      localField: 'portfolioCategoryId',
       model: GroupSingleServicePortfolioCategory,
-      nameField: 'portfolio_category_name',
-      as: 'portfolio_category_name',
+      nameField: 'name',
+      as: 'categoryName',
     },
   ],
 });
 
 const storeWithYoutube = async (req, res) => {
-  if (req.body.portfolio_item_video_url) {
-    const ytId = getYoutubeVideoId(req.body.portfolio_item_video_url);
+  if (req.body.videoUrl) {
+    const ytId = getYoutubeVideoId(req.body.videoUrl);
     if (ytId) {
-      req.body.portfolio_item_youtube_id = ytId;
+      req.body.youtubeId = ytId;
       if (!req.file) {
         const k = await uploadYoutubeThumbnailToS3(`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`, `${ytId}_${Date.now()}`, 'portfolio');
-        if (k) req.body.portfolio_item_image = k;
+        if (k) req.body.image = k;
       }
     }
   }

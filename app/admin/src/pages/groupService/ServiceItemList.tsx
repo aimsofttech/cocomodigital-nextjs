@@ -25,18 +25,18 @@ export default function ServiceItemList() {
   const categoryId = searchParams.get('groupServiceCategoryId') || '';
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupServiceItemApi, true, categoryId ? { group_service_category_id: categoryId } : {});
+    useCrud(groupServiceItemApi, true, categoryId ? { groupServiceCategoryId: categoryId } : {});
 
   // Re-apply the scope when the URL id changes.
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(categoryId ? { group_service_category_id: categoryId } : {});
+    setFilterParams(categoryId ? { groupServiceCategoryId: categoryId } : {});
   }, [categoryId, setFilterParams]);
 
   // Keep the category scope when other filters change.
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(categoryId ? { group_service_category_id: categoryId } : {}), ...params });
+    setFilterParams({ ...(categoryId ? { groupServiceCategoryId: categoryId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -50,12 +50,12 @@ export default function ServiceItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'group_service_item_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.group_service_item_thumbnail} /> },
-    { key: 'group_service_item_title', label: 'Title', sortable: true },
-    { key: 'department_name', label: 'Department', render: (row: any) => row.department_name || 'N/A' },
-    { key: 'service_category_name', label: 'Service Categories', render: (row: any) => row.service_category_name || 'N/A' },
-    { key: 'group_category_name', label: 'Group Categories', render: (row: any) => row.group_category_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.thumbnail} /> },
+    { key: 'title', label: 'Title', sortable: true },
+    { key: 'departmentName', label: 'Department', render: (row: any) => row.departmentName || 'N/A' },
+    { key: 'serviceCategoryName', label: 'Service Categories', render: (row: any) => row.serviceCategoryName || 'N/A' },
+    { key: 'groupCategoryName', label: 'Group Categories', render: (row: any) => row.groupCategoryName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {
       key: 'navigate', label: 'Navigate To', render: (row: any) => {

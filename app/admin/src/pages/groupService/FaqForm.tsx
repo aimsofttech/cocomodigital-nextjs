@@ -22,8 +22,8 @@ export default function FaqForm({ onSuccess, onCancel, editId, lockedItemId }: P
     groupServiceItemApi.getAll({ limit: 500 }).then(({ data }) => setItems(data.data || []));
     if (isEdit && id) {
       groupServiceItemFaqApi.getOne(id).then(({ data }) => {
-        editItemId.current = data.data.group_service_item_id ? String(data.data.group_service_item_id) : '';
-        reset({ ...data.data, status: String(data.data.status), group_service_item_id: editItemId.current });
+        editItemId.current = data.data.groupServiceItemId ? String(data.data.groupServiceItemId) : '';
+        reset({ ...data.data, status: String(data.data.status), groupServiceItemId: editItemId.current });
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
@@ -31,7 +31,7 @@ export default function FaqForm({ onSuccess, onCancel, editId, lockedItemId }: P
   // Re-apply the selected item once options are loaded (a select value set before
   // its options render reverts to the placeholder otherwise).
   useEffect(() => {
-    if (isEdit && items.length && editItemId.current) setValue('group_service_item_id', editItemId.current);
+    if (isEdit && items.length && editItemId.current) setValue('groupServiceItemId', editItemId.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, isEdit]);
 
@@ -39,13 +39,13 @@ export default function FaqForm({ onSuccess, onCancel, editId, lockedItemId }: P
   const lockedApplied = useRef(false);
   useEffect(() => {
     if (isEdit || !scopedItemId || !items.length || lockedApplied.current) return;
-    setValue('group_service_item_id', scopedItemId);
+    setValue('groupServiceItemId', scopedItemId);
     lockedApplied.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopedItemId, isEdit, items]);
 
   const onSubmit = async (data: any) => {
-    const payload = { ...data, group_service_item_id: data.group_service_item_id || scopedItemId };
+    const payload = { ...data, groupServiceItemId: data.groupServiceItemId || scopedItemId };
     try {
       if (isEdit && id) await groupServiceItemFaqApi.update(id, payload);
       else await groupServiceItemFaqApi.create(payload);
@@ -58,11 +58,11 @@ export default function FaqForm({ onSuccess, onCancel, editId, lockedItemId }: P
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Group Service Item <span className="text-red-500">*</span></label>
-        <select {...register('group_service_item_id', { required: 'Required' })} className="form-select">
+        <select {...register('groupServiceItemId', { required: 'Required' })} className="form-select">
           <option value="">Select service item</option>
-          {items.map((it: any) => <option key={it._id} value={it._id}>{it.group_service_item_title}</option>)}
+          {items.map((it: any) => <option key={it._id} value={it._id}>{it.title}</option>)}
         </select>
-        {errors.group_service_item_id && <p className="form-error">{String(errors.group_service_item_id.message)}</p>}
+        {errors.groupServiceItemId && <p className="form-error">{String(errors.groupServiceItemId.message)}</p>}
       </div>
       <div>
         <label className="form-label">Question <span className="text-red-500">*</span></label>
@@ -75,7 +75,7 @@ export default function FaqForm({ onSuccess, onCancel, editId, lockedItemId }: P
         {errors.answer && <p className="form-error">{String(errors.answer.message)}</p>}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

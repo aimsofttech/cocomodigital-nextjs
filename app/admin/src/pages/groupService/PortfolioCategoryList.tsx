@@ -12,16 +12,16 @@ export default function PortfolioCategoryList() {
   const itemId = searchParams.get('groupServiceItemId') || '';
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupPortfolioCategoryApi, true, itemId ? { group_service_item_id: itemId } : {});
+    useCrud(groupPortfolioCategoryApi, true, itemId ? { groupServiceItemId: itemId } : {});
 
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return; }
-    setFilterParams(itemId ? { group_service_item_id: itemId } : {});
+    setFilterParams(itemId ? { groupServiceItemId: itemId } : {});
   }, [itemId, setFilterParams]);
 
   const handleFilterChange = (params: Record<string, any>) =>
-    setFilterParams({ ...(itemId ? { group_service_item_id: itemId } : {}), ...params });
+    setFilterParams({ ...(itemId ? { groupServiceItemId: itemId } : {}), ...params });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -35,8 +35,8 @@ export default function PortfolioCategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'portfolio_category_name', label: 'Category Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'name', label: 'Category Name', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {
       key: 'navigate', label: 'Navigate To', render: (row: any) => {

@@ -34,7 +34,7 @@ const adaptGroupService = (parent: any, children: any[]): any => {
     services: {
       title: parent.title,
       service_title: parent.title,
-      group_service_title: parent.group_service_item_title || parent.title,
+      group_service_title: parent.title || parent.title,
       heading: parent.title,
       description: parent.description,
       featured_description: parent.featured_description,
@@ -101,7 +101,7 @@ export async function generateMetadata({
   return buildMetadata({
     title:
       parent?.title ||
-      parent?.group_service_item_title ||
+      parent?.title ||
       firstBanner?.heading ||
       "Service Category",
     description: truncate(

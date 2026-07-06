@@ -30,7 +30,7 @@ const titleToSlug = (title: string): string =>
 
 /* Adapter — the API ServiceItem → the legacy shape SingleService
    view expects ({title, slug, image, featured_description,
-   group_service_item_title, group_service_item_description,
+   title, description,
    group_top_banner, group_single_service_portfolio_category, content}).
    Field names match the new ServiceItems schema fields added in
    Phase 5b. */
@@ -45,9 +45,7 @@ const adaptService = (s: any): any => {
     short_description: s.short_description,
     content: s.content,
     featured_description: s.featured_description,
-    group_service_item_title: s.group_service_item_title,
-    group_service_item_description: s.group_service_item_description,
-    group_service_item_description2: s.group_service_item_description,
+    description2: s.description2 ?? s.description,
     group_top_banner: Array.isArray(s.group_top_banner)
       ? s.group_top_banner.map((b: any) => ({
           heading: b.heading,
@@ -65,7 +63,7 @@ const adaptService = (s: any): any => {
       ? s.group_single_service_portfolio_category.map((c: any) => ({
           id: c.id,
           category_name: c.category_name,
-          group_service_item_id: c.group_service_item_id,
+          groupServiceItemId: c.groupServiceItemId,
           items: Array.isArray(c.items)
             ? c.items.map((i: any) => ({
                 id: i.id,
@@ -114,8 +112,6 @@ const findDocByPortfolioItemSlug = async (slug: string): Promise<any | null> => 
             legacyImageUrl: item.legacyImageUrl ?? "",
             description: item.description ?? "",
             featured_description: item.description ?? "",
-            group_service_item_title: item.title,
-            group_service_item_description: item.description ?? "",
             group_top_banner: svc.group_top_banner ?? [],
             group_single_service_portfolio_category:
               svc.group_single_service_portfolio_category ?? [],
@@ -141,13 +137,13 @@ export async function generateMetadata({
   const service = adaptService(doc);
   const description = truncate(
     service?.featured_description ||
-      service?.group_service_item_description2 ||
+      service?.description2 ||
       service?.description ||
       "Explore Cocoma Digital service details, portfolio, process, FAQs, and booking options.",
   );
 
   return buildMetadata({
-    title: service?.title || service?.group_service_item_title || "Service",
+    title: service?.title || service?.title || "Service",
     description,
     path: `/service/${slug}`,
     image: service?.image,
@@ -155,7 +151,7 @@ export async function generateMetadata({
     category: "Services",
     keywords: [
       service?.title || "",
-      service?.group_service_item_title || "",
+      service?.title || "",
       "service",
       "creative services",
     ].filter(Boolean),
@@ -207,10 +203,10 @@ export default async function Page({ params }: PageProps) {
           {
             "@context": "https://schema.org",
             "@type": "Service",
-            name: service?.title || service?.group_service_item_title,
+            name: service?.title || service?.title,
             description: stripHtml(
               service?.featured_description ||
-                service?.group_service_item_description ||
+                service?.description ||
                 "",
             ),
             image: service?.image ? absoluteUrl(service.image) : undefined,
@@ -230,7 +226,7 @@ export default async function Page({ params }: PageProps) {
             {
               name:
                 service?.title ||
-                service?.group_service_item_title ||
+                service?.title ||
                 slug,
               path: `/service/${slug}`,
             },

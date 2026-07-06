@@ -28,15 +28,15 @@ export default function ServiceCategoryForm({ onSuccess, onCancel, editId }: Pro
         reset({
           ...item,
           status: String(item.status ?? ''),
-          explore_our_service_category_id: item.explore_our_service_category_id ?? '',
-          explore_our_service_item_id: item.explore_our_service_item_id ?? '',
+          exploreOurServiceCategoryId: item.exploreOurServiceCategoryId ?? '',
+          exploreOurServiceItemId: item.exploreOurServiceItemId ?? '',
         });
       }).catch(() => toast.error('Failed to load'));
     }
   }, [id]);
 
-  const selectedDept = watch('explore_our_service_category_id');
-  const selectedItem = watch('explore_our_service_item_id');
+  const selectedDept = watch('exploreOurServiceCategoryId');
+  const selectedItem = watch('exploreOurServiceItemId');
   // Show only Service Categories belonging to the chosen Department; always keep
   // the currently-selected one visible so edits don't lose their value.
   const itemOptions = serviceItems.filter(
@@ -49,13 +49,13 @@ export default function ServiceCategoryForm({ onSuccess, onCancel, editId }: Pro
   const onSubmit = async (formData: any) => {
     try {
       // Build an explicit payload so join-only fields surfaced on edit
-      // (department_name, category_name) are never written back to the document.
+      // (departmentName, categoryName) are never written back to the document.
       const payload = {
-        explore_our_service_category_id: formData.explore_our_service_category_id,
-        explore_our_service_item_id: formData.explore_our_service_item_id,
-        group_service_category_name: formData.group_service_category_name,
+        exploreOurServiceCategoryId: formData.exploreOurServiceCategoryId,
+        exploreOurServiceItemId: formData.exploreOurServiceItemId,
+        name: formData.name,
         slug: formData.slug,
-        display_order: Number(formData.display_order) || 0,
+        displayOrder: Number(formData.displayOrder) || 0,
         status: Number(formData.status),
       };
       if (isEdit && id) await groupServiceCategoryApi.update(id, payload);
@@ -70,31 +70,31 @@ export default function ServiceCategoryForm({ onSuccess, onCancel, editId }: Pro
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Service Department Name <span className="text-red-500">*</span></label>
-          <select {...register('explore_our_service_category_id', { required: 'Required' })} className="form-select">
+          <select {...register('exploreOurServiceCategoryId', { required: 'Required' })} className="form-select">
             <option value="">Select department</option>
             {departments.map((d: any) => (
               <option key={d._id} value={d._id}>{d.name}</option>
             ))}
           </select>
-          {errors.explore_our_service_category_id && <p className="form-error">{String(errors.explore_our_service_category_id.message)}</p>}
+          {errors.exploreOurServiceCategoryId && <p className="form-error">{String(errors.exploreOurServiceCategoryId.message)}</p>}
         </div>
         <div>
           <label className="form-label">Service Category Name <span className="text-red-500">*</span></label>
-          <select {...register('explore_our_service_item_id', { required: 'Required' })} className="form-select">
+          <select {...register('exploreOurServiceItemId', { required: 'Required' })} className="form-select">
             <option value="">Select category</option>
             {itemOptions.map((it: any) => (
               <option key={it._id} value={it._id}>{it.title}</option>
             ))}
           </select>
-          {errors.explore_our_service_item_id && <p className="form-error">{String(errors.explore_our_service_item_id.message)}</p>}
+          {errors.exploreOurServiceItemId && <p className="form-error">{String(errors.exploreOurServiceItemId.message)}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Group Service Category Name <span className="text-red-500">*</span></label>
-          <input {...register('group_service_category_name', { required: 'Required' })} className="form-input" placeholder="Enter Group Service Category Name" />
-          {errors.group_service_category_name && <p className="form-error">{String(errors.group_service_category_name.message)}</p>}
+          <input {...register('name', { required: 'Required' })} className="form-input" placeholder="Enter Group Service Category Name" />
+          {errors.name && <p className="form-error">{String(errors.name.message)}</p>}
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
@@ -102,7 +102,7 @@ export default function ServiceCategoryForm({ onSuccess, onCancel, editId }: Pro
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Display Section Order</label>
-          <input {...register('display_order')} type="number" className="form-input" placeholder="Order number. e.g. 1, 2, 3" defaultValue={0} />
+          <input {...register('displayOrder')} type="number" className="form-input" placeholder="Order number. e.g. 1, 2, 3" defaultValue={0} />
         </div>
         <div>
           <label className="form-label">Status <span className="text-red-500">*</span></label>

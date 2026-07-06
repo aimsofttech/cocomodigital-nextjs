@@ -72,8 +72,7 @@ export interface ServiceDetail {
   slug?: string;
   image?: string;
   featured_description?: string;
-  group_service_item_description2?: string;
-  group_service_item_title?: string;
+  description2?: string;
   group_single_service_portfolio_category?: PortfolioCategory[];
   [key: string]: unknown;
 }
@@ -81,7 +80,7 @@ export interface ServiceDetail {
 export interface PortfolioCategory {
   id: number | string;
   category_name?: string;
-  group_service_item_id?: number | string;
+  groupServiceItemId?: number | string;
   [key: string]: unknown;
 }
 

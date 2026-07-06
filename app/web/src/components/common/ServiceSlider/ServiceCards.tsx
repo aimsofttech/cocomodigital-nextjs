@@ -23,7 +23,7 @@ const ServiceCards = ({ data }) => {
   const { items: cartItems, addItem, removeItem } = useCart();
   const navigate = useNavigate();
   const description = getPlainText(
-    data?.description || data?.featured_description || data?.group_service_item_description
+    data?.description || data?.featured_description || data?.description
   );
 
   const isItemInCart = (itemId) => {
@@ -41,7 +41,7 @@ const ServiceCards = ({ data }) => {
     } else {
       addItem({
         ...item,
-        group_service_category_id: item?.id,
+        groupServiceCategoryId: item?.id,
         subscriptionType: "One Time Only",
       });
     }

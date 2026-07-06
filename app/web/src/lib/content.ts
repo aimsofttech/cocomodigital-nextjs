@@ -1243,14 +1243,14 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
         group_single_service_portfolio_category: (data.categories ?? []).map(
           (cat: any) => ({
             id: cat._id,
-            category_name: cat.group_service_category_name,
-            display_direction: cat.display_direction,
+            category_name: cat.name,
+            displayDirection: cat.displayDirection,
             items: (cat.items ?? []).map((it: any) => ({
               id: it._id,
-              title: it.group_service_item_title,
-              slug: it.group_service_slug,
-              description: it.group_service_item_description,
-              legacyImageUrl: buildImg(it.group_service_item_thumbnail),
+              title: it.title,
+              slug: it.slug,
+              description: it.description,
+              legacyImageUrl: buildImg(it.thumbnail),
             })),
           }),
         ),
@@ -1260,7 +1260,7 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
   /* GroupServiceItem detail — the sub-service tier one level below the
      top-level service (e.g. "Title Launch Campaign Videos" under
      "Marketing House"). These have their own slug
-     (group_service_slug) and detail endpoint; a /service/[slug] visit
+     (slug) and detail endpoint; a /service/[slug] visit
      for one of these falls back here when the top-level `services`
      lookup above finds nothing. */
   "group-service-items": {
@@ -1274,28 +1274,28 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
       if (!s) return null;
       return {
         id: s._id,
-        title: s.group_service_item_title,
-        slug: s.group_service_slug,
-        description: s.group_service_item_description,
-        short_description: s.group_service_item_description2,
-        featured_description: s.group_service_item_description,
-        image: buildImg(s.group_service_item_thumbnail),
-        legacyImageUrl: buildImg(s.group_service_item_thumbnail),
-        group_service_item_title: s.group_service_item_title,
-        group_service_item_description: s.group_service_item_description,
-        category: { id: s.group_service_category_id },
+        title: s.title,
+        slug: s.slug,
+        description: s.description,
+        short_description: s.description2,
+        featured_description: s.description,
+        image: buildImg(s.thumbnail),
+        legacyImageUrl: buildImg(s.thumbnail),
+        title: s.title,
+        description: s.description,
+        category: { id: s.groupServiceCategoryId },
         group_top_banner: [],
         group_single_service_portfolio_category: (data?.portfolio ?? []).map(
           (cat: any) => ({
             id: cat._id,
-            category_name: cat.portfolio_category_name,
+            category_name: cat.name,
             items: (cat.items ?? []).map((it: any) => ({
               id: it._id,
-              title: it.portfolio_item_title,
+              title: it.title,
               slug: it.slug || "",
-              image: buildImg(it.portfolio_item_image),
-              video_url: it.portfolio_item_video_url,
-              description: it.portfolio_item_title,
+              image: buildImg(it.image),
+              video_url: it.videoUrl,
+              description: it.title,
             })),
           }),
         ),

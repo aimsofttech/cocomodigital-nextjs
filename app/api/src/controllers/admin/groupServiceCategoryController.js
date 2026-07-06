@@ -6,22 +6,22 @@ const ServiceItem = require('../../models/ServiceItem');
 const createCrudController = require('./crudFactory');
 
 const base = createCrudController(GroupServiceCategory, {
-  searchFields: ['group_service_category_name'],
-  defaultSort: { display_order: 1 },
+  searchFields: ['name'],
+  defaultSort: { displayOrder: 1 },
   // Resolve the linked Department (explore_our_service_category) and Category
   // (explore_our_service_item) display names for the list/detail responses.
   lookups: [
     {
-      localField: 'explore_our_service_category_id',
+      localField: 'exploreOurServiceCategoryId',
       model: ServiceCategory,
       nameField: 'name',
-      as: 'department_name',
+      as: 'departmentName',
     },
     {
-      localField: 'explore_our_service_item_id',
+      localField: 'exploreOurServiceItemId',
       model: ServiceItem,
       nameField: 'title',
-      as: 'category_name',
+      as: 'categoryName',
     },
   ],
 });
@@ -55,13 +55,13 @@ const countByField = async (Model, field, values) => {
 };
 
 // Attach a `navigation` array ([{ segment, label, count }]) to each category:
-//  - Group Service Items: group_service_item linked by group_service_category_id
+//  - Group Service Items: group_service_item linked by groupServiceCategoryId
 const attachNavigation = async (cats) => {
   if (!cats.length) return cats;
 
   const itemCounts = await countByField(
     GroupServiceItem,
-    'group_service_category_id',
+    'groupServiceCategoryId',
     cats.map((c) => c._id)
   );
 

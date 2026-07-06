@@ -15,8 +15,8 @@ export default function PortfolioItemList() {
   const itemId = searchParams.get('groupServiceItemId') || '';
   const categoryId = searchParams.get('portfolioCategoryId') || '';
   const scope = itemId
-    ? { group_service_item_id: itemId }
-    : categoryId ? { portfolio_category_id: categoryId } : {};
+    ? { groupServiceItemId: itemId }
+    : categoryId ? { portfolioCategoryId: categoryId } : {};
   const scopeKey = JSON.stringify(scope);
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
@@ -43,11 +43,11 @@ export default function PortfolioItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'portfolio_item_image', label: 'Image', render: (row: any) => <ImageCell src={row.portfolio_item_image || row.portfolio_video_thumbnail} /> },
-    { key: 'portfolio_item_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.portfolio_item_video_url || row.portfolio_video_url} thumbnail={row.portfolio_item_image || row.portfolio_video_thumbnail} /> },
-    { key: 'portfolio_item_title', label: 'Title', sortable: true, render: (row: any) => row.portfolio_item_title || 'N/A' },
-    { key: 'portfolio_category_name', label: 'Portfolio Category', render: (row: any) => row.portfolio_category_name || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.videoThumbnail} /> },
+    { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.videoUrl} thumbnail={row.image || row.videoThumbnail} /> },
+    { key: 'title', label: 'Title', sortable: true, render: (row: any) => row.title || 'N/A' },
+    { key: 'name', label: 'Portfolio Category', render: (row: any) => row.categoryName || 'N/A' },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

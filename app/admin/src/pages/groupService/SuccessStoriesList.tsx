@@ -24,7 +24,7 @@ export default function SuccessStoriesList() {
     { key: 'success_stories_img', label: 'Image', render: (row: any) => <ImageCell src={row.success_stories_img} /> },
     { key: 'success_stories_title', label: 'Title', sortable: true },
     { key: 'success_stories_url', label: 'URL', sortable: true, render: (row: any) => row.success_stories_url ? <a href={row.success_stories_url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.success_stories_url}</a> : 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

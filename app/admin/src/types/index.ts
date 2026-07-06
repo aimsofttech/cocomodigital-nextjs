@@ -194,16 +194,16 @@ export interface JobApplicant extends BaseModel {
 }
 
 export interface GroupServiceCategory extends BaseModel {
-  service_item_id?: string | ServiceItem;
-  group_service_category_name: string;
+  serviceItemId?: string | ServiceItem;
+  name: string;
 }
 
 export interface GroupServiceItem extends BaseModel {
-  group_service_category_id: string | GroupServiceCategory;
-  group_service_item_title: string;
-  group_service_item_slug?: string;
-  group_service_item_thumbnail?: string;
-  group_service_item_description?: string;
+  groupServiceCategoryId: string | GroupServiceCategory;
+  title: string;
+  slug?: string;
+  thumbnail?: string;
+  description?: string;
 }
 
 export interface AuthorTemplate extends BaseModel {
@@ -250,7 +250,7 @@ export interface Faq extends BaseModel {
 }
 
 export interface GroupServiceItemFaq extends BaseModel {
-  group_service_item_id?: string;
+  groupServiceItemId?: string;
   slug?: string;
   question: string;
   answer: string;
