@@ -42,13 +42,28 @@ export default function PerformanceModuleList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All-campaign dropdown options for the server-side Campaign filter.
+  const [campaignOptions, setCampaignOptions] = useState<any[]>([]);
+  useEffect(() => {
+    marketingHouseItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setCampaignOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'marketingHouseItemId', label: 'Campaign', type: 'select' as const,
+      options: [{ value: '', label: 'All Campaigns' }, ...campaignOptions.map((it: any) => ({ value: it._id, label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'performance_image', label: 'Image', render: (row: any) => <ImageCell src={row.performance_image || row.image} alt={row.performance_title} /> },
     { key: 'performance_video_url', label: 'Video', render: (row: any) => <VideoCell src={row.performance_video_url} thumbnail={row.performance_image || row.image} /> },
     { key: 'performance_title', label: 'Title', sortable: true, render: (row: any) => row.performance_title || row.title || 'N/A' },
     { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
-    { key: 'itemName', label: 'Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'itemName', label: 'Campaign', render: (row: any) => row.itemName || 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

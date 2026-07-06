@@ -48,11 +48,25 @@ export default function CommunityProgramItemModuleList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All-campaign dropdown options for the server-side Campaign filter.
+  const [campaignOptions, setCampaignOptions] = useState<any[]>([]);
+  useEffect(() => {
+    marketingHouseItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setCampaignOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'marketingHouseItemId', label: 'Campaign', type: 'select' as const,
+      options: [{ value: '', label: 'All Campaigns' }, ...campaignOptions.map((it: any) => ({ value: it._id, label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.videoThumbnail || row.image} alt="continuity" /> },
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.videoFile || row.item_video_url} thumbnail={row.videoThumbnail || row.image} /> },
-    { key: 'description', label: 'Description', render: (row: any) => <span className="line-clamp-2 max-w-xs block">{row.description || row.item_title || row.title || 'N/A'}</span> },
     { key: 'name', label: 'Continuity Category', render: (row: any) => row.name || 'N/A' },
     { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
     { key: 'itemName', label: 'Marketing Campaign', render: (row: any) => row.itemName || 'N/A' },

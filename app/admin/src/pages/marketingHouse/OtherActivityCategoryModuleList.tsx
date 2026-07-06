@@ -41,7 +41,22 @@ export default function OtherActivityCategoryModuleList() {
   const handleFilterChange = (params: Record<string, any>) =>
     setFilterParams({ ...(itemId ? { marketingHouseItemId: itemId } : {}), ...params });
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All-campaign dropdown options for the server-side Campaign filter.
+  const [campaignOptions, setCampaignOptions] = useState<any[]>([]);
+  useEffect(() => {
+    marketingHouseItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setCampaignOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'marketingHouseItemId', label: 'Campaign', type: 'select' as const,
+      options: [{ value: '', label: 'All Campaigns' }, ...campaignOptions.map((it: any) => ({ value: it._id, label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'name', label: 'Category Name', sortable: true, render: (row: any) => row.name || 'N/A' },
     { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },

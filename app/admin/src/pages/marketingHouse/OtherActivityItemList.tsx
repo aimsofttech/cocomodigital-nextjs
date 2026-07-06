@@ -26,7 +26,6 @@ export default function OtherActivityItemList() {
     { key: 'image1', label: 'Image 1', render: (row: any) => <ImageCell src={row.image1} /> },
     { key: 'video1', label: 'Video 1', render: (row: any) => <VideoCell src={row.video1} thumbnail={row.image1} /> },
     { key: 'title', label: 'Title', sortable: true },
-    { key: 'description', label: 'Description', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-xs">{row.description || 'N/A'}</span> },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

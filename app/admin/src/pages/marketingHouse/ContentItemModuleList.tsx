@@ -48,7 +48,22 @@ export default function ContentItemModuleList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All-campaign dropdown options for the server-side Campaign filter.
+  const [campaignOptions, setCampaignOptions] = useState<any[]>([]);
+  useEffect(() => {
+    marketingHouseItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setCampaignOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'marketingHouseItemId', label: 'Campaign', type: 'select' as const,
+      options: [{ value: '', label: 'All Campaigns' }, ...campaignOptions.map((it: any) => ({ value: it._id, label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.image} alt="content" /> },
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.url || row.upload_video_url || row.item_video_url} thumbnail={row.image || row.image} /> },

@@ -47,12 +47,27 @@ export default function MarketingFaqList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All-campaign dropdown options for the server-side Campaign filter.
+  const [campaignOptions, setCampaignOptions] = useState<any[]>([]);
+  useEffect(() => {
+    marketingHouseItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setCampaignOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'marketingHouseItemId', label: 'Campaign', type: 'select' as const,
+      options: [{ value: '', label: 'All Campaigns' }, ...campaignOptions.map((it: any) => ({ value: it._id, label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'question', label: 'Question', sortable: true, render: (row: any) => <span className="font-medium">{row.question || 'N/A'}</span> },
     { key: 'answer', label: 'Answer', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-md">{row.answer || 'N/A'}</span> },
     { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
-    { key: 'itemName', label: 'Item', render: (row: any) => row.itemName || 'N/A' },
+    { key: 'itemName', label: 'Campaign', render: (row: any) => row.itemName || 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

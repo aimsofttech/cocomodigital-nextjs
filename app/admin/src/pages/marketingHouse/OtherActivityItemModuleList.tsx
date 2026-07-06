@@ -60,15 +60,26 @@ export default function OtherActivityItemModuleList() {
   const handleFilterChange = (params: Record<string, any>) =>
     setFilterParams({ ...scopeFilter, ...params });
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
+  // All-campaign dropdown options for the server-side Campaign filter.
+  const [campaignOptions, setCampaignOptions] = useState<any[]>([]);
+  useEffect(() => {
+    marketingHouseItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setCampaignOptions(data.data || []))
+      .catch(() => {});
+  }, []);
+
+  const FILTER_FIELDS = [
+    { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'marketingHouseItemId', label: 'Campaign', type: 'select' as const,
+      options: [{ value: '', label: 'All Campaigns' }, ...campaignOptions.map((it: any) => ({ value: it._id, label: it.title || it.slug || it._id }))],
+    },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+  ];
   const columns = [
     { key: 'image1', label: 'Image', render: (row: any) => <ImageCell src={row.image1 || row.image2 || row.image3 || row.image4 || row.image} alt="activity" /> },
     { key: 'video1', label: 'Video', render: (row: any) => <VideoCell src={row.video1 || row.video2 || row.video3 || row.video4 || row.video_url} thumbnail={row.image1 || row.image2 || row.image} /> },
     { key: 'title', label: 'Title', sortable: true, render: (row: any) => row.title || 'N/A' },
-    { key: 'description', label: 'Description', render: (row: any) => {
-      const text = String(row.description || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-      return <span className="text-xs text-gray-600 line-clamp-2 max-w-md min-w-[20rem] block" title={text}>{text || 'N/A'}</span>;
-    } },
     { key: 'other_activity_name', label: 'Activity Category', render: (row: any) => row.other_activity_name || 'N/A' },
     { key: 'categoryName', label: 'Marketing Category', render: (row: any) => row.categoryName || 'N/A' },
     { key: 'itemName', label: 'Marketing Campaign', render: (row: any) => row.itemName || 'N/A' },
