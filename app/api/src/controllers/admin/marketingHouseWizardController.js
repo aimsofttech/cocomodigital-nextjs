@@ -3,7 +3,6 @@ const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const MarketingHouseImage = require('../../models/MarketingHouseImage');
 const MarketingHouseStatics = require('../../models/MarketingHouseStatics');
 const MarketingHousePerformance = require('../../models/MarketingHousePerformance');
-const MarketingHousePreLaunchActivity = require('../../models/MarketingHousePreLaunchActivity');
 const MarketingHouseIdeaStrategyPlanning = require('../../models/MarketingHouseIdeaStrategyPlanning');
 const { generateSlug } = require('../../utils/helpers');
 const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
@@ -93,11 +92,6 @@ const storeStep7 = async (req, res) => {
   if (data.step3?.performance) {
     for (const p of data.step3.performance) {
       await MarketingHousePerformance.create({ ...p, marketingHouseItemId: item._id, userId: req.user._id });
-    }
-  }
-  if (data.step4?.pre_launch) {
-    for (const p of data.step4.pre_launch) {
-      await MarketingHousePreLaunchActivity.create({ ...p, marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
   if (data.step5?.idea_strategy) {

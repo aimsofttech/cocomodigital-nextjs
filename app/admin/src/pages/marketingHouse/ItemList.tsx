@@ -16,7 +16,6 @@ const SEGMENT_ROUTE: Record<string, string> = {
   'statics': '/marketing/highlights',
   'images': '/marketing/poster-media',
   'idea-strategy': '/marketing/idea-strategy-planning',
-  'pre-launch': '/marketing/pre-launch-activity',
   'performance': '/marketing/performance',
   'other-activity-category': '/marketing/add-on-activities-category',
   'other-activity-item': '/marketing/add-on-activities-item',
@@ -38,15 +37,14 @@ const targetHref = (segment: string, itemId: string) => {
 // (e.g. older payload or counts unavailable). The canonical source is the
 // backend, which derives targets + counts from the sub-module collections.
 const NAV_LINKS: NavTarget[] = [
-  { label: 'Highlights', segment: 'statics' },
   { label: 'Poster Media', segment: 'images' },
-  { label: 'Ideas Strategy', segment: 'idea-strategy' },
-  { label: 'Prelaunch', segment: 'pre-launch' },
-  { label: 'Performance', segment: 'performance' },
+  { label: 'Highlights', segment: 'statics' },
+  { label: 'Our Activities', segment: 'idea-strategy' },
   { label: 'Other Act. Cat.', segment: 'other-activity-category' },
   { label: 'Other Act. Items', segment: 'other-activity-item' },
   { label: 'Content Category', segment: 'content-category' },
   { label: 'Content Items', segment: 'content-item' },
+  { label: 'Performance', segment: 'performance' },
   { label: 'Continuity Cat.', segment: 'community-program' },
   { label: 'Continuity Items', segment: 'community-program-item' },
   { label: 'FAQ', segment: 'faq' },
@@ -56,6 +54,7 @@ const NAV_LINKS: NavTarget[] = [
 // shortened labels (e.g. 'Other Act. Cat.'); this overrides them for display
 // only — the API (segments/routes and backend labels) stays unchanged.
 const DISPLAY_LABEL: Record<string, string> = {
+  'idea-strategy': 'Our Activities',
   'other-activity-category': 'Add-on Activities Categories',
   'other-activity-item': 'Add-on Activities Items',
   'content-category': 'Content Categories',

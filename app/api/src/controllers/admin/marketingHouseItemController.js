@@ -12,15 +12,14 @@ const { parseCsvOrExcel } = require('../../utils/helpers');
 // so options stay in sync with the actual sub-module collections rather than a
 // hard-coded front-end list.
 const NAV_TARGETS = [
-  { segment: 'statics',                 label: 'Highlights',       model: require('../../models/MarketingHouseStatics') },
   { segment: 'images',                  label: 'Poster Media',     model: require('../../models/MarketingHouseImage') },
-  { segment: 'idea-strategy',           label: 'Ideas Strategy',   model: require('../../models/MarketingHouseIdeaStrategyPlanning') },
-  { segment: 'pre-launch',              label: 'Prelaunch',        model: require('../../models/MarketingHousePreLaunchActivity') },
-  { segment: 'performance',             label: 'Performance',      model: require('../../models/MarketingHousePerformance') },
+  { segment: 'statics',                 label: 'Highlights',       model: require('../../models/MarketingHouseStatics') },
+  { segment: 'idea-strategy',           label: 'Our Activities',   model: require('../../models/MarketingHouseIdeaStrategyPlanning') },
   { segment: 'other-activity-category', label: 'Other Act. Cat.',  model: require('../../models/MarketingHouseOtherActivityCategory') },
   { segment: 'other-activity-item',     label: 'Other Act. Items', model: require('../../models/MarketingHouseOtherActivityItem') },
   { segment: 'content-category',        label: 'Content Category', model: require('../../models/MarketingHouseContentCreatedCategory') },
   { segment: 'content-item',            label: 'Content Items',    model: require('../../models/MarketingHouseContentCreatedItem') },
+  { segment: 'performance',             label: 'Performance',      model: require('../../models/MarketingHousePerformance') },
   { segment: 'community-program',       label: 'Continuity Cat.',  model: require('../../models/MarketingHouseCommunityProgramCategory') },
   { segment: 'community-program-item',  label: 'Continuity Items', model: require('../../models/MarketingHouseCommunityProgramCategoryItem') },
   { segment: 'faq',                     label: 'FAQ',              model: require('../../models/Faq') },

@@ -297,7 +297,7 @@ export default function BulkUpload() {
           <p className="text-sm text-gray-600">Single-level section columns (JSON array of objects):</p>
           <ul className="text-xs text-gray-600 list-disc pl-4 space-y-0.5">
             <li><code>highlights</code>, <code>poster_media</code></li>
-            <li><code>idea_strategy</code>, <code>pre_launch</code></li>
+            <li><code>idea_strategy</code></li>
             <li><code>performance</code>, <code>faqs</code>, <code>projects</code></li>
           </ul>
           <p className="text-sm text-gray-600">

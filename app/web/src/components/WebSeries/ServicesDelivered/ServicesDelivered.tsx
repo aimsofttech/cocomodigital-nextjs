@@ -14,7 +14,7 @@ import React, { useMemo } from "react";
  *                                 Video SEO / Community Management /
  *                                 [category name as-is fallback]
  *   - ideas_strategy_planning   → Strategy & Planning
- *   - pre_launch_activity       → Pre-Launch Activations
+ *   - ideas_strategy_planning   → Campaign Strategy & Planning (merged "Our Activities")
  *   - performance               → Performance Analytics
  *
  * Plus one always-on label ("YouTube Channel Growth") since that's
@@ -70,7 +70,6 @@ function deduceServices(itemData) {
 
   // Strategy
   if (itemData.ideas_strategy_planning?.length) services.add("Strategy & Planning");
-  if (itemData.pre_launch_activity?.length) services.add("Pre-Launch Activations");
 
   // Reporting
   if (itemData.performance?.length) services.add("Performance Analytics");

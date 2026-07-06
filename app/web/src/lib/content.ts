@@ -649,20 +649,14 @@ const adaptMarketingDetail = (d: any) => {
       video_url: i.videoUrl || "",
       marketing_video: i.video,
     })),
-    /* StrategyExecution "Our Activities" — ideas + pre-launch rows */
-    ideas_strategy_planning: arr<any>(d.idea_strategy).map((i) => ({
+    /* StrategyExecution "Our Activities" rows (pre-launch rows were merged
+       into idea_strategy; d.pre_launch kept as a legacy fallback). */
+    ideas_strategy_planning: [...arr<any>(d.idea_strategy), ...arr<any>(d.pre_launch)].map((i) => ({
       id: i._id,
       marketingHouseItemId: i.marketingHouseItemId,
       title: i.title,
       description: i.description,
       image: buildImg(i.image),
-    })),
-    pre_launch_activity: arr<any>(d.pre_launch).map((p) => ({
-      id: p._id,
-      marketingHouseItemId: p.marketingHouseItemId,
-      title: p.title,
-      description: p.description,
-      image: buildImg(p.image),
     })),
     /* CampaignPerformance rows */
     performance: arr<any>(d.performances).map((p) => ({

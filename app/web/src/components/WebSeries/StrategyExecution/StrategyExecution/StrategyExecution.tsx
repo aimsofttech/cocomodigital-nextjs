@@ -1,17 +1,10 @@
 // @ts-nocheck
 import StrategyExecutionSection from "../StrategyExecutionSection/StrategyExecutionSection";
 const StrategyExecution = ({ itemData }) => {
-    const ideas_strategy_planning = itemData?.ideas_strategy_planning?.map(obj => ({
+    const data = (itemData?.ideas_strategy_planning ?? []).map(obj => ({
         ...obj,
         type: "ideas"
     }));
-
-    const pre_launch_activity = itemData?.pre_launch_activity?.map(obj => ({
-        ...obj,
-        type: "pre-launch"
-    }));
-
-    const data = [...ideas_strategy_planning, ...pre_launch_activity];
 
     return (
         <div

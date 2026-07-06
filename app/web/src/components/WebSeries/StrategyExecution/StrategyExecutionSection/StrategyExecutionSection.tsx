@@ -35,11 +35,6 @@ const StrategyExecutionSection = ({ data, index }) => {
             {data?.type === "ideas" && <EditLink
               path={`${ADMIN_URL}/marketing_house/marketing_house_idea_strategy_planning/show/${data?.id}`}
             />}
-            {data?.type === "pre-launch" &&
-              <EditLink
-                path={`${ADMIN_URL}/marketing_house/marketing_house_pre_launch_activity/show/${data?.id}/${data?.marketing_house_item_id}`}
-              />
-            }
           </h2>
           {isHTML(data?.description) ? (
             <div
@@ -63,11 +58,6 @@ const StrategyExecutionSection = ({ data, index }) => {
             {data?.type === "ideas" && <EditLink
               path={`${ADMIN_URL}/marketing_house/marketing_house_idea_strategy_planning/show/${data?.id}`}
             />}
-            {data?.type === "pre-launch" &&
-              <EditLink
-                path={`${ADMIN_URL}/marketing_house/marketing_house_pre_launch_activity/show/${data?.id}/${data?.marketing_house_item_id}`}
-              />
-            }
           </h2>
           <div
             style={{ borderRadius: "10px" }}

@@ -30,12 +30,12 @@ export default function IdeaStrategyList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Idea & Strategy" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Idea Strategy' }]}
+    <CrudListPage title="Our Activities" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Our Activities' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <IdeaStrategyForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
-      modalTitle={(mode) => mode === 'edit' ? 'Edit Idea Strategy' : 'Add Idea Strategy'}
+      modalTitle={(mode) => mode === 'edit' ? 'Edit Our Activities' : 'Add Our Activities'}
       csv={{
         api: marketingHouseIdeaStrategyApi,
         exportParams: itemId ? { marketingHouseItemId: itemId } : undefined,

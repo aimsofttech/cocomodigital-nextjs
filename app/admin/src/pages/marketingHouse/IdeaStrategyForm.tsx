@@ -62,7 +62,7 @@ export default function IdeaStrategyForm({ onSuccess, onCancel, editId }: Props 
   if (isModal) return form;
   return (
     <div>
-      <PageHeader title={isEdit ? 'Edit Idea Strategy Planning' : 'Add Idea Strategy Planning'} breadcrumbs={[{ label: 'Idea Strategy Planning', path: '../' }, { label: isEdit ? 'Edit' : 'Add' }]} />
+      <PageHeader title={isEdit ? 'Edit Our Activities' : 'Add Our Activities'} breadcrumbs={[{ label: 'Our Activities', path: '../' }, { label: isEdit ? 'Edit' : 'Add' }]} />
       <div className="card max-w-2xl">{form}</div>
     </div>
   );

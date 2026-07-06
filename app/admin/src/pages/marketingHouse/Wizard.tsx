@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import {
   marketingHouseItemApi,
   marketingHouseStaticsApi, marketingHouseImageApi, marketingHouseIdeaStrategyApi,
-  marketingHousePreLaunchApi, marketingHousePerformanceApi,
+  marketingHousePerformanceApi,
   marketingHouseOtherActivityCategoryApi, marketingHouseOtherActivityItemApi,
   marketingHouseContentCategoryApi, marketingHouseContentItemApi,
   marketingHouseCommunityProgramApi, marketingHouseCommunityProgramItemApi,
@@ -16,7 +16,6 @@ import ItemForm from './ItemForm';
 import HighlightsForm from './HighlightsForm';
 import PosterMediaForm from './PosterMediaForm';
 import IdeaStrategyPlanningForm from './IdeaStrategyPlanningForm';
-import PreLaunchActivityForm from './PreLaunchActivityForm';
 import PerformanceModuleForm from './PerformanceModuleForm';
 import OtherActivityCategoryModuleForm from './OtherActivityCategoryModuleForm';
 import OtherActivityItemModuleForm from './OtherActivityItemModuleForm';
@@ -40,17 +39,17 @@ interface SectionStep {
   managePath: string;
 }
 
-// Steps 2..13 — one per existing item-section module, saved via its existing API.
+// One step per existing item-section module, ordered exactly like the sections
+// on the public campaign page (/marketing/<slug>).
 const SECTION_STEPS: SectionStep[] = [
-  { key: 'statics',                label: 'Highlights',                  hint: 'Key stats shown on the campaign page (e.g. Platform: 100+).', Form: HighlightsForm,                    api: marketingHouseStaticsApi,               managePath: '/marketing/highlights' },
   { key: 'images',                 label: 'Poster Media',                hint: 'Poster images and media assets for the campaign.',            Form: PosterMediaForm,                   api: marketingHouseImageApi,                 managePath: '/marketing/poster-media' },
-  { key: 'idea-strategy',          label: 'Idea Strategy Planning',      hint: 'Strategy and planning entries for the campaign.',             Form: IdeaStrategyPlanningForm,          api: marketingHouseIdeaStrategyApi,          managePath: '/marketing/idea-strategy-planning' },
-  { key: 'pre-launch',             label: 'PreLaunched Activity',        hint: 'Activities executed before the launch.',                      Form: PreLaunchActivityForm,             api: marketingHousePreLaunchApi,             managePath: '/marketing/pre-launch-activity' },
-  { key: 'performance',            label: 'Performance',                 hint: 'Performance media and results (reach, engagement…).',         Form: PerformanceModuleForm,             api: marketingHousePerformanceApi,           managePath: '/marketing/performance' },
+  { key: 'statics',                label: 'Highlights',                  hint: 'Key stats shown on the campaign page (e.g. Platform: 100+).', Form: HighlightsForm,                    api: marketingHouseStaticsApi,               managePath: '/marketing/highlights' },
+  { key: 'idea-strategy',          label: 'Our Activities',              hint: 'Strategy, planning and launch activities for the campaign.',  Form: IdeaStrategyPlanningForm,          api: marketingHouseIdeaStrategyApi,          managePath: '/marketing/idea-strategy-planning' },
   { key: 'other-activity-category', label: 'Add-on Activities Categories', hint: 'Categories grouping the add-on activities.',                Form: OtherActivityCategoryModuleForm,   api: marketingHouseOtherActivityCategoryApi, managePath: '/marketing/add-on-activities-category' },
   { key: 'other-activity-item',    label: 'Add-on Activities Items',     hint: 'Individual add-on activity entries.',                         Form: OtherActivityItemModuleForm,       api: marketingHouseOtherActivityItemApi,     managePath: '/marketing/add-on-activities-item' },
   { key: 'content-category',       label: 'Content Categories',          hint: 'Categories grouping the campaign content.',                   Form: ContentCategoryModuleForm,         api: marketingHouseContentCategoryApi,       managePath: '/marketing/content-category' },
   { key: 'content-item',           label: 'Content Items',               hint: 'Individual content entries (videos, posts…).',                Form: ContentItemModuleForm,             api: marketingHouseContentItemApi,           managePath: '/marketing/content-item' },
+  { key: 'performance',            label: 'Performance',                 hint: 'Performance media and results (reach, engagement…).',         Form: PerformanceModuleForm,             api: marketingHousePerformanceApi,           managePath: '/marketing/performance' },
   { key: 'community-program',      label: 'Continuity Category',         hint: 'Continuity / community program categories.',                  Form: CommunityProgramModuleForm,        api: marketingHouseCommunityProgramApi,      managePath: '/marketing/community-program' },
   { key: 'community-program-item', label: 'Continuity Items',            hint: 'Continuity / community program entries.',                     Form: CommunityProgramItemModuleForm,    api: marketingHouseCommunityProgramItemApi,  managePath: '/marketing/community-program-item' },
   { key: 'faq',                    label: 'FAQ',                         hint: 'Frequently asked questions for the campaign.',                Form: MarketingFaqForm,                  api: marketingHouseFaqApi,                   managePath: '/marketing/faq' },

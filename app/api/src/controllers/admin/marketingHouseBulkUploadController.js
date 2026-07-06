@@ -7,7 +7,7 @@
  * single CSV/XLSX file. Each row becomes one Marketing House *item* plus ALL of
  * its related sections, supplied as JSON cells:
  *   • single-level sections (one JSON array of objects):
- *       highlights, poster_media, idea_strategy, pre_launch, performance,
+ *       highlights, poster_media, idea_strategy, performance,
  *       faqs, projects
  *   • two-level sections (JSON array of categories, each with nested `items`,
  *     and content items may carry nested `carousels`):
@@ -32,7 +32,6 @@ const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const MarketingHouseStatics = require('../../models/MarketingHouseStatics');
 const MarketingHouseImage = require('../../models/MarketingHouseImage');
 const MarketingHouseIdeaStrategyPlanning = require('../../models/MarketingHouseIdeaStrategyPlanning');
-const MarketingHousePreLaunchActivity = require('../../models/MarketingHousePreLaunchActivity');
 const MarketingHousePerformance = require('../../models/MarketingHousePerformance');
 const Faq = require('../../models/Faq');
 const MarketingHouseProject = require('../../models/MarketingHouseProject');
@@ -72,13 +71,6 @@ const SECTIONS = [
     key: 'idea_strategy',
     label: 'Idea Strategy Planning',
     model: MarketingHouseIdeaStrategyPlanning,
-    fields: ['title', 'description', 'image'],
-    required: ['title'],
-  },
-  {
-    key: 'pre_launch',
-    label: 'PreLaunch Activity',
-    model: MarketingHousePreLaunchActivity,
     fields: ['title', 'description', 'image'],
     required: ['title'],
   },
@@ -403,9 +395,6 @@ const downloadTemplate = async (req, res) => {
     ]),
     idea_strategy: JSON.stringify([
       { title: 'Strategy', description: 'The plan', image: 'https://example.com/s1.jpg' },
-    ]),
-    pre_launch: JSON.stringify([
-      { title: 'Teaser', description: 'Pre-launch teaser', image: '' },
     ]),
     performance: JSON.stringify([
       {

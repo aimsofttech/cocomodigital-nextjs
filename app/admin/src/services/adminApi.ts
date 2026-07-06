@@ -46,7 +46,6 @@ export const marketingHouseItemApi = {
 export const marketingHouseImageApi = createCrudService('marketing-house/image');
 export const marketingHouseStaticsApi = createCrudService('marketing-house/statics');
 export const marketingHousePerformanceApi = createCrudService('marketing-house/performance');
-export const marketingHousePreLaunchApi = createCrudService('marketing-house/pre-launch');
 export const marketingHouseIdeaStrategyApi = createCrudService('marketing-house/idea-strategy');
 export const marketingHouseOtherActivityCategoryApi = createCrudService('marketing-house/other-activity-category');
 export const marketingHouseOtherActivityItemApi = createCrudService('marketing-house/other-activity-item');

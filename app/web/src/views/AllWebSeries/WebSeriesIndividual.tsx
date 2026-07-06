@@ -77,9 +77,6 @@ const WebSeriesIndividual = () => {
         ideas_strategy_planning: Array.isArray(d.ideas_strategy_planning)
           ? d.ideas_strategy_planning.map(adaptNestedRow)
           : [],
-        pre_launch_activity: Array.isArray(d.pre_launch_activity)
-          ? d.pre_launch_activity.map(adaptNestedRow)
-          : [],
         performance: Array.isArray(d.performance)
           ? d.performance.map(adaptNestedRow)
           : [],
@@ -139,7 +136,7 @@ const WebSeriesIndividual = () => {
           <ServicesDelivered itemData={itemData} />
           {/* <ClientRequirement itemData={itemData} /> */}
 
-          {(itemData?.ideas_strategy_planning?.length || itemData?.pre_launch_activity?.length) &&
+          {itemData?.ideas_strategy_planning?.length > 0 &&
             <StrategyExecution itemData={itemData} />
           }
 

@@ -64,15 +64,14 @@ const navigation: NavItem[] = [
       {
         label: 'Campaigns Section', icon: RectangleStackIcon,
         children: [
-          { label: 'Highlights', path: '/marketing/highlights', icon: StarIcon },
           { label: 'Poster Media', path: '/marketing/poster-media', icon: PhotoIcon },
-          { label: 'Idea Strategy Planning', path: '/marketing/idea-strategy-planning', icon: SparklesIcon },
-          { label: 'PreLaunched Activity', path: '/marketing/pre-launch-activity', icon: RocketLaunchIcon },
-          { label: 'Performance', path: '/marketing/performance', icon: ChartBarIcon },
+          { label: 'Highlights', path: '/marketing/highlights', icon: StarIcon },
+          { label: 'Our Activities', path: '/marketing/idea-strategy-planning', icon: SparklesIcon },
           { label: 'Add-on Activities Categories', path: '/marketing/add-on-activities-category', icon: Squares2X2Icon },
           { label: 'Add-on Activities Items', path: '/marketing/add-on-activities-item', icon: ListBulletIcon },
           { label: 'Content Categories', path: '/marketing/content-category', icon: TagIcon },
           { label: 'Content Items', path: '/marketing/content-item', icon: RectangleStackIcon },
+          { label: 'Performance', path: '/marketing/performance', icon: ChartBarIcon },
           { label: 'Continuity Category', path: '/marketing/community-program', icon: UserGroupIcon },
           { label: 'Continuity Items', path: '/marketing/community-program-item', icon: ListBulletIcon },
           { label: 'FAQ', path: '/marketing/faq', icon: QuestionMarkCircleIcon },

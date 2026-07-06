@@ -4,7 +4,6 @@ const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const MarketingHouseImage = require('../../models/MarketingHouseImage');
 const MarketingHouseStatics = require('../../models/MarketingHouseStatics');
 const MarketingHousePerformance = require('../../models/MarketingHousePerformance');
-const MarketingHousePreLaunchActivity = require('../../models/MarketingHousePreLaunchActivity');
 const MarketingHouseIdeaStrategyPlanning = require('../../models/MarketingHouseIdeaStrategyPlanning');
 const MarketingHouseOtherActivityCategory = require('../../models/MarketingHouseOtherActivityCategory');
 const MarketingHouseOtherActivityItem = require('../../models/MarketingHouseOtherActivityItem');
@@ -69,11 +68,10 @@ const getSingleMarketingHouse = async (req, res) => {
   };
   const itemIds = idVariants(item._id);
 
-  const [images, statics, performances, preLaunch, ideaStrategy, otherActivityCats, contentCats, carousels, communityProgramCats, faqs] = await Promise.all([
+  const [images, statics, performances, ideaStrategy, otherActivityCats, contentCats, carousels, communityProgramCats, faqs] = await Promise.all([
     MarketingHouseImage.find({ marketingHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
     MarketingHouseStatics.find({ marketingHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
     MarketingHousePerformance.find({ marketingHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
-    MarketingHousePreLaunchActivity.find({ marketingHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
     MarketingHouseIdeaStrategyPlanning.find({ marketingHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
     MarketingHouseOtherActivityCategory.find({ marketingHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
     MarketingHouseContentCreatedCategory.find({ marketingHouseItemId: { $in: itemIds }, status: 1 }).sort({ displayOrder: 1 }),
@@ -126,7 +124,6 @@ const getSingleMarketingHouse = async (req, res) => {
       images: images.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
       statics,
       performances: performances.map((p) => ({ ...p.toObject(), performance_image: buildUrl(p.performance_image) })),
-      pre_launch: preLaunch.map((p) => ({ ...p.toObject(), image: buildUrl(p.image) })),
       idea_strategy: ideaStrategy.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
       other_activities: otherActivityData,
       content_created: contentData,

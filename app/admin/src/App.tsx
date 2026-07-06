@@ -37,7 +37,6 @@ const MarketingImageList = lazy(() => import('@/pages/marketingHouse/ImageList')
 const MarketingImageForm = lazy(() => import('@/pages/marketingHouse/ImageForm'));
 const MarketingPosterMediaList = lazy(() => import('@/pages/marketingHouse/PosterMediaList'));
 const MarketingIdeaStrategyPlanningList = lazy(() => import('@/pages/marketingHouse/IdeaStrategyPlanningList'));
-const MarketingPreLaunchActivityList = lazy(() => import('@/pages/marketingHouse/PreLaunchActivityList'));
 const MarketingPerformanceModuleList = lazy(() => import('@/pages/marketingHouse/PerformanceModuleList'));
 const MarketingOtherActivityCategoryModuleList = lazy(() => import('@/pages/marketingHouse/OtherActivityCategoryModuleList'));
 const MarketingOtherActivityItemModuleList = lazy(() => import('@/pages/marketingHouse/OtherActivityItemModuleList'));
@@ -51,8 +50,6 @@ const MarketingStaticsList = lazy(() => import('@/pages/marketingHouse/StaticsLi
 const MarketingStaticsForm = lazy(() => import('@/pages/marketingHouse/StaticsForm'));
 const MarketingPerformanceList = lazy(() => import('@/pages/marketingHouse/PerformanceList'));
 const MarketingPerformanceForm = lazy(() => import('@/pages/marketingHouse/PerformanceForm'));
-const MarketingPreLaunchList = lazy(() => import('@/pages/marketingHouse/PreLaunchList'));
-const MarketingPreLaunchForm = lazy(() => import('@/pages/marketingHouse/PreLaunchForm'));
 const MarketingIdeaStrategyList = lazy(() => import('@/pages/marketingHouse/IdeaStrategyList'));
 const MarketingIdeaStrategyForm = lazy(() => import('@/pages/marketingHouse/IdeaStrategyForm'));
 const MarketingOtherActivityCategoryList = lazy(() => import('@/pages/marketingHouse/OtherActivityCategoryList'));
@@ -238,7 +235,6 @@ export default function App() {
           <Route path="marketing/highlights" element={<MarketingHighlightsList />} />
           <Route path="marketing/poster-media" element={<MarketingPosterMediaList />} />
           <Route path="marketing/idea-strategy-planning" element={<MarketingIdeaStrategyPlanningList />} />
-          <Route path="marketing/pre-launch-activity" element={<MarketingPreLaunchActivityList />} />
           <Route path="marketing/performance" element={<MarketingPerformanceModuleList />} />
           <Route path="marketing/add-on-activities-category" element={<MarketingOtherActivityCategoryModuleList />} />
           <Route path="marketing/add-on-activities-item" element={<MarketingOtherActivityItemModuleList />} />
@@ -259,9 +255,6 @@ export default function App() {
           <Route path="marketing/item/:itemId/performance" element={<MarketingPerformanceList />} />
           <Route path="marketing/item/:itemId/performance/add" element={<MarketingPerformanceForm />} />
           <Route path="marketing/item/:itemId/performance/edit/:id" element={<MarketingPerformanceForm />} />
-          <Route path="marketing/item/:itemId/pre-launch" element={<MarketingPreLaunchList />} />
-          <Route path="marketing/item/:itemId/pre-launch/add" element={<MarketingPreLaunchForm />} />
-          <Route path="marketing/item/:itemId/pre-launch/edit/:id" element={<MarketingPreLaunchForm />} />
           <Route path="marketing/item/:itemId/idea-strategy" element={<MarketingIdeaStrategyList />} />
           <Route path="marketing/item/:itemId/idea-strategy/add" element={<MarketingIdeaStrategyForm />} />
           <Route path="marketing/item/:itemId/idea-strategy/edit/:id" element={<MarketingIdeaStrategyForm />} />

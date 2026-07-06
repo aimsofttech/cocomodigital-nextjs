@@ -180,13 +180,13 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       {/* ── Description ──────────────────────────────────────────── */}
       <div><label className="form-label">Description</label><textarea {...register('description')} className="form-textarea" placeholder="Short description or summary of the movie/web series" /></div>
 
-      {/* ── Client requirements ──────────────────────────────────── */}
-      <div><label className="form-label">Client Requirement Text</label><input {...register('clientRequirementText')} className="form-input" placeholder="Enter a description of the client" /></div>
+      {/* ── Client goals (stored in the clientRequirement* fields) ── */}
+      <div><label className="form-label">Client Goals Text</label><input {...register('clientRequirementText')} className="form-input" placeholder="Enter a description of the client" /></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[1, 2, 3, 4, 5, 6].map((n) => (
           <div key={n}>
-            <label className="form-label">Client Requirement {n}</label>
-            <input {...register(`clientRequirement${n}`)} className="form-input" placeholder={`Specific requirement ${n}`} />
+            <label className="form-label">Client Goals {n}</label>
+            <input {...register(`clientRequirement${n}`)} className="form-input" placeholder={`Specific goal ${n}`} />
           </div>
         ))}
       </div>
