@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const HomePageSection = require('../../models/HomePageSection');
 const HomePageSectionItem = require('../../models/HomePageSectionItem');
 const createCrudController = require('./crudFactory');
+const { cascadeDelete } = require('./cascadeDelete');
 
 const base = createCrudController(HomePageSection, {
   searchFields: ['name'],
@@ -50,4 +51,12 @@ const index = async (req, res) => {
   return base.index(req, res);
 };
 
-module.exports = { ...base, index };
+// Deleting a section removes all its Section Items too.
+const destroyWithCascade = async (req, res) => {
+  await cascadeDelete(req.params.id, [
+    { model: HomePageSectionItem, fk: 'home_page_section_id', media: ['image'] },
+  ]);
+  return base.destroy(req, res);
+};
+
+module.exports = { ...base, index, destroy: destroyWithCascade };

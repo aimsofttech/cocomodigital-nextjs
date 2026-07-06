@@ -3,6 +3,7 @@ const CreativeHouseItem = require('../../models/CreativeHouseItem');
 const CreativeHouseApproach = require('../../models/CreativeHouseApproach');
 const CreativeHouseFinalOutput = require('../../models/CreativeHouseFinalOutput');
 const createCrudController = require('./crudFactory');
+const { cascadeDelete } = require('./cascadeDelete');
 const { generateSlug } = require('../../utils/helpers');
 const { getYoutubeVideoId, uploadYoutubeThumbnailToS3, parseCsvOrExcel } = require('../../utils/s3Upload');
 
@@ -160,4 +161,16 @@ const bulkUpload = async (req, res) => {
   }
 };
 
-module.exports = { ...base, index: indexWithNavCounts, store: storeWithSlugAndYoutube, update: updateWithMirror, bulkUpload };
+// Section collections linked to an item via `creativeHouseItemId`.
+const SECTION_CASCADE = [
+  { model: CreativeHouseApproach,    fk: 'creativeHouseItemId', media: ['image', 'thumbnail', 'uploadVideoUrl'] },
+  { model: CreativeHouseFinalOutput, fk: 'creativeHouseItemId', media: ['image', 'thumbnail', 'uploadVideoUrl'] },
+];
+
+// Deleting an item removes its approaches and project media too.
+const destroyWithCascade = async (req, res) => {
+  await cascadeDelete(req.params.id, SECTION_CASCADE);
+  return base.destroy(req, res);
+};
+
+module.exports = { ...base, index: indexWithNavCounts, store: storeWithSlugAndYoutube, update: updateWithMirror, bulkUpload, destroy: destroyWithCascade, SECTION_CASCADE };

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const MarketingHouseItem = require('../../models/MarketingHouseItem');
 const createCrudController = require('./crudFactory');
+const { cascadeDelete } = require('./cascadeDelete');
 const { generateSlug } = require('../../utils/helpers');
 const { uploadYoutubeThumbnailToS3, getYoutubeVideoId } = require('../../utils/s3Upload');
 const { parseCsvOrExcel } = require('../../utils/helpers');
@@ -173,4 +174,27 @@ const bulkUpload = async (req, res) => {
   }
 };
 
-module.exports = { ...base, index: indexWithNavCounts, store: storeWithSlugAndYoutube, update: updateWithMirror, bulkUpload };
+// Every section collection linked to an item via `marketingHouseItemId`,
+// with the media fields to purge from S3 alongside the records.
+const SECTION_CASCADE = [
+  { model: require('../../models/MarketingHouseImage'),                         fk: 'marketingHouseItemId', media: ['image', 'uploadVideoUrl'] },
+  { model: require('../../models/MarketingHouseStatics'),                       fk: 'marketingHouseItemId', media: [] },
+  { model: require('../../models/MarketingHousePerformance'),                   fk: 'marketingHouseItemId', media: ['performance_image', 'performance_upload_video_url'] },
+  { model: require('../../models/MarketingHouseIdeaStrategyPlanning'),          fk: 'marketingHouseItemId', media: ['image'] },
+  { model: require('../../models/MarketingHouseOtherActivityCategory'),         fk: 'marketingHouseItemId', media: [] },
+  { model: require('../../models/MarketingHouseOtherActivityItem'),             fk: 'marketingHouseItemId', media: ['image', 'image1', 'image2', 'image3', 'image4'] },
+  { model: require('../../models/MarketingHouseContentCreatedCategory'),        fk: 'marketingHouseItemId', media: [] },
+  { model: require('../../models/MarketingHouseContentCreatedItem'),            fk: 'marketingHouseItemId', media: ['image', 'upload_video_url'] },
+  { model: require('../../models/MarketingHouseContentCreatedItemCarousel'),    fk: 'marketingHouseItemId', media: ['image'] },
+  { model: require('../../models/MarketingHouseCommunityProgramCategory'),      fk: 'marketingHouseItemId', media: ['image'] },
+  { model: require('../../models/MarketingHouseCommunityProgramCategoryItem'),  fk: 'marketingHouseItemId', media: ['image', 'videoThumbnail', 'videoFile'] },
+  { model: require('../../models/Faq'),                                         fk: 'marketingHouseItemId', media: [] },
+];
+
+// Deleting a campaign removes every section record that belongs to it.
+const destroyWithCascade = async (req, res) => {
+  await cascadeDelete(req.params.id, SECTION_CASCADE);
+  return base.destroy(req, res);
+};
+
+module.exports = { ...base, index: indexWithNavCounts, store: storeWithSlugAndYoutube, update: updateWithMirror, bulkUpload, destroy: destroyWithCascade, SECTION_CASCADE };
