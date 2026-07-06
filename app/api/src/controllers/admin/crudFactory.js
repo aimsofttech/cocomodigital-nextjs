@@ -186,6 +186,10 @@ const createCrudController = (Model, options = {}) => {
     // Optional always-on filter merged into every index query. Use to scope a
     // shared collection to a subset (e.g. only FAQs linked to a marketing item).
     baseFilter = {},
+    // Extra query params accepted as direct equality filters on `index`
+    // (e.g. ['year'] lets GET ?year=2025 filter server-side). Numeric values
+    // match both number- and string-stored data (legacy rows).
+    filterFields = [],
   } = options;
 
   // All fields that may hold S3 references (images + videos), de-duplicated.
@@ -217,6 +221,11 @@ const createCrudController = (Model, options = {}) => {
           : pid;
       }
       if (status !== undefined && status !== '') filter.status = parseInt(status);
+      for (const ff of filterFields) {
+        const v = req.query[ff];
+        if (v === undefined || v === '') continue;
+        filter[ff] = /^\d+$/.test(String(v)) ? { $in: [Number(v), String(v)] } : v;
+      }
       if (search && searchFields.length) {
         filter.$or = searchFields.map((f) => ({ [f]: { $regex: search, $options: 'i' } }));
       }

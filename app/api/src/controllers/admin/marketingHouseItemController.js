@@ -76,6 +76,7 @@ const base = createCrudController(MarketingHouseItem, {
   searchFields: ['title', 'slug'],
   defaultSort: { displayOrder: 1 },
   parentField: 'marketingHouseCategoryId',
+  filterFields: ['year'],
 });
 
 // Wrap the factory index so the paginated/filtered/searched result is augmented

@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
-import { marketingHouseItemApi } from '@/services/adminApi';
+import type { FilterField } from '@/components/ui/TableFilter';
+import { marketingHouseItemApi, marketingHouseCategoryApi } from '@/services/adminApi';
 
 // Navigation target shape returned by the API per item (label + live record count).
 type NavTarget = { label: string; segment: string; count?: number | null };
@@ -64,6 +66,14 @@ const labelFor = (t: NavTarget) => DISPLAY_LABEL[t.segment] ?? t.label;
 
 export default function ItemList() {
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseItemApi);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  // Categories for the server-side Category filter dropdown.
+  useEffect(() => {
+    marketingHouseCategoryApi.getAll({ limit: 100 })
+      .then(({ data }) => setCategories(data.data || []))
+      .catch(() => {});
+  }, []);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -75,11 +85,31 @@ export default function ItemList() {
     }
   };
 
-  const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }, { key: 'year', label: 'Year', type: 'year' as const }];
+  // Category / Status / Year are applied by the API (server-side); the range
+  // filters below them refine the currently loaded page client-side.
+  const FILTER_FIELDS: FilterField[] = [
+    { key: 'status', label: 'Status', type: 'status' },
+    {
+      key: 'marketingHouseCategoryId', label: 'Category', type: 'select',
+      options: [{ value: '', label: 'All Categories' }, ...categories.map((c: any) => ({ value: c._id, label: c.name }))],
+    },
+    { key: 'year', label: 'Year', type: 'year', serverSide: true },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' },
+  ];
   const columns = [
     { key: 'posterImage', label: 'Poster', render: (row: any) => <ImageCell src={row.posterImage} alt={row.title} size="w-36 h-24" /> },
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.video} thumbnail={row.posterImage} /> },
     { key: 'title', label: 'Title', sortable: true, render: (row: any) => <span className="font-medium text-gray-900">{row.title || 'N/A'}</span> },
+    {
+      key: 'marketingHouseCategoryId', label: 'Category', render: (row: any) => {
+        // The list API returns the raw id; resolve the name from the categories
+        // already loaded for the filter dropdown (handles populated objects too).
+        const raw = row.marketingHouseCategoryId;
+        const id = raw && typeof raw === 'object' ? raw._id : raw;
+        const name = (raw && typeof raw === 'object' && raw.name) || categories.find((c: any) => String(c._id) === String(id))?.name;
+        return name ? <span className="text-gray-700">{name}</span> : <span className="text-gray-400">N/A</span>;
+      },
+    },
     { key: 'year', label: 'Year', sortable: true },
     { key: 'displayOrder', label: 'Order', sortable: true },
     {

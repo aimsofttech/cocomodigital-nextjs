@@ -103,7 +103,10 @@ export function applyClientFilters(data: any[], values: FilterValues, fields: Fi
 export function extractServerParams(values: FilterValues, fields: FilterField[]): Record<string, any> {
   const params: Record<string, any> = {};
   for (const field of fields) {
-    const isServer = field.serverSide !== false && field.type !== 'date-range' && field.type !== 'number-range' && field.type !== 'year';
+    // An explicit `serverSide: true` always wins (e.g. a year filter backed by
+    // the API); otherwise range/year types default to client-side filtering.
+    const isServer = field.serverSide === true
+      || (field.serverSide !== false && field.type !== 'date-range' && field.type !== 'number-range' && field.type !== 'year');
     if (!isServer) continue;
     const value = values[field.key];
     if (isEmptyValue(value)) continue;
