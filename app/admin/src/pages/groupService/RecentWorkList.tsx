@@ -48,12 +48,11 @@ export default function RecentWorkList() {
       key: 'groupServiceItemId', label: 'Item', type: 'select' as const,
       options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: String(it._id), label: it.title || it.slug || it._id }))],
     },
-    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const, serverSide: true },
   ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.videoThumbnail} /> },
     { key: 'video', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.video} thumbnail={row.image || row.videoThumbnail} /> },
-    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

@@ -47,11 +47,17 @@ export default function FaqList() {
       key: 'groupServiceItemId', label: 'Item', type: 'select' as const,
       options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: String(it._id), label: it.title || it.slug || it._id }))],
     },
-    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const, serverSide: true },
   ];
   const columns = [
-    { key: 'question', label: 'Question', sortable: true },
-    { key: 'displayOrder', label: 'Order', sortable: true },
+    {
+      key: 'question', label: 'Question', sortable: true, className: 'min-w-[220px] max-w-[320px]',
+      render: (row: any) => <span className="block truncate" title={row.question}>{row.question || 'N/A'}</span>,
+    },
+    {
+      key: 'answer', label: 'Answer', className: 'min-w-[260px] max-w-[420px]',
+      render: (row: any) => <span className="block truncate" title={row.answer}>{row.answer || 'N/A'}</span>,
+    },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

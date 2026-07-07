@@ -5,7 +5,7 @@ import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
-import { groupServiceItemApi, groupServiceCategoryApi } from '@/services/adminApi';
+import { groupServiceItemApi, groupServiceCategoryApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
 
 // Item-sections reachable from a Group Service Item, scoped via ?groupServiceItemId.
 const SEGMENT_ROUTE: Record<string, string> = {
@@ -47,21 +47,41 @@ export default function ServiceItemList() {
     }
   };
 
-  // Group categories for the server-side Category filter dropdown.
+  // Dropdown options for the server-side filters: group categories,
+  // departments (ServiceCategory) and service categories (ServiceItem).
   const [groupCats, setGroupCats] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [serviceCats, setServiceCats] = useState<any[]>([]);
   useEffect(() => {
     groupServiceCategoryApi.getAll({ limit: 200 })
       .then(({ data }) => setGroupCats(data.data || []))
       .catch(() => { });
+    serviceCategoryApi.getAll({ limit: 200 })
+      .then(({ data }) => setDepartments(data.data || []))
+      .catch(() => { });
+    serviceItemApi.getAll({ limit: 500 })
+      .then(({ data }) => setServiceCats(data.data || []))
+      .catch(() => { });
   }, []);
 
+  // Every filter is applied by the API (see groupServiceItemController:
+  // department/service-category resolve to matching group categories, the
+  // date range maps to createdAtFrom/createdAtTo in crudFactory).
   const FILTER_FIELDS = [
     { key: 'status', label: 'Status', type: 'status' as const },
+    {
+      key: 'exploreOurServiceCategoryId', label: 'Department', type: 'select' as const,
+      options: [{ value: '', label: 'All Departments' }, ...departments.map((d: any) => ({ value: String(d._id), label: d.name }))],
+    },
+    {
+      key: 'exploreOurServiceItemId', label: 'Service Category', type: 'select' as const,
+      options: [{ value: '', label: 'All Service Categories' }, ...serviceCats.map((s: any) => ({ value: String(s._id), label: s.title }))],
+    },
     {
       key: 'groupServiceCategoryId', label: 'Group Category', type: 'select' as const,
       options: [{ value: '', label: 'All Group Categories' }, ...groupCats.map((c: any) => ({ value: String(c._id), label: c.name }))],
     },
-    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const, serverSide: true },
   ];
   const columns = [
     {

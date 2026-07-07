@@ -47,11 +47,10 @@ export default function PortfolioCategoryList() {
       key: 'groupServiceItemId', label: 'Item', type: 'select' as const,
       options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: String(it._id), label: it.title || it.slug || it._id }))],
     },
-    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const, serverSide: true },
   ];
   const columns = [
     { key: 'name', label: 'Category Name', sortable: true },
-    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
     {
       key: 'navigate', label: 'Navigate To', render: (row: any) => {

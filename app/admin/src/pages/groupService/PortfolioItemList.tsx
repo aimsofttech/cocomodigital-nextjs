@@ -67,14 +67,13 @@ export default function PortfolioItemList() {
       key: 'portfolioCategoryId', label: 'Portfolio Category', type: 'select' as const,
       options: [{ value: '', label: 'All Categories' }, ...pcatOptions.map((c: any) => ({ value: String(c._id), label: c.name }))],
     },
-    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const, serverSide: true },
   ];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image || row.videoThumbnail} /> },
     { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl || row.videoUrl} thumbnail={row.image || row.videoThumbnail} /> },
     { key: 'title', label: 'Title', sortable: true, render: (row: any) => row.title || 'N/A' },
     { key: 'name', label: 'Portfolio Category', render: (row: any) => row.categoryName || 'N/A' },
-    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

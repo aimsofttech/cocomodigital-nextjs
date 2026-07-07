@@ -40,7 +40,7 @@ export default function SingleServiceImageList() {
   useEffect(() => {
     groupServiceItemApi.getAll({ limit: 500 })
       .then(({ data }) => setItemOptions(data.data || []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const FILTER_FIELDS = [
@@ -49,13 +49,12 @@ export default function SingleServiceImageList() {
       key: 'groupServiceItemId', label: 'Item', type: 'select' as const,
       options: [{ value: '', label: 'All Items' }, ...itemOptions.map((it: any) => ({ value: String(it._id), label: it.title || it.slug || it._id }))],
     },
-    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const, serverSide: true },
   ];
   const columns = [
-    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} size='w-40 h-22' /> },
     { key: 'videoUrl', label: 'Video', render: (row: any) => <VideoCell src={row.videoUrl} thumbnail={row.image} /> },
     { key: 'description', label: 'Description', sortable: true },
-    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

@@ -228,6 +228,18 @@ const createCrudController = (Model, options = {}) => {
         };
       }
       if (status !== undefined && status !== '') filter.status = parseInt(status);
+      // Created-date range (sent by server-side date-range table filters).
+      const createdAtFrom = req.query.createdAtFrom;
+      const createdAtTo = req.query.createdAtTo;
+      if (createdAtFrom || createdAtTo) {
+        filter.createdAt = {};
+        if (createdAtFrom) filter.createdAt.$gte = new Date(createdAtFrom);
+        if (createdAtTo) {
+          const to = new Date(createdAtTo);
+          to.setHours(23, 59, 59, 999); // inclusive end of day
+          filter.createdAt.$lte = to;
+        }
+      }
       for (const ff of filterFields) {
         const v = req.query[ff];
         if (v === undefined || v === '') continue;

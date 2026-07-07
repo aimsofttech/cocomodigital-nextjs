@@ -111,6 +111,13 @@ export function extractServerParams(values: FilterValues, fields: FilterField[])
     const value = values[field.key];
     if (isEmptyValue(value)) continue;
     const paramKey = field.apiParam || field.key;
+    // Server-side ranges are flattened to <key>From/<key>To scalar params
+    // (e.g. createdAt → createdAtFrom/createdAtTo, handled by crudFactory).
+    if (field.type === 'date-range' || field.type === 'number-range') {
+      if (value.from) params[`${paramKey}From`] = value.from;
+      if (value.to) params[`${paramKey}To`] = value.to;
+      continue;
+    }
     params[paramKey] = value;
   }
   return params;
