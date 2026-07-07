@@ -228,7 +228,7 @@ const ContentCreateByTeam = ({ itemData }) => {
       <div id="shorts" className="marketing-details-content-creator-main-wrapper">
         <div className="marketing-details-content-creator-main">
           <h2 className="text-center single-web-series-main-title font-primary">
-            Content Created By Our Team
+            Content Created By Our Team Cocoma
             <EditLink
               path={`${ADMIN_URL}/marketing_house/marketing_house_content_created_category/${itemData?.id}`}
             />

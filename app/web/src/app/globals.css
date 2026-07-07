@@ -37618,68 +37618,12 @@
 
   }
 
-  .other-activity-button-prev-btn {
-
-    outline: none;
-
-    border: none;
-
-    border-radius: 50%;
-
-    overflow: hidden;
-
-    color: black;
-
-    font-weight: 900;
-
-    width: 43px;
-
-    height: 43px;
-
-    padding-right: 2px;
-
-    background-color: var(--color-primary);
-
-    border: 2px solid var(--color-primary);
-
-  }
-
+  /* Mobile: slightly smaller slider arrows (base sticker theme lives at
+     the end of this file, outside media queries). */
+  .other-activity-button-prev-btn,
   .other-activity-button-next-btn {
-
-    outline: none;
-
-    border: none;
-
-    border-radius: 50%;
-
-    overflow: hidden;
-
-    color: black;
-
-    font-weight: 900;
-
-    width: 43px;
-
-    height: 43px;
-
-    padding-bottom: 2px;
-
-    background-color: var(--color-primary);
-
-    border: 2px solid var(--color-primary);
-
-  }
-
-  .other-activity-button-prev-btn:hover {
-
-    background-color: white;
-
-  }
-
-  .other-activity-button-next-btn:hover {
-
-    background-color: white;
-
+    width: 38px;
+    height: 38px;
   }
 
   .content-created-by-team-button {
@@ -57599,4 +57543,79 @@ html {
     width: 22px;
     height: 22px;
   }
+}
+/* ── Other Activities slider arrows (marketing campaign pages) ─────────────
+   Styled to match the site's play-button "sticker" theme (see PlayBtn):
+   round brand-yellow disc, 2px black border, hard offset shadow, and a
+   lift-on-hover. Base rules live here (outside media queries) because the
+   old rules only existed inside the 600px block, leaving the desktop
+   arrows as unstyled browser buttons. */
+.other-activity-button-prev-btn,
+.other-activity-button-next-btn {
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #000;
+  border: 2px solid #000;
+  outline: none;
+  box-shadow: 3px 3px 0 #000;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.other-activity-button-prev-btn:hover,
+.other-activity-button-next-btn:hover {
+  background-color: var(--color-primary);
+  transform: translate(-2px, calc(-50% - 2px));
+  box-shadow: 5px 5px 0 #000;
+}
+.other-activity-button-prev-btn:active,
+.other-activity-button-next-btn:active {
+  transform: translate(-1px, calc(-50% - 1px));
+  box-shadow: 4px 4px 0 #000;
+}
+
+/* ── Continuity Program slider arrows (marketing campaign pages) ───────────
+   These arrows pass .service-scroll-button to react-slick, but slick's own
+   .slick-prev/.slick-next rules (20px, transparent, font-size:0, ::before
+   glyph) load later and flatten the sticker theme — the arrows rendered as
+   bare chevrons. Re-assert the theme with a higher-specificity selector. */
+.slick-arrow.service-scroll-button {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--brand, var(--color-primary, #fff000));
+  border: 2px solid var(--text-strong, #000);
+  box-shadow: 3px 3px 0 var(--text-strong, #000);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+.slick-arrow.service-scroll-button::before {
+  content: none; /* kill slick's default arrow glyph */
+}
+.slick-arrow.service-scroll-button.left {
+  left: -10px;
+}
+.slick-arrow.service-scroll-button.right {
+  right: -10px;
+}
+.slick-arrow.service-scroll-button:hover,
+.slick-arrow.service-scroll-button:focus {
+  background: var(--brand, var(--color-primary, #fff000));
+  transform: translateY(-50%) translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--text-strong, #000);
+}
+/* slick adds .slick-disabled at the ends of a finite slider — fade the
+   arrow instead of showing slick's default invisible state. */
+.slick-arrow.service-scroll-button.slick-disabled {
+  opacity: 0.35;
+  cursor: default;
 }
