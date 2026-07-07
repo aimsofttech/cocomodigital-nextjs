@@ -8,7 +8,7 @@ import {
   VideoCameraIcon, StarIcon, FilmIcon, RectangleStackIcon, ListBulletIcon,
   RocketLaunchIcon, ClipboardDocumentListIcon, SparklesIcon, UserGroupIcon,
   QuestionMarkCircleIcon, NewspaperIcon, UsersIcon, UserIcon, PhoneIcon,
-  CursorArrowRaysIcon, TrophyIcon, ChatBubbleLeftRightIcon, CalendarIcon,
+  CursorArrowRaysIcon, TrophyIcon, ChatBubbleLeftRightIcon,
   ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 
@@ -154,7 +154,6 @@ const navigation: NavItem[] = [
     label: 'Contact', icon: EnvelopeIcon,
     children: [
       { label: 'Contact Us', path: '/contact/contact-us', icon: EnvelopeIcon },
-      { label: 'Free Consultation', path: '/contact/free-consultation', icon: CalendarIcon },
       { label: 'Meeting Requests', path: '/contact/meetings', icon: PhoneIcon },
       { label: 'Form Submissions', path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
     ],
