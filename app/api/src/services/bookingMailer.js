@@ -122,6 +122,7 @@ const sendBookingEmails = async (booking = {}) => {
     sendMail({
       to: ownerEmail(),
       replyTo: booking.email,
+      fromName: visitorName,
       subject: `New booking: ${visitorName}${slot ? ` — ${slot}` : ''}`,
       html: ownerHtml,
       text: `New booking from ${visitorName} (${booking.email}). Slot: ${slot || 'n/a'}.${meetText}`,
@@ -179,7 +180,10 @@ const sendMeetingRequestEmails = async (booking = {}) => {
     sendMail({
       to: ownerEmail(),
       replyTo: booking.email,
-      subject: 'New Meeting Request',
+      // Owner's inbox shows the requester, not a generic label: the From
+      // display name and the subject both carry the visitor's name.
+      fromName: visitorName,
+      subject: `New Meeting Request from ${visitorName}${slot ? ` — ${slot}` : ''}`,
       html: ownerHtml,
       text: `A user has requested a 15-minute meeting.\nName: ${visitorName}\nEmail: ${booking.email}\nSlot: ${slot || 'n/a'}\n\nPlease review in the admin panel.`,
     }),
@@ -234,7 +238,8 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
     sendMail({
       to: ownerEmail(),
       replyTo: booking.email,
-      subject: 'Meeting Scheduled Successfully',
+      fromName: visitorName,
+      subject: `Meeting Scheduled with ${visitorName}${slot ? ` — ${slot}` : ''}`,
       html: ownerHtml,
       text: `Meeting confirmed.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}\nGoogle Meet: ${meetLink || 'n/a'}`,
     }),
@@ -290,7 +295,8 @@ const sendMeetingRescheduledEmails = async (booking = {}) => {
     sendMail({
       to: ownerEmail(),
       replyTo: booking.email,
-      subject: 'Meeting Rescheduled',
+      fromName: visitorName,
+      subject: `Meeting Rescheduled with ${visitorName}${slot ? ` — ${slot}` : ''}`,
       html: ownerHtml,
       text: `Meeting rescheduled.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}\nGoogle Meet: ${meetLink || 'n/a'}`,
     }),

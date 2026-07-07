@@ -51,11 +51,21 @@ const getTransporter = () => {
 
 const mailFrom = () => process.env.MAIL_FROM || process.env.SMTP_USER;
 
+/** Build a From header with a custom display name (e.g. the visitor's name)
+ *  while keeping the configured sending ADDRESS — required for SPF/DKIM. */
+const fromWithName = (name) => {
+  const raw = mailFrom() || '';
+  if (!name) return raw;
+  const addr = (raw.match(/<([^>]+)>/) || [])[1] || raw;
+  return `"${String(name).replace(/"/g, "'")}" <${addr}>`;
+};
+
 /**
  * Send one email. Never throws — returns { sent, skipped?, error? } so callers
  * can fire-and-(optionally)-check without wrapping in try/catch.
  * @param {{to:string|string[], subject:string, html?:string, text?:string,
- *          replyTo?:string, cc?:string|string[], attachments?:Array}} opts
+ *          replyTo?:string, cc?:string|string[], attachments?:Array,
+ *          fromName?:string}} opts
  */
 const sendMail = async (opts) => {
   const tx = getTransporter();
@@ -66,7 +76,7 @@ const sendMail = async (opts) => {
   }
   try {
     const info = await tx.sendMail({
-      from: mailFrom(),
+      from: fromWithName(opts.fromName),
       to: opts.to,
       cc: opts.cc,
       replyTo: opts.replyTo,
