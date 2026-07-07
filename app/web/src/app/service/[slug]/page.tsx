@@ -57,6 +57,17 @@ const adaptService = (s: any): any => {
           cta_url: b.cta_url,
         }))
       : [],
+    /* Service media slider + "Recently Worked With" strip — passed
+       through as-is; content.ts already maps them to the legacy field
+       shape the SingleServiceSlider / RecentWork components read. */
+    group_single_service_image: Array.isArray(s.group_single_service_image)
+      ? s.group_single_service_image
+      : [],
+    group_single_service_recent_work: Array.isArray(
+      s.group_single_service_recent_work,
+    )
+      ? s.group_single_service_recent_work
+      : [],
     group_single_service_portfolio_category: Array.isArray(
       s.group_single_service_portfolio_category,
     )
@@ -70,7 +81,9 @@ const adaptService = (s: any): any => {
                 title: i.title,
                 slug: i.slug || "",
                 image:
-                  (typeof i.image === "object" && i.image?.url) ||
+                  (typeof i.image === "object"
+                    ? i.image?.url
+                    : i.image) ||
                   i.legacyImageUrl ||
                   null,
                 video_url: i.video_url,

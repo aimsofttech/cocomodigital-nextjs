@@ -77,7 +77,7 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
     (c: any) => !selectedItem || String(c.groupServiceItemId) === String(selectedItem) || String(c._id) === String(selectedCat)
   );
 
-  const itemReg = register('groupServiceItemId', { required: 'Required' });
+  const itemReg = register('groupServiceItemId', { required: lockedItemId ? false : 'Required' });
 
   const switchVideoTab = (tab: VideoTab) => {
     setVideoTab(tab);
@@ -87,8 +87,8 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
 
   const onSubmit = async (formData: any) => {
     const payload = {
-      groupServiceItemId: formData.groupServiceItemId,
-      portfolioCategoryId: formData.portfolioCategoryId,
+      groupServiceItemId: formData.groupServiceItemId || lockedItemId || '',
+      portfolioCategoryId: formData.portfolioCategoryId || lockedCategoryId || '',
       image: formData.image,
       videoUrl: formData.videoUrl || '',
       videoType: formData.videoUrl ? videoTab : '',
@@ -114,7 +114,9 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
           <select
             {...itemReg}
             onChange={(e) => { itemReg.onChange(e); setValue('portfolioCategoryId', ''); }}
-            className="form-select"
+            className="form-select disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+            disabled={Boolean(lockedItemId)}
+            title={lockedItemId ? 'Locked to the current group service item' : undefined}
           >
             <option value="">Select service item</option>
             {items.map((it: any) => <option key={it._id} value={it._id}>{it.title}</option>)}
@@ -123,7 +125,12 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
         </div>
         <div>
           <label className="form-label">Portfolio Category <span className="text-red-500">*</span></label>
-          <select {...register('portfolioCategoryId', { required: 'Required' })} className="form-select">
+          <select
+            {...register('portfolioCategoryId', { required: lockedCategoryId ? false : 'Required' })}
+            className="form-select disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+            disabled={Boolean(lockedCategoryId)}
+            title={lockedCategoryId ? 'Locked to the current portfolio category' : undefined}
+          >
             <option value="">Select category</option>
             {categoryOptions.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>

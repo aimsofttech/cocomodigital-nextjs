@@ -16,6 +16,7 @@ import SingleServiceSlider from "../../components/Services/SingleServiceSlider/S
 import VideoEditingServices from "../../components/Services/VideoEditingServices/VideoEditingServices";
 import { FaHandshake, FaUsers, FaArrowRight } from "react-icons/fa";
 import Portfolio from "../../components/Services/ServicePorfolio/ServicePortfolio";
+import RecentlyWorkedWith from "../../components/Services/RecentWork/RecentWork";
 import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 
 // Trust + closing-CTA components reused from the SingleVideo page
@@ -321,6 +322,14 @@ export default function SingleService({
               otherServices={otherServices}
               categoryName={service?.group_service_item_title}
             />}
+
+          {/* "Recently Worked With" — admin-managed recent-work videos
+              for this service item. Hidden when none are configured. */}
+          {service?.group_single_service_recent_work?.length > 0 && (
+            <RecentlyWorkedWith
+              RecentWorkData={service.group_single_service_recent_work}
+            />
+          )}
 
           {service?.group_single_service_portfolio_category?.length > 0 &&
             <Portfolio

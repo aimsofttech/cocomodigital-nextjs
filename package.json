@@ -7,6 +7,7 @@
     "app/admin"
   ],
   "scripts": {
+    "predev": "node scripts/free-ports.js",
     "dev": "concurrently -n \"API,ADMIN,WEB\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm run dev -w @cocoma/api\" \"npm run dev -w @cocoma/admin\" \"npm run dev:web\"",
     "dev:api": "npm run dev -w @cocoma/api",
     "dev:admin": "npm run dev -w @cocoma/admin",

@@ -113,6 +113,12 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 500,
   message: 'Too many requests from this IP, please try again after 15 minutes',
+  // Next.js SSR fetches all come from localhost with no-store caching
+  // (~8 API calls per page render), so throttling loopback traffic in
+  // dev starves the web app with 429s after a few dozen refreshes.
+  skip: (req) =>
+    process.env.NODE_ENV !== 'production' &&
+    ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.ip),
 });
 app.use('/api/', limiter);
 

@@ -57,7 +57,12 @@ export default function PortfolioCategoryForm({ onSuccess, onCancel, editId, loc
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Group Service Item <span className="text-red-500">*</span></label>
-        <select {...register('groupServiceItemId', { required: 'Required' })} className="form-select">
+        <select
+          {...register('groupServiceItemId', { required: scopedItemId ? false : 'Required' })}
+          className="form-select disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          disabled={Boolean(scopedItemId)}
+          title={scopedItemId ? 'Locked to the current group service item' : undefined}
+        >
           <option value="">Select service item</option>
           {items.map((it: any) => <option key={it._id} value={it._id}>{it.title}</option>)}
         </select>

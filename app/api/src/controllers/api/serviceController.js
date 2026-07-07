@@ -13,6 +13,15 @@ const { buildS3Url } = require('../../utils/s3Upload');
 
 const buildUrl = (key) => (key ? buildS3Url(key) : '');
 
+// FK fields on the section models are Mixed: legacy rows hold ObjectIds while
+// admin-written rows hold plain strings. Match both representations.
+const fkVariants = (id) => {
+  const s = String(id);
+  const variants = [s];
+  if (mongoose.Types.ObjectId.isValid(s)) variants.push(new mongoose.Types.ObjectId(s));
+  return variants;
+};
+
 const serviceHomePriority = async (req, res) => {
   const categories = await ServiceCategory.find({ status: 1 }).sort({ displayOrder: 1 });
   const result = [];
@@ -92,16 +101,17 @@ const getSingleService = async (req, res) => {
   const serviceItem = await GroupServiceItem.findOne({ slug, status: 1 });
   if (!serviceItem) return res.status(404).json({ status: 'error', message: 'Service not found' });
 
+  const itemKeys = { $in: fkVariants(serviceItem._id) };
   const [images, recentWork, portfolioCategories, faqs] = await Promise.all([
-    GroupSingleServiceImage.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
-    GroupSingleServiceRecentWork.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
-    GroupSingleServicePortfolioCategory.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
-    GroupServiceItemFaq.find({ groupServiceItemId: serviceItem._id, status: 1 }).sort({ displayOrder: 1 }),
+    GroupSingleServiceImage.find({ groupServiceItemId: itemKeys, status: 1 }).sort({ displayOrder: 1 }),
+    GroupSingleServiceRecentWork.find({ groupServiceItemId: itemKeys, status: 1 }).sort({ displayOrder: 1 }),
+    GroupSingleServicePortfolioCategory.find({ groupServiceItemId: itemKeys, status: 1 }).sort({ displayOrder: 1 }),
+    GroupServiceItemFaq.find({ groupServiceItemId: itemKeys, status: 1 }).sort({ displayOrder: 1 }),
   ]);
 
   const portfolioData = [];
   for (const cat of portfolioCategories) {
-    const items = await GroupSingleServicePortfolioItem.find({ portfolioCategoryId: cat._id, status: 1 }).sort({ displayOrder: 1 });
+    const items = await GroupSingleServicePortfolioItem.find({ portfolioCategoryId: { $in: fkVariants(cat._id) }, status: 1 }).sort({ displayOrder: 1 });
     portfolioData.push({
       ...cat.toObject(),
       items: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
@@ -123,7 +133,7 @@ const getSingleService = async (req, res) => {
 const getPortfolioItem = async (req, res) => {
   const { portfolioCategoryId } = req.query;
   const filter = { status: 1 };
-  if (portfolioCategoryId) filter.portfolioCategoryId = portfolioCategoryId;
+  if (portfolioCategoryId) filter.portfolioCategoryId = { $in: fkVariants(portfolioCategoryId) };
   const items = await GroupSingleServicePortfolioItem.find(filter).sort({ displayOrder: 1 });
   res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })) });
 };

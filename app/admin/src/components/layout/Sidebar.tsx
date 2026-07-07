@@ -128,14 +128,6 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: 'Jobs', icon: BriefcaseIcon,
-    children: [
-      { label: 'Categories', path: '/jobs/category', icon: TagIcon },
-      { label: 'Job Listings', path: '/jobs/list', icon: ListBulletIcon },
-      { label: 'Applicants', path: '/jobs/applicants', icon: UsersIcon },
-    ],
-  },
-  {
     label: 'Gallery', icon: PhotoIcon,
     children: [
       { label: 'Images', path: '/gallery/images', icon: PhotoIcon },
@@ -143,18 +135,20 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: 'Templates', icon: DocumentTextIcon,
+    label: 'Common Templates', icon: DocumentTextIcon,
     children: [
       { label: 'Author', path: '/templates/author', icon: UserIcon },
-      { label: 'Banner Title', path: '/templates/banner-title', icon: RectangleGroupIcon },
       { label: 'Book Call', path: '/templates/book-call', icon: PhoneIcon },
-      { label: 'User Choice', path: '/templates/user-choice', icon: CursorArrowRaysIcon },
       { label: 'Our Advantage', path: '/templates/our-advantage', icon: TrophyIcon },
-      { label: 'Success Stories', path: '/templates/success-stories-project', icon: StarIcon },
       { label: 'FAQs', path: '/templates/faq', icon: QuestionMarkCircleIcon },
-      { label: 'WhatsApp Templates', path: '/templates/whatsapp', icon: ChatBubbleLeftRightIcon },
-      { label: 'Admin Posts', path: '/templates/admin-post', icon: NewspaperIcon },
-      { label: 'Pages', path: '/templates/page', icon: DocumentTextIcon },
+    ],
+  },
+  {
+    label: 'Jobs', icon: BriefcaseIcon,
+    children: [
+      { label: 'Categories', path: '/jobs/category', icon: TagIcon },
+      { label: 'Job Listings', path: '/jobs/list', icon: ListBulletIcon },
+      { label: 'Applicants', path: '/jobs/applicants', icon: UsersIcon },
     ],
   },
   {

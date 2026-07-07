@@ -1267,6 +1267,8 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
     bySlug: async (slug) => {
       const data = await apiGet<{
         service?: any;
+        images?: any[];
+        recent_work?: any[];
         portfolio?: any[];
         faqs?: any[];
       }>(`/service/single-service/${encodeURIComponent(slug)}`);
@@ -1285,6 +1287,27 @@ const EXPRESS_SOURCES: Record<string, ExpressSource> = {
         description: s.description,
         category: { id: s.groupServiceCategoryId },
         group_top_banner: [],
+        /* Service media slider (SingleServiceSlider reads
+           group_single_service_image: {id, image, description,
+           upload_video/video_url}). */
+        group_single_service_image: (data?.images ?? []).map((im: any) => ({
+          id: im._id,
+          groupServiceItemId: im.groupServiceItemId,
+          image: buildImg(im.image),
+          description: im.description,
+          video_url: im.videoUrl || "",
+          upload_video: im.videoType === "upload" ? im.videoUrl : "",
+        })),
+        /* "Recently Worked With" strip (RecentWork reads {id, thumbnail,
+           video_url}). */
+        group_single_service_recent_work: (data?.recent_work ?? []).map(
+          (rw: any) => ({
+            id: rw._id,
+            groupServiceItemId: rw.groupServiceItemId,
+            thumbnail: buildImg(rw.image) || "/Images/videoThumbnail.svg",
+            video_url: rw.videoUrl || rw.video || "",
+          }),
+        ),
         group_single_service_portfolio_category: (data?.portfolio ?? []).map(
           (cat: any) => ({
             id: cat._id,
