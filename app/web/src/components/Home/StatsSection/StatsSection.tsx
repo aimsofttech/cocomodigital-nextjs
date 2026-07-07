@@ -32,6 +32,14 @@ const StatsSection = ({ stats = [] }: { stats?: StatItem[] }) => {
 
   const [animationDone, setAnimationDone] = useState(false);
 
+  /* Stable primitive signature of the stats. Depending on this (instead of
+     the array reference) keeps the effect's dependency list a constant
+     size and stops the count-up restarting when a parent re-render passes
+     a new array with the same contents. */
+  const statsKey = stats
+    .map((s) => `${s.prefix}|${s.value}|${s.suffix}|${s.label}`)
+    .join(',');
+
   useEffect(() => {
     if (!stats.length) return;
 
@@ -133,7 +141,8 @@ const StatsSection = ({ stats = [] }: { stats?: StatItem[] }) => {
 
       window.removeEventListener("scroll", checkVisible);
     };
-  }, [stats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statsKey]);
 
   if (!stats.length) return null;
 
