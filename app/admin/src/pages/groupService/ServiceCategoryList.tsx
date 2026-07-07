@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { groupServiceCategoryApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
 import ServiceCategoryForm from './ServiceCategoryForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 // Pages reachable from a group service category. Opens scoped to this category
 // via a query param the target list reads and filters on.
@@ -13,7 +14,10 @@ const targetHref = (_segment: string, row: any) =>
   `/group-service/item?groupServiceCategoryId=${row._id}`;
 
 export default function ServiceCategoryList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(groupServiceCategoryApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(groupServiceCategoryApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: groupServiceCategoryApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -85,7 +89,7 @@ export default function ServiceCategoryList() {
       pagination={pagination}
       onPageChange={setPage}
       onSearch={setSearch}
-      onDelete={remove}
+      onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS}
       onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ServiceCategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}

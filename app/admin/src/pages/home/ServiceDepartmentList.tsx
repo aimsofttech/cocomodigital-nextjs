@@ -1,4 +1,5 @@
 import { useCrud } from '@/hooks/useCrud';
+import { useRowReorder } from '@/hooks/useReorder';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
@@ -7,7 +8,7 @@ import { serviceCategoryApi } from '@/services/adminApi';
 import ServiceDepartmentForm from './ServiceDepartmentForm';
 
 export default function ServiceDepartmentList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(serviceCategoryApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(serviceCategoryApi);
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -19,9 +20,12 @@ export default function ServiceDepartmentList() {
     }
   };
 
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: serviceCategoryApi, data, setData, pagination, fetchAll });
+
   const FILTER_FIELDS = [
     { key: 'status', label: 'Status', type: 'status' as const },
-    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const },
+    { key: 'createdAt', label: 'Created Date', type: 'date-range' as const, serverSide: true },
   ];
   const columns = [
     { key: 'icon', label: 'Icon', render: (row: any) => <ImageCell src={row.icon} bg="bg-cocoma-dark" size="lg" /> },
@@ -35,6 +39,7 @@ export default function ServiceDepartmentList() {
       breadcrumbs={[{ label: 'Home' }, { label: 'Service Departments' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
       onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) =>
         <ServiceDepartmentForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}

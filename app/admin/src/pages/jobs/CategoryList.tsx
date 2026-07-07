@@ -5,9 +5,13 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { jobCategoryApi } from '@/services/adminApi';
 import CategoryForm from './CategoryForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function CategoryList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(jobCategoryApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(jobCategoryApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: jobCategoryApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -44,7 +48,7 @@ export default function CategoryList() {
     <div className="category-table-theme">
       <CrudListPage title="Job Categories" breadcrumbs={[{ label: 'Jobs' }, { label: 'Categories' }]}
         columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-        onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+        onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
         filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
         renderModal={({ id, onSuccess, onCancel }) => <CategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
         modalTitle={(mode) => mode === 'edit' ? 'Edit Job Category' : 'Add Job Category'}

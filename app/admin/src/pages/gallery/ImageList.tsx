@@ -5,9 +5,13 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { galleryImageApi } from '@/services/adminApi';
 import ImageForm from './ImageForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function ImageList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(galleryImageApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(galleryImageApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: galleryImageApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -30,7 +34,7 @@ export default function ImageList() {
   return (
     <CrudListPage title="Gallery Images" breadcrumbs={[{ label: 'Gallery' }, { label: 'Images' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ImageForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Gallery Image' : 'Add Gallery Image'}

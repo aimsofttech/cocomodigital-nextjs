@@ -7,13 +7,16 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { groupRecentWorkApi, groupServiceItemApi } from '@/services/adminApi';
 import RecentWorkForm from './RecentWorkForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function RecentWorkList() {
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('groupServiceItemId') || '';
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupRecentWorkApi, true, itemId ? { groupServiceItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(groupRecentWorkApi, true, itemId ? { groupServiceItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: groupRecentWorkApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -58,7 +61,7 @@ export default function RecentWorkList() {
   return (
     <CrudListPage title="Recent Work" breadcrumbs={[{ label: 'Group Service' }, { label: 'Recent Work' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <RecentWorkForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Recent Work' : 'Add Recent Work'}

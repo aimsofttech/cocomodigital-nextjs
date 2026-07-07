@@ -5,9 +5,13 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { bannerTitleTemplateApi } from '@/services/adminApi';
 import BannerTitleForm from './BannerTitleForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function BannerTitleList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(bannerTitleTemplateApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(bannerTitleTemplateApi);
+
+  // Drag-and-drop rows to renumber display_order (shared hook).
+  const handleReorder = useRowReorder({ api: bannerTitleTemplateApi, data, setData, pagination, fetchAll, orderField: 'display_order' });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -30,7 +34,7 @@ export default function BannerTitleList() {
   return (
     <CrudListPage title="Banner Title Templates" breadcrumbs={[{ label: 'Templates' }, { label: 'Banner Titles' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <BannerTitleForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Banner Title' : 'Add Banner Title'}

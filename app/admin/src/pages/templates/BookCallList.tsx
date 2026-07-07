@@ -5,9 +5,13 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { bookCallApi } from '@/services/adminApi';
 import BookCallForm from './BookCallForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function BookCallList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(bookCallApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(bookCallApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: bookCallApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -30,7 +34,7 @@ export default function BookCallList() {
   return (
     <CrudListPage title="Book a Call Templates" breadcrumbs={[{ label: 'Templates' }, { label: 'Book Call' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <BookCallForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Book Call' : 'Add Book Call'}

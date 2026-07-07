@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { marketingHouseCommunityProgramApi, marketingHouseItemApi } from '@/services/adminApi';
 import CommunityProgramModuleForm from './CommunityProgramModuleForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function CommunityProgramModuleList() {
   // When navigated from a Marketing Campaign, the item id arrives as a query param
@@ -14,8 +15,10 @@ export default function CommunityProgramModuleList() {
   const itemId = searchParams.get('marketingHouseItemId') || '';
   const [itemName, setItemName] = useState('');
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseCommunityProgramApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseCommunityProgramApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseCommunityProgramApi, data, setData, pagination, fetchAll });
 
   // Re-apply the filter only when the URL id actually changes (e.g. navigating
   // between items without a remount). Skipped on mount since it's already seeded.
@@ -74,7 +77,7 @@ export default function CommunityProgramModuleList() {
   return (
     <CrudListPage title={itemName ? `Continuity Category — ${itemName}` : 'Continuity Category'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Continuity Category' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <CommunityProgramModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Continuity Category' : 'Add Continuity Category'}

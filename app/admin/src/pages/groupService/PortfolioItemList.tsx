@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { groupPortfolioItemApi, groupServiceItemApi, groupPortfolioCategoryApi } from '@/services/adminApi';
 import PortfolioItemForm from './PortfolioItemForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function PortfolioItemList() {
   // Scoped by Group Service Item (from the items table) or by Portfolio Category
@@ -19,8 +20,10 @@ export default function PortfolioItemList() {
     : categoryId ? { portfolioCategoryId: categoryId } : {};
   const scopeKey = JSON.stringify(scope);
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupPortfolioItemApi, true, scope);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(groupPortfolioItemApi, true, scope);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: groupPortfolioItemApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -79,7 +82,7 @@ export default function PortfolioItemList() {
   return (
     <CrudListPage title="Portfolio Items" breadcrumbs={[{ label: 'Group Service' }, { label: 'Portfolio Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <PortfolioItemForm editId={id} lockedItemId={itemId || undefined} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Portfolio Item' : 'Add Portfolio Item'}

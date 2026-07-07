@@ -5,9 +5,13 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { brandApi } from '@/services/adminApi';
 import BrandForm from './BrandForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function BrandList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(brandApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(brandApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: brandApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -42,7 +46,7 @@ export default function BrandList() {
       pagination={pagination}
       onPageChange={setPage}
       onSearch={setSearch}
-      onDelete={remove}
+      onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS}
       onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <BrandForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}

@@ -7,14 +7,17 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { marketingHouseImageApi, marketingHouseItemApi } from '@/services/adminApi';
 import PosterMediaForm from './PosterMediaForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function PosterMediaList() {
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
   const [itemName, setItemName] = useState('');
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseImageApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseImageApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseImageApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -69,7 +72,7 @@ export default function PosterMediaList() {
   return (
     <CrudListPage title={itemName ? `Poster Media — ${itemName}` : 'Poster Media'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Poster Media' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <PosterMediaForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Poster Media' : 'Add Poster Media'}

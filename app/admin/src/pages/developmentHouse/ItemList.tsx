@@ -5,9 +5,13 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { devHouseItemApi } from '@/services/adminApi';
 import ItemForm from './ItemForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function ItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(devHouseItemApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(devHouseItemApi);
+
+  // Drag-and-drop rows to renumber display_order (shared hook).
+  const handleReorder = useRowReorder({ api: devHouseItemApi, data, setData, pagination, fetchAll, orderField: 'display_order' });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -29,7 +33,7 @@ export default function ItemList() {
   return (
     <CrudListPage title="Development Items" breadcrumbs={[{ label: 'Development House' }, { label: 'Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <ItemForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Dev House Item' : 'Add Dev House Item'}

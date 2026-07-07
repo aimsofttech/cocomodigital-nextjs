@@ -4,9 +4,13 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { devHouseCategoryApi } from '@/services/adminApi';
 import CategoryForm from './CategoryForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function CategoryList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(devHouseCategoryApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(devHouseCategoryApi);
+
+  // Drag-and-drop rows to renumber display_order (shared hook).
+  const handleReorder = useRowReorder({ api: devHouseCategoryApi, data, setData, pagination, fetchAll, orderField: 'display_order' });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -27,7 +31,7 @@ export default function CategoryList() {
   return (
     <CrudListPage title="Development Categories" breadcrumbs={[{ label: 'Development House' }, { label: 'Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <CategoryForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Dev House Category' : 'Add Dev House Category'}

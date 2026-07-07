@@ -7,14 +7,17 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { marketingHouseIdeaStrategyApi, marketingHouseItemApi } from '@/services/adminApi';
 import IdeaStrategyPlanningForm from './IdeaStrategyPlanningForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function IdeaStrategyPlanningList() {
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
   const [itemName, setItemName] = useState('');
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseIdeaStrategyApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseIdeaStrategyApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseIdeaStrategyApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -69,7 +72,7 @@ export default function IdeaStrategyPlanningList() {
   return (
     <CrudListPage title={itemName ? `Our Activities — ${itemName}` : 'Our Activities'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Our Activities' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <IdeaStrategyPlanningForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Our Activities' : 'Add Our Activities'}

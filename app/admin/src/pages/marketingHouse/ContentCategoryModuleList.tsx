@@ -6,14 +6,17 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { marketingHouseContentCategoryApi, marketingHouseItemApi } from '@/services/adminApi';
 import ContentCategoryModuleForm from './ContentCategoryModuleForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function ContentCategoryModuleList() {
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
   const [itemName, setItemName] = useState('');
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseContentCategoryApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseContentCategoryApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseContentCategoryApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function ContentCategoryModuleList() {
   return (
     <CrudListPage title={itemName ? `Content Categories — ${itemName}` : 'Content Categories'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Content Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <ContentCategoryModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Content Category' : 'Add Content Category'}

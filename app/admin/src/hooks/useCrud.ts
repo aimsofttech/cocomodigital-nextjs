@@ -33,6 +33,8 @@ interface UseCrudReturn<T> {
   setPage: (p: number) => void;
   /** Update server-side filter params — resets to page 1 and triggers refetch */
   setFilterParams: (params: Record<string, any>) => void;
+  /** Directly replace the current rows (e.g. optimistic drag-and-drop reorder). */
+  setData: React.Dispatch<React.SetStateAction<T[]>>;
 }
 
 export function useCrud<T = any>(service: CrudService, autoFetch = true, initialFilter: Record<string, any> = {}): UseCrudReturn<T> {
@@ -149,6 +151,6 @@ export function useCrud<T = any>(service: CrudService, autoFetch = true, initial
   return {
     data, item, loading, submitting, pagination, search,
     filterParams, fetchAll, fetchOne, create, update, remove,
-    setSearch, setPage, setFilterParams,
+    setSearch, setPage, setFilterParams, setData,
   };
 }

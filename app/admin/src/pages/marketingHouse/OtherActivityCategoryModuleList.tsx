@@ -6,14 +6,17 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { marketingHouseOtherActivityCategoryApi, marketingHouseItemApi } from '@/services/adminApi';
 import OtherActivityCategoryModuleForm from './OtherActivityCategoryModuleForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function OtherActivityCategoryModuleList() {
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('marketingHouseItemId') || '';
   const [itemName, setItemName] = useState('');
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseOtherActivityCategoryApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseOtherActivityCategoryApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseOtherActivityCategoryApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -85,7 +88,7 @@ export default function OtherActivityCategoryModuleList() {
   return (
     <CrudListPage title={itemName ? `Add-on Activities Categories — ${itemName}` : 'Add-on Activities Categories'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Add-on Activities Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityCategoryModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Add-on Activities Category' : 'Add Add-on Activities Category'}

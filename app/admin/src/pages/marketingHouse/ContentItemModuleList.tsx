@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { marketingHouseContentItemApi, marketingHouseItemApi } from '@/services/adminApi';
 import ContentItemModuleForm from './ContentItemModuleForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function ContentItemModuleList() {
   // When navigated from a Marketing Campaign, the item id arrives as a query param
@@ -16,8 +17,10 @@ export default function ContentItemModuleList() {
   const [itemName, setItemName] = useState('');
 
   // Seed the filter on first render so the initial fetch is already scoped to the item.
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseContentItemApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseContentItemApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseContentItemApi, data, setData, pagination, fetchAll });
 
   // Re-apply the filter only when the URL id actually changes. Skipped on mount since seeded.
   const firstRun = useRef(true);
@@ -76,7 +79,7 @@ export default function ContentItemModuleList() {
   return (
     <CrudListPage title={itemName ? `Content Items — ${itemName}` : 'Content Items'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Content Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <ContentItemModuleForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Content Item' : 'Add Content Item'}

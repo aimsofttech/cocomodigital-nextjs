@@ -7,9 +7,13 @@ import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { topBannerApi } from '@/services/adminApi';
 import toast from 'react-hot-toast';
 import TopBannerForm from './TopBannerForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function TopBannerList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(topBannerApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(topBannerApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: topBannerApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -33,7 +37,7 @@ export default function TopBannerList() {
   return (
     <CrudListPage title="Top Banners" breadcrumbs={[{ label: 'Home' }, { label: 'Top Banners' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       viewDetails={(row: any) => ({
         title: 'Top Banner Details',

@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { marketingHouseStaticsApi, marketingHouseItemApi } from '@/services/adminApi';
 import HighlightsForm from './HighlightsForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function HighlightsList() {
   // When navigated from a Marketing Campaign, the item id arrives as a query param
@@ -16,8 +17,10 @@ export default function HighlightsList() {
 
   // Seed the filter on first render so the initial (and only) fetch is already
   // scoped to the item — no wasted unfiltered request.
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseStaticsApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseStaticsApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseStaticsApi, data, setData, pagination, fetchAll });
 
   // Re-apply the filter only when the URL id actually changes (e.g. navigating
   // between items without a remount). Skipped on mount since it's already seeded.
@@ -82,7 +85,7 @@ export default function HighlightsList() {
   return (
     <CrudListPage title={itemName ? `Highlights — ${itemName}` : 'Highlights'} breadcrumbs={breadcrumbs}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <HighlightsForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Highlight' : 'Add Highlight'}

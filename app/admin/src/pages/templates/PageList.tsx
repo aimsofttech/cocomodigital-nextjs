@@ -4,9 +4,13 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { pageApi } from '@/services/adminApi';
 import PageForm from './PageForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function PageList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(pageApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(pageApi);
+
+  // Drag-and-drop rows to renumber display_order (shared hook).
+  const handleReorder = useRowReorder({ api: pageApi, data, setData, pagination, fetchAll, orderField: 'display_order' });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -29,7 +33,7 @@ export default function PageList() {
   return (
     <CrudListPage title="Pages" breadcrumbs={[{ label: 'Templates' }, { label: 'Pages' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <PageForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit CMS Page' : 'Add CMS Page'}

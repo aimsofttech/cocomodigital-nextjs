@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { groupServiceItemApi, groupServiceCategoryApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
+import { useRowReorder } from '@/hooks/useReorder';
 
 // Item-sections reachable from a Group Service Item, scoped via ?groupServiceItemId.
 const SEGMENT_ROUTE: Record<string, string> = {
@@ -23,8 +24,10 @@ export default function ServiceItemList() {
   const [searchParams] = useSearchParams();
   const categoryId = searchParams.get('groupServiceCategoryId') || '';
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupServiceItemApi, true, categoryId ? { groupServiceCategoryId: categoryId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(groupServiceItemApi, true, categoryId ? { groupServiceCategoryId: categoryId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: groupServiceItemApi, data, setData, pagination, fetchAll });
 
   // Re-apply the scope when the URL id changes.
   const firstRun = useRef(true);
@@ -119,7 +122,7 @@ export default function ServiceItemList() {
     <CrudListPage title="Group Service Items" breadcrumbs={[{ label: 'Group Service' }, { label: 'Items' }]}
       addPath="/group-service/wizard" editPath={(row: any) => `/group-service/wizard?itemId=${row._id}&step=0`}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       onRefresh={fetchAll} />
   );

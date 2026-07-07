@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { marketingHouseOtherActivityItemApi, marketingHouseItemApi } from '@/services/adminApi';
 import OtherActivityItemModuleForm from './OtherActivityItemModuleForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function OtherActivityItemModuleList() {
   // When navigated from a Marketing Campaign, the item id arrives as a query param
@@ -25,8 +26,10 @@ export default function OtherActivityItemModuleList() {
   };
 
   // Seed the filter on first render so the initial fetch is already scoped.
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseOtherActivityItemApi, true, scopeFilter);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseOtherActivityItemApi, true, scopeFilter);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseOtherActivityItemApi, data, setData, pagination, fetchAll });
 
   // Re-apply the filter only when the URL scope actually changes. Skipped on mount
   // since it's already seeded.
@@ -89,7 +92,7 @@ export default function OtherActivityItemModuleList() {
   return (
     <CrudListPage title={itemName ? `Add-on Activities Items — ${itemName}` : 'Add-on Activities Items'} breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns Section' }, { label: 'Add-on Activities Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <OtherActivityItemModuleForm editId={id} lockedItemId={itemId || undefined} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update Add-on Activities Item' : 'Add Add-on Activities Item'}

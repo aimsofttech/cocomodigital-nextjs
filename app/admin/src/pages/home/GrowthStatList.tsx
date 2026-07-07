@@ -6,11 +6,15 @@ import { formatDateTime } from '@/components/ui/ViewDetailsModal';
 import { growthStatApi } from '@/services/adminApi';
 import toast from 'react-hot-toast';
 import GrowthStatForm from './GrowthStatForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 const statText = (row: any) => `${row.prefix || ''}${row.value ?? ''}${row.suffix || ''}`;
 
 export default function GrowthStatList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(growthStatApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(growthStatApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: growthStatApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -32,7 +36,7 @@ export default function GrowthStatList() {
   return (
     <CrudListPage title="Growth Numbers" breadcrumbs={[{ label: 'Home' }, { label: 'Growth at Glance' }, { label: 'Growth Numbers' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       viewDetails={(row: any) => ({
         title: 'Growth Number Details',

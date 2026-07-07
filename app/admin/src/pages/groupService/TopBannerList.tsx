@@ -9,14 +9,17 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { groupTopBannerApi, serviceCategoryApi, serviceItemApi } from '@/services/adminApi';
 import TopBannerForm from './TopBannerForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function TopBannerList() {
   // When navigated from a Group Service Category, the Service Category id scopes the list.
   const [searchParams] = useSearchParams();
   const serviceItemId = searchParams.get('serviceItemId') || '';
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupTopBannerApi, true, serviceItemId ? { exploreOurServiceItemId: serviceItemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(groupTopBannerApi, true, serviceItemId ? { exploreOurServiceItemId: serviceItemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: groupTopBannerApi, data, setData, pagination, fetchAll });
 
   // Re-apply the scope when the URL id changes.
   const firstRun = useRef(true);
@@ -90,7 +93,7 @@ export default function TopBannerList() {
   return (
     <CrudListPage title="Group Service Top Banners" breadcrumbs={[{ label: 'Group Service' }, { label: 'Top Banners' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       viewDetails={(row: any) => ({
         title: 'Group Top Banner Details',

@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { marketingHouseFaqApi, marketingHouseItemApi } from '@/services/adminApi';
 import MarketingFaqForm from './MarketingFaqForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function MarketingFaqList() {
   // When navigated from a Marketing Campaign, the item id arrives as a query param
@@ -15,8 +16,10 @@ export default function MarketingFaqList() {
   const [itemName, setItemName] = useState('');
 
   // Seed the filter on first render so the initial fetch is already scoped.
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(marketingHouseFaqApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseFaqApi, true, itemId ? { marketingHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseFaqApi, data, setData, pagination, fetchAll });
 
   // Re-apply the filter only when the URL id actually changes (skipped on mount).
   const firstRun = useRef(true);
@@ -79,7 +82,7 @@ export default function MarketingFaqList() {
   return (
     <CrudListPage title={itemName ? `FAQ — ${itemName}` : 'FAQ'} breadcrumbs={breadcrumbs}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <MarketingFaqForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Update FAQ' : 'Add FAQ'}

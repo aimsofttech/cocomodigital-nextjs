@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { creativeHouseItemApi, creativeHouseCategoryApi } from '@/services/adminApi';
+import { useRowReorder } from '@/hooks/useReorder';
 
 // Item-sections reachable from a creative item; clicking opens that page scoped
 // to the item via the `creativeHouseItemId` query param.
@@ -22,7 +23,10 @@ const targetHref = (segment: string, itemId: string) =>
   `${SEGMENT_ROUTE[segment] || '/creative/item'}?creativeHouseItemId=${itemId}`;
 
 export default function ItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(creativeHouseItemApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(creativeHouseItemApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: creativeHouseItemApi, data, setData, pagination, fetchAll });
   const [categories, setCategories] = useState<any[]>([]);
 
   // Categories for the server-side Category filter dropdown.
@@ -91,7 +95,7 @@ export default function ItemList() {
     <CrudListPage title="Creative Items" breadcrumbs={[{ label: 'Creative House' }, { label: 'Items' }]}
       addPath="/creative/wizard" editPath={(row: any) => `/creative/wizard?itemId=${row._id}&step=0`}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       onRefresh={fetchAll} />
   );

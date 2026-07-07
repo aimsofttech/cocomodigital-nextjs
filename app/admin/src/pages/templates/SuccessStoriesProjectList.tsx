@@ -4,9 +4,13 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { successStoriesProjectApi } from '@/services/adminApi';
 import SuccessStoriesProjectForm from './SuccessStoriesProjectForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function SuccessStoriesProjectList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(successStoriesProjectApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(successStoriesProjectApi);
+
+  // Drag-and-drop rows to renumber display_order (shared hook).
+  const handleReorder = useRowReorder({ api: successStoriesProjectApi, data, setData, pagination, fetchAll, orderField: 'display_order' });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -28,7 +32,7 @@ export default function SuccessStoriesProjectList() {
   return (
     <CrudListPage title="Success Stories Projects" breadcrumbs={[{ label: 'Templates' }, { label: 'Success Stories Projects' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderModal={({ id, onSuccess, onCancel }) => <SuccessStoriesProjectForm editId={id} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Success Stories Project' : 'Add Success Stories Project'}

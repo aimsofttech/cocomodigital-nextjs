@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { creativeHouseApproachApi, creativeHouseItemApi, creativeHouseCategoryApi } from '@/services/adminApi';
 import ApproachForm from './ApproachForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function ApproachList() {
   // When navigated from a Creative Item, the item id arrives as a query param
@@ -15,8 +16,10 @@ export default function ApproachList() {
   const itemId = searchParams.get('creativeHouseItemId') || '';
   const [itemName, setItemName] = useState('');
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(creativeHouseApproachApi, true, itemId ? { creativeHouseItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(creativeHouseApproachApi, true, itemId ? { creativeHouseItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: creativeHouseApproachApi, data, setData, pagination, fetchAll });
   const [itemOptions, setItemOptions] = useState<any[]>([]);
 
   // All creative items for the server-side Item filter dropdown.
@@ -103,7 +106,7 @@ export default function ApproachList() {
   return (
     <CrudListPage title={itemName ? `Creative Approach — ${itemName}` : 'Creative Approach'} breadcrumbs={breadcrumbs}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <ApproachForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Creative Approach' : 'Add Creative Approach'}

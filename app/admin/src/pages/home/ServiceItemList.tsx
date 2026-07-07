@@ -9,9 +9,13 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { serviceItemApi, serviceCategoryApi } from '@/services/adminApi';
 import ServiceItemForm from './ServiceItemForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function ServiceItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(serviceItemApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(serviceItemApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: serviceItemApi, data, setData, pagination, fetchAll });
 
   // Departments for the "Service Department" filter dropdown.
   const [departments, setDepartments] = useState<any[]>([]);
@@ -85,7 +89,7 @@ export default function ServiceItemList() {
       submitting={submitting}
       pagination={pagination}
       onPageChange={setPage}
-      onSearch={setSearch} onDelete={remove}
+      onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS}
       onServerFilterChange={setFilterParams}
       viewDetails={(row: any) => ({

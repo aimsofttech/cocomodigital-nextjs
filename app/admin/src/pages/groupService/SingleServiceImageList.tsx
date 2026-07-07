@@ -7,14 +7,17 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import { groupSingleServiceImageApi, groupServiceItemApi } from '@/services/adminApi';
 import SingleServiceImageForm from './SingleServiceImageForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function SingleServiceImageList() {
   // Scoped to a Group Service Item when navigated from the items table.
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('groupServiceItemId') || '';
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupSingleServiceImageApi, true, itemId ? { groupServiceItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(groupSingleServiceImageApi, true, itemId ? { groupServiceItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: groupSingleServiceImageApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function SingleServiceImageList() {
       submitting={submitting}
       pagination={pagination}
       onPageChange={setPage}
-      onSearch={setSearch} onDelete={remove}
+      onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS}
       onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <SingleServiceImageForm editId={id} lockedItemId={itemId || undefined}

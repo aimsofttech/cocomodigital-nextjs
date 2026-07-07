@@ -7,14 +7,17 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { homePageSectionItemApi, homePageSectionApi } from '@/services/adminApi';
 import HomePageSectionItemForm from './HomePageSectionItemForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function HomePageSectionItemList() {
   // Scoped to a Home Page Section when navigated from the sections table.
   const [searchParams] = useSearchParams();
   const sectionId = searchParams.get('sectionId') || '';
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(homePageSectionItemApi, true, sectionId ? { home_page_section_id: sectionId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(homePageSectionItemApi, true, sectionId ? { home_page_section_id: sectionId } : {});
+
+  // Drag-and-drop rows to renumber display_order (shared hook).
+  const handleReorder = useRowReorder({ api: homePageSectionItemApi, data, setData, pagination, fetchAll, orderField: 'display_order' });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -64,7 +67,7 @@ export default function HomePageSectionItemList() {
   return (
     <CrudListPage title="Home Section Items" breadcrumbs={[{ label: 'Settings' }, { label: 'Section Items' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <HomePageSectionItemForm editId={id} lockedSectionId={sectionId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Section Item' : 'Add Section Item'}

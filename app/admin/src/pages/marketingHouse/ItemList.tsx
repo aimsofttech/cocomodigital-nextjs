@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { ImageCell, VideoCell } from '@/components/ui/MediaCell';
 import type { FilterField } from '@/components/ui/TableFilter';
 import { marketingHouseItemApi, marketingHouseCategoryApi } from '@/services/adminApi';
+import { useRowReorder } from '@/hooks/useReorder';
 
 // Navigation target shape returned by the API per item (label + live record count).
 type NavTarget = { label: string; segment: string; count?: number | null };
@@ -65,7 +66,10 @@ const DISPLAY_LABEL: Record<string, string> = {
 const labelFor = (t: NavTarget) => DISPLAY_LABEL[t.segment] ?? t.label;
 
 export default function ItemList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(marketingHouseItemApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(marketingHouseItemApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: marketingHouseItemApi, data, setData, pagination, fetchAll });
   const [categories, setCategories] = useState<any[]>([]);
 
   // Categories for the server-side Category filter dropdown.
@@ -172,7 +176,7 @@ export default function ItemList() {
     <CrudListPage title="Marketing Campaigns" breadcrumbs={[{ label: 'Marketing Campaigns' }, { label: 'Campaigns' }]}
       addPath="/marketing/wizard" editPath={(row: any) => `/marketing/wizard?itemId=${row._id}&step=0`}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       renderExpanded={renderExpanded}
       csv={{ api: marketingHouseItemApi, filename: 'marketing-items' }}

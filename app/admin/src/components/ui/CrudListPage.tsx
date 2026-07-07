@@ -60,6 +60,9 @@ interface CrudListPageProps<T = any> {
   /** When provided, each row gets an eye icon that opens a read-only
       details modal built from this config. Available to every list page. */
   viewDetails?: (row: T) => ViewDetailsConfig;
+  /** When provided, table rows become drag-and-drop reorderable
+      (see DataTable.onReorder). Indexes refer to the `data` prop. */
+  onReorder?: (fromIndex: number, toIndex: number) => void;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -74,7 +77,7 @@ export default function CrudListPage<T extends { _id?: string }>({
   extraActions, rowActions, disableAdd, disableDelete, disableEdit,
   filterFields, onServerFilterChange,
   renderModal, modalTitle, modalSize = 'lg', onRefresh, renderExpanded, csv,
-  viewDetails,
+  viewDetails, onReorder,
 }: CrudListPageProps<T>) {
   const { pathname } = useLocation();
   const sessionKey = getSessionKey(pathname);
@@ -168,6 +171,11 @@ export default function CrudListPage<T extends { _id?: string }>({
   const filteredData = hasClientFilters && filterFields
     ? applyClientFilters(data, filterValues, filterFields)
     : data;
+
+  // Drag-and-drop reorder indexes refer to the unfiltered `data` array, so
+  // dragging is only enabled while no client-side filter is hiding rows
+  // (server-side filters are fine — `data` already reflects those).
+  const reorderSafe = filteredData.length === data.length;
 
   // ── Delete ────────────────────────────────────────────────────────────────
   const handleDelete = async () => {
@@ -289,6 +297,7 @@ export default function CrudListPage<T extends { _id?: string }>({
           pageSize={pageSize}
           onPageSizeChange={handlePageSizeChange}
           renderExpanded={renderExpanded}
+          onReorder={reorderSafe ? onReorder : undefined}
           actions={
             (!disableEdit && (editPath || renderModal)) || !disableDelete || rowActions || viewDetails
               ? defaultActions

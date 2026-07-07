@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { blogSubCategoryApi } from '@/services/adminApi';
 import SubCategoryForm from './SubCategoryForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function SubCategoryList() {
   // When navigated from the Categories page, scope to a single parent category
@@ -14,8 +15,10 @@ export default function SubCategoryList() {
   const categoryId = searchParams.get('blogCategoryId') || '';
   const scopeFilter = categoryId ? { blogCategoryId: categoryId } : {};
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(blogSubCategoryApi, true, scopeFilter);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(blogSubCategoryApi, true, scopeFilter);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: blogSubCategoryApi, data, setData, pagination, fetchAll });
 
   // Re-apply the scope only when the URL category actually changes.
   const firstRun = useRef(true);
@@ -63,7 +66,7 @@ export default function SubCategoryList() {
   return (
     <CrudListPage title="Blog Sub Categories" breadcrumbs={[{ label: 'Blog' }, { label: 'Sub Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <SubCategoryForm editId={id} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Blog Sub Category' : 'Add Blog Sub Category'}

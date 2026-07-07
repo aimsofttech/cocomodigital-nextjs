@@ -6,13 +6,16 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { groupPortfolioCategoryApi, groupServiceItemApi } from '@/services/adminApi';
 import PortfolioCategoryForm from './PortfolioCategoryForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function PortfolioCategoryList() {
   const [searchParams] = useSearchParams();
   const itemId = searchParams.get('groupServiceItemId') || '';
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(groupPortfolioCategoryApi, true, itemId ? { groupServiceItemId: itemId } : {});
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(groupPortfolioCategoryApi, true, itemId ? { groupServiceItemId: itemId } : {});
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: groupPortfolioCategoryApi, data, setData, pagination, fetchAll });
 
   const firstRun = useRef(true);
   useEffect(() => {
@@ -76,7 +79,7 @@ export default function PortfolioCategoryList() {
   return (
     <CrudListPage title="Portfolio Categories" breadcrumbs={[{ label: 'Group Service' }, { label: 'Portfolio Categories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <PortfolioCategoryForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Portfolio Category' : 'Add Portfolio Category'}

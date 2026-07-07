@@ -6,6 +6,7 @@ import StatusToggle from '@/components/ui/StatusToggle';
 import toast from 'react-hot-toast';
 import { jobListApi } from '@/services/adminApi';
 import JobListForm from './JobListForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function JobListPage() {
   // When navigated from the Job Categories page, scope to a single category
@@ -14,8 +15,10 @@ export default function JobListPage() {
   const categoryId = searchParams.get('jobCategoryId') || '';
   const scopeFilter = categoryId ? { jobCategoryId: categoryId } : {};
 
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
-    useCrud(jobListApi, true, scopeFilter);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(jobListApi, true, scopeFilter);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: jobListApi, data, setData, pagination, fetchAll });
 
   // Re-apply the scope only when the URL category actually changes.
   const firstRun = useRef(true);
@@ -77,7 +80,7 @@ export default function JobListPage() {
       pagination={pagination}
       onPageChange={setPage}
       onSearch={setSearch}
-      onDelete={remove}
+      onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS}
       onServerFilterChange={handleFilterChange}
       renderModal={({ id, onSuccess, onCancel }) => <JobListForm editId={id} lockedCategoryId={categoryId || undefined} onSuccess={onSuccess}

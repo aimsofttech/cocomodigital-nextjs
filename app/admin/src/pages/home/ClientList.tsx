@@ -7,9 +7,13 @@ import toast from 'react-hot-toast';
 import { ImageCell } from '@/components/ui/MediaCell';
 import { clientApi } from '@/services/adminApi';
 import ClientForm from './ClientForm';
+import { useRowReorder } from '@/hooks/useReorder';
 
 export default function ClientList() {
-  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } = useCrud(clientApi);
+  const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll, setData } = useCrud(clientApi);
+
+  // Drag-and-drop rows to renumber displayOrder (shared hook).
+  const handleReorder = useRowReorder({ api: clientApi, data, setData, pagination, fetchAll });
 
   const handleStatusChange = async (id: string, newStatus: number) => {
     try {
@@ -31,7 +35,7 @@ export default function ClientList() {
   return (
     <CrudListPage title="Success Stories" breadcrumbs={[{ label: 'Home' }, { label: 'Success Stories' }]}
       columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
+      onPageChange={setPage} onSearch={setSearch} onDelete={remove} onReorder={handleReorder}
       filterFields={FILTER_FIELDS} onServerFilterChange={setFilterParams}
       viewDetails={(row: any) => ({
         title: 'Success Story Details',

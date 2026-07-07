@@ -33,6 +33,11 @@ interface DataTableProps<T = any> {
   /** When provided, each row gets an expand toggle that reveals this content
    *  in a full-width panel beneath the row. */
   renderExpanded?: (row: T) => React.ReactNode;
+  /** When provided, rows become drag-and-drop reorderable (a grip handle
+   *  column appears). Called with the moved row's old and new index within
+   *  the CURRENT `data` array. Disabled while a column sort is active,
+   *  since the visual order wouldn't match the stored order. */
+  onReorder?: (fromIndex: number, toIndex: number) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
@@ -78,13 +83,19 @@ function buildPageRange(current: number, total: number): (number | '…')[] {
 export default function DataTable<T extends { _id?: string }>({
   columns, data, loading, pagination, onPageChange, onSearch,
   searchPlaceholder = 'Search...', actions, emptyMessage = 'No records found',
-  headerActions, pageSize = 20, onPageSizeChange, renderExpanded,
+  headerActions, pageSize = 20, onPageSizeChange, renderExpanded, onReorder,
 }: DataTableProps<T>) {
   const [searchValue, setSearchValue] = useState('');
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  // Drag-and-drop reorder state (indexes into `data`).
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+  // Reordering only makes sense in the server's stored order — a client-side
+  // column sort would make the drop position meaningless.
+  const reorderEnabled = Boolean(onReorder) && !sortKey && !loading;
 
   const toggleExpanded = (id: string) =>
     setExpanded((prev) => {
@@ -126,7 +137,13 @@ export default function DataTable<T extends { _id?: string }>({
     return <ChevronDownIcon className="w-3.5 h-3.5 text-primary-500 ml-1 inline" />;
   };
 
-  const colSpan = columns.length + (actions ? 1 : 0) + (renderExpanded ? 1 : 0);
+  const colSpan = columns.length + (actions ? 1 : 0) + (renderExpanded ? 1 : 0) + (onReorder ? 1 : 0);
+
+  const handleDrop = (targetIdx: number) => {
+    if (dragIdx !== null && dragIdx !== targetIdx) onReorder?.(dragIdx, targetIdx);
+    setDragIdx(null);
+    setOverIdx(null);
+  };
 
   // Effective pagination values for display
   const pag = pagination;
@@ -161,6 +178,7 @@ export default function DataTable<T extends { _id?: string }>({
         <table className="table">
           <thead>
             <tr>
+              {onReorder && <th className="w-8" />}
               {renderExpanded && <th className="w-10" />}
               {actions && <th>Actions</th>}
               {columns.map((col) => (
@@ -196,7 +214,34 @@ export default function DataTable<T extends { _id?: string }>({
                 const isExpanded = expanded.has(rowId);
                 return (
                   <Fragment key={rowId}>
-                    <tr className={`hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-primary-50/40' : ''}`}>
+                    <tr
+                      className={`hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-primary-50/40' : ''} ${
+                        dragIdx === idx ? 'opacity-40' : ''
+                      } ${overIdx === idx && dragIdx !== null && dragIdx !== idx ? 'bg-primary-50 ring-2 ring-inset ring-primary-300' : ''}`}
+                      draggable={reorderEnabled}
+                      onDragStart={reorderEnabled ? (e) => { setDragIdx(idx); e.dataTransfer.effectAllowed = 'move'; } : undefined}
+                      onDragOver={reorderEnabled ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (overIdx !== idx) setOverIdx(idx); } : undefined}
+                      onDrop={reorderEnabled ? (e) => { e.preventDefault(); handleDrop(idx); } : undefined}
+                      onDragEnd={reorderEnabled ? () => { setDragIdx(null); setOverIdx(null); } : undefined}
+                    >
+                      {onReorder && (
+                        <td className="align-middle">
+                          <Tooltip content={sortKey ? 'Clear column sorting to reorder' : 'Drag to reorder'}>
+                            <span
+                              className={`inline-flex items-center justify-center p-1 text-gray-400 ${
+                                reorderEnabled ? 'cursor-grab active:cursor-grabbing hover:text-gray-600' : 'opacity-40'
+                              }`}
+                              aria-label="Drag to reorder"
+                            >
+                              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                                <circle cx="7" cy="5" r="1.4" /><circle cx="13" cy="5" r="1.4" />
+                                <circle cx="7" cy="10" r="1.4" /><circle cx="13" cy="10" r="1.4" />
+                                <circle cx="7" cy="15" r="1.4" /><circle cx="13" cy="15" r="1.4" />
+                              </svg>
+                            </span>
+                          </Tooltip>
+                        </td>
+                      )}
                       {renderExpanded && (
                         <td className="align-middle">
                           <Tooltip content={isExpanded ? 'Collapse' : 'Expand'}>
