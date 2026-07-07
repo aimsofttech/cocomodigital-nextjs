@@ -59,7 +59,7 @@ export default function ClientForm({ onSuccess, onCancel, editId }: Props = {}) 
         <input type="hidden" {...register('description')} />
         <RichTextEditor value={watch('description')} onChange={(html) => setValue('description', html, { shouldDirty: true })} placeholder="Write the success story description…" minHeight={320} />
       </div>
-      <ImageUpload name="image" label="Success Stories Image" uploadType="image" folder="home" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Success Stories Image" recommended={{ width: 1000, height: 667, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown letterboxed — not cropped' }} uploadType="image" folder="home" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Author Template</label>

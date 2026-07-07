@@ -108,7 +108,7 @@ export default function ItemForm({ onSuccess, onCancel, editId, lockedCategoryId
         <label className="form-label">Description</label>
         <RichTextEditor value={watch('description')} onChange={(html) => setValue('description', html)} placeholder="Type your Description here…" minHeight={260} uploadFolder="blog" />
       </div>
-      <ImageUpload name="thumbnail" label="Main Image" uploadType="image" folder="blog" value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
+      <ImageUpload name="thumbnail" label="Main Image" recommended={{ width: 1760, height: 1100, ratio: '16:10', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'blog cards crop to 16:10 — exact ratio matters' }} uploadType="image" folder="blog" value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
       <div><label className="form-label">Meta Title</label><input {...register('metaTitle')} className="form-input" placeholder="Title for search engines" /></div>
       <div><label className="form-label">Meta Description</label><textarea {...register('metaDescription')} className="form-textarea" placeholder="Short description for search engines" /></div>
       <div><label className="form-label">Meta Keywords</label><input {...register('metaKeyword')} className="form-input" placeholder="comma, separated, keywords" /></div>

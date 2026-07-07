@@ -58,11 +58,20 @@ export default function SingleServiceImageList() {
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (
-    <CrudListPage title="Single Service Images" breadcrumbs={[{ label: 'Group Service' }, { label: 'Service Images' }]}
-      columns={columns} data={data} loading={loading} submitting={submitting} pagination={pagination}
-      onPageChange={setPage} onSearch={setSearch} onDelete={remove}
-      filterFields={FILTER_FIELDS} onServerFilterChange={handleFilterChange}
-      renderModal={({ id, onSuccess, onCancel }) => <SingleServiceImageForm editId={id} lockedItemId={itemId || undefined} onSuccess={onSuccess} onCancel={onCancel} />}
+    <CrudListPage
+      title="Single Service Images"
+      breadcrumbs={[{ label: 'Group Service' }, { label: 'Service Images' }]}
+      columns={columns}
+      data={data}
+      loading={loading}
+      submitting={submitting}
+      pagination={pagination}
+      onPageChange={setPage}
+      onSearch={setSearch} onDelete={remove}
+      filterFields={FILTER_FIELDS}
+      onServerFilterChange={handleFilterChange}
+      renderModal={({ id, onSuccess, onCancel }) => <SingleServiceImageForm editId={id} lockedItemId={itemId || undefined}
+        onSuccess={onSuccess} onCancel={onCancel} />}
       modalTitle={(mode) => mode === 'edit' ? 'Edit Single Service Image' : 'Add Single Service Image'}
       modalSize="lg" onRefresh={fetchAll} />
   );

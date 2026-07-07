@@ -112,7 +112,7 @@ export default function FinalOutputForm({ onSuccess, onCancel, editId, lockedIte
         <SlugField name="slug" register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
 
-      <ImageUpload name="thumbnail" label="Thumbnail (JPG, PNG, JPEG, GIF)" uploadType="image" folder="creative-house"
+      <ImageUpload name="thumbnail" label="Thumbnail (JPG, PNG, JPEG, GIF)" recommended={{ width: 1600, height: 900, ratio: '16:9', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="creative-house"
         value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
 
       {/* ── Video (URL or upload — only one) ─────────────────────── */}

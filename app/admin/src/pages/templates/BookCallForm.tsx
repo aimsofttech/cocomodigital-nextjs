@@ -50,7 +50,7 @@ export default function BookCallForm({ onSuccess, onCancel, editId }: Props = {}
         <div><label className="form-label">Button Text</label><input {...register('buttonText')} className="form-input" placeholder="e.g. Book a Call" /></div>
         <div><label className="form-label">Button URL</label><input {...register('buttonUrl')} className="form-input" placeholder="https://example.com" /></div>
       </div>
-      <ImageUpload name="image" label="Book Call Image" uploadType="image" folder="templates" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Book Call Image" recommended={{ width: 960, height: 960, ratio: '1:1', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown letterboxed — not cropped' }} uploadType="image" folder="templates" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

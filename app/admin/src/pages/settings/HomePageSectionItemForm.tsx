@@ -75,7 +75,7 @@ export default function HomePageSectionItemForm({ onSuccess, onCancel, editId, l
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
       <div><label className="form-label">URL</label><input {...register('url')} className="form-input" placeholder="https://..." /></div>
-      <ImageUpload name="image" label="Section Item Image" uploadType="image" folder="settings" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Section Item Image" recommended={{ width: 600, height: 600, ratio: '1:1', formats: 'JPG, PNG, WebP', maxSizeMB: 1 }} uploadType="image" folder="settings" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

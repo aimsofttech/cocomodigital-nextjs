@@ -150,8 +150,8 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
       </div>
 
       {/* ── Thumbnail ────────────────────────────────────────────── */}
-      <ImageUpload name="thumbnail" label="Video Thumbnail (Upload only JPG, PNG, JPEG, GIF — 987x554)"
-        uploadType="image" folder="creative-house" value={watch('thumbnail')}
+      <ImageUpload name="thumbnail" label="Video Thumbnail"
+        recommended={{ width: 1280, height: 720, ratio: '16:9', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'grid cards crop to 16:9 — exact ratio matters' }} uploadType="image" folder="creative-house" value={watch('thumbnail')}
         onChange={(url) => setValue('thumbnail', url)} />
 
       {/* ── Video (URL or upload — only one) ─────────────────────── */}

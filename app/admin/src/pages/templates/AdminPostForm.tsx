@@ -53,7 +53,7 @@ export default function AdminPostForm({ onSuccess, onCancel, editId }: Props = {
         </div>
       </div>
       <div><label className="form-label">Content</label><textarea {...register('post_content')} className="form-textarea min-h-48" placeholder="Write the post content…" /></div>
-      <ImageUpload name="post_image" label="Featured Image" uploadType="image" folder="templates" value={watch('post_image')} onChange={(url) => setValue('post_image', url)} />
+      <ImageUpload name="post_image" label="Featured Image" recommended={{ width: 1200, height: 800, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="templates" value={watch('post_image')} onChange={(url) => setValue('post_image', url)} />
       <div>
         <label className="form-label">Active Status</label>
         <select {...register('status')} className="form-select">

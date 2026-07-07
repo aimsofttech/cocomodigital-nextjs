@@ -107,7 +107,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId }: Props = {
           <input {...register('country')} className="form-input" defaultValue="en-us" placeholder="e.g. en-us" />
         </div>
       </div>
-      <ImageUpload name="videoThumbnail" label="Thumbnail" uploadType="image" folder="home" value={watch('videoThumbnail')} onChange={(url) => setValue('videoThumbnail', url)} />
+      <ImageUpload name="videoThumbnail" label="Thumbnail" recommended={{ width: 1920, height: 1080, ratio: '16:9', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'homepage hero poster — 16:9 box, keep exact ratio' }} uploadType="image" folder="home" value={watch('videoThumbnail')} onChange={(url) => setValue('videoThumbnail', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select" defaultValue="1"><option value="1">Active</option><option value="0">Inactive</option></select></div>

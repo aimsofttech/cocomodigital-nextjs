@@ -39,7 +39,7 @@ export default function ImageForm({ onSuccess, onCancel, editId }: Props = {}) {
 
   const form = (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <ImageUpload name="image" label="Gallery Image *" uploadType="image" folder="gallery" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Gallery Image *" recommended={{ width: 400, height: 160, ratio: '5:2', formats: 'PNG, SVG, WebP', maxSizeMB: 1, note: 'used as client logos (~80px tall) — transparent background recommended' }} uploadType="image" folder="gallery" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Image Title</label><input {...register('title')} className="form-input" placeholder="Enter image title" /></div>
       </div>

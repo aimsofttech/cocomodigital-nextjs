@@ -110,7 +110,7 @@ export default function ApproachForm({ onSuccess, onCancel, editId, lockedItemId
 
       <div><label className="form-label">Description</label><textarea {...register('description')} className="form-textarea" placeholder="Describe this step of the creative approach..." /></div>
 
-      <ImageUpload name="thumbnail" label="Thumbnail (JPG, PNG, JPEG, GIF)" uploadType="image" folder="creative-house"
+      <ImageUpload name="thumbnail" label="Thumbnail (JPG, PNG, JPEG, GIF)" recommended={{ width: 1280, height: 800, ratio: '16:10', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'cropped to fit — exact ratio matters' }} uploadType="image" folder="creative-house"
         value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
 
       {/* ── Video (URL or upload — only one) ─────────────────────── */}

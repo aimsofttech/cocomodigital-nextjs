@@ -94,7 +94,7 @@ export default function SingleServiceImageForm({ onSuccess, onCancel, editId, lo
         <textarea {...register('description')} className="form-textarea" rows={4} placeholder="Enter description" />
       </div>
 
-      <ImageUpload name="image" label="Service Image" uploadType="image" folder="group-service" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Service Image" recommended={{ width: 1320, height: 880, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="group-service" value={watch('image')} onChange={(url) => setValue('image', url)} />
 
       <div>
         <label className="form-label">Video <span className="text-gray-400 font-normal">(Optional - Choose one method)</span></label>

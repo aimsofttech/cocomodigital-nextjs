@@ -51,7 +51,7 @@ export default function SuccessStoriesProjectForm({ onSuccess, onCancel, editId 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Project URL</label><input {...register('project_url')} className="form-input" placeholder="https://..." /></div>
       </div>
-      <ImageUpload name="project_image" label="Project Image" uploadType="image" folder="templates" value={watch('project_image')} onChange={(url) => setValue('project_image', url)} />
+      <ImageUpload name="project_image" label="Project Image" recommended={{ width: 1600, height: 1000, ratio: '16:10', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'cropped to 16:10 — exact ratio matters' }} uploadType="image" folder="templates" value={watch('project_image')} onChange={(url) => setValue('project_image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

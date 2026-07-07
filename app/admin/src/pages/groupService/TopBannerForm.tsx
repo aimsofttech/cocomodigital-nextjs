@@ -138,8 +138,8 @@ export default function TopBannerForm({ onSuccess, onCancel, editId, lockedServi
 
       <ImageUpload
         name="image"
-        label="Banner Image (Upload only JPG, PNG, JPEG, GIF — 706px × 665px)"
-        uploadType="image"
+        label="Banner Image"
+        recommended={{ width: 1920, height: 1080, ratio: '16:9', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'service page hero — shown in a 16:9 box, keep exact ratio' }} uploadType="image"
         folder="group-service"
         accept="image/jpeg,image/png,image/gif"
         value={watch('image')}

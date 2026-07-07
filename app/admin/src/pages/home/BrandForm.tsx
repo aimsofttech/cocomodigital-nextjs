@@ -52,7 +52,7 @@ export default function BrandForm({ onSuccess, onCancel, editId }: Props = {}) {
         </div>
         <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       </div>
-      <ImageUpload name="image" label="Brand Logo" uploadType="image" folder="brands" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Brand Logo" recommended={{ width: 500, height: 250, ratio: '2:1', formats: 'PNG, SVG, WebP', maxSizeMB: 1, note: 'transparent background; shown small in logo strips — not cropped' }} uploadType="image" folder="brands" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div>
         <label className="form-label">Website URL</label>
         <input {...register('websiteUrl')} type="url" className="form-input" placeholder="https://example.com" />

@@ -69,7 +69,7 @@ export default function ProjectForm({ onSuccess, onCancel, editId }: Props = {})
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Video URL</label><input {...register('videoUrl')} className="form-input" placeholder="https://youtube.com/..." /></div>
       </div>
-      <ImageUpload name="image" label="Project Image" uploadType="image" folder="creative-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Project Image" recommended={{ width: 1280, height: 720, ratio: '16:9', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="creative-house" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

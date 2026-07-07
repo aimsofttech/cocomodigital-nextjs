@@ -63,7 +63,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId }: Props =
         <label className="form-label">Video URL</label>
         <input {...register('videoUrl')} className="form-input" placeholder="https://youtube.com/..." />
       </div>
-      <ImageUpload name="image" label="Service Image" uploadType="image" folder="home" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Service Image" recommended={{ width: 800, height: 533, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'shown letterboxed — not cropped' }} uploadType="image" folder="home" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div>
         <label className="form-label">Button Text</label>
         <input {...register('buttonText')} className="form-input" placeholder="e.g. Learn More" />

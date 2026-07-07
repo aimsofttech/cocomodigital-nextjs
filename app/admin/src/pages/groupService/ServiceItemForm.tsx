@@ -146,7 +146,7 @@ export default function ServiceItemForm({ onSuccess, onCancel, editId, lockedCat
         <label className="form-label">Description</label>
         <RichTextEditor value={watch('description')} onChange={(html) => setValue('description', html)} placeholder="Describe the service item…" minHeight={220} />
       </div>
-      <ImageUpload name="thumbnail" label="Thumbnail" uploadType="image" folder="group-service" value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
+      <ImageUpload name="thumbnail" label="Thumbnail" recommended={{ width: 900, height: 600, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="group-service" value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

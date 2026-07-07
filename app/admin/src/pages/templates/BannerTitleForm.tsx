@@ -50,7 +50,7 @@ export default function BannerTitleForm({ onSuccess, onCancel, editId }: Props =
         <div><label className="form-label">Subtitle</label><input {...register('banner_subtitle')} className="form-input" placeholder="Enter subtitle" /></div>
         <div><label className="form-label">Page Name</label><input {...register('page_name')} className="form-input" placeholder="e.g. Home" /></div>
       </div>
-      <ImageUpload name="banner_bg_img" label="Banner Background Image" uploadType="image" folder="templates" value={watch('banner_bg_img')} onChange={(url) => setValue('banner_bg_img', url)} />
+      <ImageUpload name="banner_bg_img" label="Banner Background Image" recommended={{ width: 1920, height: 800, ratio: '12:5', formats: 'JPG, PNG, WebP', maxSizeMB: 2, note: 'full-width banner background' }} uploadType="image" folder="templates" value={watch('banner_bg_img')} onChange={(url) => setValue('banner_bg_img', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

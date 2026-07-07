@@ -46,7 +46,7 @@ export default function VideoForm({ onSuccess, onCancel, editId }: Props = {}) {
         <input {...register('url', { required: 'Required' })} className="form-input mt-2" placeholder="Or paste a video URL (https://youtube.com/...)" />
         {errors.url && <p className="form-error">{String(errors.url.message)}</p>}
       </div>
-      <ImageUpload name="thumbnail" label="Video Thumbnail" uploadType="image" folder="home" value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
+      <ImageUpload name="thumbnail" label="Video Thumbnail" recommended={{ width: 1920, height: 1080, ratio: '16:9', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="home" value={watch('thumbnail')} onChange={(url) => setValue('thumbnail', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

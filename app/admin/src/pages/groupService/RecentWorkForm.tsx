@@ -91,7 +91,7 @@ export default function RecentWorkForm({ onSuccess, onCancel, editId, lockedItem
       <ImageUpload
         name="image"
         label="Work Image"
-        uploadType="image"
+        recommended={{ width: 900, height: 600, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image"
         folder="group-service"
         value={watch('image')}
         onChange={(url) => setValue('image', url)}

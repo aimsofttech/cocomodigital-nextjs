@@ -58,7 +58,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
         <div><label className="form-label">URL</label><input {...register('development_house_url')} className="form-input" placeholder="https://..." /></div>
       </div>
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
-      <ImageUpload name="development_house_img" label="Item Image" uploadType="image" folder="development-house" value={watch('development_house_img')} onChange={(url) => setValue('development_house_img', url)} />
+      <ImageUpload name="development_house_img" label="Item Image" recommended={{ width: 1200, height: 800, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="development-house" value={watch('development_house_img')} onChange={(url) => setValue('development_house_img', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>

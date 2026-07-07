@@ -138,7 +138,7 @@ export default function PortfolioItemForm({ onSuccess, onCancel, editId, lockedI
         </div>
       </div>
 
-      <ImageUpload name="image" label="Item Image" uploadType="image" folder="group-service" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Item Image" recommended={{ width: 960, height: 640, ratio: '3:2', formats: 'JPG, PNG, WebP', maxSizeMB: 2 }} uploadType="image" folder="group-service" value={watch('image')} onChange={(url) => setValue('image', url)} />
 
       <div>
         <label className="form-label">Video <span className="text-gray-400 font-normal">(Optional - Choose one method)</span></label>
