@@ -49,7 +49,7 @@ export default function ServiceDepartmentForm({ onSuccess, onCancel, editId }: P
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div>
         <label className="form-label">Icon</label>
-        <ImageUpload name="icon" uploadType="image" folder="service-department" value={watch('icon')} onChange={(url) => setValue('icon', url, { shouldDirty: true })} />
+        <ImageUpload name="icon" recommended={{ width: 50, height: 50, ratio: '1:1', formats: 'JPG, PNG, JPEG, GIF', maxSizeMB: 1 }} uploadType="image" folder="service-department" value={watch('icon')} onChange={(url) => setValue('icon', url, { shouldDirty: true })} />
         <input {...register('icon')} className="form-input mt-2" placeholder="Or paste an icon URL (https://...)" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -51,7 +51,7 @@ export default function OurAdvantageForm({ onSuccess, onCancel, editId }: Props 
       <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} />
       <div><label className="form-label">Advantage Description</label><textarea {...register('advantage_description')} className="form-textarea" placeholder="Write a short description…" /></div>
       <div><label className="form-label">Action Heading</label><input {...register('action_heading')} className="form-input" placeholder="Enter action heading" /></div>
-      <ImageUpload name="image" label="Advantage Icon/Image" uploadType="image" folder="templates" value={watch('image')} onChange={(url) => setValue('image', url)} />
+      <ImageUpload name="image" label="Advantage Icon/Image" recommended={{ width: 50, height: 50, ratio: '1:1', formats: 'JPG, PNG, JPEG, GIF', maxSizeMB: 1 }} uploadType="image" folder="templates" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
