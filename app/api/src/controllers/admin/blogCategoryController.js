@@ -1,27 +1,25 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const BlogCategory = require('../../models/BlogCategory');
 const BlogSubCategory = require('../../models/BlogSubCategory');
 const createCrudController = require('./crudFactory');
 const { generateSlug } = require('../../utils/helpers');
 
-const base = createCrudController(BlogCategory, { searchFields: ['blog_category_name'], defaultSort: { display_order: 1 } });
+const base = createCrudController(BlogCategory, { searchFields: ['name'], defaultSort: { displayOrder: 1 } });
 
-// Keep the legacy `category_name`/`category_slug` in sync with the fields the
-// admin form actually sends (`blog_category_name`/`slug`), so any code still
-// reading the legacy names keeps working. Also derive a slug if none was sent.
-const mirrorFields = (body) => {
-  if (body.blog_category_name && !body.category_name) body.category_name = body.blog_category_name;
-  if (!body.slug && body.blog_category_name) body.slug = generateSlug(body.blog_category_name);
-  if (body.slug && !body.category_slug) body.category_slug = body.slug;
+// Derive a slug from the name if none was sent. (The legacy
+// category_name/category_slug mirror pair was folded into name/slug by
+// scripts/rename-blog-keys.js, so no mirroring is needed anymore.)
+const deriveSlug = (body) => {
+  if (!body.slug && body.name) body.slug = generateSlug(body.name);
 };
 
 const storeWithSlug = async (req, res) => {
-  mirrorFields(req.body);
+  deriveSlug(req.body);
   return base.store(req, res);
 };
 
 const updateWithSlug = async (req, res) => {
-  mirrorFields(req.body);
+  deriveSlug(req.body);
   return base.update(req, res);
 };
 
@@ -40,8 +38,8 @@ const attachSubCounts = async (cats) => {
   let countMap = new Map();
   try {
     const rows = await BlogSubCategory.aggregate([
-      { $match: { blog_category_id: { $in: idVariants } } },
-      { $group: { _id: '$blog_category_id', count: { $sum: 1 } } },
+      { $match: { blogCategoryId: { $in: idVariants } } },
+      { $group: { _id: '$blogCategoryId', count: { $sum: 1 } } },
     ]);
     rows.forEach((r) => countMap.set(String(r._id), r.count));
   } catch (err) {

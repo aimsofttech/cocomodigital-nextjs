@@ -23,7 +23,7 @@ const indexSubmissions = async (req, res) => {
 };
 
 const indexCategories = async (req, res) => {
-  const data = await FreeConsultationCategory.find().sort({ display_order: 1 });
+  const data = await FreeConsultationCategory.find().sort({ displayOrder: 1 });
   res.json({ status: 'success', data });
 };
 
@@ -41,7 +41,7 @@ const updateCat = async (req, res) => {
 const show = async (req, res) => {
   const doc = await FreeConsultationCategory.findById(req.params.id);
   if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
-  const items = await FreeConsultationItem.find({ consultation_category_id: doc._id });
+  const items = await FreeConsultationItem.find({ consultationCategoryId: { $in: [doc._id, String(doc._id)] } });
   res.json({ status: 'success', data: { ...doc.toObject(), selected_services: items } });
 };
 

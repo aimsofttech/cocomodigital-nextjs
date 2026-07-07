@@ -21,7 +21,7 @@ export default function CategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'blog_category_name', label: 'Category Name', sortable: true },
+    { key: 'name', label: 'Category Name', sortable: true },
     {
       key: 'sub_categories_count', label: 'Sub Categories', render: (row: any) => {
         const count = typeof row.sub_categories_count === 'number' ? row.sub_categories_count : 0;
@@ -37,7 +37,7 @@ export default function CategoryList() {
         );
       },
     },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

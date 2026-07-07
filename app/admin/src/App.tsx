@@ -149,8 +149,6 @@ const OurAdvantageList = lazy(() => import('@/pages/templates/OurAdvantageList')
 const OurAdvantageForm = lazy(() => import('@/pages/templates/OurAdvantageForm'));
 const SuccessStoriesProjectList = lazy(() => import('@/pages/templates/SuccessStoriesProjectList'));
 const SuccessStoriesProjectForm = lazy(() => import('@/pages/templates/SuccessStoriesProjectForm'));
-const FaqList = lazy(() => import('@/pages/templates/FaqList'));
-const FaqForm = lazy(() => import('@/pages/templates/FaqForm'));
 const WhatsappTemplateList = lazy(() => import('@/pages/templates/WhatsappTemplateList'));
 const WhatsappTemplateForm = lazy(() => import('@/pages/templates/WhatsappTemplateForm'));
 const AdminPostList = lazy(() => import('@/pages/templates/AdminPostList'));
@@ -412,9 +410,6 @@ export default function App() {
           <Route path="templates/success-stories-project" element={<SuccessStoriesProjectList />} />
           <Route path="templates/success-stories-project/add" element={<SuccessStoriesProjectForm />} />
           <Route path="templates/success-stories-project/edit/:id" element={<SuccessStoriesProjectForm />} />
-          <Route path="templates/faq" element={<FaqList />} />
-          <Route path="templates/faq/add" element={<FaqForm />} />
-          <Route path="templates/faq/edit/:id" element={<FaqForm />} />
           <Route path="templates/whatsapp" element={<WhatsappTemplateList />} />
           <Route path="templates/whatsapp/add" element={<WhatsappTemplateForm />} />
           <Route path="templates/whatsapp/edit/:id" element={<WhatsappTemplateForm />} />

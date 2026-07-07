@@ -226,7 +226,7 @@ export default function BulkUpload() {
                 <option value="">Select a book call (optional)</option>
                 {bookCalls.map((b: any) => (
                   <option key={b._id} value={b._id}>
-                    {b.book_name || b.book_heading || b.book_call_title || b.title || 'Untitled'}
+                    {b.name || b.heading || b.title || 'Untitled'}
                   </option>
                 ))}
               </select>

@@ -1,7 +1,7 @@
 const JobCategory = require('../../models/JobCategory');
 
 const index = async (req, res) => {
-  const categories = await JobCategory.find({ status: 1 }).sort({ display_order: 1 }).select('-user_id');
+  const categories = await JobCategory.find({ status: 1 }).sort({ displayOrder: 1 }).select('-userId');
   res.json({ status: 'success', data: categories });
 };
 

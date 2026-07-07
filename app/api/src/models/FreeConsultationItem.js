@@ -2,16 +2,19 @@ const mongoose = require('mongoose');
 
 const freeConsultationItemSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
-  consultation_category_id: { type: mongoose.Schema.Types.Mixed, default: null },
+  consultationCategoryId: { type: mongoose.Schema.Types.Mixed, default: null },
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, trim: true, lowercase: true },
   phone: { type: String, trim: true },
   company: { type: String, trim: true },
   message: { type: String, trim: true },
   budget: { type: String, trim: true },
-  is_read: { type: Number, enum: [0, 1], default: 0 },
+  isRead: { type: Number, enum: [0, 1], default: 0 },
 
   // ── Meeting-slot booking fields ───────────────────────────────
+  // NOTE: deliberately KEPT in snake_case (meeting_start_utc, slot_key,
+  // meeting_status, …) — the unique partial index below and the booking
+  // race-guard in contactController depend on these exact key names.
   // Present only on /schedule-meeting bookings (not general leads).
   meeting_start_utc: { type: Date, default: undefined }, // exact instant of the slot
   // Canonical slot identifier: the UTC instant truncated to the minute

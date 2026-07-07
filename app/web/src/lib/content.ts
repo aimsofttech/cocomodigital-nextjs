@@ -109,94 +109,86 @@ interface ExpressSource {
 
 interface MongoRef {
   _id?: string;
-  category_name?: string;
-  category_slug?: string;
-  sub_category_name?: string;
-  author_name?: string;
-  author_image?: string;
-  author_designation?: string;
+  name?: string;
+  slug?: string | null;
+  image?: string;
+  designation?: string;
 }
 
 interface MongoBlogPost {
   _id?: string;
-  blog_slug?: string;
-  blog_title?: string;
-  blog_content?: string;
-  blog_meta_title?: string;
-  blog_meta_description?: string;
-  blog_thumbnail?: string;
-  blog_tags?: string[];
-  read_time?: string;
-  published_at?: string | null;
+  slug?: string;
+  title?: string;
+  content?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  thumbnail?: string;
+  tags?: string[];
+  readTime?: string;
+  publishedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
-  blog_category_id?: MongoRef | string | null;
-  author_template_id?: MongoRef | string | null;
+  blogCategoryId?: MongoRef | string | null;
+  authorTemplateId?: MongoRef | string | null;
 }
 
 interface MongoBlogCategory {
   _id?: string;
-  /* The api stores the name as `blog_category_name`; older imports
-     used `category_name`. Slug is often empty so it's derived. */
-  blog_category_name?: string;
-  category_name?: string;
+  name?: string;
   slug?: string | null;
-  category_slug?: string;
-  display_order?: number;
+  displayOrder?: number;
 }
 
+/* Input keys are the API's camelCase; the OUTPUT keeps the legacy
+   shape (author_name, published_at, …) the blog views consume, so
+   the UI contract is unchanged. */
 const adaptBlogPost = (m: MongoBlogPost) => {
-  const cat = m.blog_category_id;
-  const author = m.author_template_id;
+  const cat = m.blogCategoryId;
+  const author = m.authorTemplateId;
   return {
     id: m._id,
-    slug: m.blog_slug,
-    title: m.blog_title,
-    content: m.blog_content,
-    excerpt: m.blog_meta_description,
-    meta_title: m.blog_meta_title,
-    reading_time: m.read_time,
-    published_at: m.published_at ?? m.createdAt,
+    slug: m.slug,
+    title: m.title,
+    content: m.content,
+    excerpt: m.metaDescription,
+    meta_title: m.metaTitle,
+    reading_time: m.readTime,
+    published_at: m.publishedAt ?? m.createdAt,
     createdAt: m.createdAt,
     updatedAt: m.updatedAt,
-    /* Cover image. The api leaves `blog_thumbnail` empty and stores
-       the real cover under `main_image` (a bare S3 key), so fall back
-       to it and absolutize. `image` is set too so the client-side
-       filter path (which reads the adapted doc directly) renders the
-       cover, not just the SSR path that goes through imageUrl(). */
-    legacyImageUrl: buildImg(m.blog_thumbnail || (m as any).main_image),
-    image: buildImg(m.blog_thumbnail || (m as any).main_image),
-    tags: Array.isArray(m.blog_tags) ? m.blog_tags : [],
+    /* Cover image; `image` is set too so the client-side filter path
+       (which reads the adapted doc directly) renders the cover, not
+       just the SSR path that goes through imageUrl(). */
+    legacyImageUrl: buildImg(m.thumbnail),
+    image: buildImg(m.thumbnail),
+    tags: Array.isArray(m.tags) ? m.tags : [],
     author:
       author && typeof author === "object"
         ? {
             id: author._id,
-            author_name: author.author_name,
-            author_image: author.author_image,
-            author_designation: author.author_designation,
+            author_name: author.name,
+            author_image: author.image,
+            author_designation: author.designation,
           }
         : (author ?? undefined),
     category:
       cat && typeof cat === "object"
         ? {
             id: cat._id,
-            name: (cat as any).blog_category_name ?? cat.category_name,
-            slug:
-              (cat as any).slug ||
-              cat.category_slug ||
-              slugify((cat as any).blog_category_name ?? cat.category_name),
+            name: cat.name,
+            slug: cat.slug || slugify(cat.name),
           }
         : undefined,
   };
 };
 
 const adaptBlogCategory = (m: MongoBlogCategory) => {
-  const name = m.blog_category_name ?? m.category_name ?? "";
+  const name = m.name ?? "";
   return {
     id: m._id,
     name,
     /* the api leaves the slug blank, so derive it from the name. */
-    slug: m.slug || m.category_slug || slugify(name),
+    slug: m.slug || slugify(name),
   };
 };
 
@@ -297,51 +289,63 @@ const adaptBrand = (m: MongoBrand) => ({
 
 interface MongoAuthor {
   _id?: string;
-  author_name?: string;
-  author_image?: string;
-  author_description?: string;
-  template_name?: string;
-  founder_text?: string;
-  founder_url?: string;
-  cto_text?: string;
-  cto_url?: string;
-  author_url?: string;
-  click_here_text?: string;
-  click_here_url?: string;
-  display_order?: number;
+  name?: string;
+  image?: string;
+  description?: string;
+  designation?: string;
+  templateName?: string;
+  founderText?: string;
+  founderUrl?: string;
+  ctoText?: string;
+  ctoUrl?: string;
+  url?: string;
+  clickHereText?: string;
+  clickHereUrl?: string;
+  displayOrder?: number;
 }
 
 /* The legacy AuthorTemplate interface the blog detail page consumes
-   uses the SAME field names the Mongo api returns (author_name,
-   author_image, author_description, founder_text, cto_text …), so we
-   pass them through and just normalise id + image fallback. */
+   uses the OLD field names (author_name, author_image, founder_text,
+   cto_text …), so re-emit them from the API's camelCase keys — the
+   UI contract stays unchanged. */
 const adaptAuthor = (m: MongoAuthor) => ({
   ...m,
   id: m._id,
-  name: m.author_name,
-  order: m.display_order,
-  legacyImageUrl: m.author_image ?? "",
+  name: m.name,
+  author_name: m.name,
+  author_image: m.image,
+  author_description: m.description,
+  author_designation: m.designation,
+  template_name: m.templateName,
+  founder_text: m.founderText,
+  founder_url: m.founderUrl,
+  cto_text: m.ctoText,
+  cto_url: m.ctoUrl,
+  author_url: m.url,
+  click_here_text: m.clickHereText,
+  click_here_url: m.clickHereUrl,
+  order: m.displayOrder,
+  legacyImageUrl: m.image ?? "",
 });
 
 /* ── Jobs adapters ───────────────────────────────────────────── */
 
 interface MongoJob {
   _id?: string;
-  job_title?: string;
-  job_slug?: string;
-  job_experience?: string;
+  title?: string;
+  slug?: string;
   experience?: string[];
-  job_type?: string | string[];
-  workplace_type?: string | string[];
-  job_location?: string;
-  job_salary?: string | null;
-  job_description?: string;
-  job_requirements?: string;
-  no_of_openings?: number;
-  application_deadline?: string | null;
-  display_order?: number;
+  jobType?: string | string[];
+  workplaceType?: string | string[];
+  location?: string;
+  salary?: string | null;
+  description?: string;
+  requirements?: string;
+  noOfOpenings?: number;
+  applicationDeadline?: string | null;
+  displayOrder?: number;
   status?: number;
-  job_category_id?: { _id?: string; name?: string; slug?: string } | string | null;
+  jobCategoryId?: { _id?: string; name?: string; slug?: string } | string | null;
 }
 
 /* Multi-select fields (job_type / workplace_type) have been saved in
@@ -373,34 +377,32 @@ const humaniseExperienceCode = (v: string): string | null => {
   return v;
 };
 
-/* The new schema's `experience` array takes priority when populated;
-   otherwise fall back to the legacy scalar `job_experience` field —
-   most existing job postings only ever had the legacy field set. */
+/* The `experience` array holds either display labels or legacy raw
+   codes (old scalar values were folded into it by the key-rename
+   migration); humanise each entry. */
 const normaliseExperience = (m: MongoJob): string[] => {
-  const source =
-    Array.isArray(m.experience) && m.experience.length
-      ? m.experience
-      : m.job_experience
-        ? [m.job_experience]
-        : [];
+  const source = splitMulti(m.experience);
   return source.map(humaniseExperienceCode).filter(Boolean) as string[];
 };
 
+/* Input keys are the API's camelCase; the OUTPUT keeps the legacy
+   shape (job_type, work_type, salary_range, …) the career views
+   consume, so the UI contract is unchanged. */
 const adaptJob = (m: MongoJob) => {
-  const cat = m.job_category_id;
+  const cat = m.jobCategoryId;
   return {
     ...m,
     id: m._id,
-    slug: m.job_slug,
-    title: m.job_title,
+    slug: m.slug,
+    title: m.title,
     experience: normaliseExperience(m),
-    job_type: splitMulti(m.job_type),
-    work_type: splitMulti(m.workplace_type),
-    location: m.job_location,
-    salary_range: m.job_salary ?? undefined,
-    description: m.job_description,
-    requirements: m.job_requirements,
-    order: m.display_order,
+    job_type: splitMulti(m.jobType),
+    work_type: splitMulti(m.workplaceType),
+    location: m.location,
+    salary_range: m.salary ?? undefined,
+    description: m.description,
+    requirements: m.requirements,
+    order: m.displayOrder,
     is_active: m.status === 1,
     department:
       cat && typeof cat === "object"
@@ -415,7 +417,7 @@ interface MongoJobCategory {
   _id?: string;
   name?: string;
   slug?: string;
-  display_order?: number;
+  displayOrder?: number;
 }
 
 const adaptJobCategory = (m: MongoJobCategory) => ({
@@ -423,7 +425,7 @@ const adaptJobCategory = (m: MongoJobCategory) => ({
   id: m._id,
   name: m.name,
   slug: m.slug,
-  order: m.display_order,
+  order: m.displayOrder,
 });
 
 /* ── Marketing category adapter ──────────────────────────────── */
@@ -734,15 +736,14 @@ const adaptMonthlyPerf = (m: MongoMonthlyPerf) => ({
 
 interface MongoOurAdvantage {
   _id?: string;
-  display_order?: number;
-  advantage_icon?: string;
+  displayOrder?: number;
   image?: string;
 }
 
 const adaptOurAdvantage = (m: MongoOurAdvantage) => {
   /* The api stores the advantage's stats as flat numbered scalars
-     (action_number_1..7 / action_title_1..7) and its industry-
-     experience rows as exp_number_/exp_title_/exp_img_1..7. The
+     (actionNumber1..7 / actionTitle1..7) and its industry-
+     experience rows as expNumber/expTitle/expImg1..7. The
      WhyCocomaDigital section reads structured `metrics[]` +
      `industryExperience{ description, metrics[] }`, so fold the flat
      fields into those shapes here. */
@@ -750,24 +751,24 @@ const adaptOurAdvantage = (m: MongoOurAdvantage) => {
   return {
     ...m,
     id: m._id,
-    order: (m as any).display_order,
-    legacyImageUrl: buildImg((m as any).image || (m as any).advantage_icon),
-    description: (m as any).action_description,
-    video_url: (m as any).video_url || "",
+    order: (m as any).displayOrder,
+    legacyImageUrl: buildImg((m as any).image),
+    description: (m as any).actionDescription,
+    video_url: (m as any).videoUrl || "",
     image: buildImg((m as any).image),
     metrics: seven
       .map((n) => ({
-        number: (m as any)[`action_number_${n}`],
-        title: (m as any)[`action_title_${n}`],
+        number: (m as any)[`actionNumber${n}`],
+        title: (m as any)[`actionTitle${n}`],
       }))
       .filter((x) => x.number || x.title),
     industryExperience: {
-      description: (m as any).exp_description,
+      description: (m as any).expDescription,
       metrics: seven
         .map((n) => ({
-          number: (m as any)[`exp_number_${n}`],
-          title: (m as any)[`exp_title_${n}`],
-          img: buildImg((m as any)[`exp_img_${n}`]),
+          number: (m as any)[`expNumber${n}`],
+          title: (m as any)[`expTitle${n}`],
+          img: buildImg((m as any)[`expImg${n}`]),
         }))
         .filter((x) => x.number || x.title),
     },
@@ -776,27 +777,30 @@ const adaptOurAdvantage = (m: MongoOurAdvantage) => {
 
 interface MongoBookCall {
   _id?: string;
-  book_name?: string;
-  book_image?: string;
-  book_heading?: string;
-  book_title1?: string;
-  book_title2?: string;
-  book_description1?: string;
-  book_description2?: string;
-  book_button_text?: string;
-  book_button_url?: string;
-  display_order?: number;
+  name?: string;
+  image?: string;
+  heading?: string;
+  title1?: string;
+  title2?: string;
+  description1?: string;
+  description2?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  displayOrder?: number;
 }
 
+/* Input keys are the API's camelCase; the OUTPUT keeps the legacy
+   book_* / left_column / right_column shape BookCallBanner and
+   homeServerFetch already consume, so the UI contract is unchanged. */
 const adaptBookCall = (m: MongoBookCall) => ({
   ...m,
   id: m._id,
-  book_heading: m.book_heading,
-  book_button_text: m.book_button_text,
-  legacyImageUrl: buildImg(m.book_image),
-  left_column: { book_title1: m.book_title1, book_description1: m.book_description1 },
-  right_column: { book_title2: m.book_title2, book_description2: m.book_description2 },
-  order: m.display_order,
+  book_heading: m.heading,
+  book_button_text: m.buttonText,
+  legacyImageUrl: buildImg(m.image),
+  left_column: { book_title1: m.title1, book_description1: m.description1 },
+  right_column: { book_title2: m.title2, book_description2: m.description2 },
+  order: m.displayOrder,
 });
 
 interface MongoHomeSectionItem {

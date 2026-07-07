@@ -69,13 +69,13 @@ export default function ContactUsList() {
   };
 
   const columns = [
-    { key: 'name', label: 'Name', sortable: true, render: (row: any) => `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.name || 'N/A' },
+    { key: 'name', label: 'Name', sortable: true, render: (row: any) => `${row.firstName || ''} ${row.lastName || ''}`.trim() || row.name || 'N/A' },
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone_no', label: 'Phone', sortable: true, render: (row: any) => row.phone_no || row.phone || 'N/A' },
-    { key: 'company_name', label: 'Company', sortable: true, render: (row: any) => row.company_name || 'N/A' },
-    { key: 'media_budget', label: 'Budget', sortable: true, render: (row: any) => row.media_budget || 'N/A' },
+    { key: 'phoneNo', label: 'Phone', sortable: true, render: (row: any) => row.phoneNo || row.phone || 'N/A' },
+    { key: 'companyName', label: 'Company', sortable: true, render: (row: any) => row.companyName || 'N/A' },
+    { key: 'mediaBudget', label: 'Budget', sortable: true, render: (row: any) => row.mediaBudget || 'N/A' },
     { key: 'createdAt', label: 'Date', sortable: true, render: (row: any) => {
-      const d = row.createdAt || row.created_at;
+      const d = row.createdAt;
       return d ? new Date(d).toLocaleDateString() : 'N/A';
     } },
   ];
@@ -99,11 +99,11 @@ export default function ContactUsList() {
         {selected && (
           <div className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{`${selected.first_name || ''} ${selected.last_name || ''}`.trim()}</p></div>
+              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{`${selected.firstName || ''} ${selected.lastName || ''}`.trim() || selected.name || ''}</p></div>
               <div><p className="text-xs text-gray-500">Email</p><p>{selected.email}</p></div>
-              {selected.phone_no && <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone_no}</p></div>}
-              {selected.company_name && <div><p className="text-xs text-gray-500">Company</p><p>{selected.company_name}</p></div>}
-              {selected.media_budget && <div><p className="text-xs text-gray-500">Media Budget</p><p>{selected.media_budget}</p></div>}
+              {(selected.phoneNo || selected.phone) && <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phoneNo || selected.phone}</p></div>}
+              {selected.companyName && <div><p className="text-xs text-gray-500">Company</p><p>{selected.companyName}</p></div>}
+              {selected.mediaBudget && <div><p className="text-xs text-gray-500">Media Budget</p><p>{selected.mediaBudget}</p></div>}
             </div>
             {selected.message && <div><p className="text-xs text-gray-500 mb-1">Message</p><p className="bg-gray-50 p-3 rounded-lg">{selected.message}</p></div>}
           </div>

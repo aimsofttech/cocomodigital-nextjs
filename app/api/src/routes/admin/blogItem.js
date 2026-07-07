@@ -6,8 +6,8 @@ const upload = createS3Upload('blog_items');
 
 router.get('/', protect, ctrl.index);
 router.get('/:id', protect, ctrl.show);
-router.post('/', protect, upload.single('blog_thumbnail'), ctrl.store);
-router.put('/:id', protect, upload.single('blog_thumbnail'), ctrl.update);
+router.post('/', protect, upload.single('thumbnail'), ctrl.store);
+router.put('/:id', protect, upload.single('thumbnail'), ctrl.update);
 router.delete('/:id', protect, ctrl.destroy);
 
 module.exports = router;

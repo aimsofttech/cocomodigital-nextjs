@@ -37,7 +37,7 @@ export default function CategoryList() {
         );
       },
     },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

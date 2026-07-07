@@ -22,9 +22,9 @@ export default function OurAdvantageList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
-    { key: 'template_name', label: 'Template Name', sortable: true },
-    { key: 'action_heading', label: 'Action Heading', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'templateName', label: 'Template Name', sortable: true },
+    { key: 'actionHeading', label: 'Action Heading', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

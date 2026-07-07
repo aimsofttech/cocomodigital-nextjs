@@ -29,8 +29,7 @@ const index = async (req, res) => {
       const obj = bc.toObject();
       bookCallTemplate = {
         ...obj,
-        book_image: buildUrl(obj.book_image),
-        book_call_image: buildUrl(obj.book_call_image),
+        image: buildUrl(obj.image),
       };
     }
   }

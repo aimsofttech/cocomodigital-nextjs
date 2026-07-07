@@ -19,9 +19,9 @@ const buildUrl = (key) => (key ? buildS3Url(key) : '');
    MX Player=16, Prime Video=17, IMDB=18. */
 const REQUIREMENT_LOGO_BASE_ID = 15;
 
-// The gallery image key may live under `image_file` (legacy migrated rows) or
-// `image` (admin-created rows).
-const galleryImageKey = (g) => (g ? g.image_file || g.image : '');
+// Gallery rows now store the file under `image` (legacy `image_file` rows
+// were folded into it by scripts/rename-gallery-keys.js).
+const galleryImageKey = (g) => (g ? g.image : '');
 
 const resolveRequirementLogo = async (requirementTitle) => {
   if (requirementTitle === undefined || requirementTitle === null || requirementTitle === '') return '';
@@ -39,7 +39,7 @@ const resolveRequirementLogo = async (requirementTitle) => {
   // galleries (the MySQL→Mongo migration dropped the ids but kept order).
   const reqId = Number(requirementTitle);
   if (Number.isInteger(reqId) && reqId >= REQUIREMENT_LOGO_BASE_ID) {
-    const logos = await Gallery.find({ image_type: 'requirement_title' })
+    const logos = await Gallery.find({ type: 'requirement_title' })
       .sort({ _id: 1 })
       .lean();
     const key = galleryImageKey(logos[reqId - REQUIREMENT_LOGO_BASE_ID]);

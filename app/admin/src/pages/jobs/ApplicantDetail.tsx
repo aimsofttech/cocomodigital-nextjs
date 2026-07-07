@@ -69,7 +69,7 @@ export default function ApplicantDetail() {
           )}
         </div>
         <div className="card space-y-4">
-          <div><p className="text-xs text-gray-500">Job</p><p className="font-semibold">{applicant.jobListId?.job_title || 'N/A'}</p></div>
+          <div><p className="text-xs text-gray-500">Job</p><p className="font-semibold">{applicant.jobListId?.title || 'N/A'}</p></div>
           <div><p className="text-xs text-gray-500 mb-2">Current Status</p><span className={`badge ${statusColors[applicant.applicationStatus] || 'badge-warning'}`}>{applicant.applicationStatus}</span></div>
           <div><p className="text-xs text-gray-500 mb-2">Update Status</p>
             <div className="space-y-2">

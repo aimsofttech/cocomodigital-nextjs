@@ -69,13 +69,13 @@ export default function FreeConsultationList() {
   };
 
   const columns = [
-    { key: 'name', label: 'Name', sortable: true, render: (row: any) => row.name || `${row.first_name || ''} ${row.last_name || ''}`.trim() || 'N/A' },
+    { key: 'name', label: 'Name', sortable: true, render: (row: any) => row.name || `${row.firstName || ''} ${row.lastName || ''}`.trim() || 'N/A' },
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || row.phone_no || 'N/A' },
-    { key: 'company', label: 'Company', sortable: true, render: (row: any) => row.company || row.company_name || 'N/A' },
+    { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || row.phoneNo || 'N/A' },
+    { key: 'company', label: 'Company', sortable: true, render: (row: any) => row.company || row.companyName || 'N/A' },
     { key: 'budget', label: 'Budget', sortable: true, render: (row: any) => row.budget || 'N/A' },
     { key: 'createdAt', label: 'Submitted', sortable: true, render: (row: any) => {
-      const d = row.createdAt || row.created_at;
+      const d = row.createdAt;
       return d ? new Date(d).toLocaleDateString() : 'N/A';
     } },
   ];
@@ -99,10 +99,10 @@ export default function FreeConsultationList() {
         {selected && (
           <div className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.name || `${selected.first_name || ''} ${selected.last_name || ''}`.trim() || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Name</p><p className="font-medium">{selected.name || `${selected.firstName || ''} ${selected.lastName || ''}`.trim() || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || selected.phone_no || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-500">Company</p><p>{selected.company || selected.company_name || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || selected.phoneNo || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Company</p><p>{selected.company || selected.companyName || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Budget</p><p>{selected.budget || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : 'N/A'}</p></div>
             </div>

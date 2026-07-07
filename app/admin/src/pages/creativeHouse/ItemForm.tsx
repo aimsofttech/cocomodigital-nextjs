@@ -19,10 +19,10 @@ interface Props {
   editId?: string;
 }
 
-// Best-effort display label for the template dropdowns (records use different
-// name fields: author → template_name/author_name, book-call → book_name).
+// Best-effort display label for the template dropdowns (author templates use
+// templateName/name; book-call templates use name).
 const tName = (t: any) =>
-  t.template_name || t.book_name || t.author_name || t.name || t.title || t._id;
+  t.templateName || t.name || t.title || t._id;
 
 // Icon-only "open the module's listing page" link shown next to a field label.
 // Opens in a new tab so the form being filled is not lost.
@@ -65,10 +65,10 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
     creativeHouseCategoryApi.getAll({ limit: 100 }).then(({ data }) => setCategories(data.data || [])).catch(() => {});
     authorTemplateApi.getAll({ limit: 200 }).then(({ data }) => setAuthors(data.data || [])).catch(() => {});
     bookCallApi.getAll({ limit: 200 }).then(({ data }) => setBookCalls(data.data || [])).catch(() => {});
-    // Client logos = gallery images tagged with image_type 'requirement_title'
+    // Client logos = gallery images tagged with type 'requirement_title'
     // (the Gallery module keeps its legacy tag values — unrelated to the creative key rename).
     galleryImageApi.getAll({ limit: 500 }).then(({ data }) =>
-      setClientLogos((data.data || []).filter((g: any) => g.image_type === 'requirement_title'))
+      setClientLogos((data.data || []).filter((g: any) => g.type === 'requirement_title'))
     ).catch(() => {});
 
     if (isEdit && id) {
@@ -180,7 +180,7 @@ export default function ItemForm({ onSuccess, onCancel, editId }: Props = {}) {
         </label>
         <select {...register('requirementTitle')} className="form-select">
           <option value="">Select Logo</option>
-          {clientLogos.map((g: any) => <option key={g._id} value={g._id}>{g.image_title || g.slug || g._id}</option>)}
+          {clientLogos.map((g: any) => <option key={g._id} value={g._id}>{g.title || g.slug || g._id}</option>)}
         </select>
       </div>
 

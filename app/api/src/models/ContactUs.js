@@ -7,7 +7,7 @@ const contactUsSchema = new mongoose.Schema({
   phone: { type: String, trim: true },
   subject: { type: String, trim: true },
   message: { type: String, required: true, trim: true },
-  is_read: { type: Number, enum: [0, 1], default: 0 },
+  isRead: { type: Number, enum: [0, 1], default: 0 },
 }, { timestamps: true, strict: false, collection: 'contact_us' });
 
 module.exports = mongoose.model('ContactUs', contactUsSchema);

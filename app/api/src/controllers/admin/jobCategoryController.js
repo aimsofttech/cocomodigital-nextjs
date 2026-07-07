@@ -1,48 +1,26 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const JobCategory = require('../../models/JobCategory');
 const JobList = require('../../models/JobList');
 const createCrudController = require('./crudFactory');
 const { generateSlug } = require('../../utils/helpers');
 
-const base = createCrudController(JobCategory, { searchFields: ['name', 'category_name'], defaultSort: { display_order: 1 } });
+const base = createCrudController(JobCategory, { searchFields: ['name'], defaultSort: { displayOrder: 1 } });
 
-// The admin form/list use `name`/`slug`; the public web app populates the legacy
-// `category_name`/`category_slug`. Keep both in sync on every write and derive a
-// slug from the name when none was supplied.
-const mirrorFields = (body) => {
+// Derive a slug from the name when none was supplied. (The legacy
+// category_name/category_slug mirror pair was folded into name/slug by
+// scripts/rename-job-keys.js, so no mirroring is needed anymore.)
+const deriveSlug = (body) => {
   if (!body.slug && body.name) body.slug = generateSlug(body.name);
-  if (body.name && !body.category_name) body.category_name = body.name;
-  if (body.category_name && !body.name) body.name = body.category_name;
-  if (body.slug && !body.category_slug) body.category_slug = body.slug;
 };
 
 const storeWithSlug = async (req, res) => {
-  mirrorFields(req.body);
+  deriveSlug(req.body);
   return base.store(req, res);
 };
 
 const updateWithSlug = async (req, res) => {
-  mirrorFields(req.body);
+  deriveSlug(req.body);
   return base.update(req, res);
-};
-
-// Legacy/migrated rows may only carry `category_name`/`category_slug`. Backfill
-// the admin-facing `name`/`slug` on read so the list/edit form show them.
-const backfill = (d) => {
-  if (!d) return d;
-  if (!d.name && d.category_name) d.name = d.category_name;
-  if (!d.slug && d.category_slug) d.slug = d.category_slug;
-  return d;
-};
-
-const withBackfill = (handler) => async (req, res) => {
-  const sendJson = res.json.bind(res);
-  res.json = (payload) => {
-    if (payload && Array.isArray(payload.data)) payload.data = payload.data.map(backfill);
-    else if (payload && payload.data) payload.data = backfill(payload.data);
-    return sendJson(payload);
-  };
-  return handler(req, res);
 };
 
 // Attach the count of job listings linked to each category (so the admin list
@@ -60,8 +38,8 @@ const attachJobCounts = async (cats) => {
   let countMap = new Map();
   try {
     const rows = await JobList.aggregate([
-      { $match: { job_category_id: { $in: idVariants } } },
-      { $group: { _id: '$job_category_id', count: { $sum: 1 } } },
+      { $match: { jobCategoryId: { $in: idVariants } } },
+      { $group: { _id: '$jobCategoryId', count: { $sum: 1 } } },
     ]);
     rows.forEach((r) => countMap.set(String(r._id), r.count));
   } catch (err) {
@@ -70,15 +48,14 @@ const attachJobCounts = async (cats) => {
   return cats.map((c) => ({ ...c, job_list_count: countMap.get(String(c._id)) || 0 }));
 };
 
-// List wrapper: backfill legacy name/slug, then attach each category's job count.
+// List wrapper: attach each category's job count.
 const indexWithExtras = async (req, res) => {
   const sendJson = res.json.bind(res);
   res.json = (payload) => {
     if (payload && payload.status === 'success' && Array.isArray(payload.data) && payload.data.length) {
-      const backfilled = payload.data.map(backfill);
-      attachJobCounts(backfilled)
+      attachJobCounts(payload.data)
         .then((data) => sendJson({ ...payload, data }))
-        .catch(() => sendJson({ ...payload, data: backfilled }));
+        .catch(() => sendJson(payload));
       return res;
     }
     return sendJson(payload);
@@ -89,7 +66,6 @@ const indexWithExtras = async (req, res) => {
 module.exports = {
   ...base,
   index: indexWithExtras,
-  show: withBackfill(base.show),
   store: storeWithSlug,
   update: updateWithSlug,
 };

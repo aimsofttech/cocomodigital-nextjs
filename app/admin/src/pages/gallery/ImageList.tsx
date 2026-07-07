@@ -21,10 +21,10 @@ export default function ImageList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'image_file', label: 'Image', render: (row: any) => <ImageCell src={row.image_file} alt={row.image_title} /> },
-    { key: 'image_title', label: 'Title', sortable: true },
-    { key: 'image_type', label: 'Type', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} alt={row.title} /> },
+    { key: 'title', label: 'Title', sortable: true },
+    { key: 'type', label: 'Type', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

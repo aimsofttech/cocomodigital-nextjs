@@ -1,3 +1,3 @@
-﻿const OurAdvantage = require('../../models/OurAdvantage');
+const OurAdvantage = require('../../models/OurAdvantage');
 const createCrudController = require('./crudFactory');
-module.exports = createCrudController(OurAdvantage, { imageFields: ['image'], searchFields: ['advantage_title'], defaultSort: { display_order: 1 } });
+module.exports = createCrudController(OurAdvantage, { imageFields: ['image'], searchFields: ['title', 'templateName'], defaultSort: { displayOrder: 1 } });

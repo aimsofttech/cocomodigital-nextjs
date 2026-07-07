@@ -6,7 +6,7 @@ const index = async (req, res) => {
   const skip = (page - 1) * limit;
   const search = req.query.search || '';
   const filter = search
-    ? { $or: [{ first_name: { $regex: search, $options: 'i' } }, { last_name: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }] }
+    ? { $or: [{ name: { $regex: search, $options: 'i' } }, { firstName: { $regex: search, $options: 'i' } }, { lastName: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }] }
     : {};
   const [data, total] = await Promise.all([
     ContactUs.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),

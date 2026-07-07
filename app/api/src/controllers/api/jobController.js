@@ -3,20 +3,23 @@ const JobApplicant = require('../../models/JobApplicant');
 const { buildS3Url } = require('../../utils/s3Upload');
 
 const jobList = async (req, res) => {
-  const jobs = await JobList.find({ status: 1 }).sort({ display_order: 1, createdAt: -1 })
-    .populate('job_category_id', 'category_name category_slug');
+  const jobs = await JobList.find({ status: 1 }).sort({ displayOrder: 1, createdAt: -1 })
+    .populate('jobCategoryId', 'name slug');
   res.json({ status: 'success', data: jobs });
 };
 
 const getJobList = async (req, res) => {
-  const { page = 1, limit = 10, category_id, job_type, search } = req.query;
+  // `category_id`/`job_type` stay accepted as legacy query-param aliases.
+  const { page = 1, limit = 10, search } = req.query;
+  const categoryId = req.query.categoryId ?? req.query.category_id;
+  const jobType = req.query.jobType ?? req.query.job_type;
   const filter = { status: 1 };
-  if (category_id) filter.job_category_id = category_id;
-  if (job_type) filter.job_type = job_type;
-  if (search) filter.$or = [{ job_title: { $regex: search, $options: 'i' } }, { job_location: { $regex: search, $options: 'i' } }];
+  if (categoryId) filter.jobCategoryId = categoryId;
+  if (jobType) filter.jobType = jobType;
+  if (search) filter.$or = [{ title: { $regex: search, $options: 'i' } }, { location: { $regex: search, $options: 'i' } }];
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const [jobs, total] = await Promise.all([
-    JobList.find(filter).sort({ display_order: 1 }).skip(skip).limit(parseInt(limit)).populate('job_category_id', 'category_name'),
+    JobList.find(filter).sort({ displayOrder: 1 }).skip(skip).limit(parseInt(limit)).populate('jobCategoryId', 'name'),
     JobList.countDocuments(filter),
   ]);
   res.json({ status: 'success', data: jobs, pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) } });
@@ -24,7 +27,7 @@ const getJobList = async (req, res) => {
 
 const getJobDetail = async (req, res) => {
   const { job_slug } = req.params;
-  const job = await JobList.findOne({ job_slug, status: 1 }).populate('job_category_id', 'category_name');
+  const job = await JobList.findOne({ slug: job_slug, status: 1 }).populate('jobCategoryId', 'name');
   if (!job) return res.status(404).json({ status: 'error', message: 'Job not found' });
   res.json({ status: 'success', data: job });
 };
@@ -49,7 +52,7 @@ const storeApplicant = async (req, res) => {
 };
 
 const showApplicant = async (req, res) => {
-  const applicant = await JobApplicant.findById(req.params.id).populate('jobListId', 'job_title');
+  const applicant = await JobApplicant.findById(req.params.id).populate('jobListId', 'title');
   if (!applicant) return res.status(404).json({ status: 'error', message: 'Not found' });
   const obj = applicant.toObject();
   if (obj.resume) obj.resume = `${process.env.AWS_URL}/${obj.resume}`;

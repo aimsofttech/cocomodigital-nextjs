@@ -127,49 +127,45 @@ export interface CreativeHouseItem extends BaseModel {
 }
 
 export interface BlogCategory extends BaseModel {
-  category_name: string;
-  category_slug?: string;
+  name: string;
 }
 
 export interface BlogSubCategory extends BaseModel {
-  blog_category_id: string | BlogCategory;
-  sub_category_name: string;
-  sub_category_slug?: string;
+  blogCategoryId: string | BlogCategory;
+  name: string;
 }
 
 export interface BlogItem extends BaseModel {
-  blog_category_id: string | BlogCategory;
-  blog_sub_category_id?: string | BlogSubCategory;
-  author_template_id?: string | AuthorTemplate;
-  blog_title: string;
-  blog_slug?: string;
-  blog_thumbnail?: string;
-  blog_content?: string;
-  blog_meta_title?: string;
-  blog_meta_description?: string;
-  read_time?: string;
-  published_at?: string;
+  blogCategoryId: string | BlogCategory;
+  blogSubCategoryId?: string | BlogSubCategory;
+  authorTemplateId?: string | AuthorTemplate;
+  title: string;
+  thumbnail?: string;
+  content?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  readTime?: string;
+  publishedAt?: string;
 }
 
 export interface JobCategory extends BaseModel {
-  category_name: string;
-  category_slug?: string;
+  name: string;
 }
 
 export interface JobList extends BaseModel {
-  job_category_id?: string | JobCategory;
-  job_title: string;
-  job_slug?: string;
-  job_description?: string;
-  job_requirements?: string;
-  job_type?: string;
-  job_location?: string;
+  jobCategoryId?: string | JobCategory;
+  title: string;
+  description?: string;
+  requirements?: string;
+  jobType?: string | string[];
+  workplaceType?: string | string[];
+  location?: string;
   state?: string;
   country?: string;
-  experience?: string;
-  salary_range?: string;
-  no_of_openings?: number;
-  application_deadline?: string;
+  experience?: string | string[];
+  salary?: string;
+  noOfOpenings?: number;
+  applicationDeadline?: string;
 }
 
 export interface JobApplicant extends BaseModel {
@@ -207,18 +203,18 @@ export interface GroupServiceItem extends BaseModel {
 }
 
 export interface AuthorTemplate extends BaseModel {
-  author_name: string;
-  author_image?: string;
-  author_designation?: string;
-  author_bio?: string;
+  name: string;
+  image?: string;
+  designation?: string;
+  bio?: string;
 }
 
 export interface BookCall extends BaseModel {
-  book_call_title: string;
-  book_call_subtitle?: string;
-  book_call_button_text?: string;
-  book_call_button_url?: string;
-  book_call_image?: string;
+  name: string;
+  heading?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  image?: string;
 }
 
 export interface BannerTitleTemplate extends BaseModel {
@@ -237,9 +233,11 @@ export interface UserChoice extends BaseModel {
 }
 
 export interface OurAdvantage extends BaseModel {
-  advantage_title: string;
-  advantage_description?: string;
-  advantage_icon?: string;
+  title: string;
+  description?: string;
+  image?: string;
+  templateName?: string;
+  actionHeading?: string;
 }
 
 export interface Faq extends BaseModel {
@@ -263,21 +261,21 @@ export interface ContactUs {
   phone?: string;
   subject?: string;
   message: string;
-  is_read: number;
+  isRead: number;
   createdAt: string;
 }
 
 export interface Gallery extends BaseModel {
   image: string;
-  image_title?: string;
-  image_description?: string;
+  title?: string;
+  description?: string;
 }
 
 export interface GalleryVideo extends BaseModel {
-  video_thumbnail?: string;
-  video_url: string;
-  video_youtube_id?: string;
-  video_title?: string;
+  thumbnail?: string;
+  url: string;
+  youtubeId?: string;
+  title?: string;
 }
 
 export interface Page extends BaseModel {

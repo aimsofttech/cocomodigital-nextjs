@@ -3,7 +3,7 @@ const { paginateQuery } = require('../../utils/helpers');
 const { buildS3Url } = require('../../utils/s3Upload');
 
 const SEARCH_FIELDS = ['name', 'email', 'phone'];
-const POPULATE = { path: 'jobListId', select: 'job_title' };
+const POPULATE = { path: 'jobListId', select: 'title' };
 
 const withResumeUrl = (doc) => {
   const obj = doc.toObject ? doc.toObject() : doc;

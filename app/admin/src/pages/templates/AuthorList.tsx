@@ -21,10 +21,10 @@ export default function AuthorList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'author_image', label: 'Photo', render: (row: any) => <ImageCell src={row.author_image} alt={row.author_name} /> },
-    { key: 'template_name', label: 'Template Name', sortable: true },
-    { key: 'author_name', label: 'Author Name', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'image', label: 'Photo', render: (row: any) => <ImageCell src={row.image} alt={row.name} /> },
+    { key: 'templateName', label: 'Template Name', sortable: true },
+    { key: 'name', label: 'Author Name', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

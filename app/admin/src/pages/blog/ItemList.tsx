@@ -15,8 +15,8 @@ export default function ItemList() {
   const categoryId = searchParams.get('blogCategoryId') || '';
   const subCategoryId = searchParams.get('blogSubCategoryId') || '';
   const scopeFilter: Record<string, any> = {};
-  if (categoryId) scopeFilter.blog_category_id = categoryId;
-  if (subCategoryId) scopeFilter.blog_sub_category_id = subCategoryId;
+  if (categoryId) scopeFilter.blogCategoryId = categoryId;
+  if (subCategoryId) scopeFilter.blogSubCategoryId = subCategoryId;
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
     useCrud(blogItemApi, true, scopeFilter);
@@ -44,12 +44,12 @@ export default function ItemList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'main_image', label: 'Image', render: (row: any) => <ImageCell src={row.main_image} alt={row.blog_title} /> },
-    { key: 'blog_title', label: 'Title', sortable: true },
-    { key: 'blog_category_name', label: 'Category', sortable: true },
-    { key: 'blog_sub_category_name', label: 'Sub Category', render: (row: any) => row.blog_sub_category_name || 'N/A' },
-    { key: 'blog_item_slug', label: 'Slug', sortable: true },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'thumbnail', label: 'Image', render: (row: any) => <ImageCell src={row.thumbnail} alt={row.title} /> },
+    { key: 'title', label: 'Title', sortable: true },
+    { key: 'blogCategoryName', label: 'Category', sortable: true },
+    { key: 'blogSubCategoryName', label: 'Sub Category', render: (row: any) => row.blogSubCategoryName || 'N/A' },
+    { key: 'slug', label: 'Slug', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

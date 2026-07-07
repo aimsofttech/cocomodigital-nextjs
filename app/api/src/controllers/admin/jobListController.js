@@ -4,22 +4,21 @@ const createCrudController = require('./crudFactory');
 const { generateSlug, parseCsvOrExcel } = require('../../utils/helpers');
 
 const base = createCrudController(JobList, {
-  imageFields: ['job_image'],
-  searchFields: ['job_title', 'job_location', 'job_type'],
-  defaultSort: { display_order: 1, createdAt: -1 },
-  parentField: 'job_category_id',
-  // Single slug for the listing: generate a unique `job_slug` (the field the
+  imageFields: ['image'],
+  searchFields: ['title', 'location', 'jobType'],
+  defaultSort: { displayOrder: 1, createdAt: -1 },
+  parentField: 'jobCategoryId',
+  // Single slug for the listing: generate a unique `slug` (the field the
   // public web app and the admin form use). A manually-edited slug is respected;
   // otherwise it's derived from the job title. Generated on create and update.
-  slugField: 'job_slug',
+  slugField: 'slug',
   // Resolve the (single) job category's name for the list/detail responses.
-  // `name` is the current field; `category_name` is the legacy fallback.
   lookups: [
     {
-      localField: 'job_category_id',
+      localField: 'jobCategoryId',
       model: JobCategory,
-      nameField: ['name', 'category_name'],
-      as: 'job_category_name',
+      nameField: 'name',
+      as: 'jobCategoryName',
     },
   ],
 });
@@ -33,14 +32,14 @@ const bulkUpload = async (req, res) => {
       const title = row[0];
       if (!title) continue;
       const item = await JobList.create({
-        job_title: title,
-        job_slug: generateSlug(title),
-        job_type: row[1] ? [row[1]] : [],
-        job_location: row[2] || '',
+        title,
+        slug: generateSlug(title),
+        jobType: row[1] ? [row[1]] : [],
+        location: row[2] || '',
         experience: row[3] ? [row[3]] : [],
-        job_description: row[4] || '',
+        description: row[4] || '',
         status: 0,
-        user_id: req.user._id,
+        userId: req.user._id,
       });
       results.push(item);
     }

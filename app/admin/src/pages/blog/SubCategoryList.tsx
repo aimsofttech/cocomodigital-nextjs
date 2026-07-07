@@ -12,7 +12,7 @@ export default function SubCategoryList() {
   // (and pre-select it in the add/edit form).
   const [searchParams] = useSearchParams();
   const categoryId = searchParams.get('blogCategoryId') || '';
-  const scopeFilter = categoryId ? { blog_category_id: categoryId } : {};
+  const scopeFilter = categoryId ? { blogCategoryId: categoryId } : {};
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
     useCrud(blogSubCategoryApi, true, scopeFilter);
@@ -40,14 +40,14 @@ export default function SubCategoryList() {
 
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
-    { key: 'blog_category_name', label: 'Category', sortable: true },
-    { key: 'blog_sub_category_name', label: 'Sub Category Name', sortable: true },
+    { key: 'blogCategoryName', label: 'Category', sortable: true },
+    { key: 'name', label: 'Sub Category Name', sortable: true },
     {
       key: 'blog_items_count', label: 'Blog Posts', render: (row: any) => {
         const count = typeof row.blog_items_count === 'number' ? row.blog_items_count : 0;
         return (
           <Link
-            to={`/blog/item?blogCategoryId=${row.blog_category_id}&blogSubCategoryId=${row._id}`}
+            to={`/blog/item?blogCategoryId=${row.blogCategoryId}&blogSubCategoryId=${row._id}`}
             title="View / add blog posts for this sub category"
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-primary-200 bg-primary-50/60 hover:bg-primary-100 transition-colors"
           >
@@ -57,7 +57,7 @@ export default function SubCategoryList() {
         );
       },
     },
-    { key: 'display_order', label: 'Order', sortable: true },
+    { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

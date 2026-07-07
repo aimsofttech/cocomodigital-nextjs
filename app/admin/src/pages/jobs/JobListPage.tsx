@@ -12,7 +12,7 @@ export default function JobListPage() {
   // (and pre-select it in the add/edit form).
   const [searchParams] = useSearchParams();
   const categoryId = searchParams.get('jobCategoryId') || '';
-  const scopeFilter = categoryId ? { job_category_id: categoryId } : {};
+  const scopeFilter = categoryId ? { jobCategoryId: categoryId } : {};
 
   const { data, loading, submitting, pagination, remove, setSearch, setPage, setFilterParams, fetchAll } =
     useCrud(jobListApi, true, scopeFilter);
@@ -41,7 +41,7 @@ export default function JobListPage() {
   const FILTER_FIELDS = [
     { key: 'status', label: 'Status', type: 'status' as const },
     {
-      key: 'job_type', label: 'Job Type', type: 'select' as const, options: [
+      key: 'jobType', label: 'Job Type', type: 'select' as const, options: [
         { value: 'full-time', label: 'Full Time' },
         { value: 'part-time', label: 'Part Time' },
         { value: 'contract', label: 'Contract' },
@@ -49,7 +49,7 @@ export default function JobListPage() {
       ]
     },
     {
-      key: 'workplace_type', label: 'Workplace', type: 'select' as const, options: [
+      key: 'workplaceType', label: 'Workplace', type: 'select' as const, options: [
         { value: 'remote', label: 'Remote' },
         { value: 'on-site', label: 'On-site' },
         { value: 'hybrid', label: 'Hybrid' },
@@ -57,13 +57,13 @@ export default function JobListPage() {
     },
   ];
   const columns = [
-    { key: 'job_title', label: 'Job Title', sortable: true, className: 'min-w-[220px] max-w-[260px]' },
-    { key: 'job_category_name', label: 'Category', className: 'min-w-[160px]', render: (row: any) => row.job_category_name || 'N/A' },
-    { key: 'job_type', label: 'Type', className: 'min-w-[220px]', render: (row: any) => (Array.isArray(row.job_type) ? row.job_type.join(', ') : row.job_type) || 'N/A' },
-    { key: 'workplace_type', label: 'Workplace', className: 'min-w-[180px]', render: (row: any) => (Array.isArray(row.workplace_type) ? row.workplace_type.join(', ') : row.workplace_type) || 'N/A' },
-    { key: 'job_location', label: 'Location', sortable: true, className: 'min-w-[140px]' },
+    { key: 'title', label: 'Job Title', sortable: true, className: 'min-w-[220px] max-w-[260px]' },
+    { key: 'jobCategoryName', label: 'Category', className: 'min-w-[160px]', render: (row: any) => row.jobCategoryName || 'N/A' },
+    { key: 'jobType', label: 'Type', className: 'min-w-[220px]', render: (row: any) => (Array.isArray(row.jobType) ? row.jobType.join(', ') : row.jobType) || 'N/A' },
+    { key: 'workplaceType', label: 'Workplace', className: 'min-w-[180px]', render: (row: any) => (Array.isArray(row.workplaceType) ? row.workplaceType.join(', ') : row.workplaceType) || 'N/A' },
+    { key: 'location', label: 'Location', sortable: true, className: 'min-w-[140px]' },
     { key: 'experience', label: 'Experience', className: 'min-w-[220px]', render: (row: any) => (Array.isArray(row.experience) ? row.experience.join(', ') : row.experience) || 'N/A' },
-    { key: 'display_order', label: 'Order', sortable: true, className: 'min-w-[90px] whitespace-nowrap' },
+    { key: 'displayOrder', label: 'Order', sortable: true, className: 'min-w-[90px] whitespace-nowrap' },
     { key: 'status', label: 'Status', sortable: true, className: 'min-w-[140px] whitespace-nowrap', render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];
   return (

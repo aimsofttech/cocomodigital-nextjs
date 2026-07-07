@@ -140,7 +140,6 @@ const navigation: NavItem[] = [
       { label: 'Author', path: '/templates/author', icon: UserIcon },
       { label: 'Book Call', path: '/templates/book-call', icon: PhoneIcon },
       { label: 'Our Advantage', path: '/templates/our-advantage', icon: TrophyIcon },
-      { label: 'FAQs', path: '/templates/faq', icon: QuestionMarkCircleIcon },
     ],
   },
   {

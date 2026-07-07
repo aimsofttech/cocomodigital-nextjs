@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const BlogSubCategory = require('../../models/BlogSubCategory');
 const BlogCategory = require('../../models/BlogCategory');
 const BlogItem = require('../../models/BlogItem');
@@ -6,36 +6,32 @@ const createCrudController = require('./crudFactory');
 const { generateSlug } = require('../../utils/helpers');
 
 const base = createCrudController(BlogSubCategory, {
-  searchFields: ['blog_sub_category_name'],
-  defaultSort: { display_order: 1 },
-  parentField: 'blog_category_id',
+  searchFields: ['name'],
+  defaultSort: { displayOrder: 1 },
+  parentField: 'blogCategoryId',
   // Resolve the parent category's name for the list/detail responses.
   lookups: [
     {
-      localField: 'blog_category_id',
+      localField: 'blogCategoryId',
       model: BlogCategory,
-      nameField: 'blog_category_name',
-      as: 'blog_category_name',
+      nameField: 'name',
+      as: 'blogCategoryName',
     },
   ],
 });
 
-// Derive the slug if none was sent and keep the legacy sub_category_name/_slug
-// fields in sync with the fields the admin form actually sends, so old readers
-// keep working and the model's (now-optional) legacy fields stay populated.
-const mirrorFields = (body) => {
-  if (!body.blog_sub_category_slug && body.blog_sub_category_name) body.blog_sub_category_slug = generateSlug(body.blog_sub_category_name);
-  if (body.blog_sub_category_name && !body.sub_category_name) body.sub_category_name = body.blog_sub_category_name;
-  if (body.blog_sub_category_slug && !body.sub_category_slug) body.sub_category_slug = body.blog_sub_category_slug;
+// Derive the slug if none was sent.
+const deriveSlug = (body) => {
+  if (!body.slug && body.name) body.slug = generateSlug(body.name);
 };
 
 const storeWithSlug = async (req, res) => {
-  mirrorFields(req.body);
+  deriveSlug(req.body);
   return base.store(req, res);
 };
 
 const updateWithSlug = async (req, res) => {
-  mirrorFields(req.body);
+  deriveSlug(req.body);
   return base.update(req, res);
 };
 
@@ -54,8 +50,8 @@ const attachPostCounts = async (subs) => {
   let countMap = new Map();
   try {
     const rows = await BlogItem.aggregate([
-      { $match: { blog_sub_category_id: { $in: idVariants } } },
-      { $group: { _id: '$blog_sub_category_id', count: { $sum: 1 } } },
+      { $match: { blogSubCategoryId: { $in: idVariants } } },
+      { $group: { _id: '$blogSubCategoryId', count: { $sum: 1 } } },
     ]);
     rows.forEach((r) => countMap.set(String(r._id), r.count));
   } catch (err) {

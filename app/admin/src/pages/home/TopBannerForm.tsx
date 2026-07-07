@@ -91,7 +91,7 @@ export default function TopBannerForm({ onSuccess, onCancel, editId }: Props = {
             <option value="">— None —</option>
             {bookCalls.map((bc) => (
               <option key={bc._id} value={bc._id}>
-                {bc.book_name || bc.book_call_title || bc.book_heading || 'Untitled'}
+                {bc.name || bc.heading || 'Untitled'}
               </option>
             ))}
           </select>

@@ -85,7 +85,7 @@ export default function ApplicantList() {
     )},
     { key: 'email', label: 'Email', sortable: true },
     { key: 'phone', label: 'Phone', sortable: true, render: (row: any) => row.phone || 'N/A' },
-    { key: 'job_title', label: 'Applied For', render: (row: any) => row.jobListId?.job_title || 'N/A' },
+    { key: 'jobTitle', label: 'Applied For', render: (row: any) => row.jobListId?.title || 'N/A' },
     { key: 'experience', label: 'Experience', sortable: true, render: (row: any) => row.experience || 'N/A' },
     { key: 'applicationStatus', label: 'Status', render: (row: any) => (
       <span className={`badge ${STATUS_BADGES[row.applicationStatus] || 'badge-warning'} capitalize`}>{row.applicationStatus}</span>
@@ -136,7 +136,7 @@ export default function ApplicantList() {
         {viewRow && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><p className="text-xs text-gray-500">Applied For</p><p className="font-semibold">{viewRow.jobListId?.job_title || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Applied For</p><p className="font-semibold">{viewRow.jobListId?.title || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Name</p><p className="font-semibold">{viewRow.name || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Email</p><p className="font-semibold">{viewRow.email || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Phone</p><p>{viewRow.phone || 'N/A'}</p></div>

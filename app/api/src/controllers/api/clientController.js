@@ -4,8 +4,8 @@ const buildUrl = (key) => (key ? buildS3Url(key) : '');
 
 const getClientViewAll = async (req, res) => {
   const clients = await Client.find({ status: 1 }).sort({ displayOrder: 1 })
-    .populate('authorTemplateId', 'author_name author_image author_designation')
-    .populate('bookCallTemplateId', 'book_call_title book_call_button_url');
+    .populate('authorTemplateId', 'name image designation')
+    .populate('bookCallTemplateId', 'name heading buttonText buttonUrl');
   res.json({ status: 'success', data: clients.map((c) => ({ ...c.toObject(), image: buildUrl(c.image) })) });
 };
 

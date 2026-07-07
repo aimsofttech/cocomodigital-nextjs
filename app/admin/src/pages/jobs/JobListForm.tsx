@@ -43,14 +43,14 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
   // category once the category options have loaded.
   useEffect(() => {
     if (lockedCategoryId && !isEdit && categories.length) {
-      setValue('job_category_id', lockedCategoryId);
+      setValue('jobCategoryId', lockedCategoryId);
     }
   }, [lockedCategoryId, isEdit, categories, setValue]);
 
   const onSubmit = async (data: any) => {
     // A disabled <select> is excluded from RHF's submission payload, so
     // re-apply the locked category explicitly rather than relying on it.
-    if (lockedCategoryId && !isEdit) data.job_category_id = lockedCategoryId;
+    if (lockedCategoryId && !isEdit) data.jobCategoryId = lockedCategoryId;
     try {
       if (isEdit && id) await jobListApi.update(id, data);
       else await jobListApi.create(data);
@@ -64,7 +64,7 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
       <div>
         <label className="form-label">Job Category</label>
         <select
-          {...register('job_category_id')}
+          {...register('jobCategoryId')}
           className="form-select"
           disabled={Boolean(lockedCategoryId) && !isEdit}
         >
@@ -75,18 +75,18 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="form-label">Job Title <span className="text-red-500">*</span></label>
-          <input {...register('job_title', { required: 'Required' })} className="form-input" placeholder="e.g. Senior Video Editor" />
-          {errors.job_title && <p className="form-error">{String(errors.job_title.message)}</p>}
+          <input {...register('title', { required: 'Required' })} className="form-input" placeholder="e.g. Senior Video Editor" />
+          {errors.title && <p className="form-error">{String(errors.title.message)}</p>}
         </div>
-        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} name="job_slug" />
+        <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} name="slug" />
       </div>
       <div>
         <label className="form-label">Job Type</label>
-        <MultiSelect options={JOB_TYPE_OPTIONS} value={watch('job_type')} onChange={(vals) => setValue('job_type', vals, { shouldDirty: true })} placeholder="Select job type(s)" />
+        <MultiSelect options={JOB_TYPE_OPTIONS} value={watch('jobType')} onChange={(vals) => setValue('jobType', vals, { shouldDirty: true })} placeholder="Select job type(s)" />
       </div>
       <div>
         <label className="form-label">Workplace Type</label>
-        <MultiSelect options={WORKPLACE_OPTIONS} value={watch('workplace_type')} onChange={(vals) => setValue('workplace_type', vals, { shouldDirty: true })} placeholder="Select workplace type(s)" />
+        <MultiSelect options={WORKPLACE_OPTIONS} value={watch('workplaceType')} onChange={(vals) => setValue('workplaceType', vals, { shouldDirty: true })} placeholder="Select workplace type(s)" />
       </div>
       <div>
         <label className="form-label">Experience</label>
@@ -94,15 +94,15 @@ export default function JobListForm({ onSuccess, onCancel, editId, lockedCategor
       </div>
       <div>
         <label className="form-label">Location</label>
-        <input {...register('job_location')} className="form-input" placeholder="e.g. Mumbai, India" />
+        <input {...register('location')} className="form-input" placeholder="e.g. Mumbai, India" />
       </div>
       <div>
         <label className="form-label">Job Description</label>
-        <RichTextEditor value={watch('job_description')} onChange={(html) => setValue('job_description', html)} placeholder="Type Job Description here…" minHeight={260} uploadFolder="jobs" />
+        <RichTextEditor value={watch('description')} onChange={(html) => setValue('description', html)} placeholder="Type Job Description here…" minHeight={260} uploadFolder="jobs" />
       </div>
-      <ImageUpload name="job_image" label="Image" uploadType="image" folder="jobs" value={watch('job_image')} onChange={(url) => setValue('job_image', url)} />
+      <ImageUpload name="image" label="Image" uploadType="image" folder="jobs" value={watch('image')} onChange={(url) => setValue('image', url)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" defaultValue={0} placeholder="0" /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">

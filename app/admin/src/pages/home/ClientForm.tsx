@@ -65,14 +65,14 @@ export default function ClientForm({ onSuccess, onCancel, editId }: Props = {}) 
           <label className="form-label">Author Template</label>
           <select {...register('authorTemplateId')} className="form-select">
             <option value="">Select author template</option>
-            {authors.map((a: any) => <option key={a._id} value={a._id}>{a.template_name || a.author_name}</option>)}
+            {authors.map((a: any) => <option key={a._id} value={a._id}>{a.templateName || a.name}</option>)}
           </select>
         </div>
         <div>
           <label className="form-label">Book Call Template</label>
           <select {...register('bookCallTemplateId')} className="form-select">
             <option value="">Select book call template</option>
-            {bookCalls.map((b: any) => <option key={b._id} value={b._id}>{b.book_name}</option>)}
+            {bookCalls.map((b: any) => <option key={b._id} value={b._id}>{b.name}</option>)}
           </select>
         </div>
       </div>

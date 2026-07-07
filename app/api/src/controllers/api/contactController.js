@@ -37,10 +37,12 @@ const availability = async (req, res) => {
 // General consultation leads (no meeting_start_utc) still save to FreeConsultationItem.
 const freeConsultation = async (req, res) => {
   const {
-    consultation_category_id, name, email, phone, company, message, budget,
+    name, email, phone, company, message, budget,
     service, source_page, notes, meeting_date, meeting_time, meeting_timezone,
     meeting_start_utc,
   } = req.body;
+  // Accept both the new camelCase key and the legacy snake_case one.
+  const consultationCategoryId = req.body.consultationCategoryId ?? req.body.consultation_category_id;
   if (!name || !email) return res.status(400).json({ status: 'error', message: 'Name and email are required' });
 
   const slot_key = slotKeyOf(meeting_start_utc);
@@ -89,7 +91,7 @@ const freeConsultation = async (req, res) => {
 
   // ── General consultation lead (no meeting slot) ───────────────────────────
   const doc = await FreeConsultationItem.create({
-    consultation_category_id, name, email, phone, company, message, budget,
+    consultationCategoryId, name, email, phone, company, message, budget,
     service, source_page, notes,
   });
 

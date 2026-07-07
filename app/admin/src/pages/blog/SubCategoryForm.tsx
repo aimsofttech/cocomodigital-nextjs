@@ -36,7 +36,7 @@ export default function SubCategoryForm({ onSuccess, onCancel, editId, lockedCat
   // category once the category options have loaded.
   useEffect(() => {
     if (lockedCategoryId && !isEdit && categories.length) {
-      setValue('blog_category_id', lockedCategoryId);
+      setValue('blogCategoryId', lockedCategoryId);
     }
   }, [lockedCategoryId, isEdit, categories, setValue]);
 
@@ -53,20 +53,20 @@ export default function SubCategoryForm({ onSuccess, onCancel, editId, lockedCat
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="form-label">Category Name <span className="text-red-500">*</span></label>
-        <select {...register('blog_category_id', { required: 'Required' })} className="form-select">
+        <select {...register('blogCategoryId', { required: 'Required' })} className="form-select">
           <option value="">Select category</option>
-          {categories.map((c: any) => <option key={c._id} value={c._id}>{c.blog_category_name}</option>)}
+          {categories.map((c: any) => <option key={c._id} value={c._id}>{c.name}</option>)}
         </select>
-        {errors.blog_category_id && <p className="form-error">{String(errors.blog_category_id.message)}</p>}
+        {errors.blogCategoryId && <p className="form-error">{String(errors.blogCategoryId.message)}</p>}
       </div>
       <div>
         <label className="form-label">Sub Category Name <span className="text-red-500">*</span></label>
-        <input {...register('blog_sub_category_name', { required: 'Required' })} className="form-input" placeholder="Enter sub category name" />
-        {errors.blog_sub_category_name && <p className="form-error">{String(errors.blog_sub_category_name.message)}</p>}
+        <input {...register('name', { required: 'Required' })} className="form-input" placeholder="Enter sub category name" />
+        {errors.name && <p className="form-error">{String(errors.name.message)}</p>}
       </div>
-      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} name="blog_sub_category_slug" />
+      <SlugField register={register} watch={watch} setValue={setValue} isEdit={isEdit} name="slug" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div><label className="form-label">Display Order</label><input {...register('display_order')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
+        <div><label className="form-label">Display Order</label><input {...register('displayOrder')} type="number" className="form-input" placeholder="0" defaultValue={0} /></div>
         <div><label className="form-label">Status</label><select {...register('status')} className="form-select"><option value="1">Active</option><option value="0">Inactive</option></select></div>
       </div>
       <div className="flex gap-3 pt-2">
