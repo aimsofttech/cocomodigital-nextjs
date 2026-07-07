@@ -4,6 +4,7 @@ const GroupServiceItem = require('../../models/GroupServiceItem');
 const ServiceCategory = require('../../models/ServiceCategory');
 const ServiceItem = require('../../models/ServiceItem');
 const createCrudController = require('./crudFactory');
+const { cascadeCategoryItems } = require('../../utils/groupServiceCascade');
 
 const base = createCrudController(GroupServiceCategory, {
   searchFields: ['name'],
@@ -93,4 +94,11 @@ const index = async (req, res) => {
   return base.index(req, res);
 };
 
-module.exports = { ...base, index };
+// Deleting a category also deletes every Group Service Item inside it,
+// along with each item's sections (media, recent work, portfolio, FAQs).
+const destroy = async (req, res) => {
+  await cascadeCategoryItems(req.params.id);
+  return base.destroy(req, res);
+};
+
+module.exports = { ...base, index, destroy };

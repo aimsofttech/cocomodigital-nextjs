@@ -10,6 +10,7 @@ const GroupSingleServicePortfolioItem = require('../../models/GroupSingleService
 const GroupServiceItemFaq = require('../../models/GroupServiceItemFaq');
 const createCrudController = require('./crudFactory');
 const { generateSlug } = require('../../utils/helpers');
+const { cascadeItemSections } = require('../../utils/groupServiceCascade');
 
 const base = createCrudController(GroupServiceItem, {
   imageFields: ['thumbnail'],
@@ -126,4 +127,11 @@ const getServiceItems = async (req, res) => {
   res.json({ status: 'success', data: items });
 };
 
-module.exports = { ...base, index, store: storeWithSlug, getServiceItems };
+// Deleting an item also deletes every section record added inside it
+// (service media, recent work, portfolio categories + items, FAQs).
+const destroy = async (req, res) => {
+  await cascadeItemSections([req.params.id]);
+  return base.destroy(req, res);
+};
+
+module.exports = { ...base, index, store: storeWithSlug, getServiceItems, destroy };

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const GroupSingleServicePortfolioCategory = require('../../models/GroupSingleServicePortfolioCategory');
 const GroupSingleServicePortfolioItem = require('../../models/GroupSingleServicePortfolioItem');
 const createCrudController = require('./crudFactory');
+const { cascadePortfolioCategories } = require('../../utils/groupServiceCascade');
 
 const base = createCrudController(GroupSingleServicePortfolioCategory, {
   searchFields: ['name'],
@@ -51,4 +52,10 @@ const index = async (req, res) => {
   return base.index(req, res);
 };
 
-module.exports = { ...base, index };
+// Deleting a portfolio category also deletes all Portfolio Items inside it.
+const destroy = async (req, res) => {
+  await cascadePortfolioCategories([req.params.id]);
+  return base.destroy(req, res);
+};
+
+module.exports = { ...base, index, destroy };
