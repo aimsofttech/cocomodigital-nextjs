@@ -24,6 +24,9 @@ interface DataTableProps<T = any> {
   onSearch?: (query: string) => void;
   searchPlaceholder?: string;
   actions?: (row: T) => React.ReactNode;
+  /** Rendered in a dedicated "Delete" column at the far right of the table,
+   *  keeping the destructive action separate from view/edit actions. */
+  deleteAction?: (row: T) => React.ReactNode;
   emptyMessage?: string;
   headerActions?: React.ReactNode;
   /** Current page size (controlled from parent) */
@@ -82,7 +85,7 @@ function buildPageRange(current: number, total: number): (number | '…')[] {
 
 export default function DataTable<T extends { _id?: string }>({
   columns, data, loading, pagination, onPageChange, onSearch,
-  searchPlaceholder = 'Search...', actions, emptyMessage = 'No records found',
+  searchPlaceholder = 'Search...', actions, deleteAction, emptyMessage = 'No records found',
   headerActions, pageSize = 20, onPageSizeChange, renderExpanded, onReorder,
 }: DataTableProps<T>) {
   const [searchValue, setSearchValue] = useState('');
@@ -137,7 +140,7 @@ export default function DataTable<T extends { _id?: string }>({
     return <ChevronDownIcon className="w-3.5 h-3.5 text-primary-500 ml-1 inline" />;
   };
 
-  const colSpan = columns.length + (actions ? 1 : 0) + (renderExpanded ? 1 : 0) + (onReorder ? 1 : 0);
+  const colSpan = columns.length + (actions ? 1 : 0) + (deleteAction ? 1 : 0) + (renderExpanded ? 1 : 0) + (onReorder ? 1 : 0);
 
   const handleDrop = (targetIdx: number) => {
     if (dragIdx !== null && dragIdx !== targetIdx) onReorder?.(dragIdx, targetIdx);
@@ -193,6 +196,7 @@ export default function DataTable<T extends { _id?: string }>({
                   </span>
                 </th>
               ))}
+              {deleteAction && <th className="w-16 text-center">Delete</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white">
@@ -257,11 +261,21 @@ export default function DataTable<T extends { _id?: string }>({
                         </td>
                       )}
                       {actions && <td>{actions(row)}</td>}
-                      {columns.map((col) => (
-                        <td key={col.key} className={col.className}>
-                          {col.render ? col.render(row, idx) : cellValue((row as any)[col.key])}
-                        </td>
-                      ))}
+                      {columns.map((col) => {
+                        const content = col.render ? col.render(row, idx) : cellValue((row as any)[col.key]);
+                        return (
+                          // Cells are truncated to a fixed width (see .table td) —
+                          // plain-text content gets a native tooltip with the full value.
+                          <td
+                            key={col.key}
+                            className={col.className}
+                            title={typeof content === 'string' || typeof content === 'number' ? String(content) : undefined}
+                          >
+                            {content}
+                          </td>
+                        );
+                      })}
+                      {deleteAction && <td className="text-center">{deleteAction(row)}</td>}
                     </tr>
                     {renderExpanded && isExpanded && (
                       <tr className="bg-gray-50/60">

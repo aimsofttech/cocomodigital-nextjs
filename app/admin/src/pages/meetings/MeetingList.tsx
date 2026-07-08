@@ -351,15 +351,17 @@ export default function MeetingList() {
                   <EyeIcon className="w-4 h-4" />
                 </button>
               </Tooltip>
-              <Tooltip content="Delete">
-                <button
-                  onClick={() => setDeleteId(row._id)}
-                  className="p-1.5 rounded hover:bg-red-50 text-red-500"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
-              </Tooltip>
             </div>
+          )}
+          deleteAction={(row: any) => (
+            <Tooltip content="Delete">
+              <button
+                onClick={() => setDeleteId(row._id)}
+                className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </Tooltip>
           )}
         />
       </div>

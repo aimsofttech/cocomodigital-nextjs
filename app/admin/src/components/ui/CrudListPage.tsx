@@ -224,18 +224,21 @@ export default function CrudListPage<T extends { _id?: string }>({
           </Link>
         </Tooltip>
       ) : null)}
-      {!disableDelete && (
-        <Tooltip content="Delete">
-          <button
-            type="button"
-            onClick={() => setDeleteId(row._id!)}
-            className="p-1.5 rounded-md hover:bg-red-50 text-red-500 transition-colors"
-          >
-            <TrashIcon className="w-4 h-4" />
-          </button>
-        </Tooltip>
-      )}
     </div>
+  );
+
+  // Delete lives in its own column at the far right of the table,
+  // separate from the view/edit actions.
+  const deleteAction = (row: T) => (
+    <Tooltip content="Delete">
+      <button
+        type="button"
+        onClick={() => setDeleteId(row._id!)}
+        className="p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+      >
+        <TrashIcon className="w-4 h-4" />
+      </button>
+    </Tooltip>
   );
 
   return (
@@ -299,10 +302,11 @@ export default function CrudListPage<T extends { _id?: string }>({
           renderExpanded={renderExpanded}
           onReorder={reorderSafe ? onReorder : undefined}
           actions={
-            (!disableEdit && (editPath || renderModal)) || !disableDelete || rowActions || viewDetails
+            (!disableEdit && (editPath || renderModal)) || rowActions || viewDetails
               ? defaultActions
               : undefined
           }
+          deleteAction={!disableDelete ? deleteAction : undefined}
         />
       </div>
 

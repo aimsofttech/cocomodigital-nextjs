@@ -80,10 +80,14 @@
     @apply min-w-full divide-y divide-gray-200;
   }
   .table th {
-    @apply px-4 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50;
+    @apply px-4 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 whitespace-nowrap;
   }
+  /* Cells keep a fixed max width on a single line — long headings, titles
+     and descriptions truncate with an ellipsis (full text on hover) and
+     the table scrolls horizontally inside .table-container instead of
+     rows growing taller. */
   .table td {
-    @apply px-4 py-3.5 text-sm text-gray-700 align-top whitespace-normal break-words max-w-xs;
+    @apply px-4 py-3.5 text-sm text-gray-700 align-top whitespace-nowrap overflow-hidden text-ellipsis max-w-[240px];
   }
   .table tr:hover td {
     @apply bg-gray-50;
@@ -219,6 +223,15 @@
 .animate-progress-bar {
   transform-origin: left center;
   animation: progress-bar 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── Tooltip fade-in (portal-rendered action-button tooltips) ── */
+@keyframes tooltip-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-tooltip-in {
+  animation: tooltip-in 0.15s ease-out both;
 }
 
 /* ── AppLoader / initial-loader dots ─────────────────────────── */

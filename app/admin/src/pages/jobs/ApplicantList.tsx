@@ -118,16 +118,18 @@ export default function ApplicantList() {
                   <EyeIcon className="w-4 h-4" />
                 </button>
               </Tooltip>
-              <Tooltip content="Delete">
-                <button
-                  type="button"
-                  onClick={() => setDeleteId(row._id)}
-                  className="p-1.5 rounded-md hover:bg-red-50 text-red-500 transition-colors"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
-              </Tooltip>
             </div>
+          )}
+          deleteAction={(row: any) => (
+            <Tooltip content="Delete">
+              <button
+                type="button"
+                onClick={() => setDeleteId(row._id)}
+                className="p-1.5 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </Tooltip>
           )}
         />
       </div>

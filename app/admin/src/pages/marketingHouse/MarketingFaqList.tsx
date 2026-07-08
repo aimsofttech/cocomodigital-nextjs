@@ -68,7 +68,7 @@ export default function MarketingFaqList() {
   ];
   const columns = [
     { key: 'question', label: 'Question', sortable: true, render: (row: any) => <span className="font-medium">{row.question || 'N/A'}</span> },
-    { key: 'answer', label: 'Answer', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 max-w-md">{row.answer || 'N/A'}</span> },
+    { key: 'answer', label: 'Answer', render: (row: any) => <span className="text-xs text-gray-600 line-clamp-2 whitespace-normal max-w-md">{row.answer || 'N/A'}</span> },
     { key: 'categoryName', label: 'Category', render: (row: any) => row.categoryName || 'N/A' },
     { key: 'itemName', label: 'Campaign', render: (row: any) => row.itemName || 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
