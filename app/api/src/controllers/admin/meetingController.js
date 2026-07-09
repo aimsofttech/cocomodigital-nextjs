@@ -1,5 +1,5 @@
 const Meeting = require('../../models/Meeting');
-const User = require('../../models/User');
+const MeetingAssignee = require('../../models/MeetingAssignee');
 const { createMeetingEvent } = require('../../services/calendarService');
 const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
 const { zonedTimeToUtc } = require('../../utils/timezone');
@@ -246,11 +246,11 @@ const reject = async (req, res) => {
 };
 
 // GET /admin/api/meetings/assignees
-// Team members a meeting can be assigned to — the admin panel users, who can
-// log in and act on the meeting via the same deep links as the owner.
+// Team members a meeting can be assigned to — a dedicated list, managed
+// separately from the admin login accounts.
 const assignees = async (req, res) => {
-  const users = await User.find().select('name email role').sort({ name: 1 }).lean();
-  res.json({ status: 'success', data: users });
+  const list = await MeetingAssignee.find().select('name email').sort({ name: 1 }).lean();
+  res.json({ status: 'success', data: list });
 };
 
 // PUT /admin/api/meetings/:id/assign

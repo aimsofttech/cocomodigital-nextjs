@@ -752,7 +752,7 @@ export default function MeetingList() {
       </Modal>
 
       {/* ── Assign meeting modal ─────────────────────────────────────────────── */}
-      <Modal isOpen={!!assignTarget} onClose={closeAssign} title="Assign Meeting" size="sm">
+      <Modal isOpen={!!assignTarget} onClose={closeAssign} title="Assign Meeting" size="lg">
         {assignTarget && (
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -773,7 +773,7 @@ export default function MeetingList() {
             ) : assigneeList.length === 0 ? (
               <p className="text-sm text-gray-400 py-4 text-center">No team members found.</p>
             ) : (
-              <div className="max-h-64 overflow-y-auto flex flex-col gap-2 pr-1">
+              <div className="max-h-64 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2 pr-1">
                 {assigneeList.map((u: any) => (
                   <button
                     key={u.email}
