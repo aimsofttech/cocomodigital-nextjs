@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { login, clearError } from '@/features/auth/authSlice';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -14,6 +14,7 @@ interface LoginForm {
 export default function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { loading, error } = useAppSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -26,7 +27,10 @@ export default function Login() {
   const onSubmit = async (data: LoginForm) => {
     const result = await dispatch(login(data));
     if (login.fulfilled.match(result)) {
-      navigate('/dashboard', { replace: true });
+      // Return to the page the user was originally headed to (set by
+      // ProtectedRoute — e.g. a meeting deep link from an owner email).
+      const from = (location.state as { from?: string } | null)?.from;
+      navigate(from && from.startsWith('/') ? from : '/dashboard', { replace: true });
     }
   };
 

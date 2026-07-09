@@ -83,6 +83,7 @@ const freeConsultation = async (req, res) => {
       await sendMeetingRequestEmails({
         name, email, phone, companyName: company, service, notes: notes || message,
         meeting_date, meeting_time, meeting_timezone,
+        meetingId: doc._id.toString(),
       });
     })().catch(() => {});
 

@@ -11,11 +11,33 @@
  * All sends are best-effort and never throw (see ./mailer).
  */
 
-const { sendMail } = require('./mailer');
+const { sendMail, mailFrom } = require('./mailer');
 const logger = require('../utils/logger');
 
 const ownerEmail = () => process.env.OWNER_EMAIL || 'anil@cocomadigital.com';
 const brand = () => process.env.MAIL_BRAND || 'Cocoma Digital';
+
+// True when the visitor booked with an owner-side address — either OWNER_EMAIL
+// or the SMTP sending account (e.g. the owner testing the flow with their own
+// mailbox). The visitor acknowledgement would land in the same inbox as the
+// owner alert, so callers skip it to avoid duplicate mail.
+const senderAddress = () => {
+  const raw = mailFrom() || '';
+  return ((raw.match(/<([^>]+)>/) || [])[1] || raw).trim().toLowerCase();
+};
+const isOwnerAddress = (email) => {
+  const e = String(email || '').trim().toLowerCase();
+  return e === ownerEmail().trim().toLowerCase() || (!!senderAddress() && e === senderAddress());
+};
+const skippedAsOwner = () =>
+  Promise.resolve({ sent: false, skipped: true, reason: 'visitor email is the owner address' });
+
+// Admin panel base URL — used to build the action links in owner emails. The
+// admin SPA is served under the /admin base path (see app/admin/vite.config.ts).
+const adminPanelUrl = () =>
+  (process.env.ADMIN_PANEL_URL || 'https://cocomadigital.com/admin').replace(/\/+$/, '');
+const meetingActionUrl = (id, action) =>
+  `${adminPanelUrl()}/contact/meetings?open=${encodeURIComponent(id)}&action=${action}`;
 
 const esc = (v) =>
   String(v == null ? '' : v)
@@ -55,6 +77,22 @@ const meetRow = (link) =>
     ? `<tr><td colspan="2" style="padding:10px 0 4px">` +
       `<a href="${esc(link)}" style="display:inline-block;background:#00897b;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:700;font-size:14px">Join Google Meet</a>` +
       `<div style="margin-top:8px;font-size:12px;color:#666;word-break:break-all">${esc(link)}</div>` +
+      `</td></tr>`
+    : '';
+
+// Confirm / Reject / Reschedule buttons for the owner's "New Meeting Request"
+// email — deep links into the admin panel, which opens the matching modal and
+// runs the exact same flow as acting from the Meetings page. Renders nothing
+// when the meeting id is unknown (e.g. legacy callers).
+const btn = (href, label, styles) =>
+  `<a href="${esc(href)}" style="display:inline-block;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px;margin:0 8px 8px 0;${styles}">${esc(label)}</a>`;
+const meetingActionsRow = (meetingId) =>
+  meetingId
+    ? `<tr><td colspan="2" style="padding:14px 0 4px">` +
+      btn(meetingActionUrl(meetingId, 'confirm'), 'Confirm Meeting', 'background:#0b63f6;color:#fff') +
+      btn(meetingActionUrl(meetingId, 'reject'), 'Reject Meeting', 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca') +
+      btn(meetingActionUrl(meetingId, 'reschedule'), 'Reschedule Meeting', 'background:#faf5ff;color:#7c3aed;border:1px solid #e9d5ff') +
+      `<div style="margin-top:6px;font-size:12px;color:#666">These open the admin panel — you may be asked to sign in first.</div>` +
       `</td></tr>`
     : '';
 
@@ -127,8 +165,11 @@ const sendBookingEmails = async (booking = {}) => {
       html: ownerHtml,
       text: `New booking from ${visitorName} (${booking.email}). Slot: ${slot || 'n/a'}.${meetText}`,
     }),
-    booking.email
-      ? sendMail({
+    !booking.email
+      ? Promise.resolve({ sent: false, skipped: true, reason: 'no visitor email' })
+      : isOwnerAddress(booking.email)
+      ? skippedAsOwner()
+      : sendMail({
           to: booking.email,
           replyTo: ownerEmail(),
           subject: meetLink
@@ -136,8 +177,7 @@ const sendBookingEmails = async (booking = {}) => {
             : `Your call with ${brand()} — request received`,
           html: userHtml,
           text: `Hi ${visitorName}, your booking${slot ? ` for ${slot}` : ''} is confirmed.${meetText}`,
-        })
-      : Promise.resolve({ sent: false, skipped: true, reason: 'no visitor email' }),
+        }),
   ]);
 
   const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
@@ -164,7 +204,8 @@ const sendMeetingRequestEmails = async (booking = {}) => {
     row('Company', booking.companyName || booking.company) +
     row('Service', booking.service) +
     row('Requested Slot', slot) +
-    row('Notes', booking.notes || booking.message),
+    row('Notes', booking.notes || booking.message) +
+    meetingActionsRow(booking.meetingId),
     `A user has requested a 15-minute meeting. Please review and confirm the meeting request from the admin panel.`
   );
 
@@ -185,17 +226,23 @@ const sendMeetingRequestEmails = async (booking = {}) => {
       fromName: visitorName,
       subject: `New Meeting Request from ${visitorName}${slot ? ` — ${slot}` : ''}`,
       html: ownerHtml,
-      text: `A user has requested a 15-minute meeting.\nName: ${visitorName}\nEmail: ${booking.email}\nSlot: ${slot || 'n/a'}\n\nPlease review in the admin panel.`,
+      text:
+        `A user has requested a 15-minute meeting.\nName: ${visitorName}\nEmail: ${booking.email}\nSlot: ${slot || 'n/a'}\n\nPlease review in the admin panel.` +
+        (booking.meetingId
+          ? `\n\nConfirm: ${meetingActionUrl(booking.meetingId, 'confirm')}\nReject: ${meetingActionUrl(booking.meetingId, 'reject')}\nReschedule: ${meetingActionUrl(booking.meetingId, 'reschedule')}`
+          : ''),
     }),
-    booking.email
-      ? sendMail({
+    !booking.email
+      ? Promise.resolve({ sent: false, skipped: true })
+      : isOwnerAddress(booking.email)
+      ? skippedAsOwner()
+      : sendMail({
           to: booking.email,
           replyTo: ownerEmail(),
           subject: 'Meeting Request Received',
           html: userHtml,
           text: `Thank you for booking a meeting. Your request has been submitted successfully. Please wait for admin confirmation. You will receive a meeting link once your meeting is approved.`,
-        })
-      : Promise.resolve({ sent: false, skipped: true }),
+        }),
   ]);
 
   const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
@@ -243,15 +290,17 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
       html: ownerHtml,
       text: `Meeting confirmed.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}\nGoogle Meet: ${meetLink || 'n/a'}`,
     }),
-    booking.email
-      ? sendMail({
+    !booking.email
+      ? Promise.resolve({ sent: false, skipped: true })
+      : isOwnerAddress(booking.email)
+      ? skippedAsOwner()
+      : sendMail({
           to: booking.email,
           replyTo: ownerEmail(),
           subject: 'Meeting Confirmed',
           html: userHtml,
           text: `Your meeting request has been approved.\nDate: ${dateDisplay || 'n/a'}\nTime: ${timeDisplay || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
-        })
-      : Promise.resolve({ sent: false, skipped: true }),
+        }),
   ]);
 
   const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
@@ -300,15 +349,17 @@ const sendMeetingRescheduledEmails = async (booking = {}) => {
       html: ownerHtml,
       text: `Meeting rescheduled.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}\nGoogle Meet: ${meetLink || 'n/a'}`,
     }),
-    booking.email
-      ? sendMail({
+    !booking.email
+      ? Promise.resolve({ sent: false, skipped: true })
+      : isOwnerAddress(booking.email)
+      ? skippedAsOwner()
+      : sendMail({
           to: booking.email,
           replyTo: ownerEmail(),
           subject: 'Your Meeting Has Been Rescheduled',
           html: userHtml,
           text: `Your meeting has been rescheduled.\nDate: ${dateDisplay || 'n/a'}\nTime: ${timeDisplay || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
-        })
-      : Promise.resolve({ sent: false, skipped: true }),
+        }),
   ]);
 
   const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });

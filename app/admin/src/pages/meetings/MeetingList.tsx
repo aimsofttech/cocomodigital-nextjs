@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import { meetingApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
@@ -261,6 +261,47 @@ export default function MeetingList() {
   useEffect(() => {
     if (rescheduleTime && bookedTimes.has(rescheduleTime)) setRescheduleTime('');
   }, [bookedTimes, rescheduleTime]);
+
+  // Deep link from the owner's "New Meeting Request" email:
+  //   /contact/meetings?open=<id>&action=confirm|reject|reschedule
+  // Opens the matching modal with the same guards as the in-page buttons; when
+  // the action is no longer applicable (already resolved / slot passed), falls
+  // back to the details modal with an explanatory toast.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkHandled = useRef(false);
+  useEffect(() => {
+    const id = searchParams.get('open');
+    if (!id || deepLinkHandled.current) return;
+    deepLinkHandled.current = true; // StrictMode runs effects twice — fetch once
+    const action = searchParams.get('action');
+    meetingApi
+      .getOne(id)
+      .then(({ data: res }: any) => {
+        // Only clear the query once handled, so an auth round-trip (401 →
+        // login → back) still carries the deep link and re-triggers this.
+        setSearchParams({}, { replace: true });
+        const row = res?.data;
+        if (!row) { toast.error('Meeting not found'); return; }
+        if (action === 'reschedule') { openReschedule(row); return; }
+        const actionable = row.status === 'pending' && !isExpired(row);
+        if (action === 'confirm' && actionable) { setConfirmTarget(row); return; }
+        if (action === 'reject' && actionable) { setRejectTarget(row); return; }
+        if ((action === 'confirm' || action === 'reject') && !actionable) {
+          toast(row.status !== 'pending'
+            ? `This meeting has already been ${row.status}`
+            : 'This meeting slot has already passed — reschedule it instead');
+        }
+        setSelected(row);
+      })
+      .catch((e: any) => {
+        // 401: the axios interceptor redirects to login preserving this URL —
+        // keep the params so the modal opens after re-authentication.
+        if (e?.response?.status === 401) { deepLinkHandled.current = false; return; }
+        setSearchParams({}, { replace: true });
+        toast.error('Meeting not found');
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDelete = async () => {
     if (!deleteId) return;

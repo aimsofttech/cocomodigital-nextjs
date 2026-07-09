@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import { logout } from '@/features/auth/authSlice';
 import Layout from '@/components/layout/Layout';
@@ -168,7 +168,10 @@ const HomePageSectionItemForm = lazy(() => import('@/pages/settings/HomePageSect
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { token } = useAppSelector((state) => state.auth);
-  if (!token) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  // Remember where the user was headed (e.g. a meeting deep link from an owner
+  // email) so Login can return them there instead of the dashboard.
+  if (!token) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   return <>{children}</>;
 };
 
@@ -187,7 +190,12 @@ export default function App() {
   useEffect(() => {
     const handleAuthLogout = () => {
       dispatch(logout());
-      navigate('/login', { replace: true });
+      // Preserve where the user was — including query strings like a meeting
+      // deep link from an owner email — so Login can return them there.
+      // window.location includes the router basename, so strip it.
+      const { pathname, search } = window.location;
+      const from = (pathname.startsWith('/admin') ? pathname.slice('/admin'.length) || '/' : pathname) + search;
+      navigate('/login', { replace: true, state: { from } });
     };
     window.addEventListener('auth:logout', handleAuthLogout);
     return () => window.removeEventListener('auth:logout', handleAuthLogout);
