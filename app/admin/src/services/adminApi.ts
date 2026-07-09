@@ -177,6 +177,9 @@ export const meetingApi = {
   reject: (id: string) => api.put(`${BASE}/meetings/${id}/reject`),
   reschedule: (id: string, data: { meetingDate: string; meetingTime: string }) =>
     api.put(`${BASE}/meetings/${id}/reschedule`, data),
+  getAssignees: () => api.get(`${BASE}/meetings/assignees`),
+  assign: (id: string, data: { name: string; email: string }) =>
+    api.put(`${BASE}/meetings/${id}/assign`, data),
   checkAvailability: (params: { date: string; timezone?: string; excludeId?: string }) =>
     api.get(`${BASE}/meetings/availability`, { params }),
   updateStatus: (id: string, status: string) => api.put(`${BASE}/meetings/${id}/status`, { status }),

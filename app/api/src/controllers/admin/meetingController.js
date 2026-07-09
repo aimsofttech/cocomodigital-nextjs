@@ -1,6 +1,7 @@
 const Meeting = require('../../models/Meeting');
+const User = require('../../models/User');
 const { createMeetingEvent } = require('../../services/calendarService');
-const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails } = require('../../services/bookingMailer');
+const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
 const { zonedTimeToUtc } = require('../../utils/timezone');
 const logger = require('../../utils/logger');
 
@@ -102,6 +103,7 @@ const confirm = async (req, res) => {
       meetingDate: doc.meetingDate,
       meetingTime: doc.meetingTime,
       meetLink: doc.meetLink,
+      assigneeEmail: doc.assignedTo?.email,
     });
   })().catch((e) => logger.error('confirm email error:', e));
 
@@ -211,6 +213,7 @@ const reschedule = async (req, res) => {
       meetingDate: doc.meetingDate,
       meetingTime: doc.meetingTime,
       meetLink: doc.meetLink,
+      assigneeEmail: doc.assignedTo?.email,
     });
   })().catch((e) => logger.error('reschedule email error:', e));
 
@@ -227,10 +230,69 @@ const reject = async (req, res) => {
   await doc.save();
 
   (async () => {
-    if (doc.email) await sendMeetingRejectedEmail({ name: doc.userName, email: doc.email });
+    if (doc.email) {
+      await sendMeetingRejectedEmail({
+        name: doc.userName,
+        email: doc.email,
+        meeting_date: doc.meetingDate,
+        meeting_time: doc.meetingTime,
+        meeting_timezone: doc.meetingTimezone,
+        assigneeEmail: doc.assignedTo?.email,
+      });
+    }
   })().catch((e) => logger.error('reject email error:', e));
 
   res.json({ status: 'success', message: 'Meeting rejected and user notified', data: doc });
+};
+
+// GET /admin/api/meetings/assignees
+// Team members a meeting can be assigned to — the admin panel users, who can
+// log in and act on the meeting via the same deep links as the owner.
+const assignees = async (req, res) => {
+  const users = await User.find().select('name email role').sort({ name: 1 }).lean();
+  res.json({ status: 'success', data: users });
+};
+
+// PUT /admin/api/meetings/:id/assign
+// Owner delegates the meeting to a team member: saves the assignment and
+// notifies both the assignee ("<owner> has assigned you a meeting", with the
+// action buttons) and the owner (an assignment receipt). From then on the
+// assignee also receives every owner-side confirm/reject/reschedule mail.
+const assign = async (req, res) => {
+  const { name, email } = req.body;
+  if (!name || !email) {
+    return res.status(400).json({ status: 'error', message: 'Assignee name and email are required' });
+  }
+
+  const doc = await Meeting.findById(req.params.id);
+  if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
+
+  doc.assignedTo = { name: String(name).trim(), email: String(email).trim().toLowerCase() };
+  doc.assignedBy = req.user?._id || req.user?.id || null;
+  doc.assignedAt = new Date();
+  await doc.save();
+
+  (async () => {
+    await sendMeetingAssignedEmails(
+      {
+        name: doc.userName,
+        email: doc.email,
+        phone: doc.phone,
+        companyName: doc.companyName,
+        service: doc.service,
+        notes: doc.notes,
+        status: doc.status,
+        meetLink: doc.meetLink,
+        meeting_date: doc.meetingDate,
+        meeting_time: doc.meetingTime,
+        meeting_timezone: doc.meetingTimezone,
+        meetingId: doc._id.toString(),
+      },
+      doc.assignedTo
+    );
+  })().catch((e) => logger.error('assign email error:', e));
+
+  res.json({ status: 'success', message: 'Meeting assigned and emails sent', data: doc });
 };
 
 // PUT /admin/api/meetings/:id/status
@@ -251,4 +313,4 @@ const destroy = async (req, res) => {
   res.json({ status: 'success', message: 'Deleted successfully' });
 };
 
-module.exports = { index, stats, show, confirm, reject, reschedule, availability, updateStatus, destroy };
+module.exports = { index, stats, show, confirm, reject, reschedule, availability, assignees, assign, updateStatus, destroy };

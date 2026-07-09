@@ -34,6 +34,13 @@ const meetingSchema = new mongoose.Schema({
   // Populated when an admin reschedules an expired/pending meeting to a new slot.
   rescheduledBy: { type: mongoose.Schema.Types.Mixed, default: null },
   rescheduledAt: { type: Date, default: null },
+
+  // Team member the owner delegated this meeting to (picked from the admin
+  // users list). Older documents simply lack these fields until first assigned
+  // — Mongoose applies the null default on read, so no migration is needed.
+  assignedTo: { type: mongoose.Schema.Types.Mixed, default: null }, // { name, email }
+  assignedBy: { type: mongoose.Schema.Types.Mixed, default: null },
+  assignedAt: { type: Date, default: null },
 }, { timestamps: true, collection: 'meetings' });
 
 // Prevent two confirmed meetings at the same slot (race-proof via unique index).

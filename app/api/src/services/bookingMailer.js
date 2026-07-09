@@ -15,6 +15,7 @@ const { sendMail, mailFrom } = require('./mailer');
 const logger = require('../utils/logger');
 
 const ownerEmail = () => process.env.OWNER_EMAIL || 'anil@cocomadigital.com';
+const ownerName = () => process.env.OWNER_NAME || 'Anil';
 const brand = () => process.env.MAIL_BRAND || 'Cocoma Digital';
 
 // True when the visitor booked with an owner-side address — either OWNER_EMAIL
@@ -28,6 +29,15 @@ const senderAddress = () => {
 const isOwnerAddress = (email) => {
   const e = String(email || '').trim().toLowerCase();
   return e === ownerEmail().trim().toLowerCase() || (!!senderAddress() && e === senderAddress());
+};
+
+// Owner-side audience for meeting notifications: the owner plus the assigned
+// team member (when the meeting has one), deduped case-insensitively.
+const ownerRecipients = (assigneeEmail) => {
+  const list = [ownerEmail()];
+  const a = String(assigneeEmail || '').trim();
+  if (a && a.toLowerCase() !== ownerEmail().trim().toLowerCase()) list.push(a);
+  return list;
 };
 const skippedAsOwner = () =>
   Promise.resolve({ sent: false, skipped: true, reason: 'visitor email is the owner address' });
@@ -283,7 +293,8 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
 
   const [owner, user] = await Promise.allSettled([
     sendMail({
-      to: ownerEmail(),
+      // The assigned team member (if any) receives the same owner-side mail.
+      to: ownerRecipients(booking.assigneeEmail),
       replyTo: booking.email,
       fromName: visitorName,
       subject: `Meeting Scheduled with ${visitorName}${slot ? ` — ${slot}` : ''}`,
@@ -342,7 +353,8 @@ const sendMeetingRescheduledEmails = async (booking = {}) => {
 
   const [owner, user] = await Promise.allSettled([
     sendMail({
-      to: ownerEmail(),
+      // The assigned team member (if any) receives the same owner-side mail.
+      to: ownerRecipients(booking.assigneeEmail),
       replyTo: booking.email,
       fromName: visitorName,
       subject: `Meeting Rescheduled with ${visitorName}${slot ? ` — ${slot}` : ''}`,
@@ -369,7 +381,9 @@ const sendMeetingRescheduledEmails = async (booking = {}) => {
 };
 
 /**
- * Step 5: Admin rejects the meeting — notify the user only.
+ * Step 5: Admin rejects the meeting — notify the user. When the meeting is
+ * assigned to a team member, the owner and the assignee also get a rejection
+ * notice; unassigned meetings keep the original user-only behaviour.
  */
 const sendMeetingRejectedEmail = async (booking = {}) => {
   const visitorName = booking.name || booking.userName || 'there';
@@ -388,7 +402,90 @@ const sendMeetingRejectedEmail = async (booking = {}) => {
     text: `We regret to inform you that your meeting request could not be approved at this time.`,
   });
 
+  if (booking.assigneeEmail) {
+    const slot = resolveSlot(booking);
+    const ownerHtml = shell(
+      'Meeting Rejected',
+      row('User Name', visitorName) +
+      row('Email', booking.email) +
+      row('Slot', slot),
+      `The meeting request from <strong>${esc(visitorName)}</strong> has been rejected.`
+    );
+    await sendMail({
+      to: ownerRecipients(booking.assigneeEmail),
+      subject: `Meeting Rejected — ${visitorName}`,
+      html: ownerHtml,
+      text: `The meeting request from ${visitorName} (${booking.email}) has been rejected.${slot ? `\nSlot: ${slot}` : ''}`,
+    });
+  }
+
   logger.info(`Meeting rejected email: user=${JSON.stringify(result.sent ?? result.skipped)}`);
+  return result;
+};
+
+/**
+ * Owner delegates a meeting to a team member — notify the assignee (with the
+ * same action buttons as the owner alert, so they can act directly) and send
+ * the owner an assignment receipt.
+ */
+const sendMeetingAssignedEmails = async (booking = {}, assignee = {}) => {
+  const slot = resolveSlot(booking);
+  const visitorName = booking.name || booking.userName || 'there';
+  // Always the owner's name (OWNER_NAME) — not the logged-in admin account,
+  // which may be a shared/test login like "demo".
+  const assigner = ownerName();
+  const meetLink = booking.meetLink || '';
+
+  const assigneeHtml = shell(
+    'Meeting Assigned to You',
+    meetRow(meetLink) +
+    row('User Name', visitorName) +
+    row('Email', booking.email) +
+    row('Phone', booking.phone) +
+    row('Company', booking.companyName || booking.company) +
+    row('Service', booking.service) +
+    row('Slot', slot) +
+    row('Status', booking.status) +
+    row('Notes', booking.notes || booking.message) +
+    meetingActionsRow(booking.meetingId),
+    `<strong>${esc(assigner)}</strong> has assigned you a meeting with <strong>${esc(visitorName)}</strong>. Please review and take action using the buttons below.`
+  );
+
+  const ownerHtml = shell(
+    'Meeting Assigned',
+    row('Assigned To', `${assignee.name} (${assignee.email})`) +
+    row('User Name', visitorName) +
+    row('Email', booking.email) +
+    row('Slot', slot),
+    `You have assigned <strong>${esc(visitorName)}</strong>'s meeting to <strong>${esc(assignee.name)}</strong>.`
+  );
+
+  const [toAssignee, toOwner] = await Promise.allSettled([
+    sendMail({
+      to: assignee.email,
+      replyTo: booking.email,
+      subject: `${assigner} has assigned you a meeting — ${visitorName}${slot ? ` (${slot})` : ''}`,
+      html: assigneeHtml,
+      text:
+        `${assigner} has assigned you a meeting.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}` +
+        (booking.meetingId
+          ? `\n\nConfirm: ${meetingActionUrl(booking.meetingId, 'confirm')}\nReject: ${meetingActionUrl(booking.meetingId, 'reject')}\nReschedule: ${meetingActionUrl(booking.meetingId, 'reschedule')}`
+          : ''),
+    }),
+    // No receipt when the owner assigned the meeting to their own address.
+    isOwnerAddress(assignee.email)
+      ? Promise.resolve({ sent: false, skipped: true, reason: 'assignee is the owner address' })
+      : sendMail({
+          to: ownerEmail(),
+          subject: `You have assigned ${visitorName}'s meeting to ${assignee.name}`,
+          html: ownerHtml,
+          text: `You have assigned ${visitorName}'s meeting to ${assignee.name} (${assignee.email}). Slot: ${slot || 'n/a'}`,
+        }),
+  ]);
+
+  const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
+  const result = { assignee: unwrap(toAssignee), owner: unwrap(toOwner) };
+  logger.info(`Meeting assigned emails: assignee=${JSON.stringify(result.assignee.sent ?? result.assignee.skipped)} owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)}`);
   return result;
 };
 
@@ -398,5 +495,6 @@ module.exports = {
   sendMeetingConfirmedEmails,
   sendMeetingRejectedEmail,
   sendMeetingRescheduledEmails,
+  sendMeetingAssignedEmails,
   ownerEmail,
 };

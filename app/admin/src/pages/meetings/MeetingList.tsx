@@ -12,7 +12,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Tooltip from '@/components/ui/Tooltip';
 import {
   EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon, ArrowPathIcon,
-  CalendarDaysIcon, EnvelopeIcon, PhoneIcon, BuildingOfficeIcon,
+  CalendarDaysIcon, EnvelopeIcon, PhoneIcon, BuildingOfficeIcon, UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -115,6 +115,12 @@ export default function MeetingList() {
   const [bookedTimes, setBookedTimes] = useState<Set<string>>(new Set());
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
+  // Assign-to-team-member modal
+  const [assignTarget, setAssignTarget] = useState<any>(null);
+  const [assigneeList, setAssigneeList] = useState<any[]>([]);
+  const [assigneesLoading, setAssigneesLoading] = useState(false);
+  const [selectedAssignee, setSelectedAssignee] = useState<any>(null);
+
   const [stats, setStats] = useState<Record<string, number>>({});
 
   const serverFilters: Record<string, any> = {};
@@ -209,6 +215,42 @@ export default function MeetingList() {
       fetchData();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || 'Failed to reschedule meeting');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Owner delegates the meeting to a team member — opens the picker with the
+  // admin users list (name + email) and preselects the current assignee.
+  const openAssign = (row: any) => {
+    setAssignTarget(row);
+    setSelectedAssignee(row.assignedTo?.email ? row.assignedTo : null);
+    setAssigneesLoading(true);
+    meetingApi.getAssignees()
+      .then(({ data: res }: any) => setAssigneeList(res.data || []))
+      .catch(() => toast.error('Failed to load team members'))
+      .finally(() => setAssigneesLoading(false));
+  };
+  const closeAssign = () => {
+    if (actionLoading) return;
+    setAssignTarget(null);
+    setSelectedAssignee(null);
+  };
+
+  // Called after the owner picks a team member and clicks "Assign & Notify"
+  const executeAssign = async () => {
+    // actionLoading guard: a double-click must not fire two assignments
+    // (each assignment sends its own emails to the assignee and the owner).
+    if (!assignTarget || !selectedAssignee || actionLoading) return;
+    setActionLoading(true);
+    try {
+      await meetingApi.assign(assignTarget._id, { name: selectedAssignee.name, email: selectedAssignee.email });
+      toast.success('Meeting assigned and emails sent');
+      if (selected?._id === assignTarget._id) setSelected(null);
+      closeAssign();
+      fetchData();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Failed to assign meeting');
     } finally {
       setActionLoading(false);
     }
@@ -423,6 +465,12 @@ export default function MeetingList() {
               <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : 'N/A'}</p></div>
               {selected.confirmedAt && <div><p className="text-xs text-gray-500">Confirmed At</p><p>{new Date(selected.confirmedAt).toLocaleString()}</p></div>}
               {selected.rejectedAt && <div><p className="text-xs text-gray-500">Rejected At</p><p>{new Date(selected.rejectedAt).toLocaleString()}</p></div>}
+              {selected.assignedTo?.name && (
+                <div>
+                  <p className="text-xs text-gray-500">Assigned To</p>
+                  <p>{selected.assignedTo.name}{selected.assignedTo.email ? ` (${selected.assignedTo.email})` : ''}</p>
+                </div>
+              )}
             </div>
             {selected.notes && (
               <div><p className="text-xs text-gray-500 mb-1">Notes / Message</p><p className="bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selected.notes}</p></div>
@@ -445,7 +493,7 @@ export default function MeetingList() {
                     ? 'This meeting slot has already passed — reschedule it instead'
                     : undefined
                 }
-                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Confirm Meeting
               </button>
@@ -459,15 +507,21 @@ export default function MeetingList() {
                     ? 'This meeting slot has already passed — reschedule it instead'
                     : undefined
                 }
-                className="btn-secondary flex-1 !border-red-300 !text-red-600 hover:!bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-400 flex-1 whitespace-nowrap"
               >
                 Reject Meeting
               </button>
               <button
                 onClick={() => { setSelected(null); openReschedule(selected); }}
-                className="btn-secondary flex-1 !border-purple-300 !text-purple-600 hover:!bg-purple-50"
+                className="btn bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500 flex-1 whitespace-nowrap"
               >
                 Reschedule Meeting
+              </button>
+              <button
+                onClick={() => { setSelected(null); openAssign(selected); }}
+                className="btn bg-teal-600 text-white hover:bg-teal-700 focus:ring-teal-500 flex-1 whitespace-nowrap"
+              >
+                Assign Meeting
               </button>
             </div>
           </div>
@@ -691,6 +745,71 @@ export default function MeetingList() {
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-purple-600 text-white font-medium text-sm hover:bg-purple-700 disabled:opacity-60 transition-colors"
               >
                 {actionLoading ? 'Rescheduling…' : 'Reschedule & Notify'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Assign meeting modal ─────────────────────────────────────────────── */}
+      <Modal isOpen={!!assignTarget} onClose={closeAssign} title="Assign Meeting" size="sm">
+        {assignTarget && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                <UserPlusIcon className="w-6 h-6 text-teal-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">Assign {assignTarget.userName}'s meeting</p>
+                <p className="text-sm text-gray-500">
+                  The selected team member will be notified by email and will also receive all
+                  future updates (confirm / reject / reschedule) for this meeting.
+                </p>
+              </div>
+            </div>
+
+            {assigneesLoading ? (
+              <p className="text-sm text-gray-400 py-4 text-center">Loading team members…</p>
+            ) : assigneeList.length === 0 ? (
+              <p className="text-sm text-gray-400 py-4 text-center">No team members found.</p>
+            ) : (
+              <div className="max-h-64 overflow-y-auto flex flex-col gap-2 pr-1">
+                {assigneeList.map((u: any) => (
+                  <button
+                    key={u.email}
+                    type="button"
+                    onClick={() => setSelectedAssignee(u)}
+                    className={`text-left border rounded-lg px-3 py-2.5 transition-colors ${
+                      selectedAssignee?.email === u.email
+                        ? 'border-teal-500 bg-teal-50'
+                        : 'border-gray-200 hover:border-teal-300'
+                    }`}
+                  >
+                    <p className="font-medium text-gray-900 text-sm">{u.name}</p>
+                    <p className="text-xs text-gray-500">{u.email}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {assignTarget.assignedTo?.email && (
+              <p className="text-xs text-gray-500">
+                Currently assigned to{' '}
+                <span className="font-medium text-gray-700">{assignTarget.assignedTo.name}</span>{' '}
+                ({assignTarget.assignedTo.email})
+              </p>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={closeAssign} className="btn-secondary flex-1" disabled={actionLoading}>
+                Cancel
+              </button>
+              <button
+                onClick={executeAssign}
+                disabled={actionLoading || !selectedAssignee}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-teal-600 text-white font-medium text-sm hover:bg-teal-700 disabled:opacity-60 transition-colors"
+              >
+                {actionLoading ? 'Assigning…' : 'Assign & Notify'}
               </button>
             </div>
           </div>
