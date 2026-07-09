@@ -40,7 +40,7 @@ const resolveSlot = (b) => {
   const date = b.meeting_date || b.slot_date;
   const time = b.meeting_time || b.slot_time;
   const tz = b.meeting_timezone || b.slot_timezone || b.timezone;
-  if (date || time) return [date, time].filter(Boolean).join(' ') + (tz ? ` (${tz})` : '');
+  if (date || time) return [date, formatTime12(time)].filter(Boolean).join(' ') + (tz ? ` (${tz})` : '');
   const m = /Slot:\s*([^\n]+)/i.exec(b.notes || '');
   return m ? m[1].trim() : '';
 };
