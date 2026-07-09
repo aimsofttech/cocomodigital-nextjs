@@ -90,19 +90,20 @@ const meetRow = (link) =>
       `</td></tr>`
     : '';
 
-// Confirm / Reject / Reschedule buttons for the owner's "New Meeting Request"
-// email — deep links into the admin panel, which opens the matching modal and
-// runs the exact same flow as acting from the Meetings page. Renders nothing
-// when the meeting id is unknown (e.g. legacy callers).
+// Confirm / Reject / Reschedule / Assign buttons for meeting emails — each
+// deep-links into the admin panel's Meeting Requests page and opens the
+// Meeting Details modal for this meeting, where the same action buttons are
+// available. Renders nothing when the meeting id is unknown (legacy callers).
 const btn = (href, label, styles) =>
   `<a href="${esc(href)}" style="display:inline-block;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px;margin:0 8px 8px 0;${styles}">${esc(label)}</a>`;
 const meetingActionsRow = (meetingId) =>
   meetingId
     ? `<tr><td colspan="2" style="padding:14px 0 4px">` +
       btn(meetingActionUrl(meetingId, 'confirm'), 'Confirm Meeting', 'background:#0b63f6;color:#fff') +
-      btn(meetingActionUrl(meetingId, 'reject'), 'Reject Meeting', 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca') +
-      btn(meetingActionUrl(meetingId, 'reschedule'), 'Reschedule Meeting', 'background:#faf5ff;color:#7c3aed;border:1px solid #e9d5ff') +
-      `<div style="margin-top:6px;font-size:12px;color:#666">These open the admin panel — you may be asked to sign in first.</div>` +
+      btn(meetingActionUrl(meetingId, 'reject'), 'Reject Meeting', 'background:#ef4444;color:#fff') +
+      btn(meetingActionUrl(meetingId, 'reschedule'), 'Reschedule Meeting', 'background:#9333ea;color:#fff') +
+      btn(meetingActionUrl(meetingId, 'assign'), 'Assign Meeting', 'background:#0d9488;color:#fff') +
+      `<div style="margin-top:6px;font-size:12px;color:#666">These open this meeting's details in the admin panel — you may be asked to sign in first.</div>` +
       `</td></tr>`
     : '';
 
@@ -239,7 +240,7 @@ const sendMeetingRequestEmails = async (booking = {}) => {
       text:
         `A user has requested a 15-minute meeting.\nName: ${visitorName}\nEmail: ${booking.email}\nSlot: ${slot || 'n/a'}\n\nPlease review in the admin panel.` +
         (booking.meetingId
-          ? `\n\nConfirm: ${meetingActionUrl(booking.meetingId, 'confirm')}\nReject: ${meetingActionUrl(booking.meetingId, 'reject')}\nReschedule: ${meetingActionUrl(booking.meetingId, 'reschedule')}`
+          ? `\n\nConfirm: ${meetingActionUrl(booking.meetingId, 'confirm')}\nReject: ${meetingActionUrl(booking.meetingId, 'reject')}\nReschedule: ${meetingActionUrl(booking.meetingId, 'reschedule')}\nAssign: ${meetingActionUrl(booking.meetingId, 'assign')}`
           : ''),
     }),
     !booking.email
@@ -469,7 +470,7 @@ const sendMeetingAssignedEmails = async (booking = {}, assignee = {}) => {
       text:
         `${assigner} has assigned you a meeting.\nUser: ${visitorName} (${booking.email})\nSlot: ${slot || 'n/a'}` +
         (booking.meetingId
-          ? `\n\nConfirm: ${meetingActionUrl(booking.meetingId, 'confirm')}\nReject: ${meetingActionUrl(booking.meetingId, 'reject')}\nReschedule: ${meetingActionUrl(booking.meetingId, 'reschedule')}`
+          ? `\n\nConfirm: ${meetingActionUrl(booking.meetingId, 'confirm')}\nReject: ${meetingActionUrl(booking.meetingId, 'reject')}\nReschedule: ${meetingActionUrl(booking.meetingId, 'reschedule')}\nAssign: ${meetingActionUrl(booking.meetingId, 'assign')}`
           : ''),
     }),
     // No receipt when the owner assigned the meeting to their own address.

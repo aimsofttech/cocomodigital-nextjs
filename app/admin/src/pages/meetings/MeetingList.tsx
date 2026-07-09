@@ -304,18 +304,16 @@ export default function MeetingList() {
     if (rescheduleTime && bookedTimes.has(rescheduleTime)) setRescheduleTime('');
   }, [bookedTimes, rescheduleTime]);
 
-  // Deep link from the owner's "New Meeting Request" email:
-  //   /contact/meetings?open=<id>&action=confirm|reject|reschedule
-  // Opens the matching modal with the same guards as the in-page buttons; when
-  // the action is no longer applicable (already resolved / slot passed), falls
-  // back to the details modal with an explanatory toast.
+  // Deep link from the meeting emails:
+  //   /contact/meetings?open=<id>&action=confirm|reject|reschedule|assign
+  // Every email button opens this meeting's Details modal, where all four
+  // action buttons are available (with their usual guards/tooltips).
   const [searchParams, setSearchParams] = useSearchParams();
   const deepLinkHandled = useRef(false);
   useEffect(() => {
     const id = searchParams.get('open');
     if (!id || deepLinkHandled.current) return;
     deepLinkHandled.current = true; // StrictMode runs effects twice — fetch once
-    const action = searchParams.get('action');
     meetingApi
       .getOne(id)
       .then(({ data: res }: any) => {
@@ -324,15 +322,6 @@ export default function MeetingList() {
         setSearchParams({}, { replace: true });
         const row = res?.data;
         if (!row) { toast.error('Meeting not found'); return; }
-        if (action === 'reschedule') { openReschedule(row); return; }
-        const actionable = row.status === 'pending' && !isExpired(row);
-        if (action === 'confirm' && actionable) { setConfirmTarget(row); return; }
-        if (action === 'reject' && actionable) { setRejectTarget(row); return; }
-        if ((action === 'confirm' || action === 'reject') && !actionable) {
-          toast(row.status !== 'pending'
-            ? `This meeting has already been ${row.status}`
-            : 'This meeting slot has already passed — reschedule it instead');
-        }
         setSelected(row);
       })
       .catch((e: any) => {
