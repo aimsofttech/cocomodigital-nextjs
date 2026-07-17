@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import NextLink from "next/link";
 import { Link, useNavigate } from "@/src/lib/navigation";
+import { openMailto } from "@/src/lib/email";
 import {
   FaCalendarPlus,
   FaWhatsapp,
@@ -246,7 +247,11 @@ export default function ContactUs() {
             </span>
           </NextLink>
 
-          <a href={MAILTO_LINK} className="contactus-channel">
+          <a
+            href={MAILTO_LINK}
+            className="contactus-channel"
+            onClick={(e) => { e.preventDefault(); openMailto(MAILTO_LINK); }}
+          >
             <span className="contactus-channel-icon" aria-hidden="true">
               <FaEnvelope />
             </span>

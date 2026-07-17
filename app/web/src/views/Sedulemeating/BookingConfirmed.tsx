@@ -20,6 +20,7 @@ import {
   outlookCalendarUrl,
   icsDataUri,
 } from "../../utils/calendarLinks";
+import { openMailto } from "../../lib/email";
 
 
 const DIRECT_EMAIL = "anil@cocomadigital.com";
@@ -258,6 +259,10 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
             <a
               className="booking-confirmed-contact-btn"
               href={mailtoLink(fullName, dateLine || "our call")}
+              onClick={(e) => {
+                e.preventDefault();
+                openMailto(mailtoLink(fullName, dateLine || "our call"));
+              }}
             >
               <FaEnvelope aria-hidden="true" />
               <span>

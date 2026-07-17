@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import PrimaryButton from "../../common/PrimaryButton/PrimaryButton";
 import { useNavigate } from "@/src/lib/navigation";
+import { openMailto } from "@/src/lib/email";
 import { FaWhatsapp, FaArrowRight } from "react-icons/fa";
 import { HiOutlineMail, HiOutlineCalendar } from "react-icons/hi";
 
@@ -118,6 +119,10 @@ const ContactPromo = () => {
                         <a
                             className="contact-quick-channel"
                             href={`mailto:${DIRECT_EMAIL}?subject=${encodeURIComponent("Project enquiry")}`}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                openMailto(e.currentTarget.href);
+                            }}
                         >
                             <HiOutlineMail size={18} />
                             <span>Email Anil directly</span>
