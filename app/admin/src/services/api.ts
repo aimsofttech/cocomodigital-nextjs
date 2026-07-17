@@ -19,10 +19,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Skip 401 handling for the login request itself
-    const isLoginRequest = error.config?.url?.includes('/auth/login');
+    // Skip 401 handling for the login/logout requests themselves —
+    // a 401 from the logout call would re-trigger logout in a loop
+    const isAuthRequest =
+      error.config?.url?.includes('/auth/login') ||
+      error.config?.url?.includes('/auth/logout');
+    const hasSession = !!localStorage.getItem('cocoma_token');
 
-    if (error.response?.status === 401 && !isLoginRequest) {
+    if (error.response?.status === 401 && !isAuthRequest && hasSession) {
       localStorage.removeItem('cocoma_token');
       localStorage.removeItem('cocoma_user');
       // Dispatch a custom event so React Router handles navigation

@@ -8,6 +8,7 @@ interface ConfirmDialogProps {
   title?: string;
   message?: string;
   confirmLabel?: string;
+  loadingLabel?: string;
   loading?: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function ConfirmDialog({
   title = 'Confirm Delete',
   message = 'Are you sure you want to delete this item? This action cannot be undone.',
   confirmLabel = 'Delete',
+  loadingLabel = 'Deleting...',
   loading,
 }: ConfirmDialogProps) {
   return (
@@ -30,7 +32,7 @@ export default function ConfirmDialog({
         <div className="flex gap-3 w-full">
           <button onClick={onClose} className="btn-secondary flex-1">Cancel</button>
           <button onClick={onConfirm} disabled={loading} className="btn-danger flex-1">
-            {loading ? 'Deleting...' : confirmLabel}
+            {loading ? loadingLabel : confirmLabel}
           </button>
         </div>
       </div>

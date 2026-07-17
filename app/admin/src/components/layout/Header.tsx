@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { logout } from '@/features/auth/authSlice';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import {
   Bars3Icon, ArrowRightOnRectangleIcon, UserCircleIcon,
   ChevronLeftIcon, ChevronRightIcon,
@@ -16,6 +17,7 @@ export default function Header({ collapsed, onToggleSidebar, onOpenMobileMenu }:
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   return (
     <header
@@ -72,7 +74,7 @@ export default function Header({ collapsed, onToggleSidebar, onOpenMobileMenu }:
                 <p className="text-xs text-gray-500 truncate mt-0.5">{user?.email}</p>
               </div>
               <button
-                onClick={() => { setShowDropdown(false); dispatch(logout()); }}
+                onClick={() => { setShowDropdown(false); setShowLogoutConfirm(true); }}
                 className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <ArrowRightOnRectangleIcon className="w-4 h-4" />
@@ -82,6 +84,15 @@ export default function Header({ collapsed, onToggleSidebar, onOpenMobileMenu }:
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={() => { setShowLogoutConfirm(false); dispatch(logout()); }}
+        title="Confirm Sign Out"
+        message="Are you sure you want to sign out of the admin panel?"
+        confirmLabel="Sign out"
+      />
     </header>
   );
 }

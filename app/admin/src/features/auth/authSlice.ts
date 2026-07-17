@@ -64,7 +64,8 @@ const authSlice = createSlice({
         state.token = null;
         localStorage.removeItem('cocoma_token');
         localStorage.removeItem('cocoma_user');
-        toast.success('Logged out successfully');
+        // Fixed id — react-hot-toast replaces instead of stacking duplicates
+        toast.success('Logged out successfully', { id: 'logout-toast' });
       });
   },
 });
