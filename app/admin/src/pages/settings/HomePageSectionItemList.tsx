@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -60,7 +60,7 @@ export default function HomePageSectionItemList() {
     { key: 'image', label: 'Image', render: (row: any) => <ImageCell src={row.image} /> },
     { key: 'category_name', label: 'Category', render: (row: any) => row.category_name || 'N/A' },
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'url', label: 'URL', render: (row: any) => row.url ? <a href={row.url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.url}</a> : 'N/A' },
+    { key: 'url', label: 'URL', render: (row: any) => row.url ? <Link to={row.url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.url}</Link> : 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

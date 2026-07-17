@@ -104,9 +104,9 @@ export default function ServiceItemList() {
             label: 'Video URL',
             full: true,
             value: row.videoUrl ? (
-              <a href={row.videoUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">
+              <Link to={row.videoUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">
                 {row.videoUrl}
-              </a>
+              </Link>
             ) : undefined,
           },
           { label: 'Button Text', value: row.buttonText },

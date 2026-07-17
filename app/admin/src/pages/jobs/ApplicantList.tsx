@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { jobApplicantApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
@@ -157,13 +157,13 @@ export default function ApplicantList() {
             )}
             <div className="flex flex-wrap gap-3">
               {viewRow.resume && (
-                <a href={viewRow.resume} target="_blank" rel="noreferrer" className="btn-primary btn-sm">View Resume</a>
+                <Link to={viewRow.resume} target="_blank" rel="noreferrer" className="btn-primary btn-sm">View Resume</Link>
               )}
               {viewRow.linkedinUrl && (
-                <a href={viewRow.linkedinUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline self-center">LinkedIn</a>
+                <Link to={viewRow.linkedinUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline self-center">LinkedIn</Link>
               )}
               {viewRow.portfolioUrl && (
-                <a href={viewRow.portfolioUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline self-center">Portfolio</a>
+                <Link to={viewRow.portfolioUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline self-center">Portfolio</Link>
               )}
             </div>
           </div>

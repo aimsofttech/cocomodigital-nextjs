@@ -1,30 +1,7 @@
 // @ts-nocheck
+import Link from "next/link";
 import LegalPage from "./_shared/LegalPage";
 
-/**
- * /privacy-policy
- *
- * Multi-jurisdiction privacy notice — hits the disclosures
- * required by GDPR (EU/UK), CCPA/CPRA (California), DPDP Act
- * 2023 (India), Privacy Act 1988 / APPs (Australia), PDPA
- * (Singapore), and APPI (Japan). Region-specific notices are
- * grouped under section "Region-specific notices" so the body
- * stays readable for global readers while still satisfying
- * each region's mandatory disclosure points.
- *
- * Inputs from Anil:
- *   - Privacy contact: hello@cocomadigital.com
- *   - Retention: 30 days after a contract ends
- *
- * Inputs still to fill before going live (kept inline as
- * <span class="legal-todo"> markers):
- *   - Real sub-processor list (currently example placeholders)
- *   - Where servers physically sit (for transfers section)
- *
- * Lawyer review required before binding. Last updated date is
- * the date of the redesign — Anil to bump on each material
- * revision.
- */
 
 const PRIVACY_EMAIL = "hello@cocomadigital.com";
 const COMPANY_NAME = "Cocoma Digital Private Limited";
@@ -43,9 +20,9 @@ const sections = [
           <strong>"Cocoma"</strong>, <strong>"we"</strong>,{" "}
           <strong>"us"</strong>) collects, uses, shares, and protects
           information about you when you visit{" "}
-          <a className="legal-a" href="https://cocomadigital.com">
+          <Link className="legal-a" href="https://cocomadigital.com">
             cocomadigital.com
-          </a>{" "}
+          </Link>{" "}
           (the "Site"), submit a form, schedule a meeting, or
           otherwise interact with us through the Site.
         </p>
@@ -56,9 +33,9 @@ const sections = [
           (California), DPDP Act 2023 (India), Privacy Act 1988
           (Australia), PDPA (Singapore), and APPI (Japan).
           Region-specific rights are spelled out under{" "}
-          <a className="legal-a" href="#region-specific">
+          <Link className="legal-a" href="#region-specific">
             Region-specific notices
-          </a>
+          </Link>
           .
         </p>
       </>
@@ -77,9 +54,9 @@ const sections = [
         <p className="legal-p">
           For privacy questions, requests, or complaints, write to
           us at{" "}
-          <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+          <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
             {PRIVACY_EMAIL}
-          </a>
+          </Link>
           . For users in the EU/UK, this address also serves as
           our data-protection contact. For users in India, this
           address serves as our Grievance Officer contact under
@@ -133,9 +110,9 @@ const sections = [
           <li className="legal-li">
             <strong>Cookies and similar technologies</strong> — see
             our{" "}
-            <a className="legal-a" href="/cookie-policy">
+            <Link className="legal-a" href="/cookie-policy">
               Cookie Policy
-            </a>{" "}
+            </Link>{" "}
             for the full inventory.
           </li>
         </ul>
@@ -150,7 +127,7 @@ const sections = [
 
         <p className="legal-p">
           <strong>We do not collect payment information through
-          the Site.</strong> All paid engagements are handled
+            the Site.</strong> All paid engagements are handled
           through separate engagement letters and invoicing
           channels.
         </p>
@@ -189,12 +166,12 @@ const sections = [
           </li>
           <li className="legal-li">
             <strong>Detect and prevent fraud, abuse, and security
-            incidents</strong> — legitimate interests; legal
+              incidents</strong> — legitimate interests; legal
             obligation.
           </li>
           <li className="legal-li">
             <strong>Comply with legal, tax, and regulatory
-            obligations</strong> — legal obligation.
+              obligations</strong> — legal obligation.
           </li>
         </ul>
       </>
@@ -244,9 +221,9 @@ const sections = [
         <p className="legal-p">
           A current list of sub-processors is available on request
           at{" "}
-          <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+          <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
             {PRIVACY_EMAIL}
-          </a>
+          </Link>
           .
         </p>
 
@@ -307,9 +284,9 @@ const sections = [
         </ul>
         <p className="legal-p">
           For a copy of the safeguards we rely on, write to{" "}
-          <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+          <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
             {PRIVACY_EMAIL}
-          </a>
+          </Link>
           .
         </p>
       </>
@@ -361,9 +338,9 @@ const sections = [
           Depending on where you live, you have some or all of the
           following rights over your information. To exercise any
           of them, write to{" "}
-          <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+          <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
             {PRIVACY_EMAIL}
-          </a>{" "}
+          </Link>{" "}
           and we'll respond within the time frame your local law
           requires (typically 30 days).
         </p>
@@ -431,9 +408,9 @@ const sections = [
         US COPPA), under 16 (in many EU member states), or under
         18 (under the Indian DPDP Act). If you believe a child
         has submitted information to us, write to{" "}
-        <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+        <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
           {PRIVACY_EMAIL}
-        </a>{" "}
+        </Link>{" "}
         and we'll delete it.
       </p>
     ),
@@ -456,9 +433,9 @@ const sections = [
           <h4 className="legal-region-title">GDPR &amp; UK GDPR</h4>
           <p className="legal-p">
             <strong>Controller:</strong> {COMPANY_NAME}, contact{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>
+            </Link>
             .
           </p>
           <p className="legal-p">
@@ -466,24 +443,24 @@ const sections = [
             lodge a complaint with your local supervisory
             authority. In the UK, that's the Information
             Commissioner's Office (
-            <a
+            <Link
               className="legal-a"
               href="https://ico.org.uk"
               target="_blank"
               rel="noopener noreferrer"
             >
               ico.org.uk
-            </a>
+            </Link>
             ). In the EU, your country's data-protection authority
             (full list at{" "}
-            <a
+            <Link
               className="legal-a"
               href="https://edpb.europa.eu/about-edpb/about-edpb/members_en"
               target="_blank"
               rel="noopener noreferrer"
             >
               edpb.europa.eu
-            </a>
+            </Link>
             ).
           </p>
           <p className="legal-p">
@@ -499,18 +476,18 @@ const sections = [
           <p className="legal-p">
             We've collected the categories of personal information
             described under{" "}
-            <a className="legal-a" href="#what-we-collect">
+            <Link className="legal-a" href="#what-we-collect">
               Information we collect
-            </a>
+            </Link>
             . We use it for the business purposes listed under{" "}
-            <a className="legal-a" href="#why-we-collect">
+            <Link className="legal-a" href="#why-we-collect">
               Why we use your information
-            </a>
+            </Link>
             . We share it with the categories of recipients listed
             under{" "}
-            <a className="legal-a" href="#how-we-share">
+            <Link className="legal-a" href="#how-we-share">
               How we share information
-            </a>
+            </Link>
             .
           </p>
           <p className="legal-p">
@@ -527,9 +504,9 @@ const sections = [
           </p>
           <p className="legal-p">
             To exercise any right, write to{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>{" "}
+            </Link>{" "}
             with "California request" in the subject. You may
             authorise an agent to make a request on your behalf.
           </p>
@@ -546,9 +523,9 @@ const sections = [
           </p>
           <p className="legal-p">
             <strong>Grievance Officer / Contact:</strong>{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>
+            </Link>
             . You may also approach the Data Protection Board of
             India once it has been constituted under the Act.
           </p>
@@ -569,20 +546,20 @@ const sections = [
             We handle personal information in line with the
             Australian Privacy Principles (APPs). You may request
             access and correction at any time via{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>
+            </Link>
             . If you're not satisfied with how we've handled a
             complaint, you may escalate to the Office of the
             Australian Information Commissioner (
-            <a
+            <Link
               className="legal-a"
               href="https://www.oaic.gov.au"
               target="_blank"
               rel="noopener noreferrer"
             >
               oaic.gov.au
-            </a>
+            </Link>
             ).
           </p>
         </div>
@@ -594,19 +571,19 @@ const sections = [
             We process personal data in line with Singapore's
             Personal Data Protection Act. You may request access
             and correction via{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>
+            </Link>
             . Complaints may also be raised with the Personal Data
             Protection Commission (
-            <a
+            <Link
               className="legal-a"
               href="https://www.pdpc.gov.sg"
               target="_blank"
               rel="noopener noreferrer"
             >
               pdpc.gov.sg
-            </a>
+            </Link>
             ).
           </p>
         </div>
@@ -620,19 +597,19 @@ const sections = [
             purposes for which we use your information are
             described above. You may request disclosure,
             correction, or suspension of use via{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>
+            </Link>
             . You may also contact the Personal Information
             Protection Commission (
-            <a
+            <Link
               className="legal-a"
               href="https://www.ppc.go.jp/en/"
               target="_blank"
               rel="noopener noreferrer"
             >
               ppc.go.jp/en
-            </a>
+            </Link>
             ).
           </p>
         </div>
@@ -669,9 +646,9 @@ const sections = [
           {COMPANY_ADDRESS}
           <br />
           Email:{" "}
-          <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+          <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
             {PRIVACY_EMAIL}
-          </a>
+          </Link>
         </p>
         <p className="legal-p">
           We'll acknowledge your request within a reasonable time
@@ -701,9 +678,9 @@ const PrivacyPolicy = () => {
           <p>
             For anything you'd rather just ask in plain English,
             email{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>
+            </Link>
             .
           </p>
         </>

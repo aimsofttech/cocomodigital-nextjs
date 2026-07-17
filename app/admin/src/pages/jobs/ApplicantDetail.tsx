@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { jobApplicantApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -59,12 +59,12 @@ export default function ApplicantDetail() {
             <div><p className="text-xs text-gray-500 mb-1">Cover Letter</p><p className="text-sm bg-gray-50 p-3 rounded-lg">{applicant.coverLetter}</p></div>
           )}
           {applicant.resume && (
-            <div><a href={applicant.resume} target="_blank" rel="noreferrer" className="btn-primary btn-sm">View Resume</a></div>
+            <div><Link to={applicant.resume} target="_blank" rel="noreferrer" className="btn-primary btn-sm">View Resume</Link></div>
           )}
           {(applicant.linkedinUrl || applicant.portfolioUrl) && (
             <div className="flex gap-3">
-              {applicant.linkedinUrl && <a href={applicant.linkedinUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline">LinkedIn</a>}
-              {applicant.portfolioUrl && <a href={applicant.portfolioUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline">Portfolio</a>}
+              {applicant.linkedinUrl && <Link to={applicant.linkedinUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline">LinkedIn</Link>}
+              {applicant.portfolioUrl && <Link to={applicant.portfolioUrl} target="_blank" rel="noreferrer" className="text-sm text-primary-600 hover:underline">Portfolio</Link>}
             </div>
           )}
         </div>

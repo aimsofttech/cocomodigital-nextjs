@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -31,7 +32,7 @@ export default function BrandList() {
       render: (row: any) => <ImageCell src={row.image} alt={row.name} size="w-40 h-18" />
     },
     { key: 'name', label: 'Brand Name', sortable: true, render: (row: any) => <span className="capitalize">{row.name || 'N/A'}</span> },
-    { key: 'websiteUrl', label: 'Website', sortable: true, render: (row: any) => row.websiteUrl ? <a href={row.websiteUrl} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.websiteUrl}</a> : 'N/A' },
+    { key: 'websiteUrl', label: 'Website', sortable: true, render: (row: any) => row.websiteUrl ? <Link to={row.websiteUrl} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.websiteUrl}</Link> : 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

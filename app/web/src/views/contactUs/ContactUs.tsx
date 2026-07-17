@@ -1,7 +1,6 @@
 // @ts-nocheck
 "use client";
 import React, { useMemo, useState } from "react";
-import NextLink from "next/link";
 import { Link, useNavigate } from "@/src/lib/navigation";
 import { openMailto } from "@/src/lib/email";
 import {
@@ -229,7 +228,7 @@ export default function ContactUs() {
             </span>
           </Link>
 
-          <NextLink
+          <Link
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
@@ -245,9 +244,9 @@ export default function ContactUs() {
             <span className="contactus-channel-arrow" aria-hidden="true">
               <FaArrowRight />
             </span>
-          </NextLink>
+          </Link>
 
-          <a
+          <Link
             href={MAILTO_LINK}
             className="contactus-channel"
             onClick={(e) => { e.preventDefault(); openMailto(MAILTO_LINK); }}
@@ -262,7 +261,7 @@ export default function ContactUs() {
             <span className="contactus-channel-arrow" aria-hidden="true">
               <FaArrowRight />
             </span>
-          </a>
+          </Link>
         </section>
 
         {/* ----------------------------------------- *

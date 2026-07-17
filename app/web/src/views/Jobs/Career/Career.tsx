@@ -409,13 +409,13 @@ const Career = ({
             We're always open to great people. Send us your CV and a short
             note about what you're looking for — we'll find the fit.
           </p>
-          <a
+          <Link
             href={`mailto:${CAREERS_EMAIL}?subject=Speculative%20application`}
             className="career-speculative-cta"
           >
             Email {CAREERS_EMAIL}
             <FaArrowRight aria-hidden="true" />
-          </a>
+          </Link>
         </div>
       </section>
     </div>

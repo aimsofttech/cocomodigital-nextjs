@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -27,7 +28,7 @@ export default function CreatorPlatformList() {
   const columns = [
     { key: 'creator_thumbnail', label: 'Thumbnail', render: (row: any) => <ImageCell src={row.creator_thumbnail} /> },
     { key: 'creator_title', label: 'Title', sortable: true },
-    { key: 'creator_thumbnail_url', label: 'URL', sortable: true, render: (row: any) => row.creator_thumbnail_url ? <a href={row.creator_thumbnail_url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.creator_thumbnail_url}</a> : 'N/A' },
+    { key: 'creator_thumbnail_url', label: 'URL', sortable: true, render: (row: any) => row.creator_thumbnail_url ? <Link to={row.creator_thumbnail_url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs">{row.creator_thumbnail_url}</Link> : 'N/A' },
     { key: 'displayOrder', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

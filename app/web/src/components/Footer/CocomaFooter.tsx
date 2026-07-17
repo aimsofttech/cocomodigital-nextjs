@@ -199,12 +199,12 @@ export default function CocomaFooter({ serviceItems, otherServices, solutions }:
               </address>
               <p className="footer-inquiry">
                 <span className="footer-inquiry-label">{FOOTER_COPY.inquiry.label}</span>
-                <a
+                <Link
                   className="footer-inquiry-email"
                   href={`mailto:${FOOTER_COPY.inquiry.email}`}
                 >
                   {FOOTER_COPY.inquiry.email}
-                </a>
+                </Link>
               </p>
             </div>
           </div>

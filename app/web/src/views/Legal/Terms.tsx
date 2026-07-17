@@ -1,22 +1,7 @@
 // @ts-nocheck
+import Link from "next/link";
 import LegalPage from "./_shared/LegalPage";
 
-/**
- * /terms — Terms of Service for cocomadigital.com.
- *
- * The Site is informational + lead-gen + inquiry-assembly. No
- * payments are processed through the Site, so these Terms cover
- * site usage only — not service engagements. Paid engagements
- * with Cocoma are governed by separate engagement letters /
- * SOWs which take precedence over anything here.
- *
- * Inputs from Anil:
- *   - Governing law: Mumbai, India
- *   - No payment on the website
- *   - Privacy/legal contact: hello@cocomadigital.com
- *
- * Lawyer review required before binding.
- */
 
 const PRIVACY_EMAIL = "hello@cocomadigital.com";
 const COMPANY_NAME = "Cocoma Digital Private Limited";
@@ -35,9 +20,9 @@ const sections = [
         <p className="legal-p">
           These Terms of Service (<strong>"Terms"</strong>) govern
           your use of{" "}
-          <a className="legal-a" href="https://cocomadigital.com">
+          <Link className="legal-a" href="https://cocomadigital.com">
             cocomadigital.com
-          </a>{" "}
+          </Link>{" "}
           (the <strong>"Site"</strong>) operated by{" "}
           {COMPANY_NAME} (<strong>"Cocoma"</strong>,{" "}
           <strong>"we"</strong>, <strong>"us"</strong>). By
@@ -111,9 +96,9 @@ const sections = [
         When you submit a form, schedule a meeting, or assemble an
         inquiry, you provide information about yourself or your
         company. The information you provide is governed by our{" "}
-        <a className="legal-a" href="/privacy-policy">
+        <Link className="legal-a" href="/privacy-policy">
           Privacy Policy
-        </a>
+        </Link>
         . You agree to provide accurate, current, and complete
         information, and to update it if it changes.
       </p>
@@ -340,14 +325,14 @@ const sections = [
             country where you live. EU consumers may use the
             European Commission's Online Dispute Resolution
             platform (
-            <a
+            <Link
               className="legal-a"
               href="https://ec.europa.eu/consumers/odr"
               target="_blank"
               rel="noopener noreferrer"
             >
               ec.europa.eu/consumers/odr
-            </a>
+            </Link>
             ).
           </p>
         </div>
@@ -449,9 +434,9 @@ const sections = [
         {COMPANY_ADDRESS}
         <br />
         Email:{" "}
-        <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+        <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
           {PRIVACY_EMAIL}
-        </a>
+        </Link>
       </p>
     ),
   },
@@ -475,9 +460,9 @@ const Terms = () => {
           </p>
           <p>
             Questions? Email{" "}
-            <a className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
+            <Link className="legal-a" href={`mailto:${PRIVACY_EMAIL}`}>
               {PRIVACY_EMAIL}
-            </a>
+            </Link>
             .
           </p>
         </>

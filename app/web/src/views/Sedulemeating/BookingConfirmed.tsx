@@ -209,36 +209,36 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
               manually if you'd rather:
             </p>
             <div className="booking-confirmed-calendar-buttons">
-              <a
+              <Link
                 className="booking-confirmed-cal-btn"
                 href={googleCalendarUrl(calendarEvent)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <FaGoogle aria-hidden="true" /> Google
-              </a>
-              <a
+              </Link>
+              <Link
                 className="booking-confirmed-cal-btn"
                 href={icsDataUri(calendarEvent)}
                 download="cocoma-discovery-call.ics"
               >
                 <FaApple aria-hidden="true" /> Apple
-              </a>
-              <a
+              </Link>
+              <Link
                 className="booking-confirmed-cal-btn"
                 href={outlookCalendarUrl(calendarEvent)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <FaMicrosoft aria-hidden="true" /> Outlook
-              </a>
-              <a
+              </Link>
+              <Link
                 className="booking-confirmed-cal-btn booking-confirmed-cal-btn--ics"
                 href={icsDataUri(calendarEvent)}
                 download="cocoma-discovery-call.ics"
               >
                 <FaCalendarPlus aria-hidden="true" /> .ics file
-              </a>
+              </Link>
             </div>
           </section>
         )}
@@ -256,7 +256,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
             more useful.
           </p>
           <div className="booking-confirmed-contact-buttons">
-            <a
+            <Link
               className="booking-confirmed-contact-btn"
               href={mailtoLink(fullName, dateLine || "our call")}
               onClick={(e) => {
@@ -269,8 +269,8 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
                 <strong>Email Anil</strong>
                 <small>{DIRECT_EMAIL}</small>
               </span>
-            </a>
-            <a
+            </Link>
+            <Link
               className="booking-confirmed-contact-btn"
               href={whatsappLink(fullName, dateLine || "our call")}
               target="_blank"
@@ -281,7 +281,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
                 <strong>WhatsApp Anil</strong>
                 <small>{WHATSAPP_NUMBER}</small>
               </span>
-            </a>
+            </Link>
           </div>
         </section>
 

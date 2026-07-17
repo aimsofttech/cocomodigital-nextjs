@@ -116,7 +116,7 @@ const ContactPromo = () => {
                 <div className="contact-quick-channels" aria-label="Alternative ways to reach us">
                     <span className="contact-quick-channels-label">Prefer something faster?</span>
                     <div className="contact-quick-channels-row">
-                        <a
+                        <Link
                             className="contact-quick-channel"
                             href={`mailto:${DIRECT_EMAIL}?subject=${encodeURIComponent("Project enquiry")}`}
                             onClick={(e) => {
@@ -126,7 +126,7 @@ const ContactPromo = () => {
                         >
                             <HiOutlineMail size={18} />
                             <span>Email Anil directly</span>
-                        </a>
+                        </Link>
                         <Link
                             className="contact-quick-channel"
                             href={WHATSAPP_LINK}

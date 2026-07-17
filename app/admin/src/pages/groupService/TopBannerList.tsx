@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -108,9 +108,9 @@ export default function TopBannerList() {
             label: 'Video',
             full: true,
             value: row.video ? (
-              <a href={row.video} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">
+              <Link to={row.video} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">
                 {row.video}
-              </a>
+              </Link>
             ) : undefined,
           },
           { label: 'Video Type', value: row.videoType },

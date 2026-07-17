@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import { meetingApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
@@ -467,8 +467,8 @@ export default function MeetingList() {
             {selected.meetLink && (
               <div>
                 <p className="text-xs text-gray-500 mb-1">Google Meet Link</p>
-                <a href={selected.meetLink} target="_blank" rel="noopener noreferrer"
-                  className="text-blue-600 underline break-all">{selected.meetLink}</a>
+                <Link to={selected.meetLink} target="_blank" rel="noopener noreferrer"
+                  className="text-blue-600 underline break-all">{selected.meetLink}</Link>
               </div>
             )}
             <div className="flex gap-3 pt-2 border-t flex-wrap">

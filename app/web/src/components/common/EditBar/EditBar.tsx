@@ -26,6 +26,7 @@
  */
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface RouteMap {
@@ -200,8 +201,11 @@ export default function EditBar() {
         </button>
       </div>
 
-      <a
+      {/* Studio/Admin live outside this Next app — no prefetch, and the
+          click falls through to a full page load exactly like before */}
+      <Link
         href={editUrl}
+        prefetch={false}
         style={{
           display: "block",
           textAlign: "center",
@@ -215,7 +219,7 @@ export default function EditBar() {
         }}
       >
         Open the editor →
-      </a>
+      </Link>
 
       <span style={{ fontSize: 10, opacity: 0.7 }}>
         Signed in as {who} · only editors see this

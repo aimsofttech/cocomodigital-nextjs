@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCrud } from '@/hooks/useCrud';
 import CrudListPage from '@/components/ui/CrudListPage';
 import StatusToggle from '@/components/ui/StatusToggle';
@@ -26,7 +27,7 @@ export default function ItemList() {
   const FILTER_FIELDS = [{ key: 'status', label: 'Status', type: 'status' as const }];
   const columns = [
     { key: 'development_house_img', label: 'Image', render: (row: any) => <ImageCell src={row.development_house_img} /> },
-    { key: 'development_house_url', label: 'URL', sortable: true, render: (row: any) => row.development_house_url ? <a href={row.development_house_url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs truncate max-w-xs block">{row.development_house_url}</a> : 'N/A' },
+    { key: 'development_house_url', label: 'URL', sortable: true, render: (row: any) => row.development_house_url ? <Link to={row.development_house_url} target="_blank" rel="noreferrer" className="text-primary-600 hover:underline text-xs truncate max-w-xs block">{row.development_house_url}</Link> : 'N/A' },
     { key: 'display_order', label: 'Order', sortable: true },
     { key: 'status', label: 'Status', sortable: true, render: (row: any) => <StatusToggle status={row.status} onConfirm={(newStatus) => handleStatusChange(row._id, newStatus)} /> },
   ];

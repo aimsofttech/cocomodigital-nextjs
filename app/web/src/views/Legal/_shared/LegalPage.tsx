@@ -73,7 +73,7 @@ const LegalPage = ({
             <ol className="legal-toc-list">
               {sections.map((s, idx) => (
                 <li key={s.id}>
-                  <a
+                  <Link
                     href={`#${s.id}`}
                     className={`legal-toc-link ${activeId === s.id ? "is-active" : ""
                       }`}
@@ -82,7 +82,7 @@ const LegalPage = ({
                       {String(idx + 1).padStart(2, "0")}
                     </span>
                     <span className="legal-toc-title">{s.title}</span>
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ol>
