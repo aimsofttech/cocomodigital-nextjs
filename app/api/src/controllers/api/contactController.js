@@ -2,11 +2,17 @@ const ContactUs = require('../../models/ContactUs');
 const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
 const { sendBookingEmails, sendMeetingRequestEmails } = require('../../services/bookingMailer');
+const { ingestSafe: crmIngest } = require('../../crm/services/leadIngest');
 
 const contact = async (req, res) => {
   const { name, email, phone, subject, message } = req.body;
   if (!name || !email || !message) return res.status(400).json({ status: 'error', message: 'Name, email, and message are required' });
   const doc = await ContactUs.create({ name, email, phone, subject, message });
+  crmIngest({
+    channel: 'contact_form', externalCollection: 'contact_us', externalId: doc._id,
+    name, email, phone, message: [subject, message].filter(Boolean).join(' — '),
+    raw: { subject, message },
+  });
   res.status(201).json({ status: 'success', message: 'Message sent successfully', data: doc });
 };
 
@@ -87,6 +93,14 @@ const freeConsultation = async (req, res) => {
       });
     })().catch(() => {});
 
+    crmIngest({
+      channel: 'meeting', externalCollection: 'meetings', externalId: doc._id,
+      name, email, phone, company, message: notes || message,
+      serviceInterest: service, sourcePage: source_page,
+      meetingStartUtc: meeting_start_utc,
+      raw: { meeting_date, meeting_time, meeting_timezone },
+    });
+
     return res.status(201).json({ status: 'success', message: 'Meeting request submitted. You will receive a confirmation email once your meeting is approved.', data: doc });
   }
 
@@ -99,6 +113,12 @@ const freeConsultation = async (req, res) => {
   (async () => {
     await sendBookingEmails({ name, email, phone, company, message, budget, service, source_page, notes });
   })().catch(() => {});
+
+  crmIngest({
+    channel: 'consultation', externalCollection: 'free_consultation_item', externalId: doc._id,
+    name, email, phone, company, message: message || notes,
+    serviceInterest: service, budget, sourcePage: source_page,
+  });
 
   res.status(201).json({ status: 'success', message: 'Consultation request submitted', data: doc });
 };

@@ -171,6 +171,10 @@ const marketingForm = async (req, res) => {
     return res.status(400).json({ status: 'error', message: 'Name, email, and message are required' });
   }
   const form = await MarketingForm.create({ name, email, phone, company, message, service_type, marketingHouseItemId });
+  require('../../crm/services/leadIngest').ingestSafe({
+    channel: 'marketing_form', externalCollection: 'marketing_form', externalId: form._id,
+    name, email, phone, company, message, serviceInterest: service_type,
+  });
   res.status(201).json({ status: 'success', message: 'Form submitted successfully', data: form });
 };
 

@@ -4,13 +4,16 @@
   "private": true,
   "workspaces": [
     "app/api",
-    "app/admin"
+    "app/admin",
+    "app/crm"
   ],
   "scripts": {
     "predev": "node scripts/free-ports.js",
-    "dev": "concurrently -n \"API,ADMIN,WEB\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm run dev -w @cocoma/api\" \"npm run dev -w @cocoma/admin\" \"npm run dev:web\"",
+    "dev": "concurrently -n \"API,ADMIN,CRM,WEB\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold,bgGreen.bold\" \"npm run dev -w @cocoma/api\" \"npm run dev -w @cocoma/admin\" \"npm run dev -w @cocoma/crm\" \"npm run dev:web\"",
     "dev:api": "npm run dev -w @cocoma/api",
     "dev:admin": "npm run dev -w @cocoma/admin",
+    "dev:crm": "npm run dev -w @cocoma/crm",
+    "build:crm": "npm run build -w @cocoma/crm",
     "dev:web": "wait-on -t 120000 http://localhost:5000/health && cd app/web && npm run dev",
     "build": "npm run build -w @cocoma/admin",
     "start": "npm run start -w @cocoma/api",

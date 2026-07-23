@@ -2,15 +2,15 @@
  * Frees the dev-server ports before `npm run dev`.
  *
  * On Windows, nodemon/concurrently frequently leave orphaned node
- * processes holding the API (5000), web (3000), or admin (5173) ports
- * after a dev session ends, which makes the next `npm run dev` crash
- * with EADDRINUSE. This script kills whatever is still LISTENING on
- * those ports so the stack always starts clean. Wired up as the
- * `predev` script in the root package.json.
+ * processes holding the API (5000), web (3000), admin (5173), or CRM
+ * (5174) ports after a dev session ends, which makes the next
+ * `npm run dev` crash with EADDRINUSE. This script kills whatever is
+ * still LISTENING on those ports so the stack always starts clean.
+ * Wired up as the `predev` script in the root package.json.
  */
 const { execSync } = require('child_process');
 
-const PORTS = [3000, 5000, 5173];
+const PORTS = [3000, 5000, 5173, 5174];
 
 function listeningPids(port) {
   try {
@@ -59,5 +59,5 @@ for (const port of PORTS) {
   }
 }
 if (!killedAny) {
-  console.log('[free-ports] ports 3000/5000/5173 already free');
+  console.log('[free-ports] ports 3000/5000/5173/5174 already free');
 }

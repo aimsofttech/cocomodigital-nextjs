@@ -123,7 +123,8 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000').split(',');
+const allowedOrigins = (process.env.CORS_ORIGINS ||
+  'http://localhost:3000,http://localhost:5173,http://localhost:5174').split(',');
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -232,6 +233,9 @@ app.use('/api/faqs', apiFaqRoutes);
 app.use('/api/group-service/faqs', apiGroupServiceFaqRoutes);
 app.use('/api/job-categories', apiJobCategoryRoutes);
 
+// CRM (self-contained module under src/crm — mounted at /crm/api)
+app.use('/crm/api', require('./crm/routes'));
+
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
@@ -245,6 +249,8 @@ app.listen(PORT, () => {
   console.log('================================\n');
   // Verify SMTP at boot so a misconfiguration surfaces immediately (non-fatal).
   require('./services/mailer').verify().catch(() => {});
+  // Start the CRM scheduler + job handlers (Mongo-backed, no Redis).
+  try { require('./crm/services/workers').init(); } catch (err) { logger.error(`CRM workers init failed: ${err.message}`); }
   // Report Google Meet / Calendar status so it's obvious whether booking emails
   // will include a Meet link.
   if (require('./services/calendarService').isConfigured()) {
