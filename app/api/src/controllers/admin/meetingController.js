@@ -2,7 +2,7 @@ const Meeting = require('../../models/Meeting');
 const MeetingAssignee = require('../../models/MeetingAssignee');
 const { createMeetingEvent } = require('../../services/calendarService');
 const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
-const { zonedTimeToUtc } = require('../../utils/timezone');
+const { zonedTimeToUtc, IST_TIMEZONE } = require('../../utils/timezone');
 const logger = require('../../utils/logger');
 
 // 10:00–18:45 in 15-minute steps — mirrors the reschedule picker's slot grid.
@@ -102,6 +102,9 @@ const confirm = async (req, res) => {
       phone: doc.phone,
       meetingDate: doc.meetingDate,
       meetingTime: doc.meetingTime,
+      meeting_timezone: doc.meetingTimezone,
+      meeting_start_utc: doc.meeting_start_utc,
+      createdAt: doc.createdAt,
       meetLink: doc.meetLink,
       assigneeEmail: doc.assignedTo?.email,
     });
@@ -110,14 +113,11 @@ const confirm = async (req, res) => {
   res.json({ status: 'success', message: 'Meeting confirmed and emails sent', data: doc });
 };
 
-// GET /admin/api/meetings/availability?date=YYYY-MM-DD&timezone=Asia/Kolkata&excludeId=<id>
-// Which of the day's 15-min slots are already taken by another pending/confirmed
-// meeting, so the reschedule picker can disable them. Computed server-side so the
-// admin's browser timezone never has to be reconciled with the meeting's timezone.
+
 const availability = async (req, res) => {
-  const { date, timezone, excludeId } = req.query;
+  const { date, excludeId } = req.query;
   if (!date) return res.status(400).json({ status: 'error', message: 'date is required' });
-  const tz = timezone || process.env.BOOKING_TIMEZONE || 'Asia/Kolkata';
+  const tz = IST_TIMEZONE;
 
   const slotKeys = DAY_SLOTS
     .map((time) => {
@@ -139,11 +139,7 @@ const availability = async (req, res) => {
   res.json({ status: 'success', booked });
 };
 
-// PUT /admin/api/meetings/:id/reschedule
-// Admin picks a new date/time for a meeting (typically one whose original slot
-// already expired), regenerates the Google Meet link for the new slot, and
-// notifies both the user and the owner. Keeps the meeting's original timezone
-// so the wall-clock time stays meaningful to the visitor who requested it.
+
 const reschedule = async (req, res) => {
   const { meetingDate, meetingTime } = req.body;
   if (!meetingDate || !meetingTime) {
@@ -153,8 +149,7 @@ const reschedule = async (req, res) => {
   const doc = await Meeting.findById(req.params.id);
   if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
 
-  const timezone = doc.meetingTimezone || process.env.BOOKING_TIMEZONE || 'Asia/Kolkata';
-  const startUtc = zonedTimeToUtc(meetingDate, meetingTime, timezone);
+  const startUtc = zonedTimeToUtc(meetingDate, meetingTime, IST_TIMEZONE);
   if (!startUtc) return res.status(400).json({ status: 'error', message: 'Invalid meetingDate/meetingTime' });
   if (startUtc.getTime() <= Date.now()) {
     return res.status(400).json({ status: 'error', message: 'Please pick a time in the future' });
@@ -178,12 +173,15 @@ const reschedule = async (req, res) => {
     notes: doc.notes,
     meeting_date: meetingDate,
     meeting_time: meetingTime,
-    meeting_timezone: timezone,
+    meeting_timezone: IST_TIMEZONE,
   });
 
+  // meetingDate/meetingTime become "the admin's literal IST input" — reference
+  // only. meetingTimezone is deliberately left untouched: it still holds the
+  // visitor's original zone, which is what their reschedule email is rendered
+  // in. meeting_start_utc (below) is the only field anything displays from.
   doc.meetingDate = meetingDate;
   doc.meetingTime = meetingTime;
-  doc.meetingTimezone = timezone;
   doc.meeting_start_utc = startUtc;
   doc.slot_key = slot_key;
   doc.status = 'confirmed';
@@ -212,6 +210,9 @@ const reschedule = async (req, res) => {
       phone: doc.phone,
       meetingDate: doc.meetingDate,
       meetingTime: doc.meetingTime,
+      meeting_timezone: doc.meetingTimezone,
+      meeting_start_utc: doc.meeting_start_utc,
+      createdAt: doc.createdAt,
       meetLink: doc.meetLink,
       assigneeEmail: doc.assignedTo?.email,
     });
@@ -237,6 +238,7 @@ const reject = async (req, res) => {
         meeting_date: doc.meetingDate,
         meeting_time: doc.meetingTime,
         meeting_timezone: doc.meetingTimezone,
+        meeting_start_utc: doc.meeting_start_utc,
         assigneeEmail: doc.assignedTo?.email,
       });
     }
@@ -286,6 +288,7 @@ const assign = async (req, res) => {
         meeting_date: doc.meetingDate,
         meeting_time: doc.meetingTime,
         meeting_timezone: doc.meetingTimezone,
+        meeting_start_utc: doc.meeting_start_utc,
         meetingId: doc._id.toString(),
       },
       doc.assignedTo

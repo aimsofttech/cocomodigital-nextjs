@@ -6,7 +6,7 @@ import {
   DocumentTextIcon, EnvelopeIcon, ChevronRightIcon, XMarkIcon,
   RectangleGroupIcon, TagIcon, BuildingOffice2Icon, Squares2X2Icon,
   VideoCameraIcon, StarIcon, FilmIcon, RectangleStackIcon, ListBulletIcon,
-  RocketLaunchIcon, ClipboardDocumentListIcon, SparklesIcon, UserGroupIcon,
+  RocketLaunchIcon, SparklesIcon, UserGroupIcon,
   QuestionMarkCircleIcon, NewspaperIcon, UsersIcon, UserIcon, PhoneIcon,
   CursorArrowRaysIcon, TrophyIcon, ChatBubbleLeftRightIcon,
   ArrowUpTrayIcon,
@@ -155,7 +155,6 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Contact Us', path: '/contact/contact-us', icon: EnvelopeIcon },
       { label: 'Meeting Requests', path: '/contact/meetings', icon: PhoneIcon },
-      { label: 'Form Submissions', path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
     ],
   },
 ];

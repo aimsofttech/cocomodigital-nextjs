@@ -2,6 +2,7 @@ const ContactUs = require('../../models/ContactUs');
 const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
 const { sendBookingEmails, sendMeetingRequestEmails } = require('../../services/bookingMailer');
+const { zonedTimeToUtc } = require('../../utils/timezone');
 
 const contact = async (req, res) => {
   const { name, email, phone, subject, message } = req.body;
@@ -45,7 +46,18 @@ const freeConsultation = async (req, res) => {
   const consultationCategoryId = req.body.consultationCategoryId ?? req.body.consultation_category_id;
   if (!name || !email) return res.status(400).json({ status: 'error', message: 'Name and email are required' });
 
-  const slot_key = slotKeyOf(meeting_start_utc);
+  // Recompute the UTC instant server-side from the wall-clock fields rather
+  // than trusting the client's meeting_start_utc verbatim — a spoofed or
+  // clock-skewed browser could otherwise store a UTC instant inconsistent
+  // with the recorded meeting_date/meeting_time/meeting_timezone. Falls back
+  // to the client-sent value only if the recompute can't be done (missing or
+  // unrecognised timezone), so a booking never hard-fails on this.
+  const recomputedUtc = meeting_date && meeting_time && meeting_timezone
+    ? zonedTimeToUtc(meeting_date, meeting_time, meeting_timezone)
+    : null;
+  const resolvedStartUtc = recomputedUtc || (meeting_start_utc ? new Date(meeting_start_utc) : null);
+
+  const slot_key = slotKeyOf(resolvedStartUtc);
 
   // ── Meeting booking (from /ScheduleMeeting) ──────────────────────────────
   if (slot_key) {
@@ -64,7 +76,7 @@ const freeConsultation = async (req, res) => {
         meetingDate: meeting_date,
         meetingTime: meeting_time,
         meetingTimezone: meeting_timezone,
-        meeting_start_utc: new Date(meeting_start_utc),
+        meeting_start_utc: resolvedStartUtc,
         slot_key,
         duration: 15,
         notes: notes || message,
@@ -83,6 +95,8 @@ const freeConsultation = async (req, res) => {
       await sendMeetingRequestEmails({
         name, email, phone, companyName: company, service, notes: notes || message,
         meeting_date, meeting_time, meeting_timezone,
+        meeting_start_utc: doc.meeting_start_utc,
+        createdAt: doc.createdAt,
         meetingId: doc._id.toString(),
       });
     })().catch(() => {});
