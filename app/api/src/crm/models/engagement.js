@@ -39,6 +39,10 @@ const callSchema = new Schema({
 
   rescheduledFromId: { type: Schema.Types.ObjectId, ref: 'CrmCall' },
   createdByAutomation: { type: Boolean, default: false },
+
+  // Set once this call has been mirrored onto the rep's external calendar, so
+  // a re-sync patches the same event instead of creating a duplicate.
+  googleEventId: { type: String, index: true, sparse: true },
 }, { timestamps: true, collection: 'crm_calls' });
 
 /* ── Message templates (email / whatsapp / sms) ─────────────────────────── */

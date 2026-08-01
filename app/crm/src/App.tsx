@@ -16,6 +16,7 @@ const DealsBoard = lazy(() => import('@/pages/deals/DealsBoard'));
 const CallsPage = lazy(() => import('@/pages/calls/CallsPage'));
 const TasksPage = lazy(() => import('@/pages/tasks/TasksPage'));
 const FollowUpsPage = lazy(() => import('@/pages/followups/FollowUpsPage'));
+const CalendarPage = lazy(() => import('@/pages/calendar/CalendarPage'));
 const InboxPage = lazy(() => import('@/pages/inbox/InboxPage'));
 const TemplatesPage = lazy(() => import('@/pages/templates/TemplatesPage'));
 const AutomationsPage = lazy(() => import('@/pages/automations/AutomationsPage'));
@@ -59,6 +60,7 @@ const App = () => {
           <Route path="/calls" element={<CallsPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/followups" element={<FollowUpsPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/inbox" element={<InboxPage />} />
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/automations" element={<AutomationsPage />} />

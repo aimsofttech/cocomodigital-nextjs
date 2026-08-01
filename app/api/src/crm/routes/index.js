@@ -46,6 +46,7 @@ router.use('/messages', require('./messages'));
 router.use('/templates', require('./templates'));
 router.use('/tasks', require('./tasks'));
 router.use('/followups', require('./followups'));
+router.use('/calendar', require('./calendar'));
 router.use('/notifications', require('./notifications'));
 router.use('/documents', require('./documents'));
 router.use('/automations', require('./automations'));

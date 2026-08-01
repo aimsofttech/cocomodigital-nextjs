@@ -8,6 +8,11 @@ cocoma-react-admin/node_modules/
 .env.example
 .env.local
 .env.*.local
+# Timestamped env backups written by deploy/edit scripts (app/api/.env.bak.<ts>)
+.env.bak
+.env.bak.*
+*.env.bak
+*.env.bak.*
 # cocoma-node-backend/.env
 
 # Logs

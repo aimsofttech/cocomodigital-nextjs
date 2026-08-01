@@ -5,6 +5,7 @@ import {
   HomeIcon, UserGroupIcon, UsersIcon, BriefcaseIcon, PhoneIcon,
   InboxIcon, CheckCircleIcon, ClockIcon, ChartBarIcon, Cog6ToothIcon,
   BoltIcon, BellIcon, ArrowRightStartOnRectangleIcon, DocumentTextIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { logout, can } from '@/features/auth/authSlice';
@@ -20,6 +21,7 @@ const NAV = [
   { to: '/inbox', label: 'Inbox', icon: InboxIcon, perm: 'messages:read' },
   { to: '/tasks', label: 'Tasks', icon: CheckCircleIcon, perm: 'tasks:read' },
   { to: '/followups', label: 'Follow-ups', icon: ClockIcon, perm: 'followups:manage' },
+  { to: '/calendar', label: 'Calendar', icon: CalendarDaysIcon, perm: 'dashboard:view' },
   { to: '/templates', label: 'Templates', icon: DocumentTextIcon, perm: 'messages:read' },
   { to: '/automations', label: 'Automations', icon: BoltIcon, perm: 'automations:manage' },
   { to: '/reports', label: 'Reports', icon: ChartBarIcon, perm: 'reports:view' },
