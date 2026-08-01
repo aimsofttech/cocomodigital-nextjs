@@ -577,8 +577,70 @@ const sendMeetingReminderEmails = async (booking = {}) => {
   return result;
 };
 
+// Like `row`, but keeps the visitor's paragraph breaks — a Contact Us message
+// is free-text and collapses into one blob without this.
+const multilineRow = (label, value) =>
+  value
+    ? `<tr><td style="padding:4px 12px 4px 0;color:#666;white-space:nowrap;vertical-align:top">${esc(label)}</td>` +
+    `<td style="padding:4px 0;color:#111">${esc(value).replace(/\r?\n/g, '<br>')}</td></tr>`
+    : '';
+
+/**
+ * Notify the owner of a new Contact Us submission.
+ *
+ * Best-effort by design: `sendMail` never throws and never rejects, so the
+ * visitor's form submit can't fail because SMTP is down or misconfigured. The
+ * lead is already persisted by the time this runs — email is a notification,
+ * not part of the write path.
+ *
+ * @param {object} lead { name, email, phone, subject, message, createdAt }
+ * @returns {Promise<{sent:boolean, skipped?:boolean, error?:string}>}
+ */
+const sendContactEnquiryEmail = async (lead = {}) => {
+  // Both of these land in the Subject header, which is CRLF-delimited — collapse
+  // any newlines the visitor typed so they can't inject extra headers.
+  const headerSafe = (v, max = 120) =>
+    String(v == null ? '' : v).replace(/[\r\n]+/g, ' ').trim().slice(0, max);
+
+  const visitorName = headerSafe(lead.name) || 'Website visitor';
+  const subjectLabel = headerSafe(lead.subject);
+  const receivedIst = formatInTimeZone(lead.createdAt || new Date(), IST_TIMEZONE);
+
+  const html = shell(
+    'New contact enquiry',
+    row('Name', lead.name) +
+    row('Email', lead.email) +
+    row('Phone', lead.phone) +
+    row('Subject', lead.subject) +
+    multilineRow('Message', lead.message) +
+    row('Received (IST)', receivedIst ? `${receivedIst.date} · ${receivedIst.time}` : ''),
+    `New message from the Contact Us form on ${esc(brand())}.` +
+    (lead.email ? ' Reply to this email to respond to them directly.' : '')
+  );
+
+  const text =
+    `New contact enquiry\n\n` +
+    `Name: ${lead.name || 'n/a'}\n` +
+    `Email: ${lead.email || 'n/a'}\n` +
+    `Phone: ${lead.phone || 'n/a'}\n` +
+    `Subject: ${lead.subject || 'n/a'}\n` +
+    `Received (IST): ${receivedIst ? `${receivedIst.date} ${receivedIst.time}` : 'n/a'}\n\n` +
+    `Message:\n${lead.message || 'n/a'}\n`;
+
+  return sendMail({
+    to: ownerEmail(),
+    // Reply goes straight to the visitor rather than the SMTP mailbox.
+    replyTo: lead.email || undefined,
+    fromName: visitorName,
+    subject: `New enquiry: ${visitorName}${subjectLabel ? ` — ${subjectLabel}` : ''}`,
+    html,
+    text,
+  });
+};
+
 module.exports = {
   sendBookingEmails,
+  sendContactEnquiryEmail,
   sendMeetingRequestEmails,
   sendMeetingConfirmedEmails,
   sendMeetingRejectedEmail,
