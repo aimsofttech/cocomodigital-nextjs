@@ -41,6 +41,10 @@ const meetingSchema = new mongoose.Schema({
   assignedTo: { type: mongoose.Schema.Types.Mixed, default: null }, // { name, email }
   assignedBy: { type: mongoose.Schema.Types.Mixed, default: null },
   assignedAt: { type: Date, default: null },
+
+  // Set once the 1-hour-before reminder email has fired, so the poller
+  // never sends it twice for the same meeting.
+  reminderSentAt: { type: Date, default: null },
 }, { timestamps: true, collection: 'meetings' });
 
 // Prevent two confirmed meetings at the same slot (race-proof via unique index).

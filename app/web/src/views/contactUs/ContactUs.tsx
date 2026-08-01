@@ -90,6 +90,7 @@ export default function ContactUs() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    phone: "",
     message: "",
   });
   const [errors, setErrors] = useState({});
@@ -113,6 +114,12 @@ export default function ContactUs() {
     if (!formData.email.trim()) e.email = "We'll write back here";
     else if (!/^\S+@\S+\.\S+$/.test(formData.email))
       e.email = "That email looks off";
+    // Count digits only, so "+91 88005 28125" and "8800528125" both pass.
+    // 10 covers a bare Indian mobile; 15 is the E.164 ceiling.
+    const phoneDigits = formData.phone.replace(/\D/g, "");
+    if (!formData.phone.trim()) e.phone = "We'll need a number to reach you";
+    else if (phoneDigits.length < 10 || phoneDigits.length > 15)
+      e.phone = "That number looks off";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -149,18 +156,21 @@ export default function ContactUs() {
 
     setSubmitting(true);
     try {
-      /* POST to the API's contact-leads collection. Public create
-         is enabled on the collection (anonymous form submits), so
-         no auth header. The notifyLead afterChange hook fires
-         off the Resend email when RESEND_API_KEY is set; lead
-         saves regardless. */
+      /* Anonymous form submit — no auth header. The /content-api
+         route handler proxies this verbatim to the Express API's
+         POST /api/contact, which persists it to the contact_us
+         collection (name, email, phone, subject, message). */
       const res = await fetch("/content-api/contact-leads", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           name: formData.fullName,
           email: formData.email,
-          phone: "",
+          phone: formData.phone.trim(),
+          // Sent as a first-class field so the owner's notification email can
+          // show it on its own row. The `[Type: …]` prefix stays in the message
+          // too — that's what the admin panel's message column surfaces today.
+          subject: inquiryType.label,
           message: taggedMessage,
         }),
       });
@@ -367,6 +377,24 @@ export default function ContactUs() {
                 />
                 {errors.email && (
                   <small className="contactus-error">{errors.email}</small>
+                )}
+              </div>
+
+              <div className="contactus-field">
+                <label htmlFor="cu-phone">Phone number</label>
+                <input
+                  id="cu-phone"
+                  type="tel"
+                  name="phone"
+                  inputMode="tel"
+                  placeholder="Where can we call or WhatsApp you?"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  autoComplete="tel"
+                  aria-invalid={!!errors.phone}
+                />
+                {errors.phone && (
+                  <small className="contactus-error">{errors.phone}</small>
                 )}
               </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   HomeIcon, ChartBarIcon, MegaphoneIcon, PaintBrushIcon, CodeBracketIcon,
@@ -6,9 +6,9 @@ import {
   DocumentTextIcon, EnvelopeIcon, ChevronRightIcon, XMarkIcon,
   RectangleGroupIcon, TagIcon, BuildingOffice2Icon, Squares2X2Icon,
   VideoCameraIcon, StarIcon, FilmIcon, RectangleStackIcon, ListBulletIcon,
-  RocketLaunchIcon, ClipboardDocumentListIcon, SparklesIcon, UserGroupIcon,
+  SparklesIcon, UserGroupIcon,
   QuestionMarkCircleIcon, NewspaperIcon, UsersIcon, UserIcon, PhoneIcon,
-  CursorArrowRaysIcon, TrophyIcon, ChatBubbleLeftRightIcon,
+  TrophyIcon,
   ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 
@@ -155,7 +155,6 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Contact Us', path: '/contact/contact-us', icon: EnvelopeIcon },
       { label: 'Meeting Requests', path: '/contact/meetings', icon: PhoneIcon },
-      { label: 'Form Submissions', path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
     ],
   },
 ];

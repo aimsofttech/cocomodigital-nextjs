@@ -8,11 +8,7 @@
  * marked with PLACEHOLDER comments need real numbers from you.
  */
 import {
-  FaCalendarAlt,
-  FaComments,
-  FaRocket,
   FaChartLine,
-  FaUserTie,
   /* Audience + methodology icons added — sticker yellow chips
      on each text block. Reused playbook from
      /work/ip-monetization. All FA5-set (react-icons/fa) so

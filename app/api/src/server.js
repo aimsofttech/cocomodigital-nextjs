@@ -261,6 +261,9 @@ app.listen(PORT, () => {
         '/api/google/oauth/start to connect (bookings still work without a link).'
     );
   }
+  if (process.env.NODE_ENV !== 'test') {
+    require('./services/reminderService').startReminderPoller();
+  }
 });
 
 module.exports = app;

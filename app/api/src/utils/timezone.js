@@ -1,13 +1,6 @@
 'use strict';
 
 /**
- * Convert a wall-clock "YYYY-MM-DD" + "HH:mm" pair, interpreted in the given
- * IANA timezone, to the equivalent UTC Date instant. No external tz library —
- * uses the Intl per-timezone-offset trick: stamp the wall-clock numbers as if
- * they were UTC, then measure how far that same instant drifts when displayed
- * in `timeZone` vs UTC; that drift is the zone's offset at that date, which we
- * subtract to land on the real UTC instant.
- *
  * @returns {Date|null} null if the inputs can't be parsed.
  */
 const zonedTimeToUtc = (dateStr, timeStr, timeZone) => {
@@ -22,4 +15,24 @@ const zonedTimeToUtc = (dateStr, timeStr, timeZone) => {
   return new Date(asUTC.getTime() - offsetMs);
 };
 
-module.exports = { zonedTimeToUtc };
+// The owner/admin's fixed reference zone — regardless of where the visitor
+// or the admin's own browser happens to be.
+const IST_TIMEZONE = 'Asia/Kolkata';
+
+/**
+ * Render a UTC instant as a wall-clock date/time string in `timeZone`. This is
+ * the display-side counterpart to `zonedTimeToUtc` — it never mutates the
+ * instant, only how it's shown.
+ *
+ * @returns {{date:string, time:string}|null} null if `date` doesn't parse.
+ */
+const formatInTimeZone = (date, timeZone) => {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return {
+    date: d.toLocaleDateString('en-US', { timeZone, day: '2-digit', month: 'short', year: 'numeric' }),
+    time: d.toLocaleTimeString('en-US', { timeZone, hour: 'numeric', minute: '2-digit', hour12: true }),
+  };
+};
+
+module.exports = { zonedTimeToUtc, formatInTimeZone, IST_TIMEZONE };

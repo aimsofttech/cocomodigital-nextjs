@@ -51,6 +51,20 @@ function formatLongDate(d: Date): string {
   return d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+// The admin panel always shows meeting/audit times in IST, regardless of the
+// visitor's own timezone or the admin's own browser timezone — derived from
+// meeting_start_utc (the real UTC instant), never the raw meetingDate/meetingTime
+// wall-clock strings the visitor originally typed.
+const IST_TZ = 'Asia/Kolkata';
+function formatIST(utcIso?: string | Date | null): string | null {
+  if (!utcIso) return null;
+  const d = new Date(utcIso);
+  if (Number.isNaN(d.getTime())) return null;
+  const date = d.toLocaleDateString('en-IN', { timeZone: IST_TZ, day: '2-digit', month: 'short', year: 'numeric' });
+  const time = d.toLocaleTimeString('en-IN', { timeZone: IST_TZ, hour: 'numeric', minute: '2-digit', hour12: true });
+  return `${date} · ${time} IST`;
+}
+
 // "14:30" -> "2:30 PM" when hour12, otherwise passed through unchanged.
 function formatSlotLabel(slot24: string, hour12: boolean): string {
   if (!hour12) return slot24;
@@ -288,8 +302,9 @@ export default function MeetingList() {
     setAvailabilityLoading(true);
     meetingApi
       .checkAvailability({
+        // Always IST now — the admin panel's reschedule picker no longer
+        // operates in the visitor's original timezone (see meetingController).
         date: dateToYMD(rescheduleDate),
-        timezone: rescheduleTarget.meetingTimezone || undefined,
         excludeId: rescheduleTarget._id,
       })
       .then(({ data }: any) => { if (!cancelled) setBookedTimes(new Set(data?.booked || [])); })
@@ -357,8 +372,10 @@ export default function MeetingList() {
     { key: 'email', label: 'Email', sortable: true, render: (row: any) => row.email || 'N/A' },
     { key: 'phone', label: 'Phone', render: (row: any) => row.phone || 'N/A' },
     {
-      key: 'meetingDate', label: 'Meeting Date', sortable: true,
-      render: (row: any) => row.meetingDate
+      key: 'meetingDate', label: 'Meeting Date (IST)', sortable: true,
+      render: (row: any) => formatIST(row.meeting_start_utc)
+        ? <span className="whitespace-nowrap">{formatIST(row.meeting_start_utc)}</span>
+        : row.meetingDate
         ? <span className="whitespace-nowrap">{row.meetingDate}{row.meetingTime ? ` · ${row.meetingTime}` : ''}</span>
         : 'N/A',
     },
@@ -368,7 +385,7 @@ export default function MeetingList() {
     },
     {
       key: 'createdAt', label: 'Submitted', sortable: true,
-      render: (row: any) => row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A',
+      render: (row: any) => row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN', { timeZone: IST_TZ }) : 'N/A',
     },
   ];
 
@@ -447,13 +464,18 @@ export default function MeetingList() {
               <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Company</p><p>{selected.companyName || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-500">Meeting Date</p><p>{selected.meetingDate || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-500">Meeting Time</p><p>{selected.meetingTime || 'N/A'}{selected.meetingTimezone ? ` (${selected.meetingTimezone})` : ''}</p></div>
+              <div>
+                <p className="text-xs text-gray-500">Meeting Date &amp; Time (IST)</p>
+                <p>{formatIST(selected.meeting_start_utc) || `${selected.meetingDate || 'N/A'}${selected.meetingTime ? ` · ${selected.meetingTime}` : ''}`}</p>
+                {selected.meetingTimezone && (
+                  <p className="text-xs text-gray-400">Visitor's local: {selected.meetingDate} {selected.meetingTime} ({selected.meetingTimezone})</p>
+                )}
+              </div>
               <div><p className="text-xs text-gray-500">Duration</p><p>{selected.duration || 15} minutes</p></div>
               <div><p className="text-xs text-gray-500">Status</p><StatusBadge status={selected.status} /></div>
-              <div><p className="text-xs text-gray-500">Submitted</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString() : 'N/A'}</p></div>
-              {selected.confirmedAt && <div><p className="text-xs text-gray-500">Confirmed At</p><p>{new Date(selected.confirmedAt).toLocaleString()}</p></div>}
-              {selected.rejectedAt && <div><p className="text-xs text-gray-500">Rejected At</p><p>{new Date(selected.rejectedAt).toLocaleString()}</p></div>}
+              <div><p className="text-xs text-gray-500">Submitted (IST)</p><p>{selected.createdAt ? new Date(selected.createdAt).toLocaleString('en-IN', { timeZone: IST_TZ }) : 'N/A'}</p></div>
+              {selected.confirmedAt && <div><p className="text-xs text-gray-500">Confirmed At (IST)</p><p>{new Date(selected.confirmedAt).toLocaleString('en-IN', { timeZone: IST_TZ })}</p></div>}
+              {selected.rejectedAt && <div><p className="text-xs text-gray-500">Rejected At (IST)</p><p>{new Date(selected.rejectedAt).toLocaleString('en-IN', { timeZone: IST_TZ })}</p></div>}
               {selected.assignedTo?.name && (
                 <div>
                   <p className="text-xs text-gray-500">Assigned To</p>
@@ -543,12 +565,11 @@ export default function MeetingList() {
                   <span className="text-gray-600">{confirmTarget.phone}</span>
                 </div>
               )}
-              {(confirmTarget.meetingDate || confirmTarget.meetingTime) && (
+              {(confirmTarget.meeting_start_utc || confirmTarget.meetingDate || confirmTarget.meetingTime) && (
                 <div className="flex items-center gap-2 px-3 py-2">
                   <CalendarDaysIcon className="w-4 h-4 text-gray-400 shrink-0" />
                   <span className="text-gray-600">
-                    {confirmTarget.meetingDate}{confirmTarget.meetingTime ? ` · ${confirmTarget.meetingTime}` : ''}
-                    {confirmTarget.meetingTimezone ? ` (${confirmTarget.meetingTimezone})` : ''}
+                    {formatIST(confirmTarget.meeting_start_utc) || `${confirmTarget.meetingDate}${confirmTarget.meetingTime ? ` · ${confirmTarget.meetingTime}` : ''}`}
                   </span>
                 </div>
               )}
@@ -600,11 +621,11 @@ export default function MeetingList() {
                 <EnvelopeIcon className="w-4 h-4 text-gray-400 shrink-0" />
                 <span className="text-gray-600 truncate">{rejectTarget.email}</span>
               </div>
-              {(rejectTarget.meetingDate || rejectTarget.meetingTime) && (
+              {(rejectTarget.meeting_start_utc || rejectTarget.meetingDate || rejectTarget.meetingTime) && (
                 <div className="flex items-center gap-2 px-3 py-2">
                   <CalendarDaysIcon className="w-4 h-4 text-gray-400 shrink-0" />
                   <span className="text-gray-600">
-                    {rejectTarget.meetingDate}{rejectTarget.meetingTime ? ` · ${rejectTarget.meetingTime}` : ''}
+                    {formatIST(rejectTarget.meeting_start_utc) || `${rejectTarget.meetingDate}${rejectTarget.meetingTime ? ` · ${rejectTarget.meetingTime}` : ''}`}
                   </span>
                 </div>
               )}
@@ -640,9 +661,13 @@ export default function MeetingList() {
               <div>
                 <p className="font-semibold text-gray-900">{rescheduleTarget.userName}</p>
                 <p className="text-sm text-gray-500">
-                  Previously: {rescheduleTarget.meetingDate}{rescheduleTarget.meetingTime ? ` · ${rescheduleTarget.meetingTime}` : ''}
-                  {rescheduleTarget.meetingTimezone ? ` (${rescheduleTarget.meetingTimezone})` : ''} — expired
+                  Previously (IST): {formatIST(rescheduleTarget.meeting_start_utc) || `${rescheduleTarget.meetingDate}${rescheduleTarget.meetingTime ? ` · ${rescheduleTarget.meetingTime}` : ''}`} — expired
                 </p>
+                {rescheduleTarget.meetingTimezone && (
+                  <p className="text-xs text-gray-400">
+                    Visitor's local: {rescheduleTarget.meetingDate} {rescheduleTarget.meetingTime} ({rescheduleTarget.meetingTimezone})
+                  </p>
+                )}
               </div>
             </div>
 
@@ -664,7 +689,7 @@ export default function MeetingList() {
                   <div>
                     <p className="font-bold text-gray-900 text-sm leading-tight">{formatLongDate(rescheduleDate)}</p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {rescheduleTarget.meetingTimezone || 'Local time'} · 15 min · Google Meet
+                      IST · 15 min · Google Meet
                     </p>
                   </div>
                   <div className="inline-flex bg-gray-100 border border-gray-200 rounded-full p-0.5 flex-shrink-0">

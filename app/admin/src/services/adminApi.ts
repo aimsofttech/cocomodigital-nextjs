@@ -180,7 +180,7 @@ export const meetingApi = {
   getAssignees: () => api.get(`${BASE}/meetings/assignees`),
   assign: (id: string, data: { name: string; email: string }) =>
     api.put(`${BASE}/meetings/${id}/assign`, data),
-  checkAvailability: (params: { date: string; timezone?: string; excludeId?: string }) =>
+  checkAvailability: (params: { date: string; excludeId?: string }) =>
     api.get(`${BASE}/meetings/availability`, { params }),
   updateStatus: (id: string, status: string) => api.put(`${BASE}/meetings/${id}/status`, { status }),
   delete: (id: string) => api.delete(`${BASE}/meetings/${id}`),
