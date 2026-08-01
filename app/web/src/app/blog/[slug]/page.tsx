@@ -8,12 +8,10 @@ import {
 } from "@/src/lib/adminServerApi";
 import {
   findCollection,
-  findBySlug,
   getAuthors,
   getBlogPost,
   getBlogPosts,
   getServiceCategories,
-  getServices,
   imageUrl,
 } from "@/src/lib/content";
 import {

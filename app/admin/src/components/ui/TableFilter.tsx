@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FunnelIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon,
 } from '@heroicons/react/24/outline';

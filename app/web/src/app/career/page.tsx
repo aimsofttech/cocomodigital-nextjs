@@ -1,6 +1,6 @@
 import { buildMetadata, getStaticSeo } from "@/src/lib/seo";
 import Career from "@/src/views/Jobs/Career/Career";
-import { getJobs, getJobCategories, findCollection } from "@/src/lib/content";
+import { getJobs, getJobCategories } from "@/src/lib/content";
 
 export const metadata = buildMetadata(getStaticSeo("/career"));
 

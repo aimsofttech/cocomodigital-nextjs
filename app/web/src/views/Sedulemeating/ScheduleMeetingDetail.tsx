@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useLocation } from "@/src/lib/navigation";
 import { useCart } from "@/src/lib/cart";
-import { FaRegClock, FaVideo, FaGlobeAsia, FaArrowLeft, FaCheck, FaChevronRight } from "react-icons/fa";
+import { FaRegClock, FaVideo, FaGlobeAsia, FaArrowLeft } from "react-icons/fa";
 import ScheduleMeeting   from "./ScheduleMeeting";
 import BookingConfirmed  from "./BookingConfirmed";
 
