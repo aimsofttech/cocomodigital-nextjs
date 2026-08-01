@@ -3,6 +3,7 @@ const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
 const { sendBookingEmails, sendMeetingRequestEmails, sendContactEnquiryEmail } = require('../../services/bookingMailer');
 const { zonedTimeToUtc } = require('../../utils/timezone');
+const { ingestSafe: crmIngest } = require('../../crm/services/leadIngest');
 const logger = require('../../utils/logger');
 
 const contact = async (req, res) => {
@@ -18,6 +19,15 @@ const contact = async (req, res) => {
     name, email, phone, subject, message, createdAt: doc.createdAt,
   }).catch((err) => {
     logger.error(`Contact enquiry email failed for ${email}: ${err.message}`);
+  });
+
+  // Mirror the enquiry into the CRM as a lead. Fire-and-forget and internally
+  // guarded — the visitor's submit must never fail because the CRM is busy.
+  crmIngest({
+    channel: 'contact_form', externalCollection: 'contact_us', externalId: doc._id,
+    name, email, phone, message,
+    serviceInterest: subject,
+    raw: { subject },
   });
 
   res.status(201).json({ status: 'success', message: 'Message sent successfully', data: doc });

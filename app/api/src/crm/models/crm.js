@@ -13,7 +13,7 @@ const leadSchema = new Schema({
     channel: {
       type: String,
       enum: ['contact_form', 'marketing_form', 'consultation', 'meeting',
-             'job_applicant', 'whatsapp_inbound', 'manual', 'import', 'referral'],
+             'whatsapp_inbound', 'manual', 'import', 'referral'],
       default: 'manual',
     },
     externalId: { type: String },

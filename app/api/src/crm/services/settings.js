@@ -10,7 +10,6 @@ const DEFAULTS = {
   quietHoursEnd: '09:00',
   assignmentStrategy: 'round_robin',   // round_robin | load_balanced
   emailTracking: true,
-  ingestJobApplicants: true,
   idleLeadDays: 7,
   followupEscalateHours: 4,
   automationDailyCapPerEntity: 10,

@@ -69,10 +69,6 @@ const GeneralTab = () => {
           <input type="checkbox" checked={!!s.emailTracking} onChange={(e) => setS('emailTracking', e.target.checked)} />
           Email open tracking pixel
         </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={!!s.ingestJobApplicants} onChange={(e) => setS('ingestJobApplicants', e.target.checked)} />
-          Also capture job applicants as leads (tagged "recruitment")
-        </label>
         <button className="btn-primary" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save settings'}</button>
       </div>
 

@@ -13,10 +13,9 @@
 const { CrmLead, CrmContact, CrmCall, CrmTask } = require('../models');
 const timeline = require('./timeline');
 const automation = require('./automation');
-const settings = require('./settings');
 const logger = require('../../utils/logger');
 
-const SCORE = { meeting: 30, consultation: 20, marketing_form: 10, contact_form: 5, job_applicant: 0 };
+const SCORE = { meeting: 30, consultation: 20, marketing_form: 10, contact_form: 5 };
 
 const computeScore = (lead) => {
   let score = SCORE[lead.source && lead.source.channel] || 0;
@@ -37,10 +36,10 @@ const ingest = async (input) => {
   try {
     if (!input || !input.name) return null;
 
-    if (input.channel === 'job_applicant') {
-      const s = await settings.getSettings();
-      if (!s.ingestJobApplicants) return null;
-    }
+    // The Leads module is sales-only. Job applications belong to the separate
+    // Job Applicants module and are rejected here even if a caller still passes
+    // the old channel, so no recruitment records can leak back into Leads.
+    if (input.channel === 'job_applicant') return null;
 
     // 1) Idempotency on the external record.
     if (input.externalId) {
@@ -122,7 +121,7 @@ const ingest = async (input) => {
         raw: input.raw,
       },
       status: 'new',
-      tags: input.channel === 'job_applicant' ? ['recruitment'] : [],
+      tags: [],
     });
     lead.score = computeScore(lead);
     lead.rating = ratingFor(lead.score);
@@ -184,6 +183,13 @@ const ingest = async (input) => {
 };
 
 /** Safe fire-and-forget wrapper used inside existing controllers. */
-const ingestSafe = (input) => { ingest(input).catch(() => {}); };
+const ingestSafe = (input) => {
+  // `ingest` already logs and swallows its own failures; this catch is the
+  // backstop for anything thrown before that try block is entered. Logged
+  // rather than discarded, so a lead never goes missing without a trace.
+  ingest(input).catch((err) => {
+    logger.error(`CRM leadIngest (safe) failed for channel=${input && input.channel}: ${err.message}`);
+  });
+};
 
 module.exports = { ingest, ingestSafe, computeScore, ratingFor };

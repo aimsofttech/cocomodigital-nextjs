@@ -29,7 +29,7 @@ router.get('/', requirePermission('settings:manage'), async (req, res) => {
 // PUT /crm/api/settings
 router.put('/', requirePermission('settings:manage'), async (req, res) => {
   const ALLOWED = ['timezone', 'quietHoursStart', 'quietHoursEnd', 'assignmentStrategy',
-    'emailTracking', 'ingestJobApplicants', 'idleLeadDays', 'followupEscalateHours',
+    'emailTracking', 'idleLeadDays', 'followupEscalateHours',
     'automationDailyCapPerEntity', 'defaultCountryCode'];
   const patch = {};
   for (const k of ALLOWED) if (req.body[k] !== undefined) patch[k] = req.body[k];

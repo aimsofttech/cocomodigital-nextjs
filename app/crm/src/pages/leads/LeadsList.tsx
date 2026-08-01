@@ -8,7 +8,7 @@ import { can } from '@/features/auth/authSlice';
 import { Spinner, Badge, statusColor, Pagination, PageHeader, Modal, Empty, fmtDate } from '@/components/ui';
 
 const STATUSES = ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost', 'junk'];
-const SOURCES = ['contact_form', 'marketing_form', 'consultation', 'meeting', 'job_applicant', 'whatsapp_inbound', 'manual', 'import', 'referral'];
+const SOURCES = ['contact_form', 'marketing_form', 'consultation', 'meeting', 'whatsapp_inbound', 'manual', 'import', 'referral'];
 
 const LeadsList = () => {
   const user = useAppSelector((s) => s.auth.user);
