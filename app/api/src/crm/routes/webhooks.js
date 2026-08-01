@@ -76,7 +76,27 @@ router.post('/twilio/sms-inbound', async (req, res) => {
   }
 });
 
-// Outbound SMS delivery status.
+// Inbound WhatsApp via Twilio. Twilio posts form-encoded fields, unlike Meta's
+// JSON webhook above, so it needs its own route (also handles STOP → opt-out).
+router.post('/twilio/whatsapp-inbound', async (req, res) => {
+  res.type('text/xml').send('<Response></Response>');
+  try {
+    const from = req.body.From || '';        // "whatsapp:+919770601469"
+    const body = req.body.Body || '';
+    if (/^\s*stop\s*$/i.test(body)) {
+      const tail = String(from).replace(/[^\d]/g, '').slice(-10);
+      await CrmContact.updateMany({ phone: new RegExp(`${tail}$`) }, { $set: { whatsappOptIn: false } });
+      logger.info(`WhatsApp STOP received from ${from} — whatsappOptIn disabled.`);
+      return;
+    }
+    await messaging.recordInbound('whatsapp', from, body, req.body);
+  } catch (err) {
+    logger.error(`Twilio WhatsApp inbound error: ${err.message}`);
+  }
+});
+
+// Outbound SMS + WhatsApp delivery status (matched on MessageSid, which Twilio
+// sends identically for both channels).
 router.post('/twilio/sms-status', async (req, res) => {
   res.sendStatus(200);
   try {

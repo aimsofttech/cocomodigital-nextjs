@@ -86,7 +86,9 @@ const LeadDetail = () => {
           subject: tab === 'email' ? subject || undefined : undefined,
           body: text || undefined,
         });
-        toast.success(tab === 'whatsapp' && !msg.providerMessageId ? 'WhatsApp prepared — check timeline for the send link' : 'Message queued');
+        // Sends are queued and delivered by the worker, so the provider isn't
+        // known yet — the timeline shows the outcome (or the wa.me link).
+        toast.success('Message queued');
       }
       setText(''); setSubject(''); setTemplateId('');
       setTimeout(load, 800);
@@ -278,7 +280,7 @@ const LeadDetail = () => {
               value={text} onChange={(e) => setText(e.target.value)}
             />
             <div className="mt-2 flex items-center justify-between">
-              {tab === 'whatsapp' && <p className="text-[11px] text-gray-400">Free mode: generates a wa.me link you tap to send (no API charges).</p>}
+              {tab === 'whatsapp' && <p className="text-[11px] text-gray-400">Sends via your configured WhatsApp provider; with none set up, generates a free wa.me link you tap to send.</p>}
               <span />
               <button className="btn-primary" onClick={sendComposer} disabled={busy}>
                 {busy ? 'Working…' : tab === 'note' ? 'Add note' : 'Send'}

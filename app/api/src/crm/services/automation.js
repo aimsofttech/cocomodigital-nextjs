@@ -266,6 +266,14 @@ const runAction = async (action, ctx, meta, run) => {
     case 'send_whatsapp':
     case 'send_sms': {
       const channel = action.type.replace('send_', '');
+      // WhatsApp is agent-initiated only unless explicitly re-enabled: a rule
+      // must never message a customer's WhatsApp without someone pressing Send.
+      if (channel === 'whatsapp') {
+        const s = await require('./settings').getSettings();
+        if (!s.automatedWhatsappEnabled) {
+          return { skipped: 'automated WhatsApp disabled (settings.automatedWhatsappEnabled)' };
+        }
+      }
       const msg = await messaging.sendMessage({
         channel,
         ...personRef,

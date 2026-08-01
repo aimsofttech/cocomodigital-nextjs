@@ -18,7 +18,9 @@ router.get('/', requirePermission('settings:manage'), async (req, res) => {
     providers: {
       email: mailer.isConfigured(),
       whatsappCloud: messaging.waCloudConfigured(),
-      whatsappLinkMode: !messaging.waCloudConfigured(),   // free fallback always available
+      whatsappTwilio: messaging.twilioWhatsappConfigured(),
+      // Free fallback — only in play when no automatic provider is configured.
+      whatsappLinkMode: !messaging.waCloudConfigured() && !messaging.twilioWhatsappConfigured(),
       smsTwilio: messaging.twilioConfigured(),
       smsMsg91: messaging.msg91Configured(),
       voiceTwilio: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_VOICE_FROM),

@@ -56,6 +56,10 @@ const templateSchema = new Schema({
   // WhatsApp Cloud API specifics (only needed when WA cloud mode is enabled)
   waTemplateName: { type: String, trim: true },
   waLanguageCode: { type: String, default: 'en' },
+  // Twilio WhatsApp specifics — a Content template SID (HX...) from the Twilio
+  // Content Template Builder. Required to send outside the 24-hour window.
+  // `variables` above names the ordered placeholders this template expects.
+  twilioContentSid: { type: String, trim: true },
   isActive: { type: Boolean, default: true },
   createdBy: { type: Schema.Types.ObjectId, ref: 'CrmUser' },
 }, { timestamps: true, collection: 'crm_message_templates' });
@@ -87,8 +91,14 @@ const messageSchema = new Schema({
   failReason: { type: String },
   waLink: { type: String },                          // wa.me link (free mode)
 
-  provider: { type: String },                        // smtp | whatsapp_cloud | wa_link | twilio | msg91
+  provider: { type: String },                        // smtp | whatsapp_cloud | wa_link | twilio | twilio_whatsapp | msg91
   providerMessageId: { type: String, index: true, sparse: true },
+
+  // Twilio Content template send (WhatsApp outside the 24h window). When set,
+  // Twilio renders the approved template itself and `body` holds only a local
+  // preview for the inbox/timeline.
+  contentSid: { type: String },
+  contentVariables: { type: Schema.Types.Mixed },
 
   sentBy: { type: Schema.Types.ObjectId, ref: 'CrmUser' },  // null → automation/system
   automationRunId: { type: Schema.Types.ObjectId, ref: 'CrmAutomationRun' },

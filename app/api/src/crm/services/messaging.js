@@ -67,7 +67,53 @@ const apiPublicUrl = () =>
 
 const waCloudConfigured = () => Boolean(process.env.WA_ACCESS_TOKEN && process.env.WA_PHONE_NUMBER_ID);
 const twilioConfigured = () => Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_SMS_FROM);
+const twilioWhatsappConfigured = () => Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM);
 const msg91Configured = () => Boolean(process.env.MSG91_AUTH_KEY && process.env.MSG91_SENDER_ID);
+
+/**
+ * POST one message to Twilio's REST API. Shared by SMS and WhatsApp — they hit
+ * the same endpoint and differ only in the To/From channel prefix.
+ *
+ * Pass either `body` (free-form text) or `contentSid` + `contentVariables`
+ * (an approved Content template, required for WhatsApp outside the 24h window).
+ */
+const twilioSend = async ({ to, from, body, contentSid, contentVariables, mediaUrls }) => {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const auth = Buffer.from(`${sid}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64');
+  const params = new URLSearchParams({ To: to, From: from });
+  if (contentSid) {
+    params.set('ContentSid', contentSid);
+    if (contentVariables && Object.keys(contentVariables).length) {
+      params.set('ContentVariables', JSON.stringify(contentVariables));
+    }
+  } else {
+    params.set('Body', body);
+  }
+  for (const u of mediaUrls || []) params.append('MediaUrl', u);
+  // Delivery receipts land on the shared Twilio status webhook; without a public
+  // URL the message still sends, it just never advances past 'sent'.
+  if (process.env.API_PUBLIC_URL) {
+    params.set('StatusCallback', `${apiPublicUrl()}/crm/api/webhooks/twilio/sms-status`);
+  }
+
+  const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+    method: 'POST',
+    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // Twilio's numeric codes are far more actionable than its prose.
+    const hint = {
+      63015: 'Recipient has not joined the WhatsApp sandbox — send "join <code>" to +14155238886 first.',
+      63016: 'Outside the 24-hour window — send an approved Content template (set TWILIO_WHATSAPP_CONTENT_SID or the template\'s twilioContentSid).',
+      63018: 'WhatsApp rate limit reached.',
+      21211: 'Invalid destination number (must be E.164, e.g. +919770601469).',
+    }[data.code];
+    throw new Error(hint ? `${data.message} — ${hint}` : (data.message || `Twilio error ${res.status}`));
+  }
+  return data;
+};
 
 /* ── public API: queue a message ────────────────────────────────────────── */
 
@@ -104,7 +150,15 @@ const sendMessage = async (opts) => {
   const subject = channel === 'email'
     ? renderTemplate(opts.subject || (template && template.subject) || '', vars)
     : undefined;
-  if (!body) throw new Error('Message body is empty');
+
+  // Twilio Content template (WhatsApp only). When set, Twilio renders the
+  // approved template from contentVariables and `body` is just a local preview.
+  // Never substituted automatically — sending outside the 24h window without one
+  // must fail loudly rather than silently deliver unrelated approved content.
+  const contentSid = channel === 'whatsapp'
+    ? (opts.contentSid || (template && template.twilioContentSid) || null)
+    : null;
+  if (!body && !contentSid) throw new Error('Message body is empty');
 
   const msg = await CrmMessage.create({
     channel,
@@ -116,6 +170,8 @@ const sendMessage = async (opts) => {
     templateId: template ? template._id : undefined,
     subject,
     body,
+    contentSid,
+    contentVariables: contentSid ? (opts.contentVariables || null) : null,
     mediaUrls: opts.mediaUrls || [],
     status: 'queued',
     sentBy: opts.sentBy || null,
@@ -156,11 +212,23 @@ const deliver = async ({ messageId }) => {
     }
   }
 
-  // Quiet hours: delay WhatsApp/SMS (email is fine any time).
-  if (msg.channel !== 'email') {
+  // Quiet hours: delay WhatsApp/SMS (email is fine any time). Only applies to
+  // automated/system sends — quiet hours exist to stop rules from messaging
+  // customers overnight, not to hold a reply an agent just pressed Send on.
+  if (msg.channel !== 'email' && !msg.sentBy) {
     const resumeAt = await settings.quietHoursDelay();
     if (resumeAt) {
       await jobs.schedule('message:send', resumeAt, { messageId: msg._id.toString() });
+      // Record the deferral on the message itself. Without this the message sits
+      // at 'queued' with no explanation anywhere in the UI, which is
+      // indistinguishable from a silently broken send.
+      if (!msg.scheduledFor || msg.scheduledFor.getTime() !== resumeAt.getTime()) {
+        msg.scheduledFor = resumeAt;
+        msg.statusHistory.push({
+          status: 'queued', at: new Date(), raw: { deferred: 'quiet_hours', resumeAt },
+        });
+        await msg.save();
+      }
       return;
     }
   }
@@ -231,6 +299,18 @@ const deliverWhatsapp = async (msg) => {
     msg.provider = 'whatsapp_cloud';
     msg.providerMessageId = data.messages && data.messages[0] && data.messages[0].id;
     pushStatus(msg, 'sent', data);
+  } else if (twilioWhatsappConfigured()) {
+    const data = await twilioSend({
+      to: `whatsapp:+${msg.toAddress.replace(/^\+/, '')}`,
+      from: process.env.TWILIO_WHATSAPP_FROM,
+      body: msg.body,
+      contentSid: msg.contentSid,
+      contentVariables: msg.contentVariables,
+      mediaUrls: msg.mediaUrls,
+    });
+    msg.provider = 'twilio_whatsapp';
+    msg.providerMessageId = data.sid;
+    pushStatus(msg, 'sent', data);
   } else {
     // FREE link mode — agent opens the link and taps send. No API charges.
     msg.provider = 'wa_link';
@@ -241,20 +321,11 @@ const deliverWhatsapp = async (msg) => {
 
 const deliverSms = async (msg) => {
   if (twilioConfigured()) {
-    const sid = process.env.TWILIO_ACCOUNT_SID;
-    const auth = Buffer.from(`${sid}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64');
-    const params = new URLSearchParams({
-      To: `+${msg.toAddress.replace(/^\+/, '')}`,
-      From: process.env.TWILIO_SMS_FROM,
-      Body: msg.body,
+    const data = await twilioSend({
+      to: `+${msg.toAddress.replace(/^\+/, '')}`,
+      from: process.env.TWILIO_SMS_FROM,
+      body: msg.body,
     });
-    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
-      method: 'POST',
-      headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.message || `Twilio error ${res.status}`);
     msg.provider = 'twilio';
     msg.providerMessageId = data.sid;
     pushStatus(msg, 'sent', data);
@@ -347,5 +418,5 @@ const recordInbound = async (channel, fromPhone, body, raw) => {
 
 module.exports = {
   sendMessage, deliver, recordInbound, renderTemplate, buildVars, normalizePhone,
-  waCloudConfigured, twilioConfigured, msg91Configured,
+  waCloudConfigured, twilioConfigured, twilioWhatsappConfigured, msg91Configured,
 };

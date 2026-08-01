@@ -112,6 +112,8 @@ const InboxPage = () => {
                     <p className="whitespace-pre-wrap">{m.body?.replace(/<[^>]+>/g, ' ')}</p>
                     <p className={clsx('mt-1 text-[10px]', m.direction === 'outbound' ? 'text-primary-100' : 'text-gray-400')}>
                       {fmtDate(m.createdAt)} · {m.status}
+                      {m.status === 'queued' && m.scheduledFor && ` · held for quiet hours, sending ${fmtDate(m.scheduledFor)}`}
+                      {m.status === 'failed' && m.failReason && ` · ${m.failReason}`}
                     </p>
                     {m.status === 'manual' && m.waLink && (
                       <a href={m.waLink} target="_blank" rel="noreferrer"

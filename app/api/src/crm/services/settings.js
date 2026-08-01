@@ -14,6 +14,9 @@ const DEFAULTS = {
   followupEscalateHours: 4,
   automationDailyCapPerEntity: 10,
   defaultCountryCode: '91',
+  // WhatsApp goes out only when an agent presses Send. Automation rules with a
+  // send_whatsapp action are skipped while this is false. Email/SMS unaffected.
+  automatedWhatsappEnabled: false,
 };
 
 let cache = null;

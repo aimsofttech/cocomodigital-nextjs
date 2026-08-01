@@ -78,7 +78,8 @@ const GeneralTab = () => {
           {[
             ['Email (SMTP)', data.providers.email, 'Configured via SMTP_* env — reuses the existing mailer.'],
             ['WhatsApp Cloud API', data.providers.whatsappCloud, 'Set WA_ACCESS_TOKEN + WA_PHONE_NUMBER_ID to enable fully-automatic sending.'],
-            ['WhatsApp free link mode', data.providers.whatsappLinkMode, 'Always available — generates wa.me links, ₹0 cost.'],
+            ['WhatsApp — Twilio', data.providers.whatsappTwilio, 'Set TWILIO_WHATSAPP_FROM (sandbox: whatsapp:+14155238886). Recipients must join the sandbox first.'],
+            ['WhatsApp free link mode', data.providers.whatsappLinkMode, 'Fallback when no WhatsApp provider is configured — generates wa.me links, ₹0 cost.'],
             ['SMS — Twilio', data.providers.smsTwilio, 'Set TWILIO_ACCOUNT_SID / AUTH_TOKEN / SMS_FROM.'],
             ['SMS — MSG91', data.providers.smsMsg91, 'Set MSG91_AUTH_KEY + MSG91_SENDER_ID.'],
             ['Click-to-call — Twilio Voice', data.providers.voiceTwilio, 'Set TWILIO_VOICE_FROM. Without it, calls use tel: links (free).'],
