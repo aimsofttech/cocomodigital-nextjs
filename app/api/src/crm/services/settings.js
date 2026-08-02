@@ -17,6 +17,10 @@ const DEFAULTS = {
   // WhatsApp goes out only when an agent presses Send. Automation rules with a
   // send_whatsapp action are skipped while this is false. Email/SMS unaffected.
   automatedWhatsappEnabled: false,
+  // Meta policy requires recorded opt-in before you message anyone. Turn this on
+  // once you leave the sandbox: it blocks WhatsApp to any contact without a
+  // whatsappOptInAt stamp, rather than trusting the default-true flag.
+  requireExplicitWhatsappOptIn: false,
 };
 
 let cache = null;

@@ -82,7 +82,10 @@ const TemplatesPage = () => {
               {t.subject && <p className="mb-1 text-xs font-medium text-gray-600">Subject: {t.subject}</p>}
               <p className="line-clamp-3 whitespace-pre-wrap text-xs text-gray-500">{t.body.replace(/<[^>]+>/g, ' ')}</p>
               <div className="mt-3 flex items-center justify-between">
-                <span className="text-[11px] text-gray-400">{t.category || 'uncategorised'}{!t.isActive && ' · inactive'}</span>
+                <span className="text-[11px] text-gray-400">
+                {t.category || 'uncategorised'}{!t.isActive && ' · inactive'}
+                {t.channel === 'whatsapp' && (t.twilioContentSid ? ' · approved template' : ' · 24h window only')}
+              </span>
                 <div className="space-x-2 text-xs">
                   <button className="text-gray-600 hover:underline" onClick={() => showPreview(t)}>Preview</button>
                   {manage && <button className="text-primary-600 hover:underline" onClick={() => { setEditing(t); setForm(t); }}>Edit</button>}
@@ -115,6 +118,23 @@ const TemplatesPage = () => {
           )}
           <div><label className="label">Body * (HTML allowed for email)</label>
             <textarea className="input font-mono text-xs" rows={8} value={form.body || ''} onChange={(e) => setForm({ ...form, body: e.target.value })} /></div>
+          {form.channel === 'whatsapp' && (
+            <div>
+              <label className="label">Twilio Content SID</label>
+              <input
+                className="input font-mono text-xs"
+                placeholder="HX0123456789abcdef0123456789abcdef"
+                value={form.twilioContentSid || ''}
+                onChange={(e) => setForm({ ...form, twilioContentSid: e.target.value.trim() })}
+              />
+              <p className="mt-1 text-[11px] text-gray-400">
+                From Twilio Console → Messaging → Content Template Builder, after Meta approves the
+                template. Without it this template can only reach people who messaged you in the last
+                24 hours. Keep the placeholders above in the same order as the approved template's
+                {' '}{'{{1}}, {{2}}…'} — they are mapped by position.
+              </p>
+            </div>
+          )}
           {editing?._id && (
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={form.isActive !== false} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />

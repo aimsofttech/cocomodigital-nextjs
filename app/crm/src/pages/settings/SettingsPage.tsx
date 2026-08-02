@@ -69,6 +69,28 @@ const GeneralTab = () => {
           <input type="checkbox" checked={!!s.emailTracking} onChange={(e) => setS('emailTracking', e.target.checked)} />
           Email open tracking pixel
         </label>
+
+        <h3 className="pt-2 text-sm font-semibold">WhatsApp compliance</h3>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" className="mt-1" checked={!!s.automatedWhatsappEnabled}
+            onChange={(e) => setS('automatedWhatsappEnabled', e.target.checked)} />
+          <span>Allow automations to send WhatsApp
+            <span className="block text-xs text-gray-400">
+              Off by default — rules with a send_whatsapp action are skipped, so WhatsApp only goes
+              out when an agent presses Send.
+            </span>
+          </span>
+        </label>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" className="mt-1" checked={!!s.requireExplicitWhatsappOptIn}
+            onChange={(e) => setS('requireExplicitWhatsappOptIn', e.target.checked)} />
+          <span>Require recorded opt-in before sending
+            <span className="block text-xs text-gray-400">
+              Turn on before going live. Blocks WhatsApp to any contact with no recorded opt-in date,
+              which Meta requires you to be able to evidence.
+            </span>
+          </span>
+        </label>
         <button className="btn-primary" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save settings'}</button>
       </div>
 

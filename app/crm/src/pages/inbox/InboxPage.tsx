@@ -47,7 +47,10 @@ const InboxPage = () => {
         subject: active.channel === 'email' ? 'Re: your conversation with Cocoma Digital' : undefined,
       });
       setReply('');
-      toast.success(active.channel === 'whatsapp' ? 'Prepared — open the wa.me link below to send' : 'Sent');
+      // Sends are queued and delivered by the worker, so the provider isn't known
+      // yet: with Twilio configured this goes out automatically, otherwise the
+      // thread shows a wa.me link to open. Don't promise either one here.
+      toast.success('Message queued');
       setTimeout(() => openThread(active), 800);
     } catch (err) { toast.error(errMsg(err)); }
     setBusy(false);

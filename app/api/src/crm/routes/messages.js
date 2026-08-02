@@ -10,10 +10,14 @@ router.use(crmProtect, audit);
 
 // POST /crm/api/messages/send
 router.post('/send', requirePermission('messages:send'), async (req, res) => {
-  const { channel, leadId, contactId, dealId, templateId, subject, body, variables, scheduledFor } = req.body;
+  const { channel, leadId, contactId, dealId, templateId, subject, body, variables,
+    contentSid, contentVariables, scheduledFor } = req.body;
   try {
     const msg = await messaging.sendMessage({
       channel, leadId, contactId, dealId, templateId, subject, body, variables,
+      // WhatsApp only: send an approved Twilio Content template instead of free
+      // text, which is the only thing allowed outside the 24-hour window.
+      contentSid, contentVariables,
       scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
       sentBy: req.crmUser._id,
     });

@@ -160,6 +160,20 @@ const sendMessage = async (opts) => {
     : null;
   if (!body && !contentSid) throw new Error('Message body is empty');
 
+  // Twilio Content templates take positional variables ({{1}}, {{2}}…) while CRM
+  // templates use named ones. Map name → position in the order the placeholders
+  // first appear in the body, so the CRM body doubles as a readable local preview
+  // of the approved template. An explicit contentVariables always wins.
+  let contentVariables = null;
+  if (contentSid) {
+    contentVariables = opts.contentVariables || null;
+    if (!contentVariables && template && (template.variables || []).length) {
+      contentVariables = Object.fromEntries(
+        template.variables.map((v, i) => [String(i + 1), String(vars[v] === undefined || vars[v] === null ? '' : vars[v])])
+      );
+    }
+  }
+
   const msg = await CrmMessage.create({
     channel,
     direction: 'outbound',
@@ -171,7 +185,7 @@ const sendMessage = async (opts) => {
     subject,
     body,
     contentSid,
-    contentVariables: contentSid ? (opts.contentVariables || null) : null,
+    contentVariables,
     mediaUrls: opts.mediaUrls || [],
     status: 'queued',
     sentBy: opts.sentBy || null,
@@ -209,6 +223,18 @@ const deliver = async ({ messageId }) => {
       msg.failReason = 'Blocked by consent / DND settings';
       await msg.save();
       return;
+    }
+
+    // Stricter WhatsApp gate for production: the default-true opt-in flag is not
+    // evidence of anything, so require a recorded opt-in event once enabled.
+    if (msg.channel === 'whatsapp' && !contact.whatsappOptInAt) {
+      const s = await settings.getSettings();
+      if (s.requireExplicitWhatsappOptIn) {
+        pushStatus(msg, 'failed');
+        msg.failReason = 'No recorded WhatsApp opt-in for this contact';
+        await msg.save();
+        return;
+      }
     }
   }
 
@@ -388,6 +414,15 @@ const recordInbound = async (channel, fromPhone, body, raw) => {
     statusHistory: [{ status: 'received', at: new Date(), raw }],
   });
 
+  // A customer messaging us first is opt-in under Meta policy, and it also opens
+  // the 24-hour window — so record it as consent if we don't already have proof.
+  if (contact && channel === 'whatsapp' && !contact.whatsappOptInAt) {
+    contact.whatsappOptIn = true;
+    contact.whatsappOptInAt = new Date();
+    contact.whatsappOptInSource = 'inbound_message';
+    await contact.save();
+  }
+
   const entity = lead ? { kind: 'lead', id: lead._id } : { kind: 'contact', id: contact._id };
   await timeline.record({
     entity,
@@ -415,6 +450,24 @@ const recordInbound = async (channel, fromPhone, body, raw) => {
 
   return msg;
 };
+
+/* ── startup sanity check ───────────────────────────────────────────────── */
+
+// Without a public URL Twilio has nowhere to post delivery receipts or replies,
+// so messages stall at 'sent' and the inbox stays empty. Both symptoms look like
+// a broken integration rather than a missing env var, so say so at boot.
+if (twilioWhatsappConfigured() && !process.env.API_PUBLIC_URL) {
+  logger.warn(
+    'Twilio WhatsApp is configured but API_PUBLIC_URL is empty — delivery statuses ' +
+    'and inbound replies will not be received. Set it to the public HTTPS URL of this API.'
+  );
+}
+if (String(process.env.TWILIO_WHATSAPP_FROM || '').includes('14155238886')) {
+  logger.warn(
+    'TWILIO_WHATSAPP_FROM is the shared Twilio sandbox number — recipients must send ' +
+    '"join <code>" first and sessions expire after 72h. Not usable in production.'
+  );
+}
 
 module.exports = {
   sendMessage, deliver, recordInbound, renderTemplate, buildVars, normalizePhone,

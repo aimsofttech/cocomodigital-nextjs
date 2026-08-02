@@ -90,8 +90,19 @@ router.put('/:id', requirePermission('contacts:update'), async (req, res) => {
 router.patch('/:id/consent', requirePermission('contacts:update'), async (req, res) => {
   const contact = await CrmContact.findOne({ _id: req.params.id, deletedAt: null });
   if (!contact) return notFound(res, 'Contact');
-  const { whatsappOptIn, smsOptIn, emailOptIn, dnd } = req.body;
-  if (whatsappOptIn !== undefined) contact.whatsappOptIn = !!whatsappOptIn;
+  const { whatsappOptIn, smsOptIn, emailOptIn, dnd, whatsappOptInSource } = req.body;
+  if (whatsappOptIn !== undefined) {
+    contact.whatsappOptIn = !!whatsappOptIn;
+    // Stamp when and how consent was obtained — Meta expects a record, and an
+    // opt-out has to clear it so a later re-tick can't inherit the old proof.
+    if (whatsappOptIn) {
+      contact.whatsappOptInAt = new Date();
+      contact.whatsappOptInSource = whatsappOptInSource || 'agent';
+    } else {
+      contact.whatsappOptInAt = undefined;
+      contact.whatsappOptInSource = undefined;
+    }
+  }
   if (smsOptIn !== undefined) contact.smsOptIn = !!smsOptIn;
   if (emailOptIn !== undefined) contact.emailOptIn = !!emailOptIn;
   if (dnd !== undefined) contact.dnd = !!dnd;

@@ -6,9 +6,21 @@
  */
 
 const router = require('express').Router();
+const rateLimit = require('express-rate-limit');
 const { CrmMessage, CrmCall, CrmContact } = require('../models');
 const messaging = require('../services/messaging');
+const { verifyTwilioSignature } = require('../middleware/twilioSignature');
 const logger = require('../../utils/logger');
+
+// The global limiter in server.js only covers /api/, so these public routes
+// would otherwise be unthrottled. The cap sits far above real provider traffic
+// (a 200-recipient bulk send produces ~400 status callbacks) and exists purely
+// to blunt a flood against endpoints that write to the database.
+router.use(rateLimit({
+  windowMs: 60 * 1000,
+  max: 1000,
+  message: 'Too many webhook requests',
+}));
 
 /* ── WhatsApp Cloud API ─────────────────────────────────────────────────── */
 
@@ -58,8 +70,12 @@ router.post('/whatsapp', async (req, res) => {
 
 /* ── Twilio ─────────────────────────────────────────────────────────────── */
 
+// Every Twilio route below is signature-verified: without it anyone who learns
+// the URL could forge inbound messages (auto-creating leads), flip delivery
+// statuses, or POST "STOP" to opt arbitrary contacts out of WhatsApp.
+
 // Inbound SMS (also handles STOP → opt-out).
-router.post('/twilio/sms-inbound', async (req, res) => {
+router.post('/twilio/sms-inbound', verifyTwilioSignature, async (req, res) => {
   res.type('text/xml').send('<Response></Response>');
   try {
     const from = req.body.From;
@@ -78,14 +94,17 @@ router.post('/twilio/sms-inbound', async (req, res) => {
 
 // Inbound WhatsApp via Twilio. Twilio posts form-encoded fields, unlike Meta's
 // JSON webhook above, so it needs its own route (also handles STOP → opt-out).
-router.post('/twilio/whatsapp-inbound', async (req, res) => {
+router.post('/twilio/whatsapp-inbound', verifyTwilioSignature, async (req, res) => {
   res.type('text/xml').send('<Response></Response>');
   try {
     const from = req.body.From || '';        // "whatsapp:+919770601469"
     const body = req.body.Body || '';
     if (/^\s*stop\s*$/i.test(body)) {
       const tail = String(from).replace(/[^\d]/g, '').slice(-10);
-      await CrmContact.updateMany({ phone: new RegExp(`${tail}$`) }, { $set: { whatsappOptIn: false } });
+      await CrmContact.updateMany(
+        { phone: new RegExp(`${tail}$`) },
+        { $set: { whatsappOptIn: false }, $unset: { whatsappOptInAt: '', whatsappOptInSource: '' } }
+      );
       logger.info(`WhatsApp STOP received from ${from} — whatsappOptIn disabled.`);
       return;
     }
@@ -97,7 +116,7 @@ router.post('/twilio/whatsapp-inbound', async (req, res) => {
 
 // Outbound SMS + WhatsApp delivery status (matched on MessageSid, which Twilio
 // sends identically for both channels).
-router.post('/twilio/sms-status', async (req, res) => {
+router.post('/twilio/sms-status', verifyTwilioSignature, async (req, res) => {
   res.sendStatus(200);
   try {
     const msg = await CrmMessage.findOne({ providerMessageId: req.body.MessageSid });
@@ -115,7 +134,7 @@ router.post('/twilio/sms-status', async (req, res) => {
 });
 
 // Voice call status (click-to-call lifecycle).
-router.post('/twilio/call-status', async (req, res) => {
+router.post('/twilio/call-status', verifyTwilioSignature, async (req, res) => {
   res.sendStatus(200);
   try {
     const call = await CrmCall.findOne({ providerCallSid: req.body.CallSid });

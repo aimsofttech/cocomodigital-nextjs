@@ -91,6 +91,15 @@ const contactSchema = new Schema({
   smsOptIn: { type: Boolean, default: true },
   emailOptIn: { type: Boolean, default: true },
   dnd: { type: Boolean, default: false },
+  // Meta requires proof of WhatsApp opt-in, not just a boolean: when it was
+  // given and where it came from. The flag above defaults to true for
+  // convenience, so these two are what actually evidence consent — and what
+  // settings.requireExplicitWhatsappOptIn enforces before any send.
+  whatsappOptInAt: { type: Date },
+  whatsappOptInSource: {
+    type: String,
+    enum: ['form', 'inbound_message', 'agent', 'import', 'contract'],
+  },
 
   address: {
     line1: String, line2: String, city: String, state: String, country: String, pincode: String,
