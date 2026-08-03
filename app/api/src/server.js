@@ -136,7 +136,15 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({
+  limit: '50mb',
+  // Meta signs the raw bytes of its webhook body, so the parsed object cannot
+  // verify it. Captured for that one route only — buffering every request body
+  // at a 50mb limit would be a real memory cost for no benefit.
+  verify: (req, res, buf) => {
+    if (req.originalUrl && req.originalUrl.includes('/webhooks/whatsapp')) req.rawBody = buf;
+  },
+}));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
@@ -233,8 +241,14 @@ app.use('/api/faqs', apiFaqRoutes);
 app.use('/api/group-service/faqs', apiGroupServiceFaqRoutes);
 app.use('/api/job-categories', apiJobCategoryRoutes);
 
-// CRM (self-contained module under src/crm — mounted at /crm/api)
-app.use('/crm/api', require('./crm/routes'));
+// CRM (self-contained module under src/crm — mounted at /crm/api).
+// Also mounted at CRM_PUBLIC_PATH when that differs, because provider webhooks
+// can only reach whatever prefix the reverse proxy forwards to this app.
+{
+  const crmRoutes = require('./crm/routes');
+  const { mountPaths } = require('./crm/publicUrl');
+  for (const mount of mountPaths()) app.use(mount, crmRoutes);
+}
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
@@ -242,9 +256,25 @@ app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+
+// Socket.IO needs the raw HTTP server, so Express can no longer own listen().
+// Same port, same process — the upgrade handshake is routed by path
+// (/crm/socket.io), leaving every existing REST route untouched.
+const http = require('http');
+
+const server = http.createServer(app);
+try {
+  require('./crm/realtime').init(server, { origins: allowedOrigins });
+} catch (err) {
+  // A broken realtime layer must not stop the API from serving requests; the
+  // inbox falls back to its polling refresh.
+  logger.error(`CRM realtime init failed: ${err.message}`);
+}
+
+server.listen(PORT, () => {
   console.log('\n================================');
   console.log(`  API    : http://localhost:${PORT}`);
+  console.log(`  Socket : ws://localhost:${PORT}/crm/socket.io`);
   console.log(`  Mode   : ${process.env.NODE_ENV || 'development'}`);
   console.log('================================\n');
   // Verify SMTP at boot so a misconfiguration surfaces immediately (non-fatal).
@@ -267,3 +297,7 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+// The raw HTTP server, for callers that need to close it or reuse the socket
+// binding (scripts/test-realtime.js). Requiring this module already starts it,
+// so a test must never create a second server on the same port.
+module.exports.httpServer = server;

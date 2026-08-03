@@ -14,6 +14,14 @@ const DEFAULTS = {
   followupEscalateHours: 4,
   automationDailyCapPerEntity: 10,
   defaultCountryCode: '91',
+  // Dialling window for *automated* calls (campaigns, retries, automation
+  // actions). A human clicking "Call" is not restricted — they can see the
+  // clock. Outside this window the campaign runner idles instead of dialling.
+  callWindowStart: '10:00',
+  callWindowEnd: '19:00',
+  // Master switch for robocalling. Off by default: an automated voice campaign
+  // is regulated in most jurisdictions and should be a deliberate opt-in.
+  automatedCallingEnabled: false,
   // WhatsApp goes out only when an agent presses Send. Automation rules with a
   // send_whatsapp action are skipped while this is false. Email/SMS unaffected.
   automatedWhatsappEnabled: false,

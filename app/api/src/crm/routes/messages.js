@@ -4,6 +4,7 @@ const router = require('express').Router();
 const { CrmMessage, CrmLead, CrmContact } = require('../models');
 const { crmProtect, requirePermission, audit } = require('../middleware/crmAuth');
 const messaging = require('../services/messaging');
+const realtime = require('../realtime');
 const { ok, created, bad, notFound, listOf } = require('./_helpers');
 
 router.use(crmProtect, audit);
@@ -102,32 +103,98 @@ router.get('/inbox', requirePermission('messages:read'), async (req, res) => {
   ]);
   const leadMap = Object.fromEntries(leads.map((l) => [String(l._id), l]));
   const contactMap = Object.fromEntries(contacts.map((c) => [String(c._id), c]));
-  return ok(res, threads.map((t) => {
+
+  let list = threads.map((t) => {
     const lm = t.lastMessage;
     const lead = lm.leadId && leadMap[String(lm.leadId)];
     const contact = lm.contactId && contactMap[String(lm.contactId)];
+    const person = lead || contact;
     return {
+      // Must match realtime.threadKey() exactly, or a live update lands in a
+      // conversation the list cannot find.
+      key: `${t._id.channel}:${String(lm.leadId || lm.contactId || 'unknown')}`,
       channel: t._id.channel,
       leadId: lm.leadId || null,
       contactId: lm.contactId || null,
       name: (lead && lead.name) || (contact && `${contact.firstName} ${contact.lastName || ''}`.trim()) || lm.toAddress,
+      phone: (person && person.phone) || null,
       lastMessage: { body: lm.body, direction: lm.direction, status: lm.status, createdAt: lm.createdAt },
       total: t.total,
       unreadInbound: t.unreadInbound,
     };
-  }));
+  });
+
+  // Search across who it is and what was last said. Applied after hydration
+  // because the name lives on the lead/contact, not on the message.
+  if (req.query.q) {
+    const rx = new RegExp(String(req.query.q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    list = list.filter((t) => rx.test(t.name || '') || rx.test(t.phone || '') || rx.test(t.lastMessage.body || ''));
+  }
+  return ok(res, list);
 });
 
-// GET /crm/api/messages/thread?leadId=|contactId=&channel=
+/**
+ * GET /crm/api/messages/thread?leadId=|contactId=&channel=&before=&limit=
+ *
+ * Returns one page of a conversation, oldest-first, newest page by default.
+ * `before` is an ISO date (the createdAt of the oldest message the client
+ * already holds) — pass it to walk backwards through history as the user
+ * scrolls up. A conversation that has run for months would otherwise have to
+ * arrive in one 200-message response, or be silently truncated.
+ */
 router.get('/thread', requirePermission('messages:read'), async (req, res) => {
-  const { leadId, contactId, channel } = req.query;
+  const { leadId, contactId, channel, before } = req.query;
+  if (!leadId && !contactId) return bad(res, 'leadId or contactId is required');
+  const limit = Math.min(Number(req.query.limit) || 50, 200);
+
+  const filter = leadId ? { leadId } : { contactId };
+  if (channel) filter.channel = channel;
+  if (before) {
+    const cursor = new Date(before);
+    if (Number.isNaN(cursor.getTime())) return bad(res, '`before` must be an ISO date');
+    filter.createdAt = { $lt: cursor };
+  }
+
+  // Fetch newest-first so the cursor works, then flip: the UI renders oldest
+  // at the top like every chat app.
+  const page = await CrmMessage.find(filter).sort({ createdAt: -1 }).limit(limit + 1).lean();
+  const hasMore = page.length > limit;
+  const items = page.slice(0, limit).reverse();
+
+  return ok(res, items, {
+    hasMore,
+    // The client passes this straight back as `before` for the next page.
+    nextBefore: items.length ? items[0].createdAt : null,
+  });
+});
+
+/**
+ * POST /crm/api/messages/read  { leadId?, contactId?, channel? }
+ *
+ * Marks the inbound messages in one conversation as read. Explicit rather than
+ * a side effect of fetching the thread: with pagination, loading older history
+ * would otherwise keep re-clearing the unread badge, and one agent scrolling
+ * would clear it for everyone with no record of who actually looked.
+ */
+router.post('/read', requirePermission('messages:read'), async (req, res) => {
+  const { leadId, contactId, channel } = req.body;
   if (!leadId && !contactId) return bad(res, 'leadId or contactId is required');
   const filter = leadId ? { leadId } : { contactId };
   if (channel) filter.channel = channel;
-  const items = await CrmMessage.find(filter).sort({ createdAt: 1 }).limit(200).lean();
-  // Mark inbound as read (replied → keeps 'replied'; 'received' → 'read').
-  await CrmMessage.updateMany({ ...filter, status: 'received' }, { $set: { status: 'read' } });
-  return ok(res, items);
+
+  const unread = await CrmMessage.find({ ...filter, direction: 'inbound', status: 'received' })
+    .select('_id').lean();
+  if (!unread.length) return ok(res, { updated: 0, messageIds: [] });
+
+  const messageIds = unread.map((m) => String(m._id));
+  await CrmMessage.updateMany({ _id: { $in: unread.map((m) => m._id) } }, { $set: { status: 'read' } });
+
+  // Other tabs and other agents drop the badge without a refresh.
+  realtime.emitRead({
+    key: realtime.threadKey({ channel: channel || 'whatsapp', leadId, contactId }),
+    messageIds,
+  });
+  return ok(res, { updated: messageIds.length, messageIds });
 });
 
 // GET /crm/api/messages/:id

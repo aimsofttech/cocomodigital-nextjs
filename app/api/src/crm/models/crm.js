@@ -48,6 +48,11 @@ const leadSchema = new Schema({
   nextFollowUpAt: { type: Date, index: true },
   idleNotifiedAt: { type: Date },
   callAttempts: { type: Number, default: 0 },
+  lastCallAt: { type: Date },
+  // Hard block on outbound dialling. Every call path checks this, so a bulk
+  // campaign cannot reach someone who asked not to be called.
+  doNotCall: { type: Boolean, default: false },
+  doNotCallAt: { type: Date },
   deletedAt: { type: Date, default: null },
 }, { timestamps: true, collection: 'crm_leads' });
 
@@ -91,6 +96,11 @@ const contactSchema = new Schema({
   smsOptIn: { type: Boolean, default: true },
   emailOptIn: { type: Boolean, default: true },
   dnd: { type: Boolean, default: false },
+  // Voice-specific block, separate from `dnd` so a customer can keep receiving
+  // transactional email/SMS while opting out of phone calls only.
+  doNotCall: { type: Boolean, default: false },
+  doNotCallAt: { type: Date },
+  lastCallAt: { type: Date },
   // Meta requires proof of WhatsApp opt-in, not just a boolean: when it was
   // given and where it came from. The flag above defaults to true for
   // convenience, so these two are what actually evidence consent — and what

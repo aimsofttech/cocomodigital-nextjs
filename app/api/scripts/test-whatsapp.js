@@ -22,7 +22,7 @@
 
 require('dotenv').config();
 
-const to = process.argv[2];
+const to = process.argv[2] || process.env.WHATSAPP_TEST_TO;
 const freeText = process.argv[3];
 
 if (!to) {
@@ -53,7 +53,20 @@ if (freeText) {
     process.exit(1);
   }
   params.set('ContentSid', contentSid);
-  params.set('ContentVariables', JSON.stringify({ 1: '12/1', 2: '3pm' }));
+  // Use the configured variables, not a hardcoded pair — otherwise this script
+  // passes while the CRM's own config is wrong, which is the opposite of a test.
+  let vars = { 1: '12/1', 2: '3pm' };
+  const raw = (process.env.TWILIO_WHATSAPP_CONTENT_VARS || '').trim();
+  if (raw) {
+    try {
+      vars = JSON.parse(raw);
+    } catch (e) {
+      console.error(`TWILIO_WHATSAPP_CONTENT_VARS is not valid JSON: ${e.message}`);
+      process.exit(1);
+    }
+  }
+  params.set('ContentVariables', JSON.stringify(vars));
+  console.log(`Sending template ${contentSid} with ${JSON.stringify(vars)}`);
 }
 
 (async () => {

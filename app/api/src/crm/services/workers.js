@@ -11,6 +11,8 @@ const automation = require('./automation');
 const notify = require('./notify');
 const timeline = require('./timeline');
 const settings = require('./settings');
+const twilioVoice = require('./twilioVoice');
+const callEngine = require('./callEngine');
 const {
   CrmCall, CrmFollowUp, CrmTask, CrmLead, CrmUser, CrmSetting,
 } = require('../models');
@@ -21,6 +23,19 @@ const init = () => {
   /* ── one-off job handlers ─────────────────────────────────────────────── */
 
   jobs.define('message:send', messaging.deliver);
+
+  /**
+   * Pull in customer replies the inbound webhook never delivered.
+   *
+   * The webhook remains the fast path — this only catches what it missed, and
+   * recordInbound dedupes on the Twilio SID so the two never double up. It is
+   * what keeps the inbox correct when the sandbox URL is unset, when a tunnel
+   * URL has changed, or during any webhook outage.
+   */
+  jobs.define('messages:reconcile', async () => {
+    const { checked, imported } = await messaging.reconcileInboundWhatsapp();
+    if (imported) logger.warn(`Inbound reconcile: recovered ${imported} of ${checked} replies missed by the webhook.`);
+  });
   jobs.define('automation:event', automation.handleEvent);
   jobs.define('automation:actions', automation.resumeActions);
 
@@ -33,6 +48,89 @@ const init = () => {
       title: `Call with ${who} at ${new Date(call.scheduledAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}`,
       entity: call.leadId ? { kind: 'lead', id: call.leadId._id } : { kind: 'contact', id: call.contactId && call.contactId._id },
     });
+  });
+
+  /* ── Voice ────────────────────────────────────────────────────────────── */
+
+  // Places a call that was queued earlier: a scheduled retry, an automation
+  // action, or a campaign target. Runs on the scheduler rather than in the
+  // request so a failure retries with backoff instead of 500-ing an agent.
+  jobs.define('call:auto-dial', async ({ callId }) => {
+    const call = await CrmCall.findById(callId);
+    if (!call) return;
+    // The lead may have been reached, cancelled or deleted while this waited.
+    if (!['scheduled', 'queued'].includes(call.status)) {
+      logger.info(`Skipping auto-dial for call ${callId}: status is ${call.status}`);
+      return;
+    }
+    if (!twilioVoice.isVoiceReady()) {
+      logger.warn(`Skipping auto-dial for call ${callId}: Twilio Voice is not configured`);
+      return;
+    }
+    // Never wake someone at 3am because a retry timer happened to fire then.
+    if (!(await callEngine.isWithinWindow())) {
+      const at = await callEngine.nextWindowOpening();
+      await jobs.schedule('call:auto-dial', at, { callId: String(call._id) }, {
+        dedupeKey: `call:auto-dial:${call._id}`,
+      });
+      return;
+    }
+    const owner = call.ownerId ? await CrmUser.findById(call.ownerId) : null;
+    await callEngine.startCall({
+      leadId: call.leadId,
+      contactId: call.contactId,
+      dealId: call.dealId,
+      ownerId: call.ownerId,
+      agentUser: owner,
+      mode: call.mode === 'auto' ? 'auto' : 'bridge',
+      scriptId: call.scriptId,
+      campaignId: call.campaignId,
+      attemptNo: call.attemptNo,
+      retryOfId: call.retryOfId,
+      existingCall: call,
+    });
+  });
+
+  // Advances one campaign by up to `concurrency` calls, then re-arms itself.
+  jobs.define('campaign:run', async ({ campaignId }) => {
+    await callEngine.runCampaign(campaignId);
+  });
+
+  /**
+   * Reconciles calls that Twilio never sent a terminal callback for — a dropped
+   * webhook, a deploy mid-call, or a network blip would otherwise leave a row
+   * stuck at "ringing" forever and hold a campaign slot open.
+   */
+  jobs.define('calls:reconcile', async () => {
+    if (!twilioVoice.isVoiceReady()) return;
+    const stuck = await CrmCall.find({
+      provider: 'twilio',
+      providerCallSid: { $nin: [null, ''] },
+      status: { $in: ['queued', 'initiated', 'ringing', 'in_progress'] },
+      // Twilio caps a call at TWILIO_MAX_CALL_SEC; anything older than an hour
+      // beyond that is definitely over.
+      updatedAt: { $lt: new Date(Date.now() - 15 * 60e3) },
+    }).limit(25);
+
+    for (const call of stuck) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const remote = await twilioVoice.fetchCall(call.providerCallSid);
+        const mapped = twilioVoice.mapStatus(remote.status);
+        if (!mapped || !twilioVoice.TERMINAL_STATUSES.has(mapped)) continue;
+        call.status = mapped;
+        call.endedAt = remote.endTime || new Date();
+        call.durationSec = Number(remote.duration) || call.durationSec || 0;
+        if (remote.answeredBy) call.answeredBy = remote.answeredBy;
+        // eslint-disable-next-line no-await-in-loop
+        await call.save();
+        logger.warn(`Reconciled call ${call._id} to "${mapped}" — no webhook was received. Check API_PUBLIC_URL reachability.`);
+        // eslint-disable-next-line no-await-in-loop
+        await callEngine.finalizeCall(call);
+      } catch (err) {
+        logger.error(`Call reconcile failed for ${call._id}: ${err.message}`);
+      }
+    }
   });
 
   jobs.define('followup:reminder', async ({ followUpId }) => {
@@ -180,13 +278,39 @@ const init = () => {
   /* ── start ────────────────────────────────────────────────────────────── */
 
   jobs.start();
-  // Register repeatables (idempotent thanks to dedupe keys).
-  Promise.all([
+
+  // Repeatable registration writes to Mongo, but init() runs from the listen
+  // callback while connectDB() is still in flight — so every boot logged
+  // "Client must be connected before running operations" and the periodic scans
+  // (escalation, idle leads, stuck-call reconcile) never registered at all.
+  // Waiting for the connection is what makes them actually start.
+  const mongoose = require('mongoose');
+  const whenConnected = mongoose.connection.readyState === 1
+    ? Promise.resolve()
+    : new Promise((resolve) => mongoose.connection.once('connected', resolve));
+
+  whenConnected.then(() => Promise.all([
     jobs.every('followups:escalate', 30 * 60e3),
     jobs.every('leads:idle-scan', 60 * 60e3),
     jobs.every('calls:missed-scan', 60 * 60e3),
     jobs.every('digest:daily', 60 * 60e3),
-  ]).catch((err) => logger.error(`CRM repeatable registration failed: ${err.message}`));
+    // Frequent, because a stuck call blocks a campaign slot and shows the agent
+    // a call that looks live when it ended twenty minutes ago.
+    jobs.every('calls:reconcile', 10 * 60e3),
+    // Frequent: this is the only thing standing between a broken webhook and a
+    // customer reply nobody ever sees. One Twilio API call per run.
+    jobs.every('messages:reconcile', Number(process.env.WHATSAPP_RECONCILE_MS) || 30e3),
+  ]))
+    .then(() => logger.info('CRM workers: repeatable jobs registered.'))
+    .catch((err) => logger.error(`CRM repeatable registration failed: ${err.message}`));
+
+  const voice = twilioVoice.readiness();
+  if (voice.ready) {
+    logger.info(`CRM voice: Twilio ready (from ${voice.from}, callbacks → ${voice.publicUrl}).`);
+  } else {
+    logger.warn(`CRM voice: Twilio NOT ready — missing ${voice.missing.join(', ')}. Calls fall back to tel: links.`);
+  }
+  for (const w of voice.warnings) logger.warn(`CRM voice: ${w}`);
 
   logger.info('CRM workers: handlers registered.');
 };

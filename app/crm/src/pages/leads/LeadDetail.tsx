@@ -10,6 +10,7 @@ import api, { get, post, put, patch, errMsg } from '@/services/api';
 import { useAppSelector } from '@/app/hooks';
 import { can } from '@/features/auth/authSlice';
 import { Spinner, Badge, statusColor, Modal, fmtDate } from '@/components/ui';
+import { CallButton, CallHistory, useCallConfig } from '@/components/calls';
 
 const STATUSES = ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'lost', 'junk'];
 
@@ -24,6 +25,9 @@ const LeadDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
+  const callConfig = useCallConfig();
+  // Bumped after a call finishes so the history list refetches.
+  const [callsVersion, setCallsVersion] = useState(0);
   const [lead, setLead] = useState<any>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -214,11 +218,36 @@ const LeadDetail = () => {
             <button className="btn-secondary justify-center" onClick={() => { setMForm({}); setModal('task'); }}>
               <UserPlusIcon className="h-4 w-4" />Task
             </button>
-            {lead.phone && (
-              <a className="btn-secondary col-span-2 justify-center" href={`tel:${lead.phone}`}>
-                <PhoneIcon className="h-4 w-4" />Call now: {lead.phone}
-              </a>
+            {lead.phone && !lead.doNotCall && (
+              <CallButton
+                leadId={lead._id}
+                phone={lead.phone}
+                className="col-span-2"
+                label={callConfig?.voiceReady ? `Call ${lead.phone}` : `Call now: ${lead.phone}`}
+                onFinished={() => { setCallsVersion((v) => v + 1); load(); }}
+              />
             )}
+            {lead.doNotCall && (
+              <p className="col-span-2 rounded bg-red-50 p-2 text-center text-xs text-red-600">
+                Marked Do Not Call — outbound calling is blocked for this lead.
+              </p>
+            )}
+          </div>
+
+          {/* Call history — every attempt, including the ones that failed */}
+          <div className="card p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Call history</h3>
+              {lead.callAttempts ? (
+                <span className="text-xs text-gray-400">{lead.callAttempts} attempt(s)</span>
+              ) : null}
+            </div>
+            <CallHistory
+              key={callsVersion}
+              leadId={lead._id}
+              limit={10}
+              onChanged={() => setCallsVersion((v) => v + 1)}
+            />
           </div>
 
           {/* Upcoming */}

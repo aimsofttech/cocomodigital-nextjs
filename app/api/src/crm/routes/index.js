@@ -12,6 +12,9 @@ const { CrmMessage } = require('../models');
 /* ── Public (no JWT): provider webhooks + email open tracking ───────────── */
 
 router.use('/webhooks', require('./webhooks'));
+// TwiML endpoints Twilio fetches mid-call. Public like the webhooks above, and
+// signature-verified for the same reason.
+router.use('/voice', require('./voice'));
 
 // 1×1 gif email-open tracking pixel.
 const PIXEL = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');

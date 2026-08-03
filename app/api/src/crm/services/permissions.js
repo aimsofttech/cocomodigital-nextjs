@@ -13,6 +13,10 @@ const PERMISSIONS = [
   'companies:read', 'companies:manage',
   'deals:read', 'deals:create', 'deals:update', 'deals:delete', 'pipelines:manage',
   'calls:read', 'calls:create', 'calls:update', 'calls:delete',
+  // Bulk / automated dialling is deliberately separate from calls:create. One
+  // agent placing one call is routine; queueing a thousand robocalls carries
+  // real cost and regulatory exposure, so it is a Manager-and-above action.
+  'calls:bulk', 'calls:recordings',
   'messages:read', 'messages:send',
   'templates:manage',
   'tasks:read', 'tasks:create', 'tasks:update', 'tasks:delete',
@@ -33,7 +37,7 @@ const AGENT = [
   'contacts:read', 'contacts:create', 'contacts:update',
   'companies:read', 'companies:manage',
   'deals:read', 'deals:create', 'deals:update',
-  'calls:read', 'calls:create', 'calls:update',
+  'calls:read', 'calls:create', 'calls:update', 'calls:recordings',
   'messages:read', 'messages:send',
   'tasks:read', 'tasks:create', 'tasks:update',
   'followups:manage',
