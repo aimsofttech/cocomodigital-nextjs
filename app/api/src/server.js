@@ -148,6 +148,32 @@ app.use(express.json({
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
+/**
+ * Short-circuit API requests while the database is unreachable.
+ *
+ * Without this, every request queues in Mongoose's buffer, waits the full 10s
+ * timeout and then fails with `Operation "crm_users.findOne()" buffering timed
+ * out` — a 500 that names an internal driver detail. A login spinner that hangs
+ * for ten seconds and then reports a generic server error is indistinguishable
+ * from a broken build; "database unavailable, retrying" is not.
+ *
+ * Deliberately not applied to /health, which exists precisely to be reachable
+ * when this is the case.
+ */
+app.use((req, res, next) => {
+  if (req.path === '/health') return next();
+  // Only guard the API surfaces; static assets and redirects need no database.
+  const needsDb = req.path.startsWith('/api/') || req.path.startsWith('/admin/api/')
+    || req.path.startsWith('/crm/');
+  if (!needsDb) return next();
+  if (require('mongoose').connection.readyState === 1) return next();
+  return res.status(503).json({
+    status: 'error',
+    message: 'Database unavailable — the API is retrying the connection. Please try again shortly.',
+    code: 'DB_UNAVAILABLE',
+  });
+});
+
 // Admin routes
 const adminBase = '/admin/api';
 app.use(`${adminBase}/auth`, adminAuthRoutes);
@@ -251,7 +277,18 @@ app.use('/api/job-categories', apiJobCategoryRoutes);
 }
 
 // Health check
-app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+app.get('/health', (req, res) => {
+  // The process being up says nothing about whether it can serve data. Report
+  // the database separately so "the API is running but everything 500s" is one
+  // request away from being explained.
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const db = states[require('mongoose').connection.readyState] || 'unknown';
+  return res.status(db === 'connected' ? 200 : 503).json({
+    status: db === 'connected' ? 'ok' : 'degraded',
+    db,
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.use(errorHandler);
 

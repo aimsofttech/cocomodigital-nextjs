@@ -95,7 +95,7 @@ const mask = (s) => (!s ? '(not set)' : `${String(s).slice(0, 6)}…${String(s).
       line(key.ok ? okMark : bad, `API key ${c.apiKeySid}: ${key.ok ? 'works' : `rejected (HTTP ${key.status})`}`);
       line(token.ok ? okMark : bad, `Account auth token: ${token.ok ? 'works' : `rejected (HTTP ${token.status})`}`);
       if (!key.ok && token.ok) {
-        line(warn, 'The API key is the problem — your auth token is fine.',
+        line(warnMark, 'The API key is the problem — your auth token is fine.',
           'Secrets are shown once at creation, so a mis-copied secret is the usual cause. '
           + 'Either recreate the key (Admin → Account management → Keys & credentials → API keys & tokens), '
           + 'or blank TWILIO_API_KEY_SID and TWILIO_API_KEY_SECRET to fall back to the auth token.');

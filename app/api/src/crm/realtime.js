@@ -194,6 +194,37 @@ const emitRead = ({ key, messageIds }) => {
   safeEmit(ROOM_ALL, 'thread:read', { key, messageIds });
 };
 
+/**
+ * A call moved (queued → ringing → in_progress → completed/failed/no_answer).
+ *
+ * Broadcast to every agent rather than just the owner: a call row is visible on
+ * the lead page, the calls list and the dashboard at the same time, and the
+ * previous UI polled every 3 seconds from each of them to find out. Twilio's
+ * status callbacks already tell the server the instant anything changes, so
+ * there is nothing to poll for.
+ */
+const emitCall = (call) => {
+  const payload = {
+    callId: String(call._id),
+    status: call.status,
+    direction: call.direction,
+    mode: call.mode,
+    leadId: call.leadId ? String(call.leadId) : null,
+    contactId: call.contactId ? String(call.contactId) : null,
+    ownerId: call.ownerId ? String(call.ownerId) : null,
+    durationSec: call.durationSec || 0,
+    answeredBy: call.answeredBy || null,
+    errorCode: call.errorCode || null,
+    errorMessage: call.errorMessage || null,
+    recordingUrl: call.recordingUrl || null,
+    scheduledAt: call.scheduledAt || null,
+    autoDial: Boolean(call.autoDial),
+    startedAt: call.startedAt || null,
+    endedAt: call.endedAt || null,
+  };
+  safeEmit(ROOM_ALL, 'call:status', payload);
+};
+
 /** Push a notification to one agent's tabs. */
 const emitToUser = (userId, event, payload) => safeEmit(userRoom(userId), event, payload);
 
@@ -201,5 +232,5 @@ const isReady = () => Boolean(io);
 
 module.exports = {
   init, isReady, threadKey, toWire,
-  emitMessage, emitStatus, emitRead, emitToUser,
+  emitMessage, emitStatus, emitRead, emitCall, emitToUser,
 };

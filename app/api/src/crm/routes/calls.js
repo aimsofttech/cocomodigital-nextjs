@@ -2,7 +2,7 @@
 
 const router = require('express').Router();
 const rateLimit = require('express-rate-limit');
-const { CrmCall, CrmLead, CrmContact, CrmCallCampaign, CrmCallScript } = require('../models');
+const { CrmCall, CrmLead, CrmContact, CrmCallCampaign, CrmCallScript, CrmUser } = require('../models');
 const { crmProtect, requirePermission, scopeFilter, audit } = require('../middleware/crmAuth');
 const timeline = require('../services/timeline');
 const automation = require('../services/automation');
@@ -46,6 +46,76 @@ const scheduleReminder = async (call) => {
   await jobs.schedule('call:reminder', at, { callId: String(call._id) }, { dedupeKey: `call:reminder:${call._id}` });
 };
 
+/**
+ * Arm (or re-arm) the automatic dial for a scheduled call.
+ *
+ * Both jobs are keyed on the call id, so re-arming replaces the pending job
+ * rather than stacking a second one — rescheduling twice must not dial twice.
+ * Because the queue lives in Mongo, an armed call survives a restart: the
+ * poller picks it up from the collection, not from an in-process timer.
+ */
+const scheduleAutoDial = async (call) => {
+  await jobs.cancelByKey(`call:auto-dial:${call._id}`);
+  if (!call.autoDial || !call.scheduledAt || call.status !== 'scheduled') return;
+  await jobs.schedule('call:auto-dial', new Date(call.scheduledAt), { callId: String(call._id) }, {
+    dedupeKey: `call:auto-dial:${call._id}`,
+  });
+};
+
+/**
+ * Everything that has to be true before a call may dial itself, checked while
+ * the person scheduling it still has the dialog open.
+ *
+ * An auto-dial runs inside a background job with nobody watching, so a problem
+ * discovered at fire time leaves no trace but a log line and a phone that never
+ * rang. Reschedule needs this every bit as much as create: it carries the
+ * `autoDial` flag onto a brand-new call, at a brand-new time, and the owner may
+ * have lost their phone number in between.
+ *
+ * Returns null when the call is safe to arm, or { message, status } to reject.
+ */
+const autoDialGuard = async ({ autoDial, when, ownerId }) => {
+  if (!autoDial) return null;
+  // A past auto-dial fires the instant it is queued, which is never what
+  // someone scheduling a call meant. Reminders on past calls are harmless.
+  if (when && when.getTime() < Date.now() - 60e3) {
+    return { message: 'Cannot auto-dial a call scheduled in the past', status: 400 };
+  }
+  if (!tw.isVoiceReady()) {
+    return {
+      message: `Auto-dial needs Twilio Voice configured — missing ${tw.readiness().missing.join(', ')}`,
+      status: 409,
+    };
+  }
+  // Twilio fetches the call audio from API_PUBLIC_URL. Arming a dial against a
+  // host that is already dark schedules a call that will ring and then go
+  // silent — worse than not scheduling it at all.
+  const probe = tw.publicUrlHealth();
+  if (probe && !probe.ok) {
+    return {
+      message: `Auto-dial is unavailable: Twilio cannot reach this server at ${probe.url || 'API_PUBLIC_URL'} `
+        + `(${probe.reason}). Fix API_PUBLIC_URL, or schedule without auto-dial.`,
+      status: 409,
+    };
+  }
+  const s = await settings.getSettings();
+  const owner = await CrmUser.findById(ownerId).select('name phone').lean();
+  if (!tw.toE164(owner && owner.phone, s.defaultCountryCode)) {
+    return {
+      message: `Auto-dial rings ${owner && owner.name ? `${owner.name}'s` : 'the owner\'s'} phone first, but no `
+        + 'phone number is set on that profile. Add one in Settings → Profile, or schedule without auto-dial.',
+      status: 409,
+    };
+  }
+  return null;
+};
+
+/** Stop every pending job for a call that is no longer going to happen. */
+const cancelCallJobs = async (callId) => {
+  await jobs.cancelByKey(`call:reminder:${callId}`);
+  await jobs.cancelByKey(`call:auto-dial:${callId}`);
+};
+
 // GET /crm/api/calls?status=&ownerId=&leadId=&from=&to=
 router.get('/', requirePermission('calls:read'), (req, res) => {
   const filter = { ...scopeFilter(req) };
@@ -75,25 +145,35 @@ router.get('/', requirePermission('calls:read'), (req, res) => {
 
 // POST /crm/api/calls — schedule a call
 router.post('/', requirePermission('calls:create'), async (req, res) => {
-  const { leadId, contactId, dealId, scheduledAt, purpose, durationPlannedMin, reminderMinutesBefore, notes, ownerId } = req.body;
+  const { leadId, contactId, dealId, scheduledAt, purpose, durationPlannedMin,
+    reminderMinutesBefore, notes, ownerId, autoDial } = req.body;
   if (!leadId && !contactId) return bad(res, 'leadId or contactId is required');
   if (!scheduledAt) return bad(res, 'scheduledAt is required');
+
+  const when = new Date(scheduledAt);
+  if (Number.isNaN(when.getTime())) return bad(res, 'scheduledAt is not a valid date');
+  const guard = await autoDialGuard({ autoDial, when, ownerId: ownerId || req.crmUser._id });
+  if (guard) return bad(res, guard.message, guard.status);
+
   const call = await CrmCall.create({
     leadId, contactId, dealId,
     ownerId: ownerId || req.crmUser._id,
     purpose: purpose || 'follow_up',
-    scheduledAt: new Date(scheduledAt),
+    scheduledAt: when,
     durationPlannedMin: durationPlannedMin || 15,
     reminderMinutesBefore: reminderMinutesBefore === undefined ? 15 : reminderMinutesBefore,
     notes,
     status: 'scheduled',
+    autoDial: Boolean(autoDial),
   });
   await scheduleReminder(call);
+  await scheduleAutoDial(call);
   await timeline.record({
     entity: entityOf(call),
     type: 'call.scheduled',
-    title: `Call scheduled for ${new Date(call.scheduledAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
-    meta: { callId: call._id },
+    title: `Call ${call.autoDial ? 'scheduled to dial automatically' : 'scheduled'} for `
+      + `${new Date(call.scheduledAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
+    meta: { callId: call._id, autoDial: call.autoDial },
     actor: { kind: 'user', userId: req.crmUser._id, label: req.crmUser.name },
   });
   return created(res, call, 'Call scheduled');
@@ -144,9 +224,15 @@ router.post('/log', requirePermission('calls:create'), async (req, res) => {
 router.get('/config', requirePermission('calls:read'), async (req, res) => {
   const r = tw.readiness();
   const s = await settings.getSettings();
+  const probe = tw.publicUrlHealth();
   return ok(res, {
-    voiceReady: r.ready,
+    // "Configured" is not "usable". With an unreachable callback host the call
+    // is placed and then goes silent, so the button must not promise Twilio
+    // calling — it degrades to a tel: link like any other unconfigured state.
+    voiceReady: r.ready && !(probe && !probe.ok),
     missing: r.missing,
+    publicUrlReachable: probe ? probe.ok : null,
+    publicUrlError: probe && !probe.ok ? probe.reason : null,
     // Warnings are operational hints (non-HTTPS callback, validation disabled)
     // and are only worth showing to someone who could act on them.
     warnings: req.crmRole && req.crmRole.name === 'Admin' ? r.warnings : [],
@@ -525,22 +611,41 @@ router.patch('/:id/reschedule', requirePermission('calls:update'), async (req, r
   if (!scheduledAt) return bad(res, 'scheduledAt is required');
   const old = await CrmCall.findOne({ _id: req.params.id, ...scopeFilter(req) });
   if (!old) return notFound(res, 'Call');
+  const when = new Date(scheduledAt);
+  if (Number.isNaN(when.getTime())) return bad(res, 'scheduledAt is not a valid date');
+
+  // The flag the NEW call will carry — the body may override what the old one
+  // had. Validate before touching anything, so a rejected reschedule does not
+  // leave the original marked 'rescheduled' with no replacement armed.
+  const autoDial = req.body.autoDial === undefined ? Boolean(old.autoDial) : Boolean(req.body.autoDial);
+  const guard = await autoDialGuard({ autoDial, when, ownerId: old.ownerId || req.crmUser._id });
+  if (guard) return bad(res, guard.message, guard.status);
+
   old.status = 'rescheduled';
   await old.save();
-  await jobs.cancelByKey(`call:reminder:${old._id}`);
+  // The old row keeps its jobs otherwise, and the auto-dial one would still
+  // fire — ringing the customer at the time they were moved away from.
+  await cancelCallJobs(old._id);
+
   const fresh = await CrmCall.create({
     leadId: old.leadId, contactId: old.contactId, dealId: old.dealId,
     ownerId: old.ownerId, purpose: old.purpose,
-    scheduledAt: new Date(scheduledAt),
+    scheduledAt: when,
     durationPlannedMin: old.durationPlannedMin,
     reminderMinutesBefore: old.reminderMinutesBefore,
     notes: old.notes, status: 'scheduled', rescheduledFromId: old._id,
+    // Carry the intent across; `autoDial` in the body can override it.
+    autoDial,
   });
   await scheduleReminder(fresh);
+  await scheduleAutoDial(fresh);
   await timeline.record({
     entity: entityOf(fresh),
     type: 'call.scheduled',
-    title: `Call rescheduled to ${new Date(scheduledAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
+    // Say which of the two things happened. "Rescheduled" alone reads as "a
+    // call will be placed then", and when autoDial is off it will not be.
+    title: `Call rescheduled to ${new Date(scheduledAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`
+      + `${autoDial ? ' — will dial automatically' : ' — reminder only, no call is placed'}`,
     meta: { callId: fresh._id, rescheduledFromId: old._id },
     actor: { kind: 'user', userId: req.crmUser._id, label: req.crmUser.name },
   });
@@ -554,7 +659,16 @@ router.patch('/:id/cancel', requirePermission('calls:update'), async (req, res) 
   if (call.status !== 'scheduled') return bad(res, 'Only scheduled calls can be cancelled');
   call.status = 'cancelled';
   await call.save();
-  await jobs.cancelByKey(`call:reminder:${call._id}`);
+  // Both jobs, not just the reminder — a cancelled call that still auto-dials
+  // is the worst kind of bug: it phones a customer nobody meant to phone.
+  await cancelCallJobs(call._id);
+  await timeline.record({
+    entity: entityOf(call),
+    type: 'call.scheduled',
+    title: 'Scheduled call cancelled',
+    meta: { callId: call._id },
+    actor: { kind: 'user', userId: req.crmUser._id, label: req.crmUser.name },
+  });
   return ok(res, call);
 });
 

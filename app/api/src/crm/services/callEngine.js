@@ -20,6 +20,7 @@ const automation = require('./automation');
 const jobs = require('./jobs');
 const notify = require('./notify');
 const logger = require('../../utils/logger');
+const realtime = require('../realtime');
 
 /* ── Guards ─────────────────────────────────────────────────────────────── */
 
@@ -87,6 +88,35 @@ const resolveTarget = async ({ leadId, contactId, phone }) => {
 /* ── Dialling ───────────────────────────────────────────────────────────── */
 
 /**
+ * Refuse to dial when the call cannot possibly work.
+ *
+ * The reachability half matters as much as the credential half. Twilio fetches
+ * the TwiML from API_PUBLIC_URL the instant the phone is answered — so with a
+ * dead host (a `trycloudflare` tunnel that moved on restart is the usual case)
+ * the call is placed, somebody's phone rings, and they get silence. Refusing up
+ * front turns that into a message naming the actual problem instead of a
+ * mystery call to a customer.
+ */
+const assertVoiceUsable = () => {
+  if (!tw.isVoiceReady()) {
+    const err = new Error('Twilio Voice is not configured');
+    err.userMessage = `Twilio Voice is not ready: missing ${tw.readiness().missing.join(', ')}`;
+    err.statusCode = 503;
+    throw err;
+  }
+  const probe = tw.publicUrlHealth();
+  // `null` means never probed — unknown must not block dialling.
+  if (probe && !probe.ok) {
+    const err = new Error(`API_PUBLIC_URL unreachable: ${probe.reason}`);
+    err.userMessage = `Calls are disabled: Twilio cannot reach this server at ${probe.url || 'API_PUBLIC_URL'} `
+      + `(${probe.reason}). It fetches the call audio from there, so the call would ring and then go silent. `
+      + 'Start your tunnel and set API_PUBLIC_URL to its current URL, then restart the API.';
+    err.statusCode = 503;
+    throw err;
+  }
+};
+
+/**
  * Bridged click-to-call: Twilio rings `agent` first, and only once they answer
  * does our TwiML dial the customer.
  *
@@ -94,17 +124,23 @@ const resolveTarget = async ({ leadId, contactId, phone }) => {
  * is something the agent can fix (bad number, unverified trial number, ...).
  */
 const dialBridge = async ({ call, agentUser }) => {
-  if (!tw.isVoiceReady()) {
-    const err = new Error('Twilio Voice is not configured');
-    err.userMessage = `Twilio Voice is not ready: missing ${tw.readiness().missing.join(', ')}`;
-    err.statusCode = 503;
-    throw err;
-  }
+  assertVoiceUsable();
   const s = await settings.getSettings();
   const agentNumber = tw.toE164(agentUser && agentUser.phone, s.defaultCountryCode);
   if (!agentNumber) {
     const err = new Error('Agent has no phone number');
     err.userMessage = 'Add your phone number to your CRM profile before using click-to-call.';
+    err.statusCode = 400;
+    throw err;
+  }
+  // Bridging a number to itself can never work: Twilio rings the agent, then
+  // dials the customer — the same line — and the second leg lands on busy. Easy
+  // to hit on a trial account, where the one verified number tends to get used
+  // as both the agent's profile phone and the test lead's.
+  if (call.toNumber && agentNumber === call.toNumber) {
+    const err = new Error('Agent and customer are the same number');
+    err.userMessage = 'Your profile phone is the same number as this contact. A bridged call would '
+      + 'dial it twice and the second leg hits busy — use a different number on your profile.';
     err.statusCode = 400;
     throw err;
   }
@@ -117,6 +153,7 @@ const dialBridge = async ({ call, agentUser }) => {
   call.errorCode = null;
   call.errorMessage = null;
   await call.save();
+  realtime.emitCall(call);
 
   try {
     const tcall = await tw.placeCall({
@@ -130,6 +167,7 @@ const dialBridge = async ({ call, agentUser }) => {
     call.providerCallSid = tcall.sid;
     call.status = tw.mapStatus(tcall.status) || 'queued';
     await call.save();
+  realtime.emitCall(call);
     logger.info(`Twilio bridge call ${tcall.sid} queued: agent ${tw.maskPhone(agentNumber)} → ${tw.maskPhone(call.toNumber)}`);
     return call;
   } catch (err) {
@@ -139,6 +177,7 @@ const dialBridge = async ({ call, agentUser }) => {
     call.errorMessage = info.errorMessage;
     call.endedAt = new Date();
     await call.save();
+  realtime.emitCall(call);
     const wrapped = new Error(info.errorMessage);
     wrapped.userMessage = info.errorMessage;
     wrapped.statusCode = 502;
@@ -151,12 +190,7 @@ const dialBridge = async ({ call, agentUser }) => {
  * agent is on the line unless the script transfers.
  */
 const dialAuto = async ({ call }) => {
-  if (!tw.isVoiceReady()) {
-    const err = new Error('Twilio Voice is not configured');
-    err.userMessage = `Twilio Voice is not ready: missing ${tw.readiness().missing.join(', ')}`;
-    err.statusCode = 503;
-    throw err;
-  }
+  assertVoiceUsable();
   const c = tw.cfg();
   call.provider = 'twilio';
   call.mode = 'auto';
@@ -166,6 +200,7 @@ const dialAuto = async ({ call }) => {
   call.errorCode = null;
   call.errorMessage = null;
   await call.save();
+  realtime.emitCall(call);
 
   try {
     const tcall = await tw.placeCall({
@@ -180,6 +215,7 @@ const dialAuto = async ({ call }) => {
     call.providerCallSid = tcall.sid;
     call.status = tw.mapStatus(tcall.status) || 'queued';
     await call.save();
+  realtime.emitCall(call);
     logger.info(`Twilio auto call ${tcall.sid} queued → ${tw.maskPhone(call.toNumber)}`);
     return call;
   } catch (err) {
@@ -189,6 +225,7 @@ const dialAuto = async ({ call }) => {
     call.errorMessage = info.errorMessage;
     call.endedAt = new Date();
     await call.save();
+  realtime.emitCall(call);
     const wrapped = new Error(info.errorMessage);
     wrapped.userMessage = info.errorMessage;
     wrapped.statusCode = 502;
@@ -233,10 +270,27 @@ const startCall = async ({
   });
   call.toNumber = target.e164;
   await call.save();
+  realtime.emitCall(call);
 
-  if (mode === 'auto') return dialAuto({ call });
-  const agent = agentUser || (ownerId ? await CrmUser.findById(ownerId) : null);
-  return dialBridge({ call, agentUser: agent });
+  try {
+    if (mode === 'auto') return await dialAuto({ call });
+    const agent = agentUser || (ownerId ? await CrmUser.findById(ownerId) : null);
+    return await dialBridge({ call, agentUser: agent });
+  } catch (err) {
+    // The pre-flight checks in dialBridge/dialAuto (no agent number, Twilio not
+    // configured, self-bridge) reject *before* either function touches the row.
+    // Without this the call created above stayed at "queued" forever, with no
+    // SID and no reason recorded — the agent saw a call that looked pending and
+    // the history never explained why nothing happened.
+    if (call.status === 'queued' && !call.providerCallSid) {
+      call.status = 'failed';
+      call.errorMessage = err.userMessage || err.message;
+      call.endedAt = new Date();
+      await call.save().catch(() => {});
+      realtime.emitCall(call);
+    }
+    throw err;
+  }
 };
 
 /* ── Retries ────────────────────────────────────────────────────────────── */
@@ -454,6 +508,7 @@ module.exports = {
   isWithinWindow,
   nextWindowOpening,
   resolveTarget,
+  assertVoiceUsable,
   dialBridge,
   dialAuto,
   startCall,

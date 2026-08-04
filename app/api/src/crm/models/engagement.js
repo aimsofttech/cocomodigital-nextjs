@@ -57,6 +57,16 @@ const callSchema = new Schema({
    * than a mutation of it. Keeping every attempt lets the history show what
    * actually happened instead of only the last outcome. */
   attemptNo: { type: Number, default: 1 },
+  /**
+   * Dial this automatically when scheduledAt arrives.
+   *
+   * Scheduling a call used to arm a *reminder* only — a notification telling
+   * the agent to dial by hand. That is a different feature from "place the
+   * call at 3pm", and the absence of this flag is why scheduled calls never
+   * rang anyone. Defaults to false so existing scheduled calls keep behaving
+   * exactly as they do today.
+   */
+  autoDial: { type: Boolean, default: false },
   retryOfId: { type: Schema.Types.ObjectId, ref: 'CrmCall', index: true, sparse: true },
   retryScheduledAt: { type: Date },
 

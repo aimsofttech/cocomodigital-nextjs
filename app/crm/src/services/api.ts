@@ -28,7 +28,15 @@ api.interceptors.response.use(
       localStorage.removeItem('cocoma_crm_token');
       localStorage.removeItem('cocoma_crm_user');
       window.dispatchEvent(new CustomEvent('auth:logout'));
-    } else if (error.response?.status === 500) {
+    } else if (error.response?.data?.code === 'DB_UNAVAILABLE') {
+      // A specific, recoverable cause — say so rather than "server error",
+      // which sends people looking for a bug that is not there.
+      toast.error('Database unavailable. The server is reconnecting — try again in a moment.', {
+        id: 'db-unavailable',   // one toast, however many requests fail
+      });
+    } else if (!error.response) {
+      toast.error('Cannot reach the API. Is the server running?', { id: 'api-unreachable' });
+    } else if (error.response.status >= 500) {
       toast.error('Server error. Please try again.');
     }
     return Promise.reject(error);

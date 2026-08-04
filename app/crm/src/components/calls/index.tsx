@@ -6,13 +6,30 @@ import {
   ExclamationTriangleIcon, SpeakerWaveIcon,
 } from '@heroicons/react/24/outline';
 import api, { get, post, errMsg } from '@/services/api';
+import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { Badge, Empty, Spinner, fmtDate } from '@/components/ui';
+
+/** Payload of the server's `call:status` event. */
+export interface CallStatusEvent {
+  callId: string;
+  status: string;
+  durationSec?: number;
+  errorMessage?: string | null;
+  answeredBy?: string | null;
+  leadId?: string | null;
+  contactId?: string | null;
+  autoDial?: boolean;
+  scheduledAt?: string | null;
+}
 
 /* ── Shared types ───────────────────────────────────────────────────────── */
 
 export interface CallConfig {
   voiceReady: boolean;
   missing: string[];
+  /** null when never probed. false means Twilio cannot reach this server. */
+  publicUrlReachable: boolean | null;
+  publicUrlError: string | null;
   warnings: string[];
   fromNumber: string | null;
   agentPhoneSet: boolean;
@@ -95,7 +112,8 @@ export const useCallConfig = () => {
         // A failed config lookup must not disable calling entirely — fall back
         // to the manual tel: path, which always works.
         const fallback: CallConfig = {
-          voiceReady: false, missing: [], warnings: [], fromNumber: null,
+          voiceReady: false, missing: [], publicUrlReachable: null, publicUrlError: null,
+          warnings: [], fromNumber: null,
           agentPhoneSet: false, recordingEnabled: false,
           automatedCallingEnabled: false, callWindow: { start: '', end: '' },
         };
@@ -202,6 +220,24 @@ export const CallButton = ({
 
   useEffect(() => stopPolling, [stopPolling]);
 
+  /**
+   * Twilio's status callbacks reach the server the instant anything changes, so
+   * the live call updates over the socket. Polling below stays only as a
+   * fallback for when the socket is down — without it a dropped connection
+   * would leave the button stuck on "Connecting…" for the whole call.
+   */
+  useRealtimeEvent<CallStatusEvent>('call:status', (ev) => {
+    if (!live || ev.callId !== live._id) return;
+    setLive((prev) => (prev ? { ...prev, ...ev, _id: prev._id } as CallRecord : prev));
+    if (!isLive(ev.status)) {
+      stopPolling();
+      setLive(null);
+      if (ev.status === 'completed') toast.success(`Call completed — ${fmtDuration(ev.durationSec)}`);
+      else toast.error(`Call ${ev.status.replace('_', ' ')}${ev.errorMessage ? `: ${ev.errorMessage}` : ''}`);
+      onFinished?.();
+    }
+  });
+
   /** Follow one call to a terminal state, then hand control back to the page. */
   const poll = useCallback((id: string) => {
     stopPolling();
@@ -223,8 +259,10 @@ export const CallButton = ({
         }
       } catch { /* a transient poll failure is not worth surfacing */ }
       // Stop after ~10 minutes; the reconcile worker settles anything longer.
-      if (ticks > 200) { stopPolling(); setLive(null); onFinished?.(); }
-    }, 3000);
+      if (ticks > 75) { stopPolling(); setLive(null); onFinished?.(); }
+      // 8s, not 3s: this is now a backstop behind the socket, not the primary
+      // way status arrives.
+    }, 8000);
   }, [onFinished, stopPolling]);
 
   const startCall = async () => {
@@ -267,18 +305,24 @@ export const CallButton = ({
     );
   }
 
-  // Twilio is live but this agent has no phone on file: the call would fail at
-  // Twilio with a confusing error, so say so up front.
+  // Twilio is live but this agent has no phone on file.
+  //
+  // Click-to-call is a *bridge*: Twilio rings the agent first, then dials the
+  // customer and joins the two legs. With no agent number there is nothing to
+  // ring, so the button silently degrades to a tel: link — which never reaches
+  // the backend, and is why no call ever appears in Twilio. Say that, and link
+  // straight to the field that fixes it.
   if (config?.voiceReady && !config.agentPhoneSet) {
     return (
-      <a
-        href={phone ? `tel:${phone}` : undefined}
-        className={clsx('btn-secondary justify-center', className)}
-        title="Add your phone number in Settings → Profile to enable click-to-call"
-      >
-        <PhoneIcon className="h-4 w-4" />
-        {label || 'Call'} (add your number for click-to-call)
-      </a>
+      <div className={clsx('flex flex-col gap-1', className)}>
+        <a href={phone ? `tel:${phone}` : undefined} className="btn-secondary justify-center">
+          <PhoneIcon className="h-4 w-4" />
+          {label || 'Call'} — opens your dialler
+        </a>
+        <a href="/crm/settings" className="text-[11px] text-primary-600 hover:underline">
+          Add your phone in Settings → Profile to enable click-to-call →
+        </a>
+      </div>
     );
   }
 
@@ -321,6 +365,22 @@ export const CallHistory = ({
   }, [leadId, contactId, limit]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Keep the history live. A scheduled auto-dial fires with nobody watching the
+  // button that started it, so without this the row still says "scheduled"
+  // while the customer's phone is ringing.
+  useRealtimeEvent<CallStatusEvent>('call:status', (ev) => {
+    const mine = (leadId && ev.leadId === leadId) || (contactId && ev.contactId === contactId);
+    if (!mine) return;
+    setItems((prev) => {
+      const known = prev.some((c) => c._id === ev.callId);
+      // A brand-new call for this lead (auto-dial, retry, inbound) is not in the
+      // list yet — refetch rather than invent a half-populated row.
+      if (!known) { load(); return prev; }
+      return prev.map((c) => (c._id === ev.callId ? { ...c, ...ev, _id: c._id } as CallRecord : c));
+    });
+    onChanged?.();
+  });
 
   const retry = async (call: CallRecord, now: boolean) => {
     setRetrying(call._id);
@@ -410,6 +470,16 @@ export const VoiceSetupBanner = () => {
       {!config.voiceReady && !!config.missing.length && (
         <p className="mt-1">
           Missing: <code>{config.missing.join(', ')}</code>. Calls fall back to opening your phone dialler.
+        </p>
+      )}
+      {/* The commonest cause in development, and the one that used to be
+          invisible: everything is configured, but the tunnel host in
+          API_PUBLIC_URL has moved, so Twilio cannot fetch the call audio. */}
+      {config.publicUrlReachable === false && (
+        <p className="mt-1">
+          Twilio cannot reach this server ({config.publicUrlError}). It fetches the call audio from{' '}
+          <code>API_PUBLIC_URL</code>, so a call would ring and then go silent. Restart your tunnel,
+          point <code>API_PUBLIC_URL</code> at its current URL and restart the API.
         </p>
       )}
       {config.warnings.map((w) => <p key={w} className="mt-1">{w}</p>)}

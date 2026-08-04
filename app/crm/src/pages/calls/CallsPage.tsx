@@ -93,8 +93,11 @@ const CallsTab = () => {
     if (!mForm.scheduledAt) return toast.error('Pick a new time');
     setBusy(true);
     try {
-      await patch(`/crm/api/calls/${reschedModal._id}/reschedule`, { scheduledAt: mForm.scheduledAt });
-      toast.success('Rescheduled');
+      await patch(`/crm/api/calls/${reschedModal._id}/reschedule`, {
+        scheduledAt: mForm.scheduledAt,
+        autoDial: Boolean(mForm.autoDial),
+      });
+      toast.success(mForm.autoDial ? 'Rescheduled — it will dial automatically' : 'Rescheduled — reminder only');
       setReschedModal(null); setMForm({});
       load();
     } catch (err) { toast.error(errMsg(err)); }
@@ -235,6 +238,27 @@ const CallsTab = () => {
       <Modal open={!!reschedModal} onClose={() => setReschedModal(null)} title="Reschedule call">
         <label className="label">New time *</label>
         <input type="datetime-local" className="input" onChange={(e) => setMForm({ ...mForm, scheduledAt: e.target.value })} />
+        {/* Rescheduling used to silently inherit the original call's autoDial
+            flag, which is false by default — so moving a call to a new time
+            produced a reminder and nothing else, and the phone never rang at
+            the new time either. Make the choice visible and explicit. */}
+        <label className="mt-3 flex items-start gap-2 rounded-lg bg-gray-50 p-2.5">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={Boolean(mForm.autoDial)}
+            onChange={(e) => setMForm({ ...mForm, autoDial: e.target.checked })}
+          />
+          <span className="text-xs text-gray-600">
+            <b className="text-gray-800">Dial automatically at the new time</b><br />
+            Your phone rings first, then we connect the lead.
+          </span>
+        </label>
+        {!mForm.autoDial && (
+          <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-xs text-amber-800">
+            No call will be placed at the new time — you will only get a reminder and dial the lead yourself.
+          </p>
+        )}
         <div className="mt-4 flex justify-end gap-2">
           <button className="btn-secondary" onClick={() => setReschedModal(null)}>Cancel</button>
           <button className="btn-primary" onClick={submitReschedule} disabled={busy}>{busy ? 'Saving…' : 'Reschedule'}</button>

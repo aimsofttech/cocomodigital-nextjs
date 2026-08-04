@@ -104,7 +104,10 @@ const LeadDetail = () => {
     setBusy(true);
     try {
       if (modal === 'call') {
-        await post('/crm/api/calls', { leadId: id, scheduledAt: mForm.scheduledAt, purpose: mForm.purpose || 'follow_up', notes: mForm.notes });
+        await post('/crm/api/calls', {
+          leadId: id, scheduledAt: mForm.scheduledAt, purpose: mForm.purpose || 'follow_up',
+          notes: mForm.notes, autoDial: Boolean(mForm.autoDial),
+        });
         toast.success('Call scheduled');
       } else if (modal === 'logcall') {
         await post('/crm/api/calls/log', { leadId: id, status: mForm.status || 'completed', outcome: mForm.outcome || undefined, durationSec: Number(mForm.durationMin || 0) * 60, notes: mForm.notes });
@@ -355,6 +358,26 @@ const LeadDetail = () => {
             </select></div>
           <div><label className="label">Notes</label>
             <textarea className="input" rows={2} onChange={(e) => setMForm({ ...mForm, notes: e.target.value })} /></div>
+          <label className="flex items-start gap-2 rounded-lg bg-gray-50 p-2.5">
+            <input
+              type="checkbox" className="mt-0.5"
+              checked={Boolean(mForm.autoDial)}
+              onChange={(e) => setMForm({ ...mForm, autoDial: e.target.checked })}
+            />
+            <span className="text-xs text-gray-600">
+              <b className="text-gray-800">Dial automatically at that time</b><br />
+              Your phone rings first, then we connect the lead. Leave unchecked to
+              just get a reminder and dial yourself.
+            </span>
+          </label>
+          {/* Without this, "Call scheduled" reads as "a call will be placed" — it
+              does not, and the difference only shows up as a phone that never rings. */}
+          {!mForm.autoDial && (
+            <p className="rounded-lg bg-amber-50 px-2.5 py-2 text-xs text-amber-800">
+              No call will be placed. You will get a reminder
+              {mForm.scheduledAt ? '' : ' before the scheduled time'} and dial the lead yourself.
+            </p>
+          )}
         </div>
         <ModalActions onCancel={() => setModal('')} onOk={submitModal} busy={busy} okLabel="Schedule" />
       </Modal>

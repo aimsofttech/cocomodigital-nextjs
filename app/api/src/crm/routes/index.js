@@ -16,6 +16,20 @@ router.use('/webhooks', require('./webhooks'));
 // signature-verified for the same reason.
 router.use('/voice', require('./voice'));
 
+/**
+ * Reachability probe, deliberately mounted INSIDE the CRM router.
+ *
+ * The question worth answering is not "does the origin respond" but "can Twilio
+ * reach the exact prefix every callback URL is built from". Those differ in
+ * production: the app's own /health lives at the server root, while the reverse
+ * proxy on cocomadigital.com forwards only /api/* to this Express app — so a
+ * root probe would 404 against the Next.js site even though callbacks work
+ * perfectly. Probing here rides the same path as the callbacks themselves, so a
+ * pass means the callbacks will land. Unauthenticated by design: Twilio does
+ * not send a JWT, and neither can the probe.
+ */
+router.get('/health', (req, res) => res.json({ status: 'ok', service: 'crm', at: new Date().toISOString() }));
+
 // 1×1 gif email-open tracking pixel.
 const PIXEL = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
 router.get('/t/open/:msgId', async (req, res) => {

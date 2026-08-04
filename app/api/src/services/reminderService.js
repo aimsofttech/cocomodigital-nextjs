@@ -41,6 +41,10 @@ const runOnce = async () => {
 const startReminderPoller = () => {
   if (timer) return;
   timer = setInterval(() => {
+    // Every query in here would sit in Mongoose's buffer and time out while the
+    // database is unreachable, logging an error a minute for a condition that
+    // is already being reported by the connection retry itself.
+    if (require('mongoose').connection.readyState !== 1) return;
     runOnce().catch((err) => logger.error(`Reminder poller: tick failed: ${err.message}`));
   }, POLL_INTERVAL_MS);
   logger.info('Meeting reminders: poller started (checks every 60s for meetings starting in ~1 hour).');

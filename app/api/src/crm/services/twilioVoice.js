@@ -33,7 +33,12 @@ const cfg = () => ({
     || 'This call may be recorded for quality and training purposes.',
   machineDetection: process.env.TWILIO_MACHINE_DETECTION !== 'false',
   callTimeoutSec: Number(process.env.TWILIO_CALL_TIMEOUT_SEC || 30),
-  maxCallSec: Number(process.env.TWILIO_MAX_CALL_SEC || 3600),
+  // Hard stop on a runaway call. Twilio caps this per account rather than at a
+  // fixed maximum — a trial account rejects anything above 899s with error
+  // 13216 and refuses to place the call at all. 899 is therefore the safe
+  // default: it works on trial and paid alike, and createCall() drops the
+  // parameter entirely if an account caps it even lower.
+  maxCallSec: Number(process.env.TWILIO_MAX_CALL_SEC || 899),
 });
 
 /** REST credentials are usable; note this says nothing about *voice* being set up. */
@@ -69,8 +74,91 @@ const readiness = () => {
   if (process.env.TWILIO_VALIDATE_WEBHOOKS === 'false') {
     warnings.push('TWILIO_VALIDATE_WEBHOOKS=false — webhook signatures are NOT being verified. Never ship this.');
   }
-  return { ready: missing.length === 0, missing, warnings, from: c.from, publicUrl: c.publicUrl };
+  if (apiKeyDemoted) {
+    warnings.push(`TWILIO_API_KEY_SID ${c.apiKeySid} is rejected by Twilio — running on TWILIO_AUTH_TOKEN instead. Recreate the key or blank both API-key variables.`);
+  }
+  if (lastProbe && !lastProbe.ok) {
+    warnings.push(`API_PUBLIC_URL is unreachable (${lastProbe.reason}) — Twilio cannot fetch call TwiML or deliver status callbacks.`);
+  }
+  return {
+    ready: missing.length === 0,
+    missing,
+    warnings,
+    from: c.from,
+    publicUrl: c.publicUrl,
+    publicUrlReachable: lastProbe ? lastProbe.ok : null,
+  };
 };
+
+/**
+ * Actually try to reach API_PUBLIC_URL from the outside.
+ *
+ * readiness() only checks the variable is set and looks like HTTPS, so a stale
+ * tunnel URL — the usual state of a `trycloudflare` host after a restart —
+ * passes as "voice ready" while every call dies the moment Twilio tries to
+ * fetch the TwiML. Twilio fetches this host for TwiML *and* posts every status
+ * callback to it, so if it is dark, calling is broken no matter what else is
+ * configured. Probed at boot, reported, never fatal.
+ */
+/**
+ * Result of the most recent probe, so every caller shares one answer instead of
+ * re-probing (which would add seconds of latency to placing a call). `null`
+ * until the first probe completes — never treated as a failure, because
+ * "unknown" must not block calling.
+ */
+let lastProbe = null;
+
+const probePublicUrl = async ({ timeoutMs = 8000 } = {}) => {
+  const c = cfg();
+  if (!c.publicUrl) {
+    lastProbe = { ok: false, reason: 'API_PUBLIC_URL is not set', at: new Date() };
+    return lastProbe;
+  }
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  // Probe the CRM prefix, not the origin root. Every callback URL is built from
+  // this prefix, and in production it is the ONLY part of this app the reverse
+  // proxy forwards — the server-root /health belongs to the Next.js site there,
+  // so probing it would report calling as broken while it works fine.
+  const target = url('/health');
+  try {
+    const res = await fetch(target, { method: 'GET', signal: ctrl.signal });
+    lastProbe = res.ok
+      ? { ok: true, url: target, at: new Date() }
+      : { ok: false, reason: `responded HTTP ${res.status}`, url: target, at: new Date() };
+    return lastProbe;
+  } catch (err) {
+    const reason = err.name === 'AbortError' ? `no response in ${timeoutMs / 1000}s` : err.message;
+    lastProbe = { ok: false, reason, url: target, at: new Date() };
+    return lastProbe;
+  } finally {
+    clearTimeout(t);
+  }
+};
+
+/**
+ * Last known reachability of API_PUBLIC_URL.
+ *
+ * Twilio fetches the call's TwiML from this host the moment the phone is
+ * answered, and posts every status callback to it. When it is dark, a placed
+ * call still rings — then drops the answerer into dead air and never reports a
+ * status, which reads to an agent as "calling is broken" with nothing in the
+ * logs to say why. A tunnel URL that changes on every restart makes this the
+ * normal state in development, not an edge case.
+ */
+const publicUrlHealth = () => lastProbe;
+
+/**
+ * Set once an API key has been proven bad, so we stop preferring it.
+ *
+ * An API key secret is displayed exactly once at creation, so a mis-copied or
+ * rotated secret is the single most common Twilio misconfiguration — and the
+ * most damaging, because the key takes priority over the account auth token.
+ * A dead key therefore *masks* a perfectly working token and every REST call
+ * dies with 20003 "Authenticate", while readiness() still reports voice ready.
+ * Demoting lets calling carry on with the token instead of failing outright.
+ */
+let apiKeyDemoted = false;
 
 /**
  * Which username/password pair to authenticate REST calls with.
@@ -82,9 +170,15 @@ const readiness = () => {
  */
 const restCredentials = () => {
   const c = cfg();
-  return c.apiKeySid && c.apiKeySecret
+  return c.apiKeySid && c.apiKeySecret && !apiKeyDemoted
     ? { user: c.apiKeySid, pass: c.apiKeySecret }
     : { user: c.accountSid, pass: c.authToken };
+};
+
+/** True when an API key is configured and still being preferred. */
+const usingApiKey = () => {
+  const c = cfg();
+  return Boolean(c.apiKeySid && c.apiKeySecret && !apiKeyDemoted);
 };
 
 let client = null;
@@ -100,6 +194,57 @@ const getClient = () => {
 
 /** Reset the memoised client — used after a settings change or in tests. */
 const resetClient = () => { client = null; };
+
+/**
+ * Stop using the API key and rebuild the client on the account auth token.
+ * Returns false when there is no token to fall back to.
+ */
+const demoteApiKey = (reason) => {
+  const c = cfg();
+  if (apiKeyDemoted || !c.authToken) return false;
+  apiKeyDemoted = true;
+  resetClient();
+  logger.error(
+    `Twilio API key ${c.apiKeySid} was rejected (${reason}). Falling back to TWILIO_AUTH_TOKEN so calling `
+    + 'keeps working. Fix it properly: an API key secret is shown only once, so recreate the key in '
+    + 'Console → Account → API keys & tokens and update TWILIO_API_KEY_SECRET, or blank both '
+    + 'TWILIO_API_KEY_SID and TWILIO_API_KEY_SECRET in .env.'
+  );
+  return true;
+};
+
+/**
+ * Prove the configured REST credentials actually authenticate.
+ *
+ * readiness() only checks the variables are *present*. A rejected API key looks
+ * identical to a working one until the first call is placed, at which point the
+ * agent gets an opaque "Twilio authentication failed" and the call never
+ * reaches Twilio at all. Probing at boot converts that into one clear log line
+ * — and demotes a dead key so calling still works.
+ */
+const verifyCredentials = async () => {
+  const c = cfg();
+  if (!hasCredentials()) return { ok: false, reason: 'not configured' };
+  const probe = async () => {
+    const { user, pass } = restCredentials();
+    const auth = Buffer.from(`${user}:${pass}`).toString('base64');
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${c.accountSid}.json`, {
+      headers: { Authorization: `Basic ${auth}` },
+    });
+    return res.status;
+  };
+  try {
+    let status = await probe();
+    if (status === 401 && usingApiKey() && demoteApiKey('HTTP 401')) {
+      status = await probe();
+      if (status < 400) return { ok: true, credential: 'auth_token', demoted: true };
+    }
+    if (status < 400) return { ok: true, credential: usingApiKey() ? 'api_key' : 'auth_token' };
+    return { ok: false, reason: `HTTP ${status}`, credential: usingApiKey() ? 'api_key' : 'auth_token' };
+  } catch (err) {
+    return { ok: false, reason: err.message };
+  }
+};
 
 /* ── URLs ───────────────────────────────────────────────────────────────── */
 
@@ -238,6 +383,42 @@ const withRetry = async (fn, { attempts = 3, baseDelayMs = 500 } = {}) => {
  * *agent*, and the customer is dialled by the TwiML at `twimlUrl`; for an
  * automated call it is the customer directly.
  */
+/**
+ * Create the call, surviving an over-long TimeLimit.
+ *
+ * TimeLimit has no fixed maximum — Twilio caps it per account, and on a trial
+ * account the ceiling is 899s (15 minutes). Anything above it is rejected with
+ * 13216 *before the call is placed*, so a single wrong env var silently breaks
+ * every outbound call: `TWILIO_MAX_CALL_SEC=3600` did exactly that here.
+ *
+ * TimeLimit is only a safety cap on runaway calls, never something the call
+ * needs in order to connect. So when Twilio refuses the value, drop it and
+ * place the call anyway rather than failing the agent for a tuning parameter.
+ */
+const createCall = async (params) => {
+  try {
+    return await getClient().calls.create(params);
+  } catch (err) {
+    // A rejected API key masks a working auth token and kills every call with
+    // an opaque 20003. Demote and place the call on the token rather than
+    // losing the agent's call to a credential they cannot see.
+    if (err && (Number(err.code) === 20003 || err.status === 401)
+      && usingApiKey() && demoteApiKey(`error ${err.code || err.status} while placing a call`)) {
+      return getClient().calls.create(params);
+    }
+    if (err && err.code === 13216 && params.timeLimit) {
+      logger.warn(
+        `Twilio rejected TimeLimit=${params.timeLimit} (13216) — this account caps it lower `
+        + '(trial accounts allow at most 899s). Placing the call without a time limit. '
+        + 'Set TWILIO_MAX_CALL_SEC to 899 or less to remove this retry.'
+      );
+      const { timeLimit, ...rest } = params;
+      return getClient().calls.create(rest);
+    }
+    throw err;
+  }
+};
+
 const placeCall = async ({ to, twimlUrl, statusCallback, machineDetection = false, timeoutSec, record = false }) => {
   const c = cfg();
   const params = {
@@ -271,7 +452,7 @@ const placeCall = async ({ to, twimlUrl, statusCallback, machineDetection = fals
     params.machineDetectionTimeout = 15;
     params.asyncAmd = 'false';
   }
-  return withRetry(() => getClient().calls.create(params));
+  return withRetry(() => createCall(params));
 };
 
 /** Hang up / cancel a call that is still queued, ringing or in progress. */
@@ -515,6 +696,10 @@ module.exports = {
   hasCredentials,
   isVoiceReady,
   readiness,
+  probePublicUrl,
+  publicUrlHealth,
+  verifyCredentials,
+  usingApiKey,
   getClient,
   resetClient,
   URLS,

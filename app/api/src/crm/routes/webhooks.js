@@ -293,6 +293,7 @@ router.post('/twilio/call-status', verifyTwilioSignature, async (req, res) => {
       call.recordingDurationSec = Number(req.body.RecordingDuration) || call.recordingDurationSec;
       if (!call.durationSec) call.durationSec = Number(req.body.RecordingDuration) || 0;
       await call.save();
+    realtime.emitCall(call);
       return;
     }
 
@@ -322,6 +323,7 @@ router.post('/twilio/call-status', verifyTwilioSignature, async (req, res) => {
     if (!tw.TERMINAL_STATUSES.has(mapped)) {
       if (!childIsAuthoritative) call.status = mapped;
       await call.save();
+    realtime.emitCall(call);
       return;
     }
 
@@ -338,6 +340,7 @@ router.post('/twilio/call-status', verifyTwilioSignature, async (req, res) => {
     }
     call.endedAt = new Date();
     await call.save();
+    realtime.emitCall(call);
 
     await engine.finalizeCall(call);
 
@@ -381,6 +384,7 @@ router.post('/twilio/dial-status/:callId', verifyTwilioSignature, async (req, re
       }
     }
     await call.save();
+    realtime.emitCall(call);
   } catch (err) {
     logger.error(`Twilio dial status error: ${err.message}`);
   }
@@ -417,6 +421,7 @@ router.post('/twilio/recording-status', verifyTwilioSignature, async (req, res) 
     call.recordingUrl = tw.URLS.recordingProxy(call._id);
     if (!call.durationSec) call.durationSec = call.recordingDurationSec;
     await call.save();
+    realtime.emitCall(call);
     logger.info(`Recording ${req.body.RecordingSid} stored for call ${call._id} (${call.recordingDurationSec}s)`);
   } catch (err) {
     logger.error(`Twilio recording status error: ${err.message}`);

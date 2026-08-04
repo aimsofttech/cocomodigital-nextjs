@@ -19,6 +19,28 @@ const {
 const mailer = require('../../services/mailer');
 const logger = require('../../utils/logger');
 
+/**
+ * Probe API_PUBLIC_URL and log the verdict.
+ *
+ * Re-run on a timer, not only at boot: in development that host is a tunnel
+ * whose URL changes every time it restarts, so a boot-only check goes stale
+ * within the hour and callEngine would keep refusing (or keep allowing) calls
+ * on an answer from hours ago.
+ */
+const probeVoiceHost = () => twilioVoice.probePublicUrl()
+  .then((probe) => {
+    if (probe.ok) logger.info(`CRM voice: API_PUBLIC_URL is reachable (${probe.url}).`);
+    else {
+      logger.error(
+        `CRM voice: API_PUBLIC_URL is NOT reachable — ${probe.reason} (${probe.url}). `
+        + 'Twilio cannot fetch call TwiML or deliver status callbacks, so calls will not '
+        + 'connect. Start your tunnel and set API_PUBLIC_URL to its current URL.'
+      );
+    }
+    return probe;
+  })
+  .catch(() => null);
+
 const init = () => {
   /* ── one-off job handlers ─────────────────────────────────────────────── */
 
@@ -96,12 +118,38 @@ const init = () => {
     await callEngine.runCampaign(campaignId);
   });
 
+  // Keeps the reachability verdict fresh — see probeVoiceHost above.
+  jobs.define('voice:probe', async () => {
+    if (!twilioVoice.isVoiceReady()) return;
+    await probeVoiceHost();
+  });
+
   /**
    * Reconciles calls that Twilio never sent a terminal callback for — a dropped
    * webhook, a deploy mid-call, or a network blip would otherwise leave a row
    * stuck at "ringing" forever and hold a campaign slot open.
    */
   jobs.define('calls:reconcile', async () => {
+    // A row that never got a SID never reached Twilio, so there is nothing to
+    // fetch — it is a dial that died between creating the row and placing the
+    // call (a crash, or a pre-flight rejection from an older build). Left alone
+    // it sits at "queued" in the agent's history forever. Runs before the
+    // readiness check because these need clearing whether Twilio is set up or not.
+    const orphaned = await CrmCall.find({
+      status: 'queued',
+      providerCallSid: { $in: [null, ''] },
+      createdAt: { $lt: new Date(Date.now() - 15 * 60e3) },
+    }).limit(50);
+    for (const call of orphaned) {
+      call.status = 'failed';
+      call.errorMessage = call.errorMessage || 'Never placed — the dial did not reach Twilio.';
+      call.endedAt = call.endedAt || new Date();
+      // eslint-disable-next-line no-await-in-loop
+      await call.save().catch(() => {});
+      require('../realtime').emitCall(call);
+      logger.warn(`Cleared orphaned call ${call._id}: queued with no Twilio SID.`);
+    }
+
     if (!twilioVoice.isVoiceReady()) return;
     const stuck = await CrmCall.find({
       provider: 'twilio',
@@ -124,6 +172,7 @@ const init = () => {
         if (remote.answeredBy) call.answeredBy = remote.answeredBy;
         // eslint-disable-next-line no-await-in-loop
         await call.save();
+        require('../realtime').emitCall(call);
         logger.warn(`Reconciled call ${call._id} to "${mapped}" — no webhook was received. Check API_PUBLIC_URL reachability.`);
         // eslint-disable-next-line no-await-in-loop
         await callEngine.finalizeCall(call);
@@ -215,6 +264,7 @@ const init = () => {
     for (const call of stale) {
       call.status = 'missed';
       await call.save();
+      require('../realtime').emitCall(call);
       if (call.ownerId) {
         await notify.notify(call.ownerId, {
           type: 'call.missed',
@@ -297,6 +347,9 @@ const init = () => {
     // Frequent, because a stuck call blocks a campaign slot and shows the agent
     // a call that looks live when it ended twenty minutes ago.
     jobs.every('calls:reconcile', 10 * 60e3),
+    // A tunnel URL moves on every restart; without this the gate in
+    // callEngine.assertVoiceUsable would act on a boot-time answer all day.
+    jobs.every('voice:probe', Number(process.env.VOICE_PROBE_MS) || 5 * 60e3),
     // Frequent: this is the only thing standing between a broken webhook and a
     // customer reply nobody ever sees. One Twilio API call per run.
     jobs.every('messages:reconcile', Number(process.env.WHATSAPP_RECONCILE_MS) || 30e3),
@@ -307,6 +360,20 @@ const init = () => {
   const voice = twilioVoice.readiness();
   if (voice.ready) {
     logger.info(`CRM voice: Twilio ready (from ${voice.from}, callbacks → ${voice.publicUrl}).`);
+    // "Present" is not "accepted". A rejected API key masks a working auth
+    // token, so every call dies with an opaque 20003 while readiness() above
+    // still says ready. Probing here demotes a dead key before the first call.
+    twilioVoice.verifyCredentials()
+      .then((r) => {
+        if (r.ok && r.demoted) logger.warn('CRM voice: authenticated on TWILIO_AUTH_TOKEN after the API key was rejected.');
+        else if (r.ok) logger.info(`CRM voice: REST credentials accepted (${r.credential}).`);
+        else logger.error(`CRM voice: Twilio REJECTED the REST credentials (${r.reason}). No call can be placed until this is fixed.`);
+      })
+      .catch(() => {});
+    // "Configured" is not "reachable". Twilio fetches TwiML from this host and
+    // posts every status callback to it, so a stale tunnel URL breaks calling
+    // completely while everything here still reports ready.
+    probeVoiceHost();
   } else {
     logger.warn(`CRM voice: Twilio NOT ready — missing ${voice.missing.join(', ')}. Calls fall back to tel: links.`);
   }

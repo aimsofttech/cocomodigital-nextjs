@@ -111,6 +111,11 @@ const runJob = async (job) => {
 
 const tick = async () => {
   if (running) return;
+  // Nothing here can work without a database, and every query would sit in
+  // Mongoose's buffer until it times out — producing a "buffering timed out
+  // after 10000ms" error every 15 seconds, which buries the one line that
+  // actually matters (the connection failure itself).
+  if (require('mongoose').connection.readyState !== 1) return;
   running = true;
   try {
     // Recover jobs whose worker died mid-run.
