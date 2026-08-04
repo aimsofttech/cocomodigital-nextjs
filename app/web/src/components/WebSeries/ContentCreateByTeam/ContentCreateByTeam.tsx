@@ -182,8 +182,6 @@ const ContentCreateByTeam = ({ itemData }) => {
     if (location.hash) {
       const id = location.hash.replace("#", "").split("?")[0];
 
-      console.log("Scrolling to ID:", id);
-
       if (id) {
         setScrollToId(id);
       }

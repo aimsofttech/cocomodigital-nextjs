@@ -7,11 +7,14 @@
  * be built from the *externally visible* origin and path — not from how the app
  * happens to be mounted locally.
  *
- * These can differ. On cocomadigital.com the reverse proxy forwards `/api/*` to
- * this Express app but hands `/crm/*` to the Next.js site, so the local mount
- * `/crm/api` is not publicly reachable while `/api/crm` is. CRM_PUBLIC_PATH
- * lets the callback URLs point at whichever prefix the proxy actually forwards,
- * without touching the proxy config.
+ * These can differ, which is the whole reason this file exists. On
+ * cocomadigital.com Apache forwards BOTH `/api/*` and `/crm/api/*` here, so the
+ * local mount `/crm/api` is publicly reachable and CRM_PUBLIC_PATH can simply
+ * stay at its default. It previously
+ * could not: `/crm/*` went to the Next.js site, and production had to be set to
+ * `/api/crm` instead. Both mounts are kept alive by mountPaths() below, so
+ * callbacks already registered in the Twilio/Meta consoles against `/api/crm`
+ * keep working and need no re-pointing.
  *
  * The signature check in middleware/twilioSignature rebuilds the signed URL as
  * API_PUBLIC_URL + req.originalUrl, so whatever path Twilio calls must arrive at
