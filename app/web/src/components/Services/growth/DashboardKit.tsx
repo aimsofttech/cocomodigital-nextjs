@@ -52,17 +52,19 @@ export function DashboardShell({
     <div
       role="img"
       aria-label={`${title} preview`}
-      className="w-full rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_18px_50px_-24px_rgba(0,0,0,0.35)] sm:p-4"
+      /* Outer frame carries the full sticker treatment; inner panels below
+         use a hairline so the mock keeps a clear depth hierarchy. */
+      className="w-full rounded-sticker border-2 border-strong bg-page p-3 shadow-[6px_6px_0_var(--brand,#fff000)] sm:p-4"
     >
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#EE2B2C] text-white">
-            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        <p className="flex items-center gap-2 text-sm font-black text-strong">
+          <span className="flex h-6 w-6 items-center justify-center rounded-sm border-2 border-strong bg-brand text-brand-on">
+            <Icon className="h-3 w-3" aria-hidden="true" />
           </span>
           {title}
         </p>
         {control ? (
-          <span className="rounded-md border border-neutral-200 px-2.5 py-1 text-[11px] text-neutral-500">
+          <span className="rounded-pill border border-strong/20 px-2.5 py-1 text-[11px] font-bold text-muted">
             {control}
           </span>
         ) : null}
@@ -86,14 +88,16 @@ export function MiniStat({
   delta?: string;
 }) {
   return (
-    <div className="rounded-lg border border-neutral-200 p-2.5">
-      <p className="flex items-center gap-1.5 text-[10px] font-medium text-neutral-500">
-        <Icon className="h-3 w-3 text-[#EE2B2C]" aria-hidden="true" />
+    <div className="rounded-sticker border border-strong/15 bg-page-soft p-2.5">
+      <p className="flex items-center gap-1.5 text-[10px] font-bold text-muted">
+        <Icon className="h-3 w-3 text-strong" aria-hidden="true" />
         <span className="truncate">{label}</span>
       </p>
-      <p className="mt-1.5 text-base leading-none font-bold text-neutral-900">{value}</p>
+      <p className="mt-1.5 text-base leading-none font-black text-strong">{value}</p>
       {delta ? (
-        <p className="mt-1 flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600">
+        /* The arrow already carries "up"; colour is left to the theme so the
+           mock doesn't introduce a green that appears nowhere else. */
+        <p className="mt-1 flex items-center gap-0.5 text-[10px] font-black text-strong">
           <FiArrowUpRight className="h-2.5 w-2.5" aria-hidden="true" />
           {delta}
         </p>
@@ -116,11 +120,15 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <div className={`rounded-lg border border-neutral-200 p-2.5 ${className}`}>
+    <div className={`rounded-sticker border border-strong/15 p-2.5 ${className}`}>
       {title ? (
         <div className="mb-2 flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold text-neutral-700">{title}</p>
-          {action ? <span className="text-[10px] text-[#EE2B2C]">{action}</span> : null}
+          <p className="text-[11px] font-black text-body">{title}</p>
+          {action ? (
+            <span className="text-[10px] font-bold text-strong underline decoration-brand decoration-2 underline-offset-2">
+              {action}
+            </span>
+          ) : null}
         </div>
       ) : null}
       {children}
@@ -148,9 +156,12 @@ export function LineChart({
         focusable="false"
       >
         <defs>
+          {/* Brand yellow fills the area; the line itself stays near-black so
+              the series is readable against a white panel. Written as an
+              arbitrary property so the token resolves, not a literal hex. */}
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#EE2B2C" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#EE2B2C" stopOpacity="0" />
+            <stop offset="0%" className="[stop-color:var(--brand,#fff000)]" stopOpacity="0.85" />
+            <stop offset="100%" className="[stop-color:var(--brand,#fff000)]" stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -161,7 +172,7 @@ export function LineChart({
             x2="300"
             y1={12 + row * 28}
             y2={12 + row * 28}
-            className="stroke-neutral-100"
+            className="stroke-strong/10"
             strokeWidth="1"
           />
         ))}
@@ -169,7 +180,7 @@ export function LineChart({
         <polygon points={`0,110 ${points} 300,110`} fill={`url(#${gradientId})`} />
         <polyline
           points={points}
-          className="fill-none stroke-[#EE2B2C]"
+          className="fill-none stroke-strong"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -177,11 +188,11 @@ export function LineChart({
 
         {points.split(" ").map((point) => {
           const [x, y] = point.split(",");
-          return <circle key={point} cx={x} cy={y} r="3" className="fill-[#EE2B2C]" />;
+          return <circle key={point} cx={x} cy={y} r="3" className="fill-strong" />;
         })}
       </svg>
 
-      <ul className="mt-1.5 flex justify-between text-[9px] text-neutral-400">
+      <ul className="mt-1.5 flex justify-between text-[9px] font-bold text-subtle">
         {labels.map((label) => (
           <li key={label}>{label}</li>
         ))}
@@ -198,7 +209,7 @@ export function BarChart({ heights }: { heights: number[] }) {
       {heights.map((height, index) => (
         <span
           key={index}
-          className={`w-full rounded-sm bg-[#EE2B2C]/70 ${BAR_HEIGHTS[height] ?? "h-4"}`}
+          className={`w-full rounded-sm bg-strong/85 ${BAR_HEIGHTS[height] ?? "h-4"}`}
         />
       ))}
     </div>
@@ -213,7 +224,7 @@ export function Waveform({ pattern, className = "" }: { pattern: number[]; class
       {pattern.map((amplitude, index) => (
         <span
           key={index}
-          className={`w-[3px] shrink-0 rounded-full bg-[#EE2B2C]/70 ${
+          className={`w-[3px] shrink-0 rounded-full bg-strong/70 ${
             BAR_HEIGHTS[amplitude] ?? "h-3"
           }`}
         />
@@ -247,17 +258,17 @@ export function ListRow({
     <li className="flex items-center gap-2 py-1.5">
       <span
         aria-hidden="true"
-        className="flex h-7 w-10 shrink-0 items-center justify-center rounded bg-linear-to-br from-neutral-200 to-neutral-300 text-[9px] font-bold text-neutral-500"
+        className="flex h-7 w-10 shrink-0 items-center justify-center rounded-sm border border-strong/20 bg-brand text-[9px] font-black text-brand-on"
       >
         {rank}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[10px] font-medium text-neutral-800">{title}</span>
-        <span className="block truncate text-[9px] text-neutral-400">{meta}</span>
+        <span className="block truncate text-[10px] font-bold text-strong">{title}</span>
+        <span className="block truncate text-[9px] text-subtle">{meta}</span>
       </span>
       <span className="shrink-0 text-right">
-        <span className="block text-[10px] font-semibold text-neutral-900">{value}</span>
-        {trend ? <span className="block text-[9px] text-emerald-600">{trend}</span> : null}
+        <span className="block text-[10px] font-black text-strong">{value}</span>
+        {trend ? <span className="block text-[9px] font-bold text-muted">{trend}</span> : null}
       </span>
     </li>
   );

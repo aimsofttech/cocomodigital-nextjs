@@ -49,8 +49,10 @@ export default function ChannelDashboard() {
           {RAIL_ICONS.map((Icon, index) => (
             <li
               key={index}
-              className={`flex h-7 w-7 items-center justify-center rounded-md ${
-                index === 0 ? "bg-[#EE2B2C] text-white" : "bg-neutral-100 text-neutral-400"
+              className={`flex h-7 w-7 items-center justify-center rounded-sm ${
+                index === 0
+                  ? "border-2 border-strong bg-brand text-brand-on"
+                  : "bg-page-tint text-subtle"
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -62,10 +64,10 @@ export default function ChannelDashboard() {
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-5">
             <Panel className="sm:col-span-3">
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-[11px] font-semibold text-neutral-700">Total Views</p>
-                <p className="text-[10px] font-semibold text-emerald-600">+25.3%</p>
+                <p className="text-[11px] font-black text-body">Total Views</p>
+                <p className="text-[10px] font-black text-strong">+25.3%</p>
               </div>
-              <p className="mt-0.5 text-xl leading-none font-bold text-neutral-900">125K</p>
+              <p className="mt-0.5 text-xl leading-none font-black text-strong">125K</p>
               <LineChart
                 gradientId="channel-views"
                 points="10,86 62,72 114,74 166,50 218,36 292,14"
@@ -74,16 +76,16 @@ export default function ChannelDashboard() {
             </Panel>
 
             <Panel className="sm:col-span-2">
-              <span className="mb-2 flex h-9 w-full items-center justify-center rounded-md bg-[#EE2B2C] text-white">
+              <span className="mb-2 flex h-9 w-full items-center justify-center rounded-sm border-2 border-strong bg-brand text-brand-on">
                 <FiPlay className="h-4 w-4 fill-current" aria-hidden="true" />
               </span>
-              <p className="flex items-center gap-1.5 text-[10px] font-medium text-neutral-500">
-                <FiUsers className="h-3 w-3 text-[#EE2B2C]" aria-hidden="true" />
+              <p className="flex items-center gap-1.5 text-[10px] font-bold text-muted">
+                <FiUsers className="h-3 w-3 text-strong" aria-hidden="true" />
                 Subscribers
               </p>
               <p className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-base leading-none font-bold text-neutral-900">3.62M</span>
-                <span className="text-[10px] font-semibold text-emerald-600">+18.1%</span>
+                <span className="text-base leading-none font-black text-strong">3.62M</span>
+                <span className="text-[10px] font-black text-strong">+18.1%</span>
               </p>
               <div className="mt-1.5">
                 <BarChart heights={[3, 5, 4, 7, 6, 9, 8, 11]} />
@@ -98,7 +100,7 @@ export default function ChannelDashboard() {
           </div>
 
           <Panel title="Top Performing Videos" action="View all">
-            <ul className="divide-y divide-neutral-100">
+            <ul className="divide-y divide-strong/10">
               {TOP_VIDEOS.map((video, index) => (
                 <ListRow key={video.title} rank={index + 1} {...video} />
               ))}

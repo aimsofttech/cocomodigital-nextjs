@@ -42,12 +42,12 @@ export default function PodcastDashboard() {
         <div className="space-y-2.5 lg:col-span-2">
           <Panel title="Episode Waveform">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#EE2B2C] text-white">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-strong bg-brand text-brand-on">
                 <FiPlay className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
               </span>
               <Waveform pattern={WAVE_PATTERN} className="min-w-0 flex-1 overflow-hidden" />
             </div>
-            <p className="mt-1.5 flex justify-between text-[9px] text-neutral-400">
+            <p className="mt-1.5 flex justify-between text-[9px] font-bold text-subtle">
               <span>00:00</span>
               <span>48:32</span>
             </p>
@@ -55,7 +55,7 @@ export default function PodcastDashboard() {
 
           <Panel title="Downloads Over Time">
             <div className="flex gap-2">
-              <ul className="flex h-24 flex-col justify-between text-[9px] text-neutral-400 sm:h-28">
+              <ul className="flex h-24 flex-col justify-between text-[9px] font-bold text-subtle sm:h-28">
                 <li>150K</li>
                 <li>100K</li>
                 <li>50K</li>
@@ -73,7 +73,7 @@ export default function PodcastDashboard() {
 
         <div className="space-y-2.5">
           <Panel title="Top Episodes" action="View all">
-            <ul className="divide-y divide-neutral-100">
+            <ul className="divide-y divide-strong/10">
               {TOP_EPISODES.map((episode, index) => (
                 <ListRow key={episode.title} rank={index + 1} {...episode} />
               ))}
@@ -81,7 +81,7 @@ export default function PodcastDashboard() {
           </Panel>
 
           <Panel title="Top Clip Performance" action="View all">
-            <ul className="divide-y divide-neutral-100">
+            <ul className="divide-y divide-strong/10">
               {TOP_CLIPS.map((clip, index) => (
                 <ListRow key={clip.title} rank={index + 1} {...clip} />
               ))}

@@ -41,6 +41,7 @@ import {
   Section,
   SectionHeading,
 } from "@/src/components/Services/growth/Primitives";
+import { CARD, ICON_CHIP } from "@/src/components/Services/growth/theme";
 import type {
   FaqItem,
   FeatureItem,
@@ -342,7 +343,7 @@ const SERVICE_SCHEMA = {
 };
 
 const SocialVideoEditingPage = () => (
-  <div className="w-full bg-white text-neutral-900">
+  <div className="w-full bg-page text-body">
     <StructuredData data={[SERVICE_SCHEMA, FAQ_SCHEMA]} />
 
     <GrowthHero
@@ -415,22 +416,22 @@ const SocialVideoEditingPage = () => (
       <ul className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
         {PLATFORMS.map(({ icon: Icon, name, caption, metric, points }) => (
           <li key={name}>
-            <article className="h-full rounded-2xl border border-neutral-200 bg-white p-5">
-              <h3 className="flex items-center gap-2.5 text-base font-bold text-neutral-900">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#EE2B2C]/10 text-[#EE2B2C]">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
+            <article className={`${CARD} h-full p-5`}>
+              <h3 className="flex items-center gap-2.5 font-satoshi text-base font-black text-strong">
+                <span className={`${ICON_CHIP} h-9 w-9`}>
+                  <Icon className="h-4.5 w-4.5" aria-hidden="true" />
                 </span>
                 {name}
               </h3>
 
-              <div className="relative mt-4 flex aspect-[9/13] flex-col justify-between overflow-hidden rounded-xl bg-linear-to-br from-neutral-700 via-neutral-800 to-black p-4">
-                <span className="self-start rounded bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white">
+              <div className="relative mt-4 flex aspect-[9/13] flex-col justify-between overflow-hidden rounded-sticker border-2 border-strong bg-dark-surface p-4">
+                <span className="self-start rounded-sm bg-brand px-2 py-0.5 text-[10px] font-black text-brand-on">
                   9:16
                 </span>
-                <p className="text-lg leading-tight font-extrabold text-white uppercase">
+                <p className="font-satoshi text-lg leading-tight font-black text-white uppercase">
                   {caption}
                 </p>
-                <p className="flex items-center gap-1.5 text-[11px] text-white/70">
+                <p className="flex items-center gap-1.5 text-[11px] font-bold text-brand">
                   <FiHeart className="h-3 w-3" aria-hidden="true" />
                   {metric}
                 </p>
@@ -472,14 +473,14 @@ const SocialVideoEditingPage = () => (
           ],
           rows: CASE_ROWS,
           media: (
-            <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-neutral-800 via-neutral-900 to-black p-5">
-              <p className="text-center text-xl leading-tight font-extrabold tracking-tight text-white uppercase sm:text-2xl">
+            <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-sticker border-2 border-strong bg-dark-surface p-5">
+              <p className="text-center font-satoshi text-xl leading-tight font-black tracking-tight text-white uppercase sm:text-2xl">
                 Social
-                <span className="block text-[#EE2B2C]">Growth</span>
+                <span className="block text-brand">Growth</span>
               </p>
               <span
                 aria-hidden="true"
-                className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-neutral-900"
+                className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full border-2 border-strong bg-brand text-brand-on"
               >
                 <FiPlay className="h-3.5 w-3.5 fill-current" />
               </span>
@@ -522,14 +523,14 @@ const SocialVideoEditingPage = () => (
         <div className="relative mx-auto flex aspect-[4/3] w-full max-w-md items-end justify-center gap-4">
           <span
             aria-hidden="true"
-            className="flex h-32 w-24 items-center justify-center rounded-2xl border-4 border-white/40 bg-white/15 sm:h-44 sm:w-32"
+            className="flex h-32 w-24 items-center justify-center rounded-sticker border-4 border-brand/50 bg-brand/15 sm:h-44 sm:w-32"
           >
-            <FiPlay className="h-10 w-10 fill-current text-white sm:h-14 sm:w-14" />
+            <FiPlay className="h-10 w-10 fill-current text-brand sm:h-14 sm:w-14" />
           </span>
           <span aria-hidden="true" className="flex items-end gap-2">
-            <span className="h-14 w-6 rounded-t bg-white/25 sm:h-20 sm:w-8" />
-            <span className="h-24 w-6 rounded-t bg-white/35 sm:h-32 sm:w-8" />
-            <span className="h-32 w-6 rounded-t bg-white/50 sm:h-44 sm:w-8" />
+            <span className="h-14 w-6 rounded-t bg-brand/35 sm:h-20 sm:w-8" />
+            <span className="h-24 w-6 rounded-t bg-brand/60 sm:h-32 sm:w-8" />
+            <span className="h-32 w-6 rounded-t bg-brand sm:h-44 sm:w-8" />
           </span>
         </div>
       }

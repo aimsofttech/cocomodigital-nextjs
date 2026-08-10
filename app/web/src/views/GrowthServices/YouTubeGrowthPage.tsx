@@ -244,7 +244,7 @@ const SERVICE_SCHEMA = {
 };
 
 const YouTubeGrowthPage = () => (
-  <div className="w-full bg-white text-neutral-900">
+  <div className="w-full bg-page text-body">
     <StructuredData data={[SERVICE_SCHEMA, FAQ_SCHEMA]} />
 
     <GrowthHero
@@ -333,14 +333,14 @@ const YouTubeGrowthPage = () => (
           paragraphs: ["We helped Tech Explained 2X their views and grow subscribers consistently."],
           rows: CASE_ROWS,
           media: (
-            <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-neutral-800 via-neutral-900 to-black p-5">
-              <p className="text-center text-xl leading-tight font-extrabold tracking-tight text-amber-300 uppercase sm:text-2xl">
+            <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-sticker border-2 border-strong bg-dark-surface p-5">
+              <p className="text-center font-satoshi text-xl leading-tight font-black tracking-tight text-brand uppercase sm:text-2xl">
                 Tech
                 <span className="block text-white">Explained</span>
               </p>
               <span
                 aria-hidden="true"
-                className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded bg-[#EE2B2C] px-2 py-1 text-[10px] font-semibold text-white"
+                className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-sm bg-brand px-2 py-1 text-[10px] font-black text-brand-on uppercase"
               >
                 <FaYoutube className="h-3 w-3" />
                 Subscribe
@@ -379,14 +379,14 @@ const YouTubeGrowthPage = () => (
         <div className="relative mx-auto flex aspect-[4/3] w-full max-w-md items-end justify-center gap-4">
           <span
             aria-hidden="true"
-            className="flex h-24 w-32 items-center justify-center rounded-2xl bg-white/20 sm:h-32 sm:w-44"
+            className="flex h-24 w-32 items-center justify-center rounded-sticker border-4 border-brand/50 bg-brand/15 sm:h-32 sm:w-44"
           >
-            <FiPlay className="h-12 w-12 fill-current text-white sm:h-16 sm:w-16" />
+            <FiPlay className="h-12 w-12 fill-current text-brand sm:h-16 sm:w-16" />
           </span>
           <span aria-hidden="true" className="flex items-end gap-2">
-            <span className="h-16 w-6 rounded-t bg-white/25 sm:h-24 sm:w-8" />
-            <span className="h-24 w-6 rounded-t bg-white/35 sm:h-36 sm:w-8" />
-            <span className="h-32 w-6 rounded-t bg-white/50 sm:h-48 sm:w-8" />
+            <span className="h-16 w-6 rounded-t bg-brand/35 sm:h-24 sm:w-8" />
+            <span className="h-24 w-6 rounded-t bg-brand/60 sm:h-36 sm:w-8" />
+            <span className="h-32 w-6 rounded-t bg-brand sm:h-48 sm:w-8" />
           </span>
         </div>
       }

@@ -1,6 +1,7 @@
 import { FiStar } from "react-icons/fi";
 import type { ReactNode } from "react";
 import { CtaGroup, HeroPill } from "./Primitives";
+import { HIGHLIGHT } from "./theme";
 import type { CtaLink, HeroBadge, HeroHeadline, TrustSignal } from "./types";
 
 /* Shared hero: copy column on the left, product-style dashboard
@@ -26,21 +27,25 @@ export default function GrowthHero({
   id: string;
 }) {
   return (
-    <section aria-labelledby={id} className="w-full bg-white">
+    <section aria-labelledby={id} className="w-full bg-page">
       <div className="mx-auto grid w-full max-w-360 grid-cols-1 items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14 lg:px-10 lg:py-16">
         <div>
           <HeroPill icon={badge.icon} label={badge.label} />
 
           <h1
             id={id}
-            className="mt-5 text-3xl leading-[1.12] font-extrabold tracking-tight text-balance text-neutral-900 sm:text-4xl lg:text-5xl"
+            className="mt-5 font-satoshi text-3xl leading-[1.12] font-black tracking-tight text-balance text-strong sm:text-4xl lg:text-5xl"
           >
             {headline.map((line) => (
-              <span
-                key={line.text}
-                className={`block ${line.accent ? "text-[#EE2B2C]" : "text-neutral-900"}`}
-              >
-                {line.text}
+              /* The accent line keeps near-black type and takes the brand
+                 as a marker highlight instead — yellow text on white would
+                 be unreadable, and this is the site's own emphasis motif. */
+              <span key={line.text} className="block text-strong">
+                {line.accent ? (
+                  <span className={`${HIGHLIGHT} box-decoration-clone`}>{line.text}</span>
+                ) : (
+                  line.text
+                )}
               </span>
             ))}
           </h1>
@@ -48,7 +53,7 @@ export default function GrowthHero({
           {paragraphs.map((paragraph) => (
             <p
               key={paragraph}
-              className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-500 sm:text-[15px]"
+              className="mt-4 max-w-xl text-sm leading-relaxed text-muted sm:text-[15px]"
             >
               {paragraph}
             </p>
@@ -63,7 +68,7 @@ export default function GrowthHero({
               {trust.initials.map((initials) => (
                 <li
                   key={initials}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-linear-to-br from-neutral-300 to-neutral-400 text-[11px] font-semibold text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-strong bg-page-tint text-[11px] font-black text-strong"
                 >
                   {initials}
                 </li>
@@ -72,15 +77,18 @@ export default function GrowthHero({
 
             <div>
               <p className="flex items-center gap-0.5" aria-label="Rated 5 out of 5">
+                {/* Brand fill with a near-black stroke — keeps the stars
+                    legible on white, which a flat yellow glyph would not be. */}
                 {Array.from({ length: 5 }).map((_, index) => (
                   <FiStar
                     key={index}
-                    className="h-4 w-4 fill-amber-400 text-amber-400"
+                    className="h-4 w-4 fill-brand text-strong"
+                    strokeWidth={1.5}
                     aria-hidden="true"
                   />
                 ))}
               </p>
-              <p className="mt-1 max-w-[16rem] text-xs leading-snug text-neutral-500">
+              <p className="mt-1 max-w-[16rem] text-xs leading-snug text-muted">
                 {trust.label}
               </p>
             </div>

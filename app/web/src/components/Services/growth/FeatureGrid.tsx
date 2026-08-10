@@ -1,4 +1,5 @@
 import type { FeatureItem } from "./types";
+import { CARD_FLAT, ICON_CHIP } from "./theme";
 
 /* One grid drives every icon-card block across the three pages:
    the services grid, the "what's included" grid, the problems
@@ -14,8 +15,7 @@ const COLUMN_CLASSES: Record<Columns, string> = {
   6: "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6",
 };
 
-const CARD_BASE =
-  "rounded-[10px] border border-neutral-200/80 bg-white shadow-[0_1px_2px_rgba(16,16,16,0.04)] transition-shadow duration-200 hover:shadow-[0_6px_18px_-8px_rgba(16,16,16,0.18)]";
+const CARD_BASE = CARD_FLAT;
 
 export default function FeatureGrid({
   items,
@@ -41,29 +41,30 @@ export default function FeatureGrid({
               layout === "row" ? "items-start gap-3.5" : "flex-col items-center text-center"
             }`}
           >
-            {/* Bare red line icon — the reference cards carry no
-                filled chip behind the glyph. */}
+            {/* Brand chip behind a near-black glyph. Yellow can't carry a
+                thin icon on white (~1.1:1), so it becomes the surface and
+                the glyph stays near-black. */}
             <span
-              className={`flex shrink-0 items-center justify-center text-[#EE2B2C] ${
-                layout === "stack" ? "mb-2.5" : ""
+              className={`${ICON_CHIP} ${compact ? "h-9 w-9" : "h-11 w-11"} ${
+                layout === "stack" ? "mb-3" : ""
               }`}
             >
               <Icon
-                className={compact ? "h-6 w-6" : "h-7 w-7"}
-                strokeWidth={1.75}
+                className={compact ? "h-4.5 w-4.5" : "h-5.5 w-5.5"}
+                strokeWidth={2}
                 aria-hidden="true"
               />
             </span>
             <div>
               <h3
-                className={`font-bold text-neutral-900 ${
+                className={`font-black text-strong ${
                   compact ? "text-[13px] leading-snug" : "text-[15px] leading-snug"
                 }`}
               >
                 {title}
               </h3>
               <p
-                className={`mt-1.5 leading-relaxed text-neutral-500 ${
+                className={`mt-1.5 leading-relaxed text-muted ${
                   compact ? "text-[11px]" : "text-[13px]"
                 }`}
               >

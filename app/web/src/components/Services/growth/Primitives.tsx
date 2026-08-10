@@ -1,35 +1,46 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { CtaLink } from "./types";
+import {
+  CTA_BASE,
+  CTA_VARIANTS,
+  EYEBROW,
+  HIGHLIGHT,
+  ICON_CHIP,
+  SECTION_TONES,
+  type CtaTone,
+} from "./theme";
 
 /* Building blocks shared by all three growth landing pages.
 
-   These pages are light-themed (white page, near-black type, red
-   accent) to match the approved designs, so colours are written as
-   explicit Tailwind utilities rather than the site's yellow brand
-   tokens. Everything here is Tailwind only — no stylesheet, no
+   Colours come from the site's semantic tokens via ./theme, so these
+   pages match the rest of Cocoma rather than carrying their own
+   palette. Everything here is Tailwind only — no stylesheet, no
    inline styles. */
+
+export type { CtaTone };
 
 /* ── Layout shell ─────────────────────────────────────────────
    Every band is the same centred, gutter-padded container.
-   `tone` swaps the white default for the pale red band used by
-   the "problems we solve" section. */
+   `tone` swaps the page default for the soft grey the rest of the
+   site uses to break one section from the next. */
 
 export function Section({
   children,
   labelledBy,
-  tone = "white",
+  tone = "page",
   className = "",
 }: {
   children: ReactNode;
   labelledBy?: string;
-  tone?: "white" | "tint";
+  tone?: keyof typeof SECTION_TONES;
   className?: string;
 }) {
-  const toneClass = tone === "tint" ? "bg-[#EE2B2C]/5" : "bg-white";
-
   return (
-    <section aria-labelledby={labelledBy} className={`w-full ${toneClass} ${className}`}>
+    <section
+      aria-labelledby={labelledBy}
+      className={`w-full ${SECTION_TONES[tone]} ${className}`}
+    >
       {/* 1440px matches --content-max-w, the width the rest of the
           site lays out to. */}
       <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 sm:py-14 lg:px-10 lg:py-16">
@@ -56,23 +67,28 @@ export function SectionHeading({
   align?: "center" | "left";
   className?: string;
 }) {
-  const alignClass = align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl text-left";
+  const alignClass =
+    align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl text-left";
 
   return (
     <div className={`${alignClass} ${className}`}>
       {eyebrow ? (
-        <p className="mb-2 text-[11px] font-bold tracking-[0.18em] text-[#EE2B2C] uppercase">
-          {eyebrow}
+        <p className="mb-3">
+          {/* Highlight sits on the inline span, not the block, so the
+              marker hugs the words instead of the full column width. */}
+          <span className={`${EYEBROW} ${HIGHLIGHT}`}>{eyebrow}</span>
         </p>
       ) : null}
       <h2
         id={id}
-        className="text-2xl font-bold tracking-tight text-balance text-neutral-900 sm:text-3xl lg:text-[34px] lg:leading-tight"
+        className="font-satoshi text-2xl font-black tracking-tight text-balance text-strong sm:text-3xl lg:text-[34px] lg:leading-tight"
       >
         {title}
       </h2>
       {description ? (
-        <p className="mt-3 text-sm leading-relaxed text-neutral-500 sm:text-base">{description}</p>
+        <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
+          {description}
+        </p>
       ) : null}
     </div>
   );
@@ -83,22 +99,6 @@ export function SectionHeading({
    in this lookup avoids overriding colours through a trailing
    className, where the winner would depend on Tailwind's output
    order rather than the order the classes are written in. */
-
-const CTA_BASE =
-  "inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EE2B2C]";
-
-const CTA_VARIANTS = {
-  default: {
-    solid: "bg-[#EE2B2C] text-white hover:bg-[#d21f20]",
-    outline: "border border-[#EE2B2C] bg-white text-[#EE2B2C] hover:bg-[#EE2B2C] hover:text-white",
-  },
-  onRed: {
-    solid: "bg-white text-[#EE2B2C] hover:bg-neutral-100",
-    outline: "border border-white bg-transparent text-white hover:bg-white hover:text-[#EE2B2C]",
-  },
-} as const;
-
-export type CtaTone = keyof typeof CTA_VARIANTS;
 
 export function CtaButton({
   cta,
@@ -144,7 +144,7 @@ export function CtaGroup({
 
 export function HeroPill({ icon: Icon, label }: { icon?: CtaLink["icon"]; label: string }) {
   return (
-    <p className="inline-flex items-center gap-2 rounded-full bg-[#EE2B2C] px-4 py-1.5 text-xs font-semibold text-white sm:text-[13px]">
+    <p className="inline-flex items-center gap-2 rounded-pill border-2 border-strong bg-brand px-4 py-1.5 text-xs font-black tracking-wide text-brand-on uppercase shadow-[2px_2px_0_var(--text-strong,#111)] sm:text-[13px]">
       {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden="true" /> : null}
       {label}
     </p>
@@ -153,29 +153,19 @@ export function HeroPill({ icon: Icon, label }: { icon?: CtaLink["icon"]; label:
 
 /* ── Check bullet used inside the format showcase panels ──── */
 
-export function CheckBullet({
-  children,
-  tone = "red",
-}: {
-  children: ReactNode;
-  tone?: "red" | "sky";
-}) {
-  const dotClass = tone === "sky" ? "bg-sky-600" : "bg-[#EE2B2C]";
-
+export function CheckBullet({ children }: { children: ReactNode }) {
   return (
     <li className="flex items-start gap-2.5">
-      <span
-        className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${dotClass}`}
-      >
+      <span className={`${ICON_CHIP} mt-0.5 h-4.5 w-4.5 rounded-full`}>
         <svg
           viewBox="0 0 12 12"
-          className="h-2.5 w-2.5 fill-none stroke-white stroke-[2.5]"
+          className="h-2.5 w-2.5 fill-none stroke-current stroke-[2.5]"
           aria-hidden="true"
         >
           <path d="M2.5 6.2 4.8 8.5 9.5 3.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <span className="text-sm leading-relaxed text-neutral-700">{children}</span>
+      <span className="text-sm leading-relaxed text-body">{children}</span>
     </li>
   );
 }

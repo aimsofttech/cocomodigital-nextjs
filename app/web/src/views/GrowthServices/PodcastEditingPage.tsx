@@ -325,7 +325,7 @@ const SERVICE_SCHEMA = {
 };
 
 const PodcastEditingPage = () => (
-  <div className="w-full bg-white text-neutral-900">
+  <div className="w-full bg-page text-body">
     <StructuredData data={[SERVICE_SCHEMA, FAQ_SCHEMA]} />
 
     <GrowthHero
@@ -399,12 +399,14 @@ const PodcastEditingPage = () => (
       <SectionHeading id="podcast-formats-title" title="Professional Quality Across Every Format" />
 
       <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Audio panel */}
-        <article className="relative overflow-hidden rounded-2xl border border-[#EE2B2C]/20 bg-[#EE2B2C]/5 p-5 sm:p-6">
-          <h3 className="text-lg font-bold text-[#EE2B2C]">Audio Podcast Editing</h3>
+        {/* Audio panel — brand-tinted surface. Audio vs video are told apart
+            by surface (yellow tint vs soft grey) now that the page no longer
+            carries a second accent hue. */}
+        <article className="relative overflow-hidden rounded-sticker border-2 border-strong bg-brand/15 p-5 shadow-[4px_4px_0_var(--text-strong,#111)] sm:p-6">
+          <h3 className="font-satoshi text-lg font-black text-strong">Audio Podcast Editing</h3>
 
-          <div className="mt-4 flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#EE2B2C] text-white">
+          <div className="mt-4 flex items-center gap-3 rounded-sticker border-2 border-strong bg-page p-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-strong bg-strong text-page">
               <FiPlay className="h-4 w-4 fill-current" aria-hidden="true" />
             </span>
             <span
@@ -414,12 +416,12 @@ const PodcastEditingPage = () => (
               {WAVE_BARS.map((amplitude, index) => (
                 <span
                   key={index}
-                  className={`w-[3px] shrink-0 rounded-full bg-[#EE2B2C]/70 ${BAR_CLASSES[amplitude]}`}
+                  className={`w-[3px] shrink-0 rounded-full bg-strong/70 ${BAR_CLASSES[amplitude]}`}
                 />
               ))}
             </span>
           </div>
-          <p className="mt-1.5 flex justify-between px-1 text-[11px] text-neutral-400">
+          <p className="mt-1.5 flex justify-between px-1 text-[11px] font-bold text-muted">
             <span>00:00</span>
             <span>48:32</span>
           </p>
@@ -432,22 +434,24 @@ const PodcastEditingPage = () => (
 
           <FiHeadphones
             aria-hidden="true"
-            className="pointer-events-none absolute right-4 bottom-4 h-12 w-12 text-[#EE2B2C]/25"
+            className="pointer-events-none absolute right-4 bottom-4 h-12 w-12 text-strong/20"
           />
         </article>
 
-        {/* Video panel */}
-        <article className="relative overflow-hidden rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
-          <h3 className="text-lg font-bold text-sky-700">Video Podcast Editing</h3>
+        {/* Video panel — soft grey surface, same frame. */}
+        <article className="relative overflow-hidden rounded-sticker border-2 border-strong bg-page-soft p-5 shadow-[4px_4px_0_var(--text-strong,#111)] sm:p-6">
+          <h3 className="font-satoshi text-lg font-black text-strong">Video Podcast Editing</h3>
 
-          <div className="relative mt-4 flex aspect-[16/8] items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-neutral-700 via-neutral-800 to-black">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-neutral-900">
+          <div className="relative mt-4 flex aspect-[16/8] items-center justify-center overflow-hidden rounded-sticker border-2 border-strong bg-dark-surface">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-strong bg-brand text-brand-on">
               <FiPlay className="h-4 w-4 fill-current" aria-hidden="true" />
             </span>
-            <span className="absolute bottom-2 left-3 text-[10px] text-white/80">00:00 / 48:32</span>
+            <span className="absolute bottom-2 left-3 text-[10px] font-bold text-white/75">
+              00:00 / 48:32
+            </span>
             <span
               aria-hidden="true"
-              className="absolute right-3 bottom-2 flex h-6 w-6 items-center justify-center rounded bg-sky-500 text-white"
+              className="absolute right-3 bottom-2 flex h-6 w-6 items-center justify-center rounded-sm bg-brand text-brand-on"
             >
               <FiVideo className="h-3 w-3" />
             </span>
@@ -455,15 +459,13 @@ const PodcastEditingPage = () => (
 
           <ul className="mt-5 space-y-2.5">
             {VIDEO_POINTS.map((point) => (
-              <CheckBullet key={point} tone="sky">
-                {point}
-              </CheckBullet>
+              <CheckBullet key={point}>{point}</CheckBullet>
             ))}
           </ul>
 
           <FiType
             aria-hidden="true"
-            className="pointer-events-none absolute right-4 bottom-4 h-12 w-12 text-sky-600/20"
+            className="pointer-events-none absolute right-4 bottom-4 h-12 w-12 text-strong/20"
           />
         </article>
       </div>
@@ -491,15 +493,17 @@ const PodcastEditingPage = () => (
           ],
           rows: CASE_ROWS,
           media: (
-            <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-neutral-800 via-neutral-900 to-black p-5">
-              <p className="text-center text-xl leading-tight font-extrabold tracking-tight text-white uppercase sm:text-2xl">
+            <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-sticker border-2 border-strong bg-dark-surface p-5">
+              <p className="text-center font-satoshi text-xl leading-tight font-black tracking-tight text-white uppercase sm:text-2xl">
                 The Growth
-                <span className="block text-[#EE2B2C]">Show</span>
+                {/* Brand yellow reads at ~15:1 on the dark surface — the one
+                    context where it can carry type directly. */}
+                <span className="block text-brand">Show</span>
                 <span className="mt-1 block text-[10px] font-medium tracking-normal text-white/60 normal-case">
                   with Alex Martin
                 </span>
               </p>
-              <FiMic aria-hidden="true" className="absolute right-3 bottom-3 h-8 w-8 text-white/30" />
+              <FiMic aria-hidden="true" className="absolute right-3 bottom-3 h-8 w-8 text-brand/40" />
             </div>
           ),
         }}
@@ -539,14 +543,16 @@ const PodcastEditingPage = () => (
         <div className="relative mx-auto flex aspect-[4/3] w-full max-w-md items-end justify-center gap-3">
           <span
             aria-hidden="true"
-            className="flex h-28 w-28 items-center justify-center rounded-full bg-white/15 sm:h-36 sm:w-36"
+            className="flex h-28 w-28 items-center justify-center rounded-full bg-brand/15 sm:h-36 sm:w-36"
           >
-            <FiMic className="h-14 w-14 text-white sm:h-20 sm:w-20" />
+            <FiMic className="h-14 w-14 text-brand sm:h-20 sm:w-20" />
           </span>
+          {/* Rising bars in brand yellow — the accent the dark band is built
+              around, instead of the flat white it used before. */}
           <span aria-hidden="true" className="flex items-end gap-2">
-            <span className="h-12 w-6 rounded-t bg-white/25 sm:h-16 sm:w-8" />
-            <span className="h-20 w-6 rounded-t bg-white/35 sm:h-28 sm:w-8" />
-            <span className="h-28 w-6 rounded-t bg-white/50 sm:h-40 sm:w-8" />
+            <span className="h-12 w-6 rounded-t bg-brand/35 sm:h-16 sm:w-8" />
+            <span className="h-20 w-6 rounded-t bg-brand/60 sm:h-28 sm:w-8" />
+            <span className="h-28 w-6 rounded-t bg-brand sm:h-40 sm:w-8" />
           </span>
         </div>
       }
