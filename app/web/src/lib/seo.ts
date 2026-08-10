@@ -112,11 +112,11 @@ export const staticPageSeo: Record<string, PageSeo> = {
     path: "/case-studies",
     category: "Case Studies",
   },
-  "/solution": {
+  "/solutions": {
     title: "Solutions",
     description:
       "Cocoma Digital solutions for creators, brands, platforms, agencies, film studios, music labels, and education businesses.",
-    path: "/solution",
+    path: "/solutions",
     category: "Solutions",
   },
   "/ScheduleMeeting": {
