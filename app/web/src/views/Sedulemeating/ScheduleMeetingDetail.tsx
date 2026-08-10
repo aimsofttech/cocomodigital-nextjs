@@ -7,6 +7,11 @@ import { useCart } from "@/src/lib/cart";
 import { FaRegClock, FaVideo, FaGlobeAsia, FaArrowLeft } from "react-icons/fa";
 import ScheduleMeeting   from "./ScheduleMeeting";
 import BookingConfirmed  from "./BookingConfirmed";
+import {
+  CLOSED_DAY_MESSAGE,
+  isBookableTime,
+  isClosedDay,
+} from "@/src/lib/bookingWindow";
 
 /* ── constants ──────────────────────────────────────────────── */
 const HOST_PHOTO_URL =
@@ -150,6 +155,23 @@ const ScheduleMeetingDetails = () => {
     })();
     const t24 = convertTo24Hour(pickedTime);
     if (!t24) { setSubmitError("Invalid time — go back and pick again."); return; }
+
+    /* Last check before the POST. The slot arrives here as navigation state, so
+       it can be stale (tab left open across midnight) or hand-crafted. The API
+       enforces the same rule and is the real gate; this just gives an
+       immediate, readable reason instead of a round-trip 400. */
+    if (isClosedDay(pickedDate)) {
+      setSubmitError(CLOSED_DAY_MESSAGE);
+      setStage("picker");
+      setStep(1);
+      return;
+    }
+    if (!isBookableTime(t24)) {
+      setSubmitError("That time is outside our booking hours (10:00–18:45). Please pick another.");
+      setStage("picker");
+      setStep(1);
+      return;
+    }
 
     // Exact slot instant (UTC) — the server uses this to reserve the slot and
     // reject duplicate bookings. Built from the picked local wall-clock time.

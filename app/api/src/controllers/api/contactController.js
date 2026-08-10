@@ -2,7 +2,8 @@ const ContactUs = require('../../models/ContactUs');
 const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
 const { sendBookingEmails, sendMeetingRequestEmails, sendContactEnquiryEmail } = require('../../services/bookingMailer');
-const { zonedTimeToUtc } = require('../../utils/timezone');
+const { zonedTimeToUtc, wallClockInZone, IST_TIMEZONE } = require('../../utils/timezone');
+const { validateBookingSlot, isClosedDate, DAY_SLOTS } = require('../../utils/bookingWindow');
 const { ingestSafe: crmIngest } = require('../../crm/services/leadIngest');
 const logger = require('../../utils/logger');
 
@@ -39,10 +40,18 @@ const slotKeyOf = (iso) => {
   return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 16);
 };
 
-// GET /api/contact/availability?from=<iso>&to=<iso>
+// GET /api/contact/availability?from=<iso>&to=<iso>[&date=YYYY-MM-DD]
 // Returns slot keys for pending + confirmed meetings so the frontend disables them.
 const availability = async (req, res) => {
-  const { from, to } = req.query;
+  const { from, to, date } = req.query;
+
+  /* Optional `date` (wall-clock YYYY-MM-DD): lets a caller ask about a specific
+     day and get the closed-day answer without inferring it from an empty
+     `booked` list. Additive — callers that only send from/to are unaffected. */
+  if (date && isClosedDate(date)) {
+    return res.json({ status: 'success', booked: [], closed: true, slots: [] });
+  }
+
   const q = { slot_key: { $exists: true }, status: { $in: ['pending', 'confirmed'] } };
   if (from || to) {
     q.meeting_start_utc = {};
@@ -50,7 +59,12 @@ const availability = async (req, res) => {
     if (to) q.meeting_start_utc.$lte = new Date(to);
   }
   const docs = await Meeting.find(q).select('slot_key -_id').lean();
-  res.json({ status: 'success', booked: docs.map((d) => d.slot_key).filter(Boolean) });
+  const booked = docs.map((d) => d.slot_key).filter(Boolean);
+  /* `closed`/`slots` only appear when the caller asked about a specific date,
+     so the existing from/to response shape is untouched. */
+  res.json(date
+    ? { status: 'success', booked, closed: false, slots: DAY_SLOTS }
+    : { status: 'success', booked });
 };
 
 // POST /api/contact/free-consultation
@@ -83,6 +97,25 @@ const freeConsultation = async (req, res) => {
 
   // ── Meeting booking (from /ScheduleMeeting) ──────────────────────────────
   if (slot_key) {
+    /* Enforce the booking window server-side. The picker already hides closed
+       days and out-of-hours slots, but this endpoint is reachable directly, so
+       the UI's rule cannot be the only one.
+
+       Validate the wall-clock slot the booker chose. When a direct caller omits
+       meeting_date/meeting_time and posts only meeting_start_utc, derive the
+       wall-clock from the instant in their stated zone (IST if unstated) —
+       otherwise skipping those fields would skip the check entirely. */
+    const wall = (meeting_date && meeting_time)
+      ? { date: meeting_date, time: meeting_time }
+      : wallClockInZone(resolvedStartUtc, meeting_timezone || IST_TIMEZONE);
+    if (!wall) {
+      return res.status(400).json({ status: 'error', message: 'Invalid meeting date or time.' });
+    }
+    const slotCheck = validateBookingSlot(wall.date, wall.time);
+    if (!slotCheck.ok) {
+      return res.status(400).json({ status: 'error', message: slotCheck.message });
+    }
+
     const taken = await Meeting.findOne({ slot_key, status: { $in: ['pending', 'confirmed'] } }).lean();
     if (taken) {
       return res.status(409).json({ status: 'error', message: 'That time slot is no longer available. Please pick another.' });

@@ -35,4 +35,32 @@ const formatInTimeZone = (date, timeZone) => {
   };
 };
 
-module.exports = { zonedTimeToUtc, formatInTimeZone, IST_TIMEZONE };
+/**
+ * Machine-readable counterpart to `formatInTimeZone`: the wall-clock date and
+ * time of a UTC instant in `timeZone`, as "YYYY-MM-DD" / "HH:mm".
+ *
+ * Exists so booking rules stated in wall-clock terms ("no Sundays", "10:00 to
+ * 18:45") can be checked even when a caller posts only a UTC instant and skips
+ * the meeting_date/meeting_time fields the UI normally sends.
+ *
+ * @returns {{date:string, time:string}|null} null if `date` doesn't parse.
+ */
+const wallClockInZone = (date, timeZone) => {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  try {
+    // en-CA renders ISO-style dates (2026-08-10); en-GB gives 24-hour times.
+    const day = d.toLocaleDateString('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+    });
+    const time = d.toLocaleTimeString('en-GB', {
+      timeZone, hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    // Some ICU builds render midnight as "24:00" — normalise to "00:00".
+    return { date: day, time: time.replace(/^24:/, '00:') };
+  } catch {
+    return null; // unrecognised timeZone
+  }
+};
+
+module.exports = { zonedTimeToUtc, formatInTimeZone, wallClockInZone, IST_TIMEZONE };

@@ -4,17 +4,9 @@ const { createMeetingEvent } = require('../../services/calendarService');
 const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
 const { zonedTimeToUtc, IST_TIMEZONE } = require('../../utils/timezone');
 const logger = require('../../utils/logger');
-
-// 10:00–18:45 in 15-minute steps — mirrors the reschedule picker's slot grid.
-const DAY_SLOTS = (() => {
-  const slots = [];
-  for (let h = 10; h < 19; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-    }
-  }
-  return slots;
-})();
+// The 10:00–18:45 grid and the closed-Sunday rule used to be redeclared here.
+// Both now come from the one module the public booking path also uses.
+const { DAY_SLOTS, isClosedDate, validateBookingSlot } = require('../../utils/bookingWindow');
 
 // GET /admin/api/meetings
 const index = async (req, res) => {
@@ -117,6 +109,11 @@ const confirm = async (req, res) => {
 const availability = async (req, res) => {
   const { date, excludeId } = req.query;
   if (!date) return res.status(400).json({ status: 'error', message: 'date is required' });
+  /* Closed day — report every slot as unavailable rather than an empty
+     `booked` list, which the picker would read as "all free". */
+  if (isClosedDate(date)) {
+    return res.json({ status: 'success', booked: DAY_SLOTS, closed: true });
+  }
   const tz = IST_TIMEZONE;
 
   const slotKeys = DAY_SLOTS
@@ -144,6 +141,15 @@ const reschedule = async (req, res) => {
   const { meetingDate, meetingTime } = req.body;
   if (!meetingDate || !meetingTime) {
     return res.status(400).json({ status: 'error', message: 'meetingDate and meetingTime are required' });
+  }
+
+  /* Reschedule moves a customer onto a new slot, so it has to honour the same
+     window as a fresh booking — otherwise "Sunday is closed" would hold for
+     visitors but not for meetings an admin drags onto a Sunday. Admin times are
+     IST wall-clock (the picker's own zone), matching the check below. */
+  const slotCheck = validateBookingSlot(meetingDate, meetingTime);
+  if (!slotCheck.ok) {
+    return res.status(400).json({ status: 'error', message: slotCheck.message });
   }
 
   const doc = await Meeting.findById(req.params.id);

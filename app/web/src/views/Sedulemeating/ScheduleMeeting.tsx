@@ -4,32 +4,20 @@ import React, { useState, useEffect, useMemo } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "@/src/lib/navigation";
 import { FaRegClock, FaVideo, FaGlobeAsia } from "react-icons/fa";
+import {
+  CLOSED_DAY_MESSAGE,
+  generateTimeSlots,
+  isClosedDay,
+  nextOpenDay,
+} from "@/src/lib/bookingWindow";
 
 
 
 const HOST_PHOTO_URL =
   "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png";
 
-const SLOT_START_HOUR = 10; // 10:00
-const SLOT_END_HOUR = 19; // 19:00
-const SLOT_STEP_MINUTES = 15;
-
-function generateTimeSlots(date) {
-  if (!date) return [];
-  const slots = [];
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-
-  for (let h = SLOT_START_HOUR; h < SLOT_END_HOUR; h++) {
-    for (let m = 0; m < 60; m += SLOT_STEP_MINUTES) {
-      const slot = new Date(date);
-      slot.setHours(h, m, 0, 0);
-      if (isToday && slot <= now) continue;
-      slots.push(slot);
-    }
-  }
-  return slots;
-}
+/* Window (Mon–Sat 10:00–18:45) and slot generation live in one module shared
+   with the rest of the booking flow — see src/lib/bookingWindow.ts. */
 
 // Canonical slot id shared with the API: the UTC instant truncated to the
 // minute ("YYYY-MM-DDTHH:mm"). Must match the backend's slot_key format.
@@ -55,19 +43,23 @@ function formatLongDate(date) {
 }
 
 const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time: string, tz: string) => void) | null }) => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // Opens on today, or the next open day when today is closed (Sunday).
+  const [selectedDate, setSelectedDate] = useState(() => nextOpenDay(new Date()));
   const [selectedSlot, setSelectedSlot] = useState(null); // store the Date itself
   const [timezone, setTimezone] = useState("");
   const [bookedKeys, setBookedKeys] = useState(() => new Set<string>());
   const [slotsLoading, setSlotsLoading] = useState(false);
-  // Default to 12h in en-US locales, 24h elsewhere — matches the
-  // user's regional expectation without a settings click.
-  const [hour12, setHour12] = useState(() => {
-    if (typeof navigator !== "undefined" && navigator.language) {
-      return /^en-(US|CA|AU|NZ|PH)/i.test(navigator.language);
-    }
-    return false;
-  });
+  /* Deterministic on the server; the real locale preference is applied after
+     mount (below) so the 12h/24h toggle can't differ between the two renders. */
+  const [hour12, setHour12] = useState(false);
+  /* The picker's contents depend on things that exist only in the browser —
+     the current time, the visitor's timezone and their locale. Rendering them
+     during SSR produced markup the client couldn't match: the server built the
+     slot list at (say) 12:30 and the browser hydrated at 12:45, so the first
+     future slot differed and React threw a hydration error. Nothing below is
+     rendered until this flips, which is safe here because the booking funnel
+     is noIndex — there is no SEO value in server-rendering it. */
+  const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -75,11 +67,18 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
 
   useEffect(() => {
     setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    // Default to 12h in en-US locales, 24h elsewhere — matches the
+    // user's regional expectation without a settings click.
+    if (typeof navigator !== "undefined" && navigator.language) {
+      setHour12(/^en-(US|CA|AU|NZ|PH)/i.test(navigator.language));
+    }
+    // Batched with the two setters above, so this costs one re-render, not three.
+    setMounted(true);
   }, []);
 
   const timeSlots = useMemo(
-    () => generateTimeSlots(selectedDate),
-    [selectedDate]
+    () => (mounted ? generateTimeSlots(selectedDate) : []),
+    [selectedDate, mounted]
   );
 
   // Drop the time when the date changes — a 14:30 valid yesterday
@@ -125,6 +124,9 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
 
   const handleConfirm = () => {
     if (!selectedDate || !selectedSlot) return;
+    /* Belt-and-braces: the calendar already blocks closed days and no slots are
+       generated for them, so this only fires if that guard is ever bypassed. */
+    if (isClosedDay(selectedDate)) return;
     const time24 = formatSlot(selectedSlot, false);
     if (onConfirm) {
       onConfirm(selectedDate, time24, timezone);
@@ -202,6 +204,15 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
           {/* Single sticker-framed card holds calendar AND slots so
               the right side reads as one decision, not three. */}
           <div className="schedule-picker-card">
+            {!mounted ? (
+              /* Placeholder for the first (server) paint. Must not contain any
+                 date, time, timezone or locale-derived text — that is exactly
+                 what cannot be reproduced identically on the client. */
+              <p className="schedule-slots-loading" role="status">
+                Loading available times…
+              </p>
+            ) : (
+              <>
             <div className="schedule-calendar">
               <Calendar
                 onChange={setSelectedDate}
@@ -209,6 +220,12 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                 minDate={new Date()}
                 prev2Label={null}
                 next2Label={null}
+                /* Closed days are greyed out and unclickable, so a Sunday can
+                   never become the selected date in the first place. The
+                   existing .react-calendar__tile:disabled rule styles them. */
+                tileDisabled={({ date, view }) =>
+                  view === "month" && isClosedDay(date)
+                }
               />
             </div>
 
@@ -255,8 +272,10 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
               </div>
 
               {timeSlots.length === 0 ? (
-                <p className="schedule-slots-empty">
-                  No more slots today — pick another date.
+                <p className="schedule-slots-empty" role="status">
+                  {isClosedDay(selectedDate)
+                    ? CLOSED_DAY_MESSAGE
+                    : "No more slots today — pick another date."}
                 </p>
               ) : (
                 <>
@@ -296,6 +315,8 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                 </>
               )}
             </div>
+              </>
+            )}
           </div>
 
           {/* Confirm button only renders when both are picked — no

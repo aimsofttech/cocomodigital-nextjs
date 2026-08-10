@@ -27,6 +27,19 @@ const RESCHEDULE_SLOTS: string[] = (() => {
   return slots;
 })();
 
+/* Days the studio takes no calls (0 = Sunday). The reschedule endpoint rejects
+   these too — see app/api/src/utils/bookingWindow.js, the authoritative copy. */
+const CLOSED_WEEKDAYS = [0];
+const isClosedDay = (d: Date | null | undefined): boolean =>
+  !!d && CLOSED_WEEKDAYS.includes(d.getDay());
+
+/** The given day, or the next open one — keeps the picker off a closed day. */
+const nextOpenDay = (from: Date): Date => {
+  const d = new Date(from);
+  for (let i = 0; i < 7 && isClosedDay(d); i++) d.setDate(d.getDate() + 1);
+  return d;
+};
+
 // A meeting whose scheduled slot has already passed without being resolved.
 function isExpired(row: any): boolean {
   if (row.meeting_start_utc) {
@@ -123,7 +136,7 @@ export default function MeetingList() {
   const [confirmTarget, setConfirmTarget] = useState<any>(null);
   const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [rescheduleTarget, setRescheduleTarget] = useState<any>(null);
-  const [rescheduleDate, setRescheduleDate] = useState<Date>(new Date());
+  const [rescheduleDate, setRescheduleDate] = useState<Date>(() => nextOpenDay(new Date()));
   const [rescheduleTime, setRescheduleTime] = useState('');
   const [rescheduleHour12, setRescheduleHour12] = useState(true);
   const [bookedTimes, setBookedTimes] = useState<Set<string>>(new Set());
@@ -206,13 +219,13 @@ export default function MeetingList() {
 
   const openReschedule = (row: any) => {
     setRescheduleTarget(row);
-    setRescheduleDate(new Date());
+    setRescheduleDate(nextOpenDay(new Date()));
     setRescheduleTime('');
   };
   const closeReschedule = () => {
     if (actionLoading) return;
     setRescheduleTarget(null);
-    setRescheduleDate(new Date());
+    setRescheduleDate(nextOpenDay(new Date()));
     setRescheduleTime('');
     setBookedTimes(new Set());
   };
@@ -274,6 +287,7 @@ export default function MeetingList() {
   // the backend still re-validates against the meeting's actual timezone).
   const visibleRescheduleSlots = useMemo(() => {
     const now = new Date();
+    if (isClosedDay(rescheduleDate)) return [];
     if (!isSameLocalDay(rescheduleDate, now)) return RESCHEDULE_SLOTS;
     return RESCHEDULE_SLOTS.filter((slot) => {
       const [h, m] = slot.split(':').map(Number);
@@ -680,6 +694,9 @@ export default function MeetingList() {
                   minDate={new Date()}
                   prev2Label={null}
                   next2Label={null}
+                  tileDisabled={({ date, view }) =>
+                    view === 'month' && isClosedDay(date)
+                  }
                 />
               </div>
 
@@ -715,7 +732,11 @@ export default function MeetingList() {
                 )}
 
                 {visibleRescheduleSlots.length === 0 ? (
-                  <p className="text-sm text-gray-400 py-4">No more slots today — pick another date.</p>
+                  <p className="text-sm text-gray-400 py-4">
+                    {isClosedDay(rescheduleDate)
+                      ? 'Closed on Sundays — pick a day from Monday to Saturday.'
+                      : 'No more slots today — pick another date.'}
+                  </p>
                 ) : (
                   <div className="grid grid-cols-2 gap-2 overflow-y-auto max-h-64 pr-1">
                     {visibleRescheduleSlots.map((slot) => {
