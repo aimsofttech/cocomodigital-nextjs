@@ -40,6 +40,13 @@ const meetingAvailabilitySchema = new mongoose.Schema(
 
     days: { type: [availabilityDaySchema], default: [] },
 
+    /* One-off closures that override `days` entirely: "YYYY-MM-DD" calendar
+       dates in `timezone`, on which nothing can be booked no matter what the
+       weekday rules say (holidays, a studio shutdown, a day off). Removing a
+       date restores whatever the weekday rules already allowed — the day's
+       slots are never edited, only ignored while the date is listed. */
+    blockedDates: { type: [String], default: [] },
+
     updatedBy: { type: mongoose.Schema.Types.Mixed, default: null },
   },
   { timestamps: true, collection: 'meeting_availability' }

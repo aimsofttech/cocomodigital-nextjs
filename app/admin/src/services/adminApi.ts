@@ -199,12 +199,19 @@ export interface AvailabilityConfig {
   slotStepMinutes: number;
   minNoticeMinutes: number;
   days: AvailabilityDay[];
+  /* One-off closures, "YYYY-MM-DD" in the studio's timezone. A listed date is
+     unbookable whatever its weekday rules say; removing it restores them. */
+  blockedDates: string[];
   updatedAt: string | null;
   allSlots: string[];
   weekdayNames: string[];
 }
 export const meetingAvailabilityApi = {
   get: () => api.get(`${BASE}/meeting-availability`),
-  update: (data: { timezone?: string; minNoticeMinutes?: number; days: AvailabilityDay[] }) =>
-    api.put(`${BASE}/meeting-availability`, data),
+  update: (data: {
+    timezone?: string;
+    minNoticeMinutes?: number;
+    days: AvailabilityDay[];
+    blockedDates?: string[];
+  }) => api.put(`${BASE}/meeting-availability`, data),
 };

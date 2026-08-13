@@ -15,6 +15,7 @@ const present = (config) => ({
   slotStepMinutes: config.slotStepMinutes,
   minNoticeMinutes: config.minNoticeMinutes,
   days: config.days,
+  blockedDates: config.blockedDates,
   updatedAt: config.updatedAt || null,
   // Reference data for the editor — the grid it paints and the day labels —
   // so the panel doesn't hard-code either.

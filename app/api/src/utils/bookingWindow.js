@@ -107,6 +107,7 @@ const defaultConfig = () => ({
   slotStepMinutes: SLOT_STEP_MINUTES,
   minNoticeMinutes: 0,
   days: defaultDays(),
+  blockedDates: [],
 });
 
 /**
@@ -134,14 +135,31 @@ const normalizeConfig = (raw) => {
 
   const notice = Number(src.minNoticeMinutes);
 
+  /* Only real calendar dates survive, deduped and sorted, so every consumer can
+     compare them as plain strings. */
+  const blockedDates = [...new Set((Array.isArray(src.blockedDates) ? src.blockedDates : [])
+    .map((d) => String(d).trim())
+    .filter(isDateStr))].sort();
+
   return {
     timezone,
     slotStepMinutes: SLOT_STEP_MINUTES,
     minNoticeMinutes: Number.isFinite(notice) && notice >= 0 ? Math.floor(notice) : 0,
     days,
+    blockedDates,
     updatedAt: src.updatedAt || null,
   };
 };
+
+/**
+ * Is this studio-zone calendar date closed by a one-off block?
+ *
+ * Blocked dates are stored in the studio's zone, like every other rule here, so
+ * "block 26 January" closes the studio's 26th — a visitor in another zone loses
+ * exactly the slots that belong to that studio date, not their own calendar day.
+ */
+const isDateBlocked = (config, businessDateStr) =>
+  Array.isArray(config?.blockedDates) && config.blockedDates.includes(businessDateStr);
 
 let cachedConfig = null;
 let cachedAt = 0;
@@ -244,18 +262,40 @@ const parseConfigInput = (body, current) => {
     minNoticeMinutes = Math.floor(n);
   }
 
+  /* Omitting the key keeps the stored blocks — a client that predates the
+     feature must not wipe them by saving the weekday grid. */
+  let blockedDates = [...(current?.blockedDates || [])];
+  if (src.blockedDates !== undefined) {
+    if (!Array.isArray(src.blockedDates)) {
+      return { ok: false, message: '`blockedDates` must be an array of YYYY-MM-DD dates.' };
+    }
+    const cleaned = src.blockedDates.map((d) => String(d).trim());
+    const bad = cleaned.find((d) => !isDateStr(d));
+    if (bad !== undefined) {
+      return { ok: false, message: `"${bad}" is not a valid calendar date (expected YYYY-MM-DD).` };
+    }
+    blockedDates = [...new Set(cleaned)].sort();
+  }
+
   return {
     ok: true,
-    value: { timezone, slotStepMinutes: SLOT_STEP_MINUTES, minNoticeMinutes, days },
+    value: { timezone, slotStepMinutes: SLOT_STEP_MINUTES, minNoticeMinutes, days, blockedDates },
   };
 };
 
 // ── slot generation ─────────────────────────────────────────────────────────
 
-/** Enabled slot starts on a studio-zone calendar date. [] when closed. */
+/**
+ * Enabled slot starts on a studio-zone calendar date. [] when closed.
+ *
+ * Every slot the API ever offers is generated through here, so a blocked date
+ * disappears from the month feed, the day feed and the reschedule picker alike
+ * without any of them knowing the feature exists.
+ */
 const enabledSlotsOn = (config, businessDateStr) => {
   const wd = weekdayOf(businessDateStr);
   if (wd === null) return [];
+  if (isDateBlocked(config, businessDateStr)) return [];
   const day = config.days[wd];
   return day && day.enabled ? day.slots : [];
 };
@@ -409,6 +449,8 @@ const openViewerDatesInRange = (config, fromDateStr, toDateStr, viewerTz, opts =
 
 const CLOSED_DAY_MESSAGE =
   'We are not taking calls on that day. Please pick another date.';
+const BLOCKED_DATE_MESSAGE =
+  'That date is not available for bookings. Please pick another date.';
 const OUT_OF_HOURS_MESSAGE =
   'That time is not available for booking. Please pick one of the offered slots.';
 
@@ -436,6 +478,13 @@ const validateBookingInstant = async (startUtc, opts = {}) => {
 
   const wd = weekdayOf(wall.date);
   if (wd === null) return { ok: false, message: 'Invalid meeting date or time.' };
+
+  /* Checked before the weekday rules: a blocked date closes the studio even on
+     a weekday that is otherwise fully open, and it is the more specific reason
+     to report back. */
+  if (isDateBlocked(config, wall.date)) {
+    return { ok: false, message: BLOCKED_DATE_MESSAGE };
+  }
 
   const day = config.days[wd];
   if (!day || !day.enabled) {
@@ -495,11 +544,13 @@ module.exports = {
   invalidateAvailabilityCache,
 
   enabledSlotsOn,
+  isDateBlocked,
   slotsForViewerDate,
   openViewerDatesInRange,
 
   validateBookingInstant,
   validateBookingSlot,
   CLOSED_DAY_MESSAGE,
+  BLOCKED_DATE_MESSAGE,
   OUT_OF_HOURS_MESSAGE,
 };

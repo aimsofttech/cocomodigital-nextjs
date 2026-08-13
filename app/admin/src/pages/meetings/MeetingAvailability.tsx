@@ -9,7 +9,7 @@ import ContentLoader from '@/components/ui/ContentLoader';
 import Tooltip from '@/components/ui/Tooltip';
 import {
   ArrowPathIcon, CheckIcon, ClockIcon, DocumentDuplicateIcon,
-  ChevronDownIcon, GlobeAltIcon,
+  ChevronDownIcon, GlobeAltIcon, NoSymbolIcon, PlusIcon, XMarkIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -64,10 +64,31 @@ const sameDays = (a: AvailabilityDay[], b: AvailabilityDay[]): boolean =>
 const BUSINESS_FROM = '10:00';
 const BUSINESS_TO = '18:45';
 
-const sameSlots = (a: string[], b: string[]): boolean => {
+const sameList = (a: string[], b: string[]): boolean => {
   if (a.length !== b.length) return false;
   const sortedB = [...b].sort();
   return [...a].sort().every((s, i) => s === sortedB[i]);
+};
+
+/** Today's calendar date in the studio's zone — the earliest date worth blocking. */
+const todayIn = (timezone: string): string => {
+  try {
+    // en-CA renders as YYYY-MM-DD, which is the format the API stores.
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date());
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+};
+
+/** "2026-08-13" → "Thu, 13 Aug 2026", read as written (no zone shift). */
+const fmtDate = (dateStr: string): string => {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (!y || !m || !d) return dateStr;
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', {
+    timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+  });
 };
 
 /** Preset pill: filled when active, tinted-flat when not. */
@@ -296,6 +317,9 @@ export default function MeetingAvailability() {
   const [savedDays, setSavedDays] = useState<AvailabilityDay[]>([]);
   const [minNotice, setMinNotice] = useState(0);
   const [savedMinNotice, setSavedMinNotice] = useState(0);
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
+  const [savedBlockedDates, setSavedBlockedDates] = useState<string[]>([]);
+  const [dateToBlock, setDateToBlock] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -310,6 +334,8 @@ export default function MeetingAvailability() {
         setSavedDays(cloneDays(cfg.days));
         setMinNotice(cfg.minNoticeMinutes ?? 0);
         setSavedMinNotice(cfg.minNoticeMinutes ?? 0);
+        setBlockedDates([...(cfg.blockedDates ?? [])].sort());
+        setSavedBlockedDates([...(cfg.blockedDates ?? [])].sort());
       })
       .catch(() => toast.error('Failed to load booking availability'))
       .finally(() => setLoading(false));
@@ -317,7 +343,9 @@ export default function MeetingAvailability() {
 
   useEffect(() => { load(); }, [load]);
 
-  const dirty = !sameDays(days, savedDays) || minNotice !== savedMinNotice;
+  const dirty = !sameDays(days, savedDays)
+    || minNotice !== savedMinNotice
+    || !sameList(blockedDates, savedBlockedDates);
 
   // Warn before a tab close drops unsaved schedule edits.
   useEffect(() => {
@@ -348,13 +376,17 @@ export default function MeetingAvailability() {
     if (saving) return;
     setSaving(true);
     try {
-      const { data: res }: any = await meetingAvailabilityApi.update({ days, minNoticeMinutes: minNotice });
+      const { data: res }: any = await meetingAvailabilityApi.update({
+        days, minNoticeMinutes: minNotice, blockedDates,
+      });
       const cfg: AvailabilityConfig = res.data;
       setConfig(cfg);
       setDays(cloneDays(cfg.days));
       setSavedDays(cloneDays(cfg.days));
       setMinNotice(cfg.minNoticeMinutes ?? 0);
       setSavedMinNotice(cfg.minNoticeMinutes ?? 0);
+      setBlockedDates([...(cfg.blockedDates ?? [])].sort());
+      setSavedBlockedDates([...(cfg.blockedDates ?? [])].sort());
       toast.success('Booking availability updated — visitors see it immediately');
     } catch (e: any) {
       toast.error(e?.response?.data?.message || 'Failed to save availability');
@@ -380,11 +412,31 @@ export default function MeetingAvailability() {
   const names = config.weekdayNames;
   const openCount = days.filter((d) => d.enabled && d.slots.length).length;
 
+  const today = todayIn(config.timezone);
+  const upcomingBlocked = blockedDates.filter((d) => d >= today);
+  const pastBlocked = blockedDates.filter((d) => d < today);
+
+  const blockDate = (date: string) => {
+    if (!date) {
+      toast.error('Pick a date to block first.');
+      return;
+    }
+    if (blockedDates.includes(date)) {
+      toast.error(`${fmtDate(date)} is already blocked.`);
+      return;
+    }
+    setBlockedDates((prev) => [...prev, date].sort());
+    setDateToBlock('');
+  };
+
+  const unblockDate = (date: string) =>
+    setBlockedDates((prev) => prev.filter((d) => d !== date));
+
   const businessSlots = allSlots.filter((s) => s >= BUSINESS_FROM && s <= BUSINESS_TO);
   const allEnabled = days.length > 0 && days.every((d) => d.enabled);
   const allDisabled = days.length > 0 && days.every((d) => !d.enabled);
-  const open24Active = allEnabled && days.every((d) => sameSlots(d.slots, allSlots));
-  const businessHoursActive = allEnabled && days.every((d) => sameSlots(d.slots, businessSlots));
+  const open24Active = allEnabled && days.every((d) => sameList(d.slots, allSlots));
+  const businessHoursActive = allEnabled && days.every((d) => sameList(d.slots, businessSlots));
 
   return (
     <div>
@@ -394,7 +446,11 @@ export default function MeetingAvailability() {
         actions={
           <>
             <button
-              onClick={() => { setDays(cloneDays(savedDays)); setMinNotice(savedMinNotice); }}
+              onClick={() => {
+                setDays(cloneDays(savedDays));
+                setMinNotice(savedMinNotice);
+                setBlockedDates([...savedBlockedDates]);
+              }}
               disabled={!dirty || saving}
               className="btn-secondary inline-flex items-center gap-1.5 disabled:opacity-50"
             >
@@ -486,6 +542,87 @@ export default function MeetingAvailability() {
           <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
             You have unsaved changes — visitors still see the previously saved schedule.
           </p>
+        )}
+      </div>
+
+      {/* ── One-off closed dates ── */}
+      <div className="card p-4 mb-5 space-y-3">
+        <div className="flex items-start gap-2">
+          <NoSymbolIcon className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-gray-900">Blocked dates</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Close a specific date — a holiday or a day off. Nothing can be booked on a
+              blocked date even if its weekday is open below, and unblocking restores the
+              day's normal times. Dates are {config.timezone} calendar dates.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="date"
+            value={dateToBlock}
+            min={today}
+            onChange={(e) => setDateToBlock(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); blockDate(dateToBlock); } }}
+            aria-label="Date to block"
+            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5"
+          />
+          <button
+            type="button"
+            onClick={() => blockDate(dateToBlock)}
+            disabled={!dateToBlock}
+            className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-600 text-white shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-600"
+          >
+            <PlusIcon className="w-3.5 h-3.5" strokeWidth={2.5} /> Block this date
+          </button>
+          {!!pastBlocked.length && (
+            <button
+              type="button"
+              onClick={() => setBlockedDates(upcomingBlocked)}
+              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+            >
+              Clear {pastBlocked.length} past date{pastBlocked.length === 1 ? '' : 's'}
+            </button>
+          )}
+        </div>
+
+        {blockedDates.length === 0 ? (
+          <p className="text-xs text-gray-400">
+            No blocked dates — every date follows the weekday schedule below.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {blockedDates.map((date) => {
+              const past = date < today;
+              return (
+                <span
+                  key={date}
+                  className={`inline-flex items-center gap-1.5 text-xs font-semibold pl-2.5 pr-1.5 py-1 rounded-full border ${
+                    past
+                      ? 'bg-gray-50 border-gray-200 text-gray-400'
+                      : 'bg-red-50 border-red-200 text-red-700'
+                  }`}
+                >
+                  {fmtDate(date)}
+                  {past && <span className="font-normal text-gray-400">· past</span>}
+                  <Tooltip content={`Unblock ${fmtDate(date)}`}>
+                    <button
+                      type="button"
+                      onClick={() => unblockDate(date)}
+                      aria-label={`Unblock ${fmtDate(date)}`}
+                      className={`rounded-full p-0.5 transition-colors ${
+                        past ? 'hover:bg-gray-200 hover:text-gray-600' : 'hover:bg-red-200 hover:text-red-900'
+                      }`}
+                    >
+                      <XMarkIcon className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    </button>
+                  </Tooltip>
+                </span>
+              );
+            })}
+          </div>
         )}
       </div>
 
