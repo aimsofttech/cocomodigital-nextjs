@@ -185,3 +185,26 @@ export const meetingApi = {
   updateStatus: (id: string, status: string) => api.put(`${BASE}/meetings/${id}/status`, { status }),
   delete: (id: string) => api.delete(`${BASE}/meetings/${id}`),
 };
+
+/* The bookable schedule itself — which weekdays are open and which 15-minute
+   slots each one offers. One document, replaced whole on save, and the single
+   source of truth for the public picker as well as the reschedule form. */
+export interface AvailabilityDay {
+  weekday: number; // 0 = Sunday … 6 = Saturday
+  enabled: boolean;
+  slots: string[]; // enabled slot starts, "HH:mm" in the studio's timezone
+}
+export interface AvailabilityConfig {
+  timezone: string;
+  slotStepMinutes: number;
+  minNoticeMinutes: number;
+  days: AvailabilityDay[];
+  updatedAt: string | null;
+  allSlots: string[];
+  weekdayNames: string[];
+}
+export const meetingAvailabilityApi = {
+  get: () => api.get(`${BASE}/meeting-availability`),
+  update: (data: { timezone?: string; minNoticeMinutes?: number; days: AvailabilityDay[] }) =>
+    api.put(`${BASE}/meeting-availability`, data),
+};

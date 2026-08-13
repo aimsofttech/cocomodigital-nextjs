@@ -10,6 +10,12 @@ const meetingSchema = new mongoose.Schema({
   meetingTimezone: { type: String, trim: true },
   meeting_start_utc: { type: Date, default: undefined },
   slot_key: { type: String, default: undefined },
+
+  /* Mirrors slot_key for exactly as long as this meeting actually holds the
+     slot (pending or confirmed), and is unset otherwise. Derived by the hook
+     below — never assign it directly. The sparse unique index on it is what
+     makes the reservation atomic; see the index comment. */
+  slot_hold: { type: String, default: undefined },
   duration: { type: Number, default: 15 },
   notes: { type: String, trim: true },
   service: { type: String, trim: true },
@@ -47,6 +53,20 @@ const meetingSchema = new mongoose.Schema({
   reminderSentAt: { type: Date, default: null },
 }, { timestamps: true, collection: 'meetings' });
 
+/** Statuses in which a meeting is still occupying its slot. */
+const HOLDING_STATUSES = ['pending', 'confirmed'];
+
+/* Keep slot_hold in step with (slot_key, status) on every write that goes
+   through a document — create, confirm, reject, reschedule. Deriving it here
+   rather than at each call site means a new status transition can't forget to
+   release or re-take the slot. */
+meetingSchema.pre('save', function syncSlotHold(next) {
+  this.slot_hold = this.slot_key && HOLDING_STATUSES.includes(this.status)
+    ? this.slot_key
+    : undefined;
+  next();
+});
+
 // Prevent two confirmed meetings at the same slot (race-proof via unique index).
 meetingSchema.index(
   { slot_key: 1 },
@@ -55,5 +75,15 @@ meetingSchema.index(
     partialFilterExpression: { slot_key: { $exists: true }, status: 'confirmed' },
   }
 );
+
+/* The same guarantee one step earlier: two visitors submitting the same slot in
+   the same instant would both pass the "is it taken?" read before either wrote,
+   and both end up with a pending meeting. This index makes the insert itself the
+   reservation — the loser gets a duplicate-key error, which the booking and
+   reschedule endpoints already translate into a 409.
+   Sparse on a dedicated field rather than a partial index on slot_key, because a
+   partial expression matching two statuses needs MongoDB 5.3+, and redefining
+   the index above would require dropping it on a live collection. */
+meetingSchema.index({ slot_hold: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Meeting', meetingSchema);

@@ -10,6 +10,7 @@ import {
   QuestionMarkCircleIcon, NewspaperIcon, UsersIcon, UserIcon, PhoneIcon,
   TrophyIcon,
   ArrowUpTrayIcon,
+  CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
 
 // ── Nav tree ────────────────────────────────────────────────────────────────
@@ -155,6 +156,7 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Contact Us', path: '/contact/contact-us', icon: EnvelopeIcon },
       { label: 'Meeting Requests', path: '/contact/meetings', icon: PhoneIcon },
+      { label: 'Booking Availability', path: '/contact/meeting-availability', icon: CalendarDaysIcon },
     ],
   },
 ];

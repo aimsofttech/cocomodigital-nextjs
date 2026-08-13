@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import Calendar from 'react-calendar';
-import { meetingApi } from '@/services/adminApi';
+import { meetingApi, meetingAvailabilityApi, type AvailabilityConfig } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
 import TableFilter, {
@@ -16,27 +16,26 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
-// 10:00–18:45 in 15-minute steps — mirrors the public booking page's slot grid.
-const RESCHEDULE_SLOTS: string[] = (() => {
-  const slots: string[] = [];
-  for (let h = 10; h < 19; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-    }
-  }
-  return slots;
-})();
+/* Which days are open and which slots each offers is the admin's own
+   configuration (Contact → Booking Availability). Nothing about the window is
+   declared here: the reschedule grid comes from /meetings/availability and the
+   calendar's closed days from the config document, so this picker and the
+   public one can never drift apart. */
 
-/* Days the studio takes no calls (0 = Sunday). The reschedule endpoint rejects
-   these too — see app/api/src/utils/bookingWindow.js, the authoritative copy. */
-const CLOSED_WEEKDAYS = [0];
-const isClosedDay = (d: Date | null | undefined): boolean =>
-  !!d && CLOSED_WEEKDAYS.includes(d.getDay());
+/** True when the schedule has that weekday switched off (or empty). */
+const isClosedDay = (
+  config: AvailabilityConfig | null,
+  d: Date | null | undefined
+): boolean => {
+  if (!config || !d) return false;
+  const day = config.days.find((x) => x.weekday === d.getDay());
+  return !day || !day.enabled || day.slots.length === 0;
+};
 
 /** The given day, or the next open one — keeps the picker off a closed day. */
-const nextOpenDay = (from: Date): Date => {
+const nextOpenDay = (config: AvailabilityConfig | null, from: Date): Date => {
   const d = new Date(from);
-  for (let i = 0; i < 7 && isClosedDay(d); i++) d.setDate(d.getDate() + 1);
+  for (let i = 0; i < 7 && isClosedDay(config, d); i++) d.setDate(d.getDate() + 1);
   return d;
 };
 
@@ -136,11 +135,16 @@ export default function MeetingList() {
   const [confirmTarget, setConfirmTarget] = useState<any>(null);
   const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [rescheduleTarget, setRescheduleTarget] = useState<any>(null);
-  const [rescheduleDate, setRescheduleDate] = useState<Date>(() => nextOpenDay(new Date()));
+  const [rescheduleDate, setRescheduleDate] = useState<Date>(() => new Date());
   const [rescheduleTime, setRescheduleTime] = useState('');
   const [rescheduleHour12, setRescheduleHour12] = useState(true);
   const [bookedTimes, setBookedTimes] = useState<Set<string>>(new Set());
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  /* The configured slots for the picked date, and whether the day is closed —
+     both straight from the API, so the grid matches what visitors can book. */
+  const [daySlots, setDaySlots] = useState<string[]>([]);
+  const [dayClosed, setDayClosed] = useState(false);
+  const [availabilityConfig, setAvailabilityConfig] = useState<AvailabilityConfig | null>(null);
 
   // Assign-to-team-member modal
   const [assignTarget, setAssignTarget] = useState<any>(null);
@@ -219,15 +223,16 @@ export default function MeetingList() {
 
   const openReschedule = (row: any) => {
     setRescheduleTarget(row);
-    setRescheduleDate(nextOpenDay(new Date()));
+    setRescheduleDate(nextOpenDay(availabilityConfig, new Date()));
     setRescheduleTime('');
   };
   const closeReschedule = () => {
     if (actionLoading) return;
     setRescheduleTarget(null);
-    setRescheduleDate(nextOpenDay(new Date()));
+    setRescheduleDate(nextOpenDay(availabilityConfig, new Date()));
     setRescheduleTime('');
     setBookedTimes(new Set());
+    setDaySlots([]);
   };
 
   // Called after the user picks a new date/time and clicks "Reschedule & Notify"
@@ -283,19 +288,10 @@ export default function MeetingList() {
     }
   };
 
-  // Hide already-passed slots when the selected day is today (soft UX guard —
-  // the backend still re-validates against the meeting's actual timezone).
-  const visibleRescheduleSlots = useMemo(() => {
-    const now = new Date();
-    if (isClosedDay(rescheduleDate)) return [];
-    if (!isSameLocalDay(rescheduleDate, now)) return RESCHEDULE_SLOTS;
-    return RESCHEDULE_SLOTS.filter((slot) => {
-      const [h, m] = slot.split(':').map(Number);
-      const slotDate = new Date(rescheduleDate);
-      slotDate.setHours(h, m, 0, 0);
-      return slotDate.getTime() > now.getTime();
-    });
-  }, [rescheduleDate]);
+  /* The API already drops slots that have passed (it does so in the studio's
+     timezone, which is the zone this form works in), so the list it returns is
+     exactly what may be offered. */
+  const visibleRescheduleSlots = daySlots;
 
   // Default the time picker to the meeting's own original time-of-day whenever
   // the target meeting or the picked date changes — admins usually keep the
@@ -308,21 +304,42 @@ export default function MeetingList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rescheduleDate, rescheduleTarget]);
 
-  // Fetch which slots on the picked date are already booked/confirmed by
-  // ANOTHER meeting, so they can be disabled in the grid below.
+  /* The configured schedule, used to grey out closed days in the calendar. One
+     fetch per mount — the per-date slot list below is the authoritative feed,
+     this only decides which tiles are clickable. */
   useEffect(() => {
-    if (!rescheduleTarget) { setBookedTimes(new Set()); return; }
+    let cancelled = false;
+    meetingAvailabilityApi.get()
+      .then(({ data: res }: any) => { if (!cancelled) setAvailabilityConfig(res?.data || null); })
+      .catch(() => { /* leave every tile clickable; the API is still the gate */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Fetch the picked date's bookable slots, plus which of them another meeting
+  // already holds, so the grid below shows exactly what can be chosen.
+  useEffect(() => {
+    if (!rescheduleTarget) { setBookedTimes(new Set()); setDaySlots([]); return; }
     let cancelled = false;
     setAvailabilityLoading(true);
     meetingApi
       .checkAvailability({
-        // Always IST now — the admin panel's reschedule picker no longer
-        // operates in the visitor's original timezone (see meetingController).
+        // Always the studio's own zone — the admin panel's reschedule picker no
+        // longer operates in the visitor's timezone (see meetingController).
         date: dateToYMD(rescheduleDate),
         excludeId: rescheduleTarget._id,
       })
-      .then(({ data }: any) => { if (!cancelled) setBookedTimes(new Set(data?.booked || [])); })
-      .catch(() => { if (!cancelled) setBookedTimes(new Set()); })
+      .then(({ data }: any) => {
+        if (cancelled) return;
+        setDaySlots(data?.slots || []);
+        setBookedTimes(new Set(data?.booked || []));
+        setDayClosed(Boolean(data?.closed));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setDaySlots([]);
+        setBookedTimes(new Set());
+        setDayClosed(false);
+      })
       .finally(() => { if (!cancelled) setAvailabilityLoading(false); });
     return () => { cancelled = true; };
   }, [rescheduleTarget, rescheduleDate]);
@@ -695,7 +712,7 @@ export default function MeetingList() {
                   prev2Label={null}
                   next2Label={null}
                   tileDisabled={({ date, view }) =>
-                    view === 'month' && isClosedDay(date)
+                    view === 'month' && isClosedDay(availabilityConfig, date)
                   }
                 />
               </div>
@@ -706,7 +723,7 @@ export default function MeetingList() {
                   <div>
                     <p className="font-bold text-gray-900 text-sm leading-tight">{formatLongDate(rescheduleDate)}</p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      IST · 15 min · Google Meet
+                      {availabilityConfig?.timezone || IST_TZ} · 15 min · Google Meet
                     </p>
                   </div>
                   <div className="inline-flex bg-gray-100 border border-gray-200 rounded-full p-0.5 flex-shrink-0">
@@ -733,8 +750,10 @@ export default function MeetingList() {
 
                 {visibleRescheduleSlots.length === 0 ? (
                   <p className="text-sm text-gray-400 py-4">
-                    {isClosedDay(rescheduleDate)
-                      ? 'Closed on Sundays — pick a day from Monday to Saturday.'
+                    {availabilityLoading
+                      ? 'Loading available times…'
+                      : dayClosed
+                      ? 'No availability configured for this day — pick another date, or open it under Contact → Booking Availability.'
                       : 'No more slots today — pick another date.'}
                   </p>
                 ) : (

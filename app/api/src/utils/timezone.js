@@ -63,4 +63,50 @@ const wallClockInZone = (date, timeZone) => {
   }
 };
 
-module.exports = { zonedTimeToUtc, formatInTimeZone, wallClockInZone, IST_TIMEZONE };
+/** True when `tz` is an IANA zone this runtime recognises. */
+const isValidTimeZone = (tz) => {
+  if (!tz || typeof tz !== 'string') return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * A reusable `wallClockInZone` bound to one zone.
+ *
+ * Slot generation converts hundreds of instants per request; building a single
+ * Intl formatter up front and calling formatToParts is an order of magnitude
+ * cheaper than a toLocaleString pair per instant.
+ *
+ * @returns {(date: Date) => {date: string, time: string}}
+ * @throws {RangeError} if `timeZone` isn't a recognised IANA zone.
+ */
+const wallClockFormatter = (timeZone) => {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    // h23 rather than hour12:false — the latter renders midnight as "24:00" on
+    // some ICU builds, which would pair the next day's hour with today's date.
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  });
+  return (date) => {
+    const parts = {};
+    for (const p of fmt.formatToParts(date)) parts[p.type] = p.value;
+    return {
+      date: `${parts.year}-${parts.month}-${parts.day}`,
+      time: `${parts.hour}:${parts.minute}`,
+    };
+  };
+};
+
+module.exports = {
+  zonedTimeToUtc,
+  formatInTimeZone,
+  wallClockInZone,
+  wallClockFormatter,
+  isValidTimeZone,
+  IST_TIMEZONE,
+};

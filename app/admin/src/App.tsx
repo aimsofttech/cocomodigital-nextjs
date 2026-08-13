@@ -159,6 +159,7 @@ const PageForm = lazy(() => import('@/pages/templates/PageForm'));
 // Contact
 const ContactUsList = lazy(() => import('@/pages/contact/ContactUsList'));
 const MeetingList = lazy(() => import('@/pages/meetings/MeetingList'));
+const MeetingAvailability = lazy(() => import('@/pages/meetings/MeetingAvailability'));
 
 // Home Page Sections
 const HomePageSectionList = lazy(() => import('@/pages/settings/HomePageSectionList'));
@@ -430,6 +431,7 @@ export default function App() {
           {/* Contact */}
           <Route path="contact/contact-us" element={<ContactUsList />} />
           <Route path="contact/meetings" element={<MeetingList />} />
+          <Route path="contact/meeting-availability" element={<MeetingAvailability />} />
 
           {/* Settings */}
           <Route path="settings/home-sections" element={<HomePageSectionList />} />

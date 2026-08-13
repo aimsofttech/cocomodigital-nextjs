@@ -1,14 +1,17 @@
 // @ts-nocheck
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Calendar from "react-calendar";
 import { useNavigate, useLocation } from "@/src/lib/navigation";
 import { FaRegClock, FaVideo, FaGlobeAsia } from "react-icons/fa";
 import {
   CLOSED_DAY_MESSAGE,
-  generateTimeSlots,
-  isClosedDay,
-  nextOpenDay,
+  NO_SLOTS_LEFT_MESSAGE,
+  fetchDayAvailability,
+  fetchOpenDates,
+  localDateKey,
+  localMonthKey,
+  viewerTimeZone,
 } from "@/src/lib/bookingWindow";
 
 
@@ -16,14 +19,9 @@ import {
 const HOST_PHOTO_URL =
   "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png";
 
-/* Window (Mon–Sat 10:00–18:45) and slot generation live in one module shared
-   with the rest of the booking flow — see src/lib/bookingWindow.ts. */
-
-// Canonical slot id shared with the API: the UTC instant truncated to the
-// minute ("YYYY-MM-DDTHH:mm"). Must match the backend's slot_key format.
-function slotKeyOf(slot) {
-  return slot.toISOString().slice(0, 16);
-}
+/* Which days are open and which 15-minute slots each one offers is the admin's
+   configuration, fetched from the API — nothing about the window is decided
+   here. See src/lib/bookingWindow.ts for the client. */
 
 function formatSlot(slot, hour12) {
   return slot.toLocaleTimeString([], {
@@ -42,12 +40,18 @@ function formatLongDate(date) {
   });
 }
 
-const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time: string, tz: string) => void) | null }) => {
-  // Opens on today, or the next open day when today is closed (Sunday).
-  const [selectedDate, setSelectedDate] = useState(() => nextOpenDay(new Date()));
-  const [selectedSlot, setSelectedSlot] = useState(null); // store the Date itself
+const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time: string, tz: string, startUtc: string) => void) | null }) => {
+  /* Opens on today. If the admin has today switched off, the first effect that
+     sees the month's open dates moves the selection to the next open one. */
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [selectedSlot, setSelectedSlot] = useState(null); // an API slot object
   const [timezone, setTimezone] = useState("");
-  const [bookedKeys, setBookedKeys] = useState(() => new Set<string>());
+  /* Day availability straight from the API — slot list and booked flags. */
+  const [dayAvail, setDayAvail] = useState(null);
+  /* Open dates per visible month, keyed "YYYY-MM". A month absent from here
+     hasn't loaded yet; its dates stay clickable rather than falsely disabled. */
+  const [openDatesByMonth, setOpenDatesByMonth] = useState({});
+  const [activeMonth, setActiveMonth] = useState(() => localMonthKey(new Date()));
   const [slotsLoading, setSlotsLoading] = useState(false);
   /* Deterministic on the server; the real locale preference is applied after
      mount (below) so the 12h/24h toggle can't differ between the two renders. */
@@ -66,7 +70,7 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
   const { cartItems = [] } = location.state || {};
 
   useEffect(() => {
-    setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    setTimezone(viewerTimeZone());
     // Default to 12h in en-US locales, 24h elsewhere — matches the
     // user's regional expectation without a settings click.
     if (typeof navigator !== "undefined" && navigator.language) {
@@ -76,60 +80,68 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
     setMounted(true);
   }, []);
 
-  const timeSlots = useMemo(
-    () => (mounted ? generateTimeSlots(selectedDate) : []),
-    [selectedDate, mounted]
-  );
+  const selectedKey = useMemo(() => localDateKey(selectedDate), [selectedDate]);
+  const openDates = openDatesByMonth[activeMonth];
+
+  /* Which dates in the month the calendar may offer. Fetched per month and
+     cached, so paging back to a month already seen costs nothing. */
+  useEffect(() => {
+    if (!mounted || openDatesByMonth[activeMonth] !== undefined) return;
+    const ctrl = new AbortController();
+    fetchOpenDates(activeMonth, timezone, ctrl.signal).then((set) => {
+      if (ctrl.signal.aborted) return;
+      // null (feed unreachable) is stored as null, which tileDisabled reads as
+      // "unknown" and leaves every date clickable.
+      setOpenDatesByMonth((prev) => ({ ...prev, [activeMonth]: set }));
+    });
+    return () => ctrl.abort();
+  }, [mounted, activeMonth, timezone, openDatesByMonth]);
+
+  /* Land the visitor on a day they can actually book. Runs once, after the
+     first month's open dates arrive — today may be switched off. */
+  const initialJumpDone = useRef(false);
+  useEffect(() => {
+    if (initialJumpDone.current || !openDates) return;
+    initialJumpDone.current = true;
+    if (openDates.has(selectedKey)) return;
+    const next = [...openDates].sort().find((d) => d >= selectedKey);
+    if (!next) return;
+    const [y, m, d] = next.split("-").map(Number);
+    setSelectedDate(new Date(y, m - 1, d));
+  }, [openDates, selectedKey]);
 
   // Drop the time when the date changes — a 14:30 valid yesterday
   // isn't valid today.
   useEffect(() => {
     setSelectedSlot(null);
-  }, [selectedDate]);
+  }, [selectedKey]);
 
-  // Fetch which slots are already booked for the visible day and disable them.
-  // Re-runs whenever the day's slots change (i.e. on date change / remount), so
-  // availability refreshes after a booking is made elsewhere.
+  /* The day's slots, with their booked flags, exactly as the API reports them.
+     Re-runs on every date change, so a slot taken elsewhere shows up as booked
+     the next time the day is opened. */
   useEffect(() => {
-    let cancelled = false;
-    if (!timeSlots.length) {
-      setBookedKeys(new Set());
-      return;
-    }
-    const from = timeSlots[0].toISOString();
-    const to = timeSlots[timeSlots.length - 1].toISOString();
+    if (!mounted) return;
+    const ctrl = new AbortController();
     setSlotsLoading(true);
-    fetch(
-      `/content-api/meeting-availability?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-      { headers: { Accept: "application/json" } }
-    )
-      .then((r) => (r.ok ? r.json() : { booked: [] }))
-      .then((d) => {
-        if (cancelled) return;
-        const booked = new Set<string>(d?.booked || []);
-        setBookedKeys(booked);
-        // If the currently selected slot just became booked, clear it.
-        setSelectedSlot((cur) => (cur && booked.has(slotKeyOf(cur)) ? null : cur));
-      })
-      .catch(() => {
-        if (!cancelled) setBookedKeys(new Set());
-      })
-      .finally(() => {
-        if (!cancelled) setSlotsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [timeSlots]);
+    fetchDayAvailability(selectedKey, timezone, ctrl.signal).then((data) => {
+      if (ctrl.signal.aborted) return;
+      setDayAvail(data);
+      setSlotsLoading(false);
+      // If the slot picked a moment ago is gone or now booked, drop it.
+      setSelectedSlot((cur) =>
+        cur && data.slots.some((s) => s.slotKey === cur.slotKey && !s.booked) ? cur : null
+      );
+    });
+    return () => ctrl.abort();
+  }, [mounted, selectedKey, timezone]);
+
+  const timeSlots = dayAvail?.date === selectedKey ? dayAvail.slots : [];
 
   const handleConfirm = () => {
     if (!selectedDate || !selectedSlot) return;
-    /* Belt-and-braces: the calendar already blocks closed days and no slots are
-       generated for them, so this only fires if that guard is ever bypassed. */
-    if (isClosedDay(selectedDate)) return;
-    const time24 = formatSlot(selectedSlot, false);
+    const time24 = selectedSlot.time;
     if (onConfirm) {
-      onConfirm(selectedDate, time24, timezone);
+      onConfirm(selectedDate, time24, timezone, selectedSlot.startUtc);
       return;
     }
     navigate("/schedule-meeting", {
@@ -137,6 +149,9 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
         date: selectedDate,
         time: time24,
         timeZone: timezone,
+        // The exact instant the API offered — carried through so the booking
+        // POST reserves that slot and not a re-derived approximation of it.
+        startUtc: selectedSlot.startUtc,
         cartItems,
       },
     });
@@ -220,12 +235,20 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                 minDate={new Date()}
                 prev2Label={null}
                 next2Label={null}
-                /* Closed days are greyed out and unclickable, so a Sunday can
-                   never become the selected date in the first place. The
-                   existing .react-calendar__tile:disabled rule styles them. */
-                tileDisabled={({ date, view }) =>
-                  view === "month" && isClosedDay(date)
+                onActiveStartDateChange={({ activeStartDate }) =>
+                  activeStartDate && setActiveMonth(localMonthKey(activeStartDate))
                 }
+                /* Days the admin has switched off (or that have no slots left)
+                   are greyed out and unclickable, so they can never become the
+                   selected date. The existing .react-calendar__tile:disabled
+                   rule styles them. A month whose feed hasn't arrived — or
+                   couldn't be reached — disables nothing; the API is still the
+                   gate. */
+                tileDisabled={({ date, view }) => {
+                  if (view !== "month") return false;
+                  const known = openDatesByMonth[localMonthKey(date)];
+                  return !!known && !known.has(localDateKey(date));
+                }}
               />
             </div>
 
@@ -271,11 +294,13 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                 </div>
               </div>
 
-              {timeSlots.length === 0 ? (
+              {slotsLoading && timeSlots.length === 0 ? (
+                <p className="schedule-slots-loading" role="status">
+                  Loading available times…
+                </p>
+              ) : timeSlots.length === 0 ? (
                 <p className="schedule-slots-empty" role="status">
-                  {isClosedDay(selectedDate)
-                    ? CLOSED_DAY_MESSAGE
-                    : "No more slots today — pick another date."}
+                  {dayAvail?.closed ? CLOSED_DAY_MESSAGE : NO_SLOTS_LEFT_MESSAGE}
                 </p>
               ) : (
                 <>
@@ -290,21 +315,22 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
                   aria-label="Available time slots"
                 >
                   {timeSlots.map((slot) => {
-                    const label = formatSlot(slot, hour12);
-                    const active =
-                      selectedSlot && selectedSlot.getTime() === slot.getTime();
-                    const booked = bookedKeys.has(slotKeyOf(slot));
+                    /* Rendered from the instant, so the 12h/24h toggle and the
+                       visitor's locale still control the label — the API only
+                       says which instants exist. */
+                    const label = formatSlot(new Date(slot.startUtc), hour12);
+                    const active = selectedSlot?.slotKey === slot.slotKey;
                     return (
-                      <li key={slot.getTime()}>
+                      <li key={slot.slotKey}>
                         <button
                           type="button"
                           role="option"
                           aria-selected={active}
-                          disabled={booked}
-                          aria-disabled={booked}
-                          title={booked ? "Already booked" : undefined}
-                          className={`schedule-slot ${active ? "schedule-slot--active" : ""} ${booked ? "schedule-slot--booked" : ""}`}
-                          onClick={() => !booked && setSelectedSlot(slot)}
+                          disabled={slot.booked}
+                          aria-disabled={slot.booked}
+                          title={slot.booked ? "Already booked" : undefined}
+                          className={`schedule-slot ${active ? "schedule-slot--active" : ""} ${slot.booked ? "schedule-slot--booked" : ""}`}
+                          onClick={() => !slot.booked && setSelectedSlot(slot)}
                         >
                           {label}
                         </button>
@@ -329,7 +355,7 @@ const ScheduleMeeting = ({ onConfirm = null }: { onConfirm?: ((date: Date, time:
               onClick={handleConfirm}
             >
               Confirm — {formatLongDate(selectedDate)} at{" "}
-              {formatSlot(selectedSlot, hour12)}
+              {formatSlot(new Date(selectedSlot.startUtc), hour12)}
               {timezone && ` (${timezone})`}
             </button>
           )}

@@ -2,8 +2,14 @@ const ContactUs = require('../../models/ContactUs');
 const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
 const { sendBookingEmails, sendMeetingRequestEmails, sendContactEnquiryEmail } = require('../../services/bookingMailer');
-const { zonedTimeToUtc, wallClockInZone, IST_TIMEZONE } = require('../../utils/timezone');
-const { validateBookingSlot, isClosedDate, DAY_SLOTS } = require('../../utils/bookingWindow');
+const { zonedTimeToUtc, isValidTimeZone } = require('../../utils/timezone');
+const {
+  getAvailabilityConfig,
+  slotsForViewerDate,
+  openViewerDatesInRange,
+  validateBookingInstant,
+  addDays,
+} = require('../../utils/bookingWindow');
 const { ingestSafe: crmIngest } = require('../../crm/services/leadIngest');
 const logger = require('../../utils/logger');
 
@@ -40,18 +46,80 @@ const slotKeyOf = (iso) => {
   return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 16);
 };
 
-// GET /api/contact/availability?from=<iso>&to=<iso>[&date=YYYY-MM-DD]
-// Returns slot keys for pending + confirmed meetings so the frontend disables them.
-const availability = async (req, res) => {
-  const { from, to, date } = req.query;
+/** Slot keys already taken (pending or confirmed) among the ones asked about. */
+const bookedKeysAmong = async (slotKeys) => {
+  if (!slotKeys.length) return new Set();
+  const docs = await Meeting.find({
+    slot_key: { $in: slotKeys },
+    status: { $in: ['pending', 'confirmed'] },
+  }).select('slot_key -_id').lean();
+  return new Set(docs.map((d) => d.slot_key));
+};
 
-  /* Optional `date` (wall-clock YYYY-MM-DD): lets a caller ask about a specific
-     day and get the closed-day answer without inferring it from an empty
-     `booked` list. Additive — callers that only send from/to are unaffected. */
-  if (date && isClosedDate(date)) {
-    return res.json({ status: 'success', booked: [], closed: true, slots: [] });
+/**
+ * GET /api/contact/availability
+ *
+ * Three modes, all reading the admin-configured schedule — the picker holds no
+ * rule of its own:
+ *
+ *   ?date=YYYY-MM-DD[&tz=Area/City]  the day's bookable slots, each flagged
+ *                                    booked/free, in the caller's timezone.
+ *   ?month=YYYY-MM[&tz=Area/City]    which dates that month have any slot left,
+ *                                    so the calendar can disable the rest.
+ *   ?from=<iso>&to=<iso>             legacy: just the taken slot keys in a range.
+ *
+ * `tz` defaults to the studio's own zone when missing or unrecognised.
+ */
+const availability = async (req, res) => {
+  const { from, to, date, month, tz } = req.query;
+  const config = await getAvailabilityConfig();
+  const viewerTz = isValidTimeZone(tz) ? tz : config.timezone;
+
+  // ── Month mode: which dates are open at all ───────────────────────────────
+  if (month) {
+    const m = /^(\d{4})-(\d{2})$/.exec(String(month).trim());
+    const year = m ? Number(m[1]) : NaN;
+    const mon = m ? Number(m[2]) : NaN;
+    if (!m || mon < 1 || mon > 12) {
+      return res.status(400).json({ status: 'error', message: 'Invalid month. Expected YYYY-MM.' });
+    }
+    const firstOfMonth = `${m[1]}-${m[2]}-01`;
+    const nextMonthFirst = mon === 12
+      ? `${year + 1}-01-01`
+      : `${m[1]}-${String(mon + 1).padStart(2, '0')}-01`;
+    const openDates = openViewerDatesInRange(config, firstOfMonth, addDays(nextMonthFirst, -1), viewerTz);
+    return res.json({
+      status: 'success',
+      month: `${m[1]}-${m[2]}`,
+      timezone: viewerTz,
+      businessTimezone: config.timezone,
+      openDates,
+    });
   }
 
+  // ── Day mode: the slot list the picker renders ────────────────────────────
+  if (date) {
+    const { configured, slots } = slotsForViewerDate(config, date, viewerTz);
+    const booked = await bookedKeysAmong(slots.map((s) => s.slotKey));
+    return res.json({
+      status: 'success',
+      date,
+      timezone: viewerTz,
+      businessTimezone: config.timezone,
+      /* "Nothing is configured for this date" — distinct from a day whose
+         slots have merely all passed, which the picker words differently. */
+      closed: configured === 0,
+      slots: slots.map((s) => ({
+        time: s.time,
+        startUtc: s.startUtc,
+        slotKey: s.slotKey,
+        booked: booked.has(s.slotKey),
+      })),
+      booked: [...booked],
+    });
+  }
+
+  // ── Legacy range mode — response shape deliberately unchanged ─────────────
   const q = { slot_key: { $exists: true }, status: { $in: ['pending', 'confirmed'] } };
   if (from || to) {
     q.meeting_start_utc = {};
@@ -59,12 +127,7 @@ const availability = async (req, res) => {
     if (to) q.meeting_start_utc.$lte = new Date(to);
   }
   const docs = await Meeting.find(q).select('slot_key -_id').lean();
-  const booked = docs.map((d) => d.slot_key).filter(Boolean);
-  /* `closed`/`slots` only appear when the caller asked about a specific date,
-     so the existing from/to response shape is untouched. */
-  res.json(date
-    ? { status: 'success', booked, closed: false, slots: DAY_SLOTS }
-    : { status: 'success', booked });
+  res.json({ status: 'success', booked: docs.map((d) => d.slot_key).filter(Boolean) });
 };
 
 // POST /api/contact/free-consultation
@@ -97,21 +160,15 @@ const freeConsultation = async (req, res) => {
 
   // ── Meeting booking (from /ScheduleMeeting) ──────────────────────────────
   if (slot_key) {
-    /* Enforce the booking window server-side. The picker already hides closed
-       days and out-of-hours slots, but this endpoint is reachable directly, so
-       the UI's rule cannot be the only one.
+    /* Enforce the admin's availability server-side. The picker already hides
+       disabled days and slots, but this endpoint is reachable directly, so the
+       UI's rule cannot be the only one.
 
-       Validate the wall-clock slot the booker chose. When a direct caller omits
-       meeting_date/meeting_time and posts only meeting_start_utc, derive the
-       wall-clock from the instant in their stated zone (IST if unstated) —
-       otherwise skipping those fields would skip the check entirely. */
-    const wall = (meeting_date && meeting_time)
-      ? { date: meeting_date, time: meeting_time }
-      : wallClockInZone(resolvedStartUtc, meeting_timezone || IST_TIMEZONE);
-    if (!wall) {
-      return res.status(400).json({ status: 'error', message: 'Invalid meeting date or time.' });
-    }
-    const slotCheck = validateBookingSlot(wall.date, wall.time);
+       The check runs on the resolved UTC instant, not on the wall-clock fields:
+       a direct caller can omit meeting_date/meeting_time, or state a timezone
+       they aren't in, and the instant they actually asked for is still the one
+       measured against the studio's schedule. */
+    const slotCheck = await validateBookingInstant(resolvedStartUtc);
     if (!slotCheck.ok) {
       return res.status(400).json({ status: 'error', message: slotCheck.message });
     }
