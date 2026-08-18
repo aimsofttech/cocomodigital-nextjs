@@ -36,6 +36,7 @@
     "prebuild": "tsx scripts/generate-blog-manifest.ts",
     "build": "next build",
     "blog": "tsx scripts/generate-blog-manifest.ts",
+    "og:cover": "tsx scripts/generate-og-cover.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write ."
