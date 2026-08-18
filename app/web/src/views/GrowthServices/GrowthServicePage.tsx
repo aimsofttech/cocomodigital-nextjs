@@ -1,4 +1,5 @@
 import StructuredData from "@/src/components/common/StructuredData/StructuredData";
+import ArticleContent from "@/src/components/Services/growth/ArticleContent";
 import CaseMedia from "@/src/components/Services/growth/CaseMedia";
 import CaseStudy from "@/src/components/Services/growth/CaseStudy";
 import ClosingCta from "@/src/components/Services/growth/ClosingCta";
@@ -23,25 +24,19 @@ import type {
   StatItem,
 } from "@/src/components/Services/growth/types";
 import {
+  sectionContents,
   sectionFeatures,
   sectionShowcases,
   type GrowthCta,
   type GrowthSection,
   type GrowthService,
 } from "@/src/lib/growthServices";
-
-/**
- * One renderer for all three growth landing pages.
- *
- * Everything on the page comes from the API: the hero, the section list and
- * their order, the items in each section, the case study, the FAQ and both CTA
- * groups. The section components themselves are unchanged — this layer only
- * resolves stored icon names into components and maps each section's renderer
- * to the right one.
- *
- * Sections the admin hasn't given any items are skipped rather than rendered
- * as an empty band, so a half-populated page still reads as finished.
- */
+import {
+  absoluteUrl,
+  breadcrumbJsonLd,
+  SITE_NAME,
+  SITE_URL,
+} from "@/src/lib/seo";
 
 const DASHBOARDS = {
   channel: ChannelDashboard,
@@ -57,7 +52,7 @@ const toCta = (cta: GrowthCta): CtaLink => ({
 });
 
 export default function GrowthServicePage({ service }: { service: GrowthService }) {
-  const { hero, caseStudy, closing, seo } = service;
+  const { hero, caseStudy, closing, mediaAlt, seo } = service;
 
   const Dashboard =
     hero.dashboardKey !== "none" ? DASHBOARDS[hero.dashboardKey] : null;
@@ -79,27 +74,91 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
   const heroCtas = service.ctas.hero.map(toCta);
   const closingCtas = service.ctas.closing.map(toCta);
 
-  /* Structured data. The FAQ block is only emitted when there are questions —
-     an empty FAQPage is invalid and would be flagged in Search Console. */
+  /* Every icon card across the page's grid bands, flattened — these are the
+     things the service actually delivers, so they become the OfferCatalog. */
+  const offerItems = service.sections
+    .filter((section) => section.renderer === "grid")
+    .flatMap((section) => sectionFeatures(service, section))
+    .map((feature) => ({ title: feature.title, description: feature.description }));
+
+  /* Structured data.
+
+     The canonical is resolved the same way `buildGrowthMetadata` resolves it,
+     so the URL in the schema and the URL in <link rel="canonical"> can never
+     disagree — a mismatch is one of the more common reasons a rich result gets
+     dropped. The FAQ and offer blocks are only emitted when there is something
+     to put in them: an empty FAQPage or an empty itemListElement is invalid
+     and gets flagged in Search Console. */
+  const pagePath = `/services/${service.slug}`;
+  const canonical = absoluteUrl(seo.canonicalUrl || service.pageUrl || pagePath);
+  const ogImage = seo.openGraph.image
+    ? absoluteUrl(seo.openGraph.image)
+    : absoluteUrl(`${pagePath}/opengraph-image`);
+
+  const provider = {
+    "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: absoluteUrl("/Images/logo/main-logo.png"),
+  };
+
   const schemas: Record<string, unknown>[] = [
     {
       "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": `${canonical}#webpage`,
+      url: canonical,
+      name: seo.title || service.name,
+      description: seo.description,
+      inLanguage: "en-IN",
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      primaryImageOfPage: { "@type": "ImageObject", url: ogImage },
+      about: { "@id": `${canonical}#service` },
+    },
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Services", path: "/solutions" },
+      { name: service.name, path: pagePath },
+    ]),
+    {
+      "@context": "https://schema.org",
       "@type": "Service",
+      "@id": `${canonical}#service`,
       name: service.name,
       serviceType: seo.serviceType,
-      provider: {
-        "@type": "Organization",
-        name: "Cocoma Digital",
-        url: "https://cocomadigital.com",
-      },
-      url: service.pageUrl,
+      provider,
+      areaServed: ["India", "United States", "United Kingdom", "Singapore", "Australia"],
+      url: canonical,
+      image: ogImage,
       description: seo.schemaDescription,
+      /* The deliverable cards are the closest thing the page has to a service
+         catalogue, so they are published as one rather than left as markup a
+         crawler has to infer meaning from. */
+      ...(offerItems.length
+        ? {
+            hasOfferCatalog: {
+              "@type": "OfferCatalog",
+              name: `${service.name} deliverables`,
+              itemListElement: offerItems.map((item, index) => ({
+                "@type": "Offer",
+                position: index + 1,
+                itemOffered: {
+                  "@type": "Service",
+                  name: item.title,
+                  description: item.description,
+                },
+              })),
+            },
+          }
+        : {}),
     },
   ];
   if (service.faqs.length) {
     schemas.push({
       "@context": "https://schema.org",
       "@type": "FAQPage",
+      "@id": `${canonical}#faq`,
       mainEntity: service.faqs.map((faq) => ({
         "@type": "Question",
         name: faq.question,
@@ -110,6 +169,11 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
 
   // Each band gets a stable heading id so its <section> can be labelled by it.
   const headingId = (section: GrowthSection) => `${service.slug}-${section.key}-title`;
+
+  /* Every band's heading is an H2, so the items inside it are H3s and their
+     own sub-blocks are H4s. Passing the level down rather than hard-coding it
+     keeps the outline intact when the admin reorders or removes a band. */
+  const ITEM_LEVEL = 3;
 
   const renderSectionBody = (section: GrowthSection) => {
     switch (section.renderer) {
@@ -125,6 +189,7 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
             columns={section.columns}
             layout={section.layout}
             compact={section.compact}
+            headingLevel={ITEM_LEVEL}
             className="mt-8"
           />
         );
@@ -134,26 +199,46 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
           title: f.title,
           description: f.description,
         }));
-        return <ProcessTimeline steps={steps} />;
+        return <ProcessTimeline steps={steps} headingLevel={ITEM_LEVEL} />;
       }
       case "showcase":
-        return <ShowcaseGrid items={sectionShowcases(service, section)} />;
+        return (
+          <ShowcaseGrid
+            items={sectionShowcases(service, section)}
+            headingLevel={ITEM_LEVEL}
+          />
+        );
       case "format-panels":
-        return <FormatPanels items={sectionShowcases(service, section)} />;
+        return (
+          <FormatPanels
+            items={sectionShowcases(service, section)}
+            headingLevel={ITEM_LEVEL}
+          />
+        );
+      case "article":
+        return <ArticleContent blocks={sectionContents(service, section)} />;
       case "case-study":
         return (
           <CaseStudy
+            id={`${service.slug}-${section.key}`}
+            headingLevel={ITEM_LEVEL}
             content={{
               title: caseStudy.title,
               subtitle: caseStudy.subtitle || undefined,
               paragraphs: caseStudy.paragraphs,
               rows: caseRows,
-              media: <CaseMedia media={caseStudy.media} />,
+              media: <CaseMedia media={caseStudy.media} alt={mediaAlt.caseStudy} />,
             }}
           />
         );
       case "faq":
-        return <FaqAccordion items={service.faqs} variant={section.faqVariant} />;
+        return (
+          <FaqAccordion
+            items={service.faqs}
+            variant={section.faqVariant}
+            headingLevel={ITEM_LEVEL}
+          />
+        );
       default:
         return null;
     }
@@ -169,6 +254,8 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
       case "showcase":
       case "format-panels":
         return sectionShowcases(service, section).length > 0;
+      case "article":
+        return sectionContents(service, section).length > 0;
       case "case-study":
         return caseRows.length > 0 || Boolean(caseStudy.title);
       case "faq":
@@ -193,11 +280,16 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
           ctas={heroCtas}
           trust={hero.trust}
           dashboard={Dashboard ? <Dashboard /> : null}
+          dashboardAlt={mediaAlt.hero}
         />
       )}
 
       {stats.length > 0 && (
-        <StatsBand items={stats} label={service.statsLabel || `${service.name} at a glance`} />
+        <StatsBand
+          id={`${service.slug}-stats-title`}
+          items={stats}
+          label={service.statsLabel || `${service.name} at a glance`}
+        />
       )}
 
       {sections.map((section) => (
@@ -218,15 +310,18 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
           title={
             <>
               {closing.title.map((line, index) =>
-                /* The first line sits inline with the heading; the rest each
-                   take their own line, matching the designed line breaks. */
                 index === 0 ? line : <span key={line} className="block">{line}</span>,
               )}
             </>
           }
           description={closing.description}
           ctas={closingCtas}
-          illustration={<ClosingIllustration variant={closing.illustrationKey} />}
+          illustration={
+            <ClosingIllustration
+              variant={closing.illustrationKey}
+              alt={mediaAlt.closing}
+            />
+          }
         />
       )}
     </div>

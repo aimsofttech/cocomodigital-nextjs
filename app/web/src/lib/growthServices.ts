@@ -59,13 +59,22 @@ export interface GrowthFaq {
   answer: string;
 }
 
+export interface GrowthContentBlock {
+  /** Heading level this block renders at — 3 to 6, nested under the H2. */
+  level: 3 | 4 | 5 | 6;
+  heading: string;
+  body: string[];
+  bullets: string[];
+}
+
 export type GrowthRenderer =
   | "grid"
   | "timeline"
   | "showcase"
   | "format-panels"
   | "case-study"
-  | "faq";
+  | "faq"
+  | "article";
 
 export interface GrowthSection {
   key: string;
@@ -110,12 +119,36 @@ export interface GrowthService {
     description: string;
     illustrationKey: "youtube" | "social" | "podcast" | "none";
   };
+  /** Accessible names for the three illustrated blocks; "" = decorative. */
+  mediaAlt: { hero: string; caseStudy: string; closing: string };
   seo: {
     title: string;
     description: string;
     keywords: string[];
+    secondaryKeywords: string[];
+    /** Absolute URL; "" means "derive it from the slug". */
+    canonicalUrl: string;
+    noIndex: boolean;
     serviceType: string;
     schemaDescription: string;
+    openGraph: {
+      title: string;
+      description: string;
+      type: "website" | "article";
+      /** "" falls back to the route's generated opengraph-image. */
+      image: string;
+      imageAlt: string;
+      imageWidth: number;
+      imageHeight: number;
+      imageType: string;
+    };
+    twitter: {
+      card: "summary_large_image" | "summary";
+      title: string;
+      description: string;
+      image: string;
+      imageAlt: string;
+    };
   };
   displayOrder: number;
   sections: GrowthSection[];
@@ -123,6 +156,8 @@ export interface GrowthService {
   features: Record<string, GrowthFeature[]>;
   /** Showcase panels keyed by the section they belong to. */
   showcases: Record<string, GrowthShowcase[]>;
+  /** Long-form SEO copy blocks keyed by the section they belong to. */
+  contents: Record<string, GrowthContentBlock[]>;
   stats: GrowthStat[];
   caseMetrics: GrowthCaseMetric[];
   faqs: GrowthFaq[];
@@ -136,6 +171,8 @@ export interface GrowthServiceSummary {
   pageUrl: string;
   metaTitle: string;
   metaDescription: string;
+  canonicalUrl: string;
+  updatedAt: string | null;
   displayOrder: number;
 }
 
@@ -161,3 +198,8 @@ export const sectionShowcases = (
   service: GrowthService,
   section: GrowthSection,
 ): GrowthShowcase[] => service.showcases?.[section.key] ?? [];
+
+export const sectionContents = (
+  service: GrowthService,
+  section: GrowthSection,
+): GrowthContentBlock[] => service.contents?.[section.key] ?? [];

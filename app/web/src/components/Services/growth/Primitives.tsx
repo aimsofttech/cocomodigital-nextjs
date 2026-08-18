@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { CtaLink } from "./types";
+import type { CtaLink, HeadingLevel } from "./types";
 import {
   CTA_BASE,
   CTA_VARIANTS,
@@ -57,6 +57,7 @@ export function SectionHeading({
   title,
   description,
   id,
+  level = 2,
   align = "center",
   className = "",
 }: {
@@ -64,6 +65,8 @@ export function SectionHeading({
   title: ReactNode;
   description?: string;
   id?: string;
+  /** Band headings are H2s under the hero's H1; override only to re-nest. */
+  level?: HeadingLevel;
   align?: "center" | "left";
   className?: string;
 }) {
@@ -79,12 +82,13 @@ export function SectionHeading({
           <span className={`${EYEBROW} ${HIGHLIGHT}`}>{eyebrow}</span>
         </p>
       ) : null}
-      <h2
+      <Heading
+        level={level}
         id={id}
-        className="font-satoshi text-2xl font-black tracking-tight text-balance text-strong sm:text-3xl lg:text-[34px] lg:leading-tight"
+        className="font-satoshi text-2xl font-black tracking-tight text-balance text-strong sm:text-3xl lg:text-[40px] lg:leading-tight"
       >
         {title}
-      </h2>
+      </Heading>
       {description ? (
         <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
           {description}
@@ -167,5 +171,30 @@ export function CheckBullet({ children }: { children: ReactNode }) {
       </span>
       <span className="text-sm leading-relaxed text-body">{children}</span>
     </li>
+  );
+}
+
+/* ── Heading element ──────────────────────────────────────────
+   Renders h1-h6 from a numeric level so a block can be nested one
+   step under whatever contains it. Purely semantic — the size
+   always comes from the caller's className, so moving a card from
+   an H3 to an H4 context changes the outline and nothing visual. */
+
+export function Heading({
+  level,
+  id,
+  className = "",
+  children,
+}: {
+  level: HeadingLevel;
+  id?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const Tag = `h${level}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  return (
+    <Tag id={id} className={className}>
+      {children}
+    </Tag>
   );
 }

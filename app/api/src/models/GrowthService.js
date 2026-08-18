@@ -52,13 +52,53 @@ const growthServiceSchema = new mongoose.Schema({
   closingDescription: { type: String, default: '' },
   closingIllustrationKey: { type: String, enum: ['youtube', 'social', 'podcast', 'none'], default: 'youtube' },
 
+  // ── Media alt text ──────────────────────────────────────────────────────
+  /* The hero mock, the case-study card and the closing illustration are drawn
+   * as inline SVG rather than <img>, so they carry an accessible name instead
+   * of an alt attribute. Blank means "decorative" and the graphic is hidden
+   * from assistive tech entirely, which is the correct default for a mock. */
+  heroMediaAlt: { type: String, trim: true, default: '' },
+  caseMediaAlt: { type: String, trim: true, default: '' },
+  closingMediaAlt: { type: String, trim: true, default: '' },
+
   // ── SEO / structured data ───────────────────────────────────────────────
   metaTitle: { type: String, trim: true, default: '' },
   metaDescription: { type: String, default: '' },
-  /** Comma-separated keywords. */
+  /** Comma-separated focus keywords — the terms the page is written to rank for. */
   metaKeywords: { type: String, default: '' },
+  /** Comma-separated supporting terms, appended after the focus keywords. */
+  metaSecondaryKeywords: { type: String, default: '' },
+  /** Absolute canonical URL. Falls back to pageUrl, then to /services/<slug>. */
+  canonicalUrl: { type: String, trim: true, default: '' },
+  /** Keep a page out of the index without unpublishing it. */
+  noIndex: { type: Boolean, default: false },
   schemaServiceType: { type: String, trim: true, default: '' },
   schemaDescription: { type: String, default: '' },
+
+  // ── Open Graph (Facebook, LinkedIn, WhatsApp) ───────────────────────────
+  /* All optional: an empty field inherits the matching meta* value, and an
+   * empty ogImage falls back to the generated card at
+   * /services/<slug>/opengraph-image — so a page always shares with a real
+   * picture even when nothing here is filled in. */
+  ogTitle: { type: String, trim: true, default: '' },
+  ogDescription: { type: String, default: '' },
+  ogType: { type: String, enum: ['website', 'article'], default: 'website' },
+  ogImage: { type: String, trim: true, default: '' },
+  ogImageAlt: { type: String, trim: true, default: '' },
+  ogImageWidth: { type: Number, default: 1200 },
+  ogImageHeight: { type: Number, default: 630 },
+  ogImageType: { type: String, trim: true, default: 'image/png' },
+
+  // ── Twitter / X card ────────────────────────────────────────────────────
+  twitterCard: {
+    type: String,
+    enum: ['summary_large_image', 'summary'],
+    default: 'summary_large_image',
+  },
+  twitterTitle: { type: String, trim: true, default: '' },
+  twitterDescription: { type: String, default: '' },
+  twitterImage: { type: String, trim: true, default: '' },
+  twitterImageAlt: { type: String, trim: true, default: '' },
 
   displayOrder: { type: Number, default: 0 },
   status: { type: Number, enum: [0, 1], default: 1 },

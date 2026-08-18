@@ -1,7 +1,8 @@
 import { FiPlay, FiVideo } from "react-icons/fi";
 import type { GrowthShowcase } from "@/src/lib/growthServices";
 import { optionalIcon } from "./icons";
-import { CheckBullet } from "./Primitives";
+import { CheckBullet, Heading } from "./Primitives";
+import type { HeadingLevel } from "./types";
 
 /* Two-up quality panels (audio vs video podcast editing).
 
@@ -41,7 +42,7 @@ function AudioPlayer({ duration }: { duration?: string }) {
           ))}
         </span>
       </div>
-      <p className="mt-1.5 flex justify-between px-1 text-[11px] font-bold text-muted">
+      <p className="mt-1.5 flex justify-between px-1 text-[13px] font-bold text-muted">
         <span>00:00</span>
         <span>{duration || ""}</span>
       </p>
@@ -56,7 +57,7 @@ function VideoFrame({ timestamp }: { timestamp?: string }) {
         <FiPlay className="h-4 w-4 fill-current" aria-hidden="true" />
       </span>
       {timestamp ? (
-        <span className="absolute bottom-2 left-3 text-[10px] font-bold text-white/75">
+        <span className="absolute bottom-2 left-3 text-xs font-bold text-white/75">
           {timestamp}
         </span>
       ) : null}
@@ -70,8 +71,18 @@ function VideoFrame({ timestamp }: { timestamp?: string }) {
   );
 }
 
-export default function FormatPanels({ items }: { items: GrowthShowcase[] }) {
+export default function FormatPanels({
+  items,
+  headingLevel = 3,
+}: {
+  items: GrowthShowcase[];
+  /** Panel titles sit one level under their band heading. */
+  headingLevel?: HeadingLevel;
+}) {
   if (!items.length) return null;
+
+  // Same reasoning as ShowcaseGrid: the bullet list is a named sub-block.
+  const listLevel = Math.min(6, headingLevel + 1) as HeadingLevel;
 
   return (
     <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -82,17 +93,24 @@ export default function FormatPanels({ items }: { items: GrowthShowcase[] }) {
             key={item.title}
             className={`relative overflow-hidden rounded-sticker border-2 border-strong p-5 shadow-[4px_4px_0_var(--text-strong,#111)] sm:p-6 ${PANEL_TONES[item.tone]}`}
           >
-            <h3 className="font-satoshi text-lg font-black text-strong">{item.title}</h3>
+            <Heading level={headingLevel} className="font-satoshi text-xl font-black text-strong sm:text-2xl">
+              {item.title}
+            </Heading>
 
             {item.mediaBadge === "play" ? <AudioPlayer duration={item.caption} /> : null}
             {item.mediaBadge === "video" ? <VideoFrame timestamp={item.caption} /> : null}
 
             {item.points.length ? (
-              <ul className="mt-5 space-y-2.5">
-                {item.points.map((point) => (
-                  <CheckBullet key={point}>{point}</CheckBullet>
-                ))}
-              </ul>
+              <>
+                <Heading level={listLevel} className="sr-only">
+                  What {item.title} includes
+                </Heading>
+                <ul className="mt-5 space-y-2.5">
+                  {item.points.map((point) => (
+                    <CheckBullet key={point}>{point}</CheckBullet>
+                  ))}
+                </ul>
+              </>
             ) : null}
 
             {Watermark ? (

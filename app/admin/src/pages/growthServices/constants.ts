@@ -29,12 +29,28 @@ export const RENDERER_OPTIONS = [
   { value: 'format-panels', label: 'Format panels — items from Showcases' },
   { value: 'case-study', label: 'Case study — uses Case Metrics + service fields' },
   { value: 'faq', label: 'FAQ accordion — items from FAQs' },
+  { value: 'article', label: 'Long-form SEO copy — blocks from SEO Content' },
 ];
 
 /** Renderers whose items live in the Features collection. */
 export const FEATURE_RENDERERS = ['grid', 'timeline'];
 /** Renderers whose items live in the Showcases collection. */
 export const SHOWCASE_RENDERERS = ['showcase', 'format-panels'];
+/** Renderers whose items live in the SEO Content collection. */
+export const CONTENT_RENDERERS = ['article'];
+
+/* Heading levels a content block can render at.
+ *
+ * The band's own heading is the page's H2, so a block starts at H3. Skipping a
+ * level breaks the document outline — an H3 followed by an H5 reads to a
+ * crawler and a screen reader as a missing section — so the labels spell out
+ * where each level belongs rather than leaving it to be guessed. */
+export const CONTENT_LEVEL_OPTIONS = [
+  { value: 3, label: 'H3 — a main topic inside the band' },
+  { value: 4, label: 'H4 — a sub-topic of the H3 above it' },
+  { value: 5, label: 'H5 — a detail under the H4 above it' },
+  { value: 6, label: 'H6 — a footnote-level point' },
+];
 
 export const TONE_OPTIONS = [
   { value: 'page', label: 'Page (white)' },
@@ -96,6 +112,16 @@ export const SHOWCASE_TONE_OPTIONS = [
 export const PLACEMENT_OPTIONS = [
   { value: 'hero', label: 'Hero — under the headline' },
   { value: 'closing', label: 'Closing — the dark CTA band' },
+];
+
+export const OG_TYPE_OPTIONS = [
+  { value: 'website', label: 'Website — a standing page (use this for a service)' },
+  { value: 'article', label: 'Article — a dated piece of writing' },
+];
+
+export const TWITTER_CARD_OPTIONS = [
+  { value: 'summary_large_image', label: 'Large image — full-width card' },
+  { value: 'summary', label: 'Summary — small square thumbnail' },
 ];
 
 export const CTA_VARIANT_OPTIONS = [

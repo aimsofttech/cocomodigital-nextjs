@@ -1,11 +1,19 @@
-import type { ProcessStep } from "./types";
+import type { HeadingLevel, ProcessStep } from "./types";
+import { Heading } from "./Primitives";
 import { STEP_MARKER } from "./theme";
 
 /* Numbered six-step timeline. The dashed connector only appears
    once the steps sit on a single row (lg+); on smaller screens
    the steps stack and the line would read as noise. */
 
-export default function ProcessTimeline({ steps }: { steps: ProcessStep[] }) {
+export default function ProcessTimeline({
+  steps,
+  headingLevel = 3,
+}: {
+  steps: ProcessStep[];
+  /** Step titles sit one level under their band heading. */
+  headingLevel?: HeadingLevel;
+}) {
   return (
     <div className="relative mt-10">
       <span
@@ -24,8 +32,10 @@ export default function ProcessTimeline({ steps }: { steps: ProcessStep[] }) {
             >
               {index + 1}
             </span>
-            <h3 className="mt-4 text-sm font-black text-strong">{step.title}</h3>
-            <p className="mx-auto mt-1.5 max-w-[22ch] text-xs leading-relaxed text-muted">
+            <Heading level={headingLevel} className="mt-4 text-base font-black text-strong">
+              {step.title}
+            </Heading>
+            <p className="mx-auto mt-1.5 max-w-[24ch] text-sm leading-relaxed text-muted">
               {step.description}
             </p>
           </li>

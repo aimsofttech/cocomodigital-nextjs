@@ -19,7 +19,10 @@ import GrowthServicePage from "./GrowthServicePage";
 export interface GrowthRouteFallback {
   title: string;
   description: string;
+  /** The terms the page is written to rank for. */
   keywords: string[];
+  /** Supporting terms, listed after the focus keywords. */
+  secondaryKeywords?: string[];
 }
 
 export async function buildGrowthMetadata(
@@ -27,13 +30,43 @@ export async function buildGrowthMetadata(
   fallback: GrowthRouteFallback,
 ): Promise<Metadata> {
   const service = await getGrowthService(slug);
+  const seo = service?.seo;
+  const path = `/services/${slug}`;
+
+  const title = seo?.title || fallback.title;
+  const description = seo?.description || fallback.description;
 
   return buildMetadata({
-    title: service?.seo.title || fallback.title,
-    description: service?.seo.description || fallback.description,
-    path: `/services/${slug}`,
+    title,
+    description,
+    path,
     category: "Services",
-    keywords: service?.seo.keywords.length ? service.seo.keywords : fallback.keywords,
+    /* The admin panel's canonical field wins, but a blank one must not produce
+       a canonical pointing at the site root — hence the path fallback. */
+    canonical: seo?.canonicalUrl || path,
+    keywords: seo?.keywords.length ? seo.keywords : fallback.keywords,
+    secondaryKeywords: seo?.secondaryKeywords.length
+      ? seo.secondaryKeywords
+      : fallback.secondaryKeywords,
+    noIndex: seo?.noIndex,
+    type: seo?.openGraph.type,
+    ogTitle: seo?.openGraph.title,
+    ogDescription: seo?.openGraph.description,
+    twitterCard: seo?.twitter.card,
+    twitterTitle: seo?.twitter.title,
+    twitterDescription: seo?.twitter.description,
+    twitterImage: seo?.twitter.image || `${path}/twitter-image`,
+    twitterImageAlt: seo?.twitter.imageAlt || undefined,
+    /* Point at this route's own generated card unless the panel names a
+       custom image. The URL is written out rather than left to Next's
+       file-convention resolution so it is unambiguously absolute against the
+       production host: the scrapers fetch it from outside, and a localhost or
+       protocol-relative URL renders as a blank preview. */
+    image: seo?.openGraph.image || `${path}/opengraph-image`,
+    imageAlt: seo?.openGraph.imageAlt || `${title} - Cocoma Digital`,
+    imageWidth: seo?.openGraph.imageWidth,
+    imageHeight: seo?.openGraph.imageHeight,
+    imageType: seo?.openGraph.imageType,
   });
 }
 

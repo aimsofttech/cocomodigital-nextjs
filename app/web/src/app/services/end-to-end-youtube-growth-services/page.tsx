@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
 import GrowthServiceRoute, { buildGrowthMetadata } from "@/src/views/GrowthServices/route";
 
-/* Static route — a literal segment wins over /services/[slug],
-   so the existing dynamic service route is left untouched.
-
-   Content is served from the API (admin panel → Growth Services), so the route
-   renders per-request rather than being baked in at build time. */
-
 export const dynamic = "force-dynamic";
 
 const SLUG = "end-to-end-youtube-growth-services";
 
-/* Used only when the API is unreachable, so the page still carries sensible
-   metadata instead of falling back to the site defaults. */
 const FALLBACK = {
   title: "End-to-End YouTube Growth Services",
   description:
@@ -26,6 +18,16 @@ const FALLBACK = {
     "YouTube Shorts creation",
     "grow YouTube subscribers",
     "YouTube growth agency",
+  ],
+  secondaryKeywords: [
+    "YouTube video editing services",
+    "YouTube content strategy agency",
+    "YouTube analytics and reporting",
+    "YouTube channel optimization",
+    "increase YouTube watch time",
+    "YouTube thumbnail CTR optimization",
+    "monetize a YouTube channel",
+    "YouTube growth agency India",
   ],
 };
 

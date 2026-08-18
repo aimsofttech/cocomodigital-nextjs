@@ -9,11 +9,29 @@ export interface PageSeo {
   description: string;
   path: string;
   keywords?: string[];
+  /* An absolute or root-relative image URL. Routes that generate their own
+     card point this at their opengraph-image path; omitting it keeps the
+     shared site cover. */
   image?: string;
   imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageType?: string;
   type?: "website" | "article";
   noIndex?: boolean;
   category?: string;
+  /** Absolute canonical URL, when it can't be derived from `path`. */
+  canonical?: string;
+  /** Appended after `keywords`, for supporting terms. */
+  secondaryKeywords?: string[];
+  /** Social copy overrides. Each falls back to the page title/description. */
+  ogTitle?: string;
+  ogDescription?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterCard?: "summary_large_image" | "summary";
+  twitterImage?: string;
+  twitterImageAlt?: string;
 }
 
 const DEFAULT_KEYWORDS = [
@@ -248,22 +266,31 @@ export function getStaticSeo(path: string): PageSeo {
 
 export function buildMetadata(input: PageSeo): Metadata {
   /* Callers like generateMetadata for detail pages frequently pass
-     imageUrl(doc) which returns "" when the doc has no media. `??`
-     wouldn't catch that, so empty strings would resolve to the site
-     root and produce a broken OG image. `||` handles both null/
-     undefined and the empty-string case. */
+     imageUrl(doc), which returns "" when the doc has no media. `??` wouldn't
+     catch that, so an empty string would resolve to the site root and produce
+     a broken share image. `||` handles both null/undefined and "". */
   const image = absoluteUrl(input.image || DEFAULT_OG_IMAGE);
-  const canonical = absoluteUrl(input.path);
+  const twitterImage = input.twitterImage ? absoluteUrl(input.twitterImage) : image;
+  const canonical = input.canonical
+    ? absoluteUrl(input.canonical)
+    : absoluteUrl(input.path);
   const title = input.title.includes(SITE_NAME)
     ? input.title
     : `${input.title} | ${SITE_NAME}`;
+  const ogTitle = input.ogTitle || title;
+  const twitterTitle = input.twitterTitle || ogTitle;
+  const imageAlt = input.imageAlt ?? `${input.title} - ${SITE_NAME}`;
 
   return {
     metadataBase: new URL(SITE_URL),
     applicationName: SITE_NAME,
     title,
     description: input.description,
-    keywords: [...DEFAULT_KEYWORDS, ...(input.keywords ?? [])],
+    keywords: [
+      ...(input.keywords ?? []),
+      ...(input.secondaryKeywords ?? []),
+      ...DEFAULT_KEYWORDS,
+    ],
     alternates: { canonical },
     robots: input.noIndex
       ? { index: false, follow: false, googleBot: { index: false, follow: false } }
@@ -283,8 +310,8 @@ export function buildMetadata(input: PageSeo): Metadata {
     publisher: SITE_NAME,
     category: input.category ?? "Marketing",
     openGraph: {
-      title,
-      description: input.description,
+      title: ogTitle,
+      description: input.ogDescription || input.description,
       url: canonical,
       type: input.type ?? "website",
       siteName: SITE_NAME,
@@ -292,19 +319,21 @@ export function buildMetadata(input: PageSeo): Metadata {
       images: [
         {
           url: image,
-          width: 1200,
-          height: 630,
-          alt: input.imageAlt ?? `${input.title} - ${SITE_NAME}`,
+          width: input.imageWidth ?? 1200,
+          height: input.imageHeight ?? 630,
+          type: input.imageType ?? "image/jpeg",
+          alt: imageAlt,
         },
       ],
     },
     twitter: {
-      card: "summary_large_image",
-      title,
-      description: input.description,
+      card: input.twitterCard ?? "summary_large_image",
+      title: twitterTitle,
+      description:
+        input.twitterDescription || input.ogDescription || input.description,
       site: "@cocomadigital",
       creator: "@cocomadigital",
-      images: [image],
+      images: [{ url: twitterImage, alt: input.twitterImageAlt || imageAlt }],
     },
   };
 }

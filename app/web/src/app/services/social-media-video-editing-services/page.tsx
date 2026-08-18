@@ -27,6 +27,16 @@ const FALLBACK = {
     "motion graphics",
     "video editing agency",
   ],
+  secondaryKeywords: [
+    "Reels editing services",
+    "vertical video editing agency",
+    "subtitle and caption editing",
+    "video repurposing services",
+    "brand video editing agency",
+    "UGC video editing",
+    "9:16 video resizing",
+    "social media content editing India",
+  ],
 };
 
 export async function generateMetadata(): Promise<Metadata> {

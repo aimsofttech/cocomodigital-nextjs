@@ -9,6 +9,7 @@ const GrowthServiceShowcase = require('../models/GrowthServiceShowcase');
 const GrowthServiceCaseMetric = require('../models/GrowthServiceCaseMetric');
 const GrowthServiceFaq = require('../models/GrowthServiceFaq');
 const GrowthServiceCta = require('../models/GrowthServiceCta');
+const GrowthServiceContent = require('../models/GrowthServiceContent');
 
 /* Seed the three growth landing pages with the exact copy the hard-coded
  * views shipped, so switching the web app over to the API is a pure
@@ -49,6 +50,11 @@ const YOUTUBE = {
     closingDescription:
       "Let's grow your channel, audience, and business — with a strategy that works.",
     closingIllustrationKey: 'youtube',
+    // Alt text for the three illustrated blocks. They are mocks rather than
+    // screenshots, so each describes what the graphic depicts, not fake data.
+    heroMediaAlt: 'Illustrated YouTube channel analytics dashboard showing rising views, watch time and subscriber growth',
+    caseMediaAlt: 'Channel artwork placeholder for the Tech Explained YouTube channel',
+    closingMediaAlt: 'Illustration of a YouTube play button beside rising growth bars',
     metaTitle: 'End-to-End YouTube Growth Services',
     metaDescription:
       'Full-service YouTube growth — channel audits, content strategy, production, thumbnail design, YouTube SEO, Shorts creation, analytics and channel management.',
@@ -62,6 +68,18 @@ const YOUTUBE = {
       'grow YouTube subscribers',
       'YouTube growth agency',
     ].join(', '),
+    // Supporting terms, published after the focus keywords above.
+    metaSecondaryKeywords: 'YouTube video editing services, YouTube content strategy agency, YouTube analytics and reporting, YouTube channel optimization, increase YouTube watch time, YouTube thumbnail CTR optimization, monetize a YouTube channel, YouTube growth agency India',
+    canonicalUrl: 'https://cocomadigital.com/services/end-to-end-youtube-growth-services',
+    /* Social copy is written for a feed rather than for a results page:
+       shorter, and leading with the outcome. Leaving these blank would
+       fall back to the meta copy, which reads long in a share card. */
+    ogTitle: 'End-to-End YouTube Growth Services',
+    ogDescription: 'Audits, strategy, production, thumbnails, YouTube SEO and channel management — one team for everything your channel needs to grow.',
+    ogImageAlt: 'End-to-End YouTube Growth Services from Cocoma Digital',
+    twitterTitle: 'End-to-End YouTube Growth Services',
+    twitterDescription: 'One team for audits, YouTube SEO, thumbnails, Shorts, editing and channel management. See how we grow channels.',
+    twitterImageAlt: 'End-to-End YouTube Growth Services from Cocoma Digital',
     schemaServiceType: 'YouTube channel growth and management',
     schemaDescription:
       'Full-service YouTube growth — channel audits, content strategy, production, thumbnail design, YouTube SEO, Shorts creation, analytics and channel management.',
@@ -161,6 +179,132 @@ const YOUTUBE = {
       title: 'Real YouTube Growth, Measurable Results',
     },
     {
+      sectionKey: 'youtube-growth-guide',
+      renderer: 'article',
+      eyebrow: 'The Complete Guide',
+      title: 'YouTube Growth Services Explained, End to End',
+      description:
+        'What a full-service YouTube growth engagement includes, who it suits, and the results to expect month by month.',
+      tone: 'tint',
+      /* The long-form band. Every block carries its own heading level, so
+       * the band renders a real H3-to-H6 outline under the section's H2
+       * instead of a run of same-level headings. */
+      contents: [
+        {
+          level: 3,
+          heading: 'What end-to-end YouTube growth actually covers',
+          body: [
+            'Most channels do not stall because of one missing piece. They stall because strategy, packaging, editing and publishing are handled by different people who never compare notes, so a strong video gets a weak title and a great title lands on a video nobody finishes.',
+            'End-to-end means one team owns the whole chain. The same people who read your analytics decide what to make next, write the title, design the thumbnail, cut the video and publish it, then measure what that decision did to your watch time.',
+          ].join('\n'),
+          bullets: [
+            'A documented channel strategy tied to a specific audience and outcome',
+            'Keyword and topic research before a script is written, not after',
+            'Titles, thumbnails and descriptions treated as part of the video rather than packaging bolted on',
+            'A publishing calendar your team can actually sustain',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Channel audit and competitive research',
+          body: [
+            'Every engagement opens with an audit. We go through your last several months of uploads, your traffic sources, your audience retention curves and the channels already ranking for the searches you want, then write up what is working, what is quietly costing you views, and where the fastest available wins are.',
+            'You keep the audit document whether or not you go on to work with us.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'YouTube SEO and video packaging',
+          body: [
+            'YouTube SEO is not keyword stuffing a description. It is making it obvious, to both the ranking systems and to a person scrolling a results page, what a video is, who it is for, and why it is worth their time.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Titles, thumbnails and click-through rate',
+          body: [
+            'Impressions are worth nothing until somebody clicks. We design thumbnails against the specific competitors a video will appear beside, test title variants on live traffic, and read click-through rate alongside retention rather than on its own. A title that wins clicks and loses viewers has hurt the channel.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Descriptions, chapters and metadata',
+          body: [
+            'Descriptions are written for the reader deciding whether to stay, then structured so YouTube can classify the video properly. Chapters, timestamps, links and end screens are set per video rather than pasted from a template.',
+          ].join('\n'),
+        },
+        {
+          level: 6,
+          heading: 'Why we do not chase tags',
+          body: [
+            'Tags carry very little ranking weight today. We fill them in correctly and spend the time saved on what does move the numbers: the first thirty seconds, the thumbnail, and the choice of topic.',
+          ].join('\n'),
+        },
+        {
+          level: 3,
+          heading: 'Who these YouTube growth services are for',
+          body: [
+            'We work best with channels that already have something to build on: a point of view, a product, a back catalogue, or an audience that has stopped growing. We are not the right fit for a channel that wants views without a reason for anyone to watch.',
+          ].join('\n'),
+          bullets: [
+            'Creators pushing past a plateau and ready to treat the channel as a business',
+            'Founders and subject experts using YouTube to generate qualified inbound leads',
+            'Brands whose in-house team needs strategy, editing or thumbnails as an extension',
+            'Educators and studios with a library that is under-performing its potential',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Creators scaling past their first ten thousand subscribers',
+          body: [
+            'The tactics that earn a first ten thousand subscribers rarely earn the next hundred thousand. At this stage the constraint is usually production capacity and topic selection rather than effort, which is exactly what a full-service team removes.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Brands using YouTube as a sales channel',
+          body: [
+            'For a business channel, subscriber count is a vanity metric. We measure the videos that generate demo requests, applications or purchases, and build the calendar around making more of those, even when they are not the videos that get the most views.',
+          ].join('\n'),
+        },
+        {
+          level: 3,
+          heading: 'What results to expect, and when',
+          body: [
+            'YouTube growth compounds, which makes the early weeks look slower than they are. This is the honest shape of it, based on the channels we manage.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'The first thirty days',
+          body: [
+            'Audit, strategy, and repackaging what you already have. Retitling and re-thumbnailing a back catalogue often produces the first measurable lift before a single new video ships.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Months two and three',
+          body: [
+            'New videos start publishing against the strategy. Impressions and click-through rate usually move first, with watch time and subscribers following as the catalogue builds.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'The reporting you receive',
+          body: [
+            'A monthly report covering impressions, click-through rate, average view duration, subscriber sources and the leads or revenue attributable to the channel, written as an explanation of what happened and what we are changing next.',
+          ].join('\n'),
+        },
+        {
+          level: 6,
+          heading: 'The numbers we hold ourselves to',
+          body: [
+            'Click-through rate, average view duration, returning-viewer share, and whichever business metric the channel exists to move. Raw view count is reported, but it is never the goal on its own.',
+          ].join('\n'),
+        },
+      ],
+    },
+    {
       sectionKey: 'faq',
       renderer: 'faq',
       eyebrow: 'FAQs',
@@ -230,6 +374,11 @@ const SOCIAL = {
     closingDescription:
       'Turn your raw footage into professional, engaging, platform-ready videos that grow your brand.',
     closingIllustrationKey: 'social',
+    // Alt text for the three illustrated blocks. They are mocks rather than
+    // screenshots, so each describes what the graphic depicts, not fake data.
+    heroMediaAlt: 'Illustrated social media dashboard showing reach and engagement climbing across Reels, Shorts and TikTok',
+    caseMediaAlt: 'Cover artwork placeholder for the Fitness First social media channel',
+    closingMediaAlt: 'Illustration of a vertical 9:16 video tile beside rising growth bars',
     metaTitle: 'Social Media Video Editing Services',
     metaDescription:
       'Professional social media video editing — Instagram Reels, YouTube Shorts, TikTok clips, promotional videos, animated captions, motion graphics and multi-platform resizing.',
@@ -243,6 +392,18 @@ const SOCIAL = {
       'motion graphics',
       'video editing agency',
     ].join(', '),
+    // Supporting terms, published after the focus keywords above.
+    metaSecondaryKeywords: 'Reels editing services, vertical video editing agency, subtitle and caption editing, video repurposing services, brand video editing agency, UGC video editing, 9:16 video resizing, social media content editing India',
+    canonicalUrl: 'https://cocomadigital.com/services/social-media-video-editing-services',
+    /* Social copy is written for a feed rather than for a results page:
+       shorter, and leading with the outcome. Leaving these blank would
+       fall back to the meta copy, which reads long in a share card. */
+    ogTitle: 'Social Media Video Editing Services',
+    ogDescription: 'Scroll-stopping Reels, Shorts and TikToks — animated captions, motion graphics and every aspect ratio your platforms need.',
+    ogImageAlt: 'Social Media Video Editing Services from Cocoma Digital',
+    twitterTitle: 'Social Media Video Editing Services',
+    twitterDescription: 'Reels, Shorts and TikTok edits with captions, motion graphics and multi-platform resizing. See the work.',
+    twitterImageAlt: 'Social Media Video Editing Services from Cocoma Digital',
     schemaServiceType: 'Social media video editing',
     schemaDescription:
       'Professional social media video editing — Instagram Reels, YouTube Shorts, TikTok clips, promotional videos, animated captions, motion graphics and multi-platform resizing.',
@@ -411,6 +572,124 @@ const SOCIAL = {
       ],
     },
     {
+      sectionKey: 'social-editing-guide',
+      renderer: 'article',
+      eyebrow: 'The Complete Guide',
+      title: 'Social Media Video Editing, Explained',
+      description:
+        'How short-form editing works in practice, what gets delivered for each platform, and how turnaround is structured.',
+      tone: 'tint',
+      /* The long-form band. Every block carries its own heading level, so
+       * the band renders a real H3-to-H6 outline under the section's H2
+       * instead of a run of same-level headings. */
+      contents: [
+        {
+          level: 3,
+          heading: 'What social media video editing involves',
+          body: [
+            'A social edit and a long-form edit are different crafts. On a feed you have about a second and a half before a thumb keeps moving, most viewers have the sound off, and the same footage has to work as a vertical Reel, a square post and a widescreen cutdown without being re-edited three times from scratch.',
+            'Our editors cut for that reality: a hook in the opening frames, burned-in captions that carry the story silently, pacing built around the platform, and a delivery that ships every aspect ratio together.',
+          ].join('\n'),
+          bullets: [
+            'Hook-first edits built for sound-off viewing',
+            'Animated captions styled to your brand rather than a default template',
+            'Motion graphics, b-roll and sound design that earn their place',
+            'Every aspect ratio delivered from a single edit',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Short-form editing for Reels, Shorts and TikTok',
+          body: [
+            'Short-form is where most brands see movement first. We cut long recordings, webinars, podcasts and event footage into clips that stand on their own, each with its own hook, arc and end frame rather than a slice lifted from the middle of something longer.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Captions, subtitles and accessibility',
+          body: [
+            'Captions are read by most of your audience and by everyone browsing with the sound off. We burn them in, style them to your brand, and check them by hand. Automatic captions get names, products and technical terms wrong often enough to matter.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Motion graphics and lower thirds',
+          body: [
+            'Titles, lower thirds, callouts and transitions come from a small kit tied to your brand, so a month of clips reads as one body of work instead of a dozen unrelated experiments.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Colour and sound',
+          body: [
+            'Every clip is levelled and colour-matched. Consistent loudness across a feed matters more than people expect: a clip that plays noticeably louder or quieter than the one before it gets scrolled past.',
+          ].join('\n'),
+        },
+        {
+          level: 6,
+          heading: 'On trending audio',
+          body: [
+            'We use trending audio where it fits the clip and skip it where it does not. A trend that fights the message costs more attention than it borrows.',
+          ].join('\n'),
+        },
+        {
+          level: 3,
+          heading: 'Which brands and creators this is built for',
+          body: [
+            'This service suits teams producing video often enough that editing has become the bottleneck, and teams sitting on footage they have never had time to cut.',
+          ].join('\n'),
+          bullets: [
+            'Brands running an always-on social calendar across several platforms',
+            'Creators repurposing long-form video into daily short-form',
+            'Agencies needing overflow editing capacity with a predictable turnaround',
+            'Founders and educators turning talks, webinars and podcasts into clips',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Repurposing a long-form library',
+          body: [
+            'A single hour-long recording usually holds eight to twelve genuinely good short clips. Most teams pull two, because finding the rest is slow work. We go through the whole recording and cut everything that stands on its own.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Working alongside an in-house team',
+          body: [
+            'We plug into what you already run, including your asset library, brand kit and review process, and absorb the volume your team cannot, without asking you to change how you work.',
+          ].join('\n'),
+        },
+        {
+          level: 3,
+          heading: 'Turnaround, volume and how we work',
+          body: [
+            'Editing only helps if it arrives while the content is still relevant, so both turnaround and volume are agreed up front rather than quoted job by job.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'A typical delivery cycle',
+          body: [
+            'Footage in, first cuts back within an agreed window, one round of revisions included, final files delivered in every ratio and format your platforms need. Higher-volume retainers run on a rolling schedule so there is always work in flight.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Revisions and version control',
+          body: [
+            'Every edit carries a version, and feedback is collected in one place with timecoded comments, so nothing is lost between a message thread and the timeline.',
+          ].join('\n'),
+        },
+        {
+          level: 6,
+          heading: 'File delivery',
+          body: [
+            'Platform-ready exports, plus the source project on request. The work is yours, project files included.',
+          ].join('\n'),
+        },
+      ],
+    },
+    {
       sectionKey: 'faq',
       renderer: 'faq',
       title: 'Frequently Asked Questions',
@@ -481,6 +760,11 @@ const PODCAST = {
     closingDescription:
       'Turn every recording into a polished podcast episode and a complete library of promotional content designed to reach more listeners.',
     closingIllustrationKey: 'podcast',
+    // Alt text for the three illustrated blocks. They are mocks rather than
+    // screenshots, so each describes what the graphic depicts, not fake data.
+    heroMediaAlt: 'Illustrated podcast dashboard showing recent episodes, downloads and listener growth',
+    caseMediaAlt: 'Cover artwork placeholder for The Growth Show podcast',
+    closingMediaAlt: 'Illustration of a podcast microphone beside rising growth bars',
     metaTitle: 'Podcast Editing & Growth Services',
     metaDescription:
       'Professional podcast editing and growth services — audio editing, video podcast editing, mixing and mastering, podcast SEO, short-form clips, publishing and distribution.',
@@ -494,6 +778,18 @@ const PODCAST = {
       'podcast publishing and distribution',
       'podcast growth services',
     ].join(', '),
+    // Supporting terms, published after the focus keywords above.
+    metaSecondaryKeywords: 'podcast post-production services, podcast mixing and mastering, podcast clip editing, podcast marketing agency, video podcast production, podcast episode publishing, grow podcast listeners, podcast editing services India',
+    canonicalUrl: 'https://cocomadigital.com/services/podcast-editing-and-growth-services',
+    /* Social copy is written for a feed rather than for a results page:
+       shorter, and leading with the outcome. Leaving these blank would
+       fall back to the meta copy, which reads long in a share card. */
+    ogTitle: 'Podcast Editing & Growth Services',
+    ogDescription: 'Broadcast-quality audio and video podcast editing, plus the SEO, clips and distribution that turn episodes into an audience.',
+    ogImageAlt: 'Podcast Editing and Growth Services from Cocoma Digital',
+    twitterTitle: 'Podcast Editing & Growth Services',
+    twitterDescription: 'Editing, mixing, podcast SEO, short-form clips and distribution — everything an episode needs after the recording stops.',
+    twitterImageAlt: 'Podcast Editing and Growth Services from Cocoma Digital',
     schemaServiceType: 'Podcast editing and podcast growth',
     schemaDescription:
       'Professional podcast editing and growth services — audio editing, video podcast editing, mixing and mastering, podcast SEO, short-form clips, publishing and distribution.',
@@ -648,6 +944,133 @@ const PODCAST = {
       ],
     },
     {
+      sectionKey: 'podcast-guide',
+      renderer: 'article',
+      eyebrow: 'The Complete Guide',
+      title: 'Podcast Editing and Growth, Explained',
+      description:
+        'Everything that happens to an episode after the recording stops: editing, mixing, SEO, clips and distribution.',
+      tone: 'tint',
+      /* The long-form band. Every block carries its own heading level, so
+       * the band renders a real H3-to-H6 outline under the section's H2
+       * instead of a run of same-level headings. */
+      contents: [
+        {
+          level: 3,
+          heading: 'What podcast editing and growth covers',
+          body: [
+            'Recording an episode is roughly half the work. What decides whether anyone hears it is what happens next: the edit, the mix, how the episode is titled and described, the clips that carry it into social feeds, and where it gets published.',
+            'We handle that entire second half, for audio-only shows, video podcasts, or both from the same recording.',
+          ].join('\n'),
+          bullets: [
+            'Full audio edit covering filler words, false starts, cross-talk and dead air',
+            'Mixing and mastering to broadcast loudness standards',
+            'Video podcast editing with multi-camera switching',
+            'Show notes, chapters, transcripts and episode SEO',
+            'Short-form clips cut from every episode',
+            'Publishing and distribution to every major platform',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Audio editing, mixing and mastering',
+          body: [
+            'Each track is edited separately, then levelled, de-noised and mastered so every guest sits at the same volume and the episode holds up on phone speakers, car audio and studio headphones alike.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Video podcast editing',
+          body: [
+            'For filmed shows we cut multi-camera footage to the conversation, match colour across angles, add titles and guest lower thirds, and deliver both the full episode and its vertical clips from the same session.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Multi-camera switching',
+          body: [
+            'Camera changes follow the conversation rather than a timer. Cutting on the beat of an exchange keeps a two-hour episode watchable; cutting every eight seconds regardless makes it exhausting.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Remote-recording repair',
+          body: [
+            'Remote episodes arrive with drift, dropouts and rooms that do not match. We resync tracks, patch what can be patched, and treat each side separately so a guest recording on a laptop does not sink the episode.',
+          ].join('\n'),
+        },
+        {
+          level: 6,
+          heading: 'What cannot be fixed afterwards',
+          body: [
+            'Clipped audio and heavy room echo cannot be fully repaired in post. When a recording arrives with either, we say so and suggest a setup change rather than shipping something that sounds over-processed.',
+          ].join('\n'),
+        },
+        {
+          level: 3,
+          heading: 'Podcast growth: how episodes find listeners',
+          body: [
+            'Podcast discovery is search, plus recommendation, plus whatever you put in front of people yourself. Editing and metadata serve the first two; clips and distribution serve the third.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Podcast SEO and episode metadata',
+          body: [
+            'Episode titles are written to be searched for as well as clicked. Show notes are structured with timestamps, guest details, links and a transcript, which is what makes an episode findable in Apple Podcasts, Spotify, YouTube and ordinary web search.',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Short-form clips and social distribution',
+          body: [
+            'Every episode yields several vertical clips with captions, each built as a standalone piece rather than a slice of a longer conversation. This is where most shows pick up listeners who were never going to find the full episode first.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Publishing and distribution',
+          body: [
+            'We publish to your host and confirm the episode has propagated to Apple Podcasts, Spotify, YouTube and the rest, so a feed error does not quietly cost you a week.',
+          ].join('\n'),
+        },
+        {
+          level: 3,
+          heading: 'Who we work with',
+          body: [
+            'We take on shows that are already recording consistently, and shows launching that want the production side handled from episode one.',
+          ].join('\n'),
+          bullets: [
+            'Independent podcasters who would rather record than edit',
+            'Brand and B2B shows with a marketing outcome attached',
+            'Video-first podcasts publishing to YouTube and social together',
+            'Networks and studios needing reliable overflow post-production',
+          ].join('\n'),
+        },
+        {
+          level: 4,
+          heading: 'Launching a new show',
+          body: [
+            'For a new show we help settle the format, the recording setup and the publishing workflow before the first episode, which is considerably cheaper than fixing all three at episode twenty.',
+          ].join('\n'),
+        },
+        {
+          level: 5,
+          heading: 'Turnaround',
+          body: [
+            'Turnaround is agreed against your release schedule, with the edit back in time for you to review before the episode is due. Weekly shows run on a fixed weekly cycle.',
+          ].join('\n'),
+        },
+        {
+          level: 6,
+          heading: 'Rush episodes',
+          body: [
+            'Time-sensitive episodes can be moved up the queue when the schedule allows. We confirm before committing rather than promising and slipping.',
+          ].join('\n'),
+        },
+      ],
+    },
+    {
       sectionKey: 'faq',
       renderer: 'faq',
       eyebrow: 'FAQs',
@@ -699,6 +1122,7 @@ const CHILD_MODELS = [
   GrowthServiceCaseMetric,
   GrowthServiceFaq,
   GrowthServiceCta,
+  GrowthServiceContent,
 ];
 
 // FK values may have been written as either a string or an ObjectId, so clear
@@ -732,7 +1156,7 @@ const seedPage = async (page) => {
   await GrowthServiceFaq.insertMany(withOrder(page.faqs));
 
   let sectionOrder = 0;
-  for (const { features = [], showcases = [], ...section } of page.sections) {
+  for (const { features = [], showcases = [], contents = [], ...section } of page.sections) {
     sectionOrder += 1;
     await GrowthServiceSection.create({
       ...section,
@@ -750,12 +1174,18 @@ const seedPage = async (page) => {
         withOrder(showcases, { sectionKey: section.sectionKey })
       );
     }
+    if (contents.length) {
+      await GrowthServiceContent.insertMany(
+        withOrder(contents, { sectionKey: section.sectionKey })
+      );
+    }
   }
 
   const counts = {
     sections: page.sections.length,
     features: page.sections.reduce((n, s) => n + (s.features?.length || 0), 0),
     showcases: page.sections.reduce((n, s) => n + (s.showcases?.length || 0), 0),
+    contentBlocks: page.sections.reduce((n, s) => n + (s.contents?.length || 0), 0),
     stats: page.stats.length,
     caseMetrics: page.caseMetrics.length,
     faqs: page.faqs.length,

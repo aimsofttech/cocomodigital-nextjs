@@ -1,6 +1,15 @@
 import type { IconType } from "react-icons";
 import type { ReactNode } from "react";
 
+/* Which heading element a block renders as.
+
+   The pages carry a real document outline — one H1 in the hero, an H2 per
+   band, an H3 per card inside a band, and H4-H6 inside the long-form copy —
+   so every block that owns a heading takes its level from its parent instead
+   of hard-coding one. That keeps the outline correct when a band is reordered
+   or dropped, which is admin-controlled and can happen at any time. */
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
 /* Shared shapes for the three growth landing pages
    (podcast editing, social video editing, YouTube growth).
    Every page feeds the same section components with its own

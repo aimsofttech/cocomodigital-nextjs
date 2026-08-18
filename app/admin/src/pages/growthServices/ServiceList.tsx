@@ -19,6 +19,7 @@ const SEGMENT_PATHS: Record<string, string> = {
   'case-metrics': '/growth-services/case-metric',
   faqs: '/growth-services/faq',
   ctas: '/growth-services/cta',
+  contents: '/growth-services/content',
 };
 
 export default function ServiceList() {
@@ -123,6 +124,13 @@ export default function ServiceList() {
           { label: 'Meta Title', value: row.metaTitle },
           { label: 'Meta Description', value: row.metaDescription },
           { label: 'Meta Keywords', value: row.metaKeywords },
+          { label: 'Secondary Keywords', value: row.metaSecondaryKeywords },
+          { label: 'Canonical URL', value: row.canonicalUrl },
+          { label: 'OG Title', value: row.ogTitle },
+          { label: 'OG Description', value: row.ogDescription },
+          { label: 'OG Image', value: row.ogImage },
+          { label: 'Twitter Title', value: row.twitterTitle },
+          { label: 'Twitter Description', value: row.twitterDescription },
         ],
       })}
     />

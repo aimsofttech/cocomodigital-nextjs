@@ -16,6 +16,7 @@ export default function GrowthHero({
   ctas,
   trust,
   dashboard,
+  dashboardAlt = "",
   id,
 }: {
   badge: HeroBadge;
@@ -24,6 +25,8 @@ export default function GrowthHero({
   ctas: CtaLink[];
   trust: TrustSignal;
   dashboard: ReactNode;
+  /** Alt text for the dashboard mock; "" marks it decorative. */
+  dashboardAlt?: string;
   id: string;
 }) {
   return (
@@ -53,7 +56,7 @@ export default function GrowthHero({
           {paragraphs.map((paragraph) => (
             <p
               key={paragraph}
-              className="mt-4 max-w-xl text-sm leading-relaxed text-muted sm:text-[15px]"
+              className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted sm:text-base"
             >
               {paragraph}
             </p>
@@ -88,14 +91,24 @@ export default function GrowthHero({
                   />
                 ))}
               </p>
-              <p className="mt-1 max-w-[16rem] text-xs leading-snug text-muted">
+              <p className="mt-1 max-w-[18rem] text-sm leading-snug text-muted">
                 {trust.label}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="min-w-0">{dashboard}</div>
+        {/* The dashboard is an illustration built from live-looking but
+            invented numbers, so it is announced as a single labelled image
+            rather than as a table of figures a reader might take literally. */}
+        <div
+          className="min-w-0"
+          {...(dashboardAlt
+            ? { role: "img", "aria-label": dashboardAlt }
+            : { "aria-hidden": true })}
+        >
+          {dashboard}
+        </div>
       </div>
     </section>
   );

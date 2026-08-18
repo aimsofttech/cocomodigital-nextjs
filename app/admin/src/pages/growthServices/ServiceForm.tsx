@@ -8,6 +8,7 @@ import ContentLoader from '@/components/ui/ContentLoader';
 import { growthServiceApi } from '@/services/adminApi';
 import {
   CASE_ACCENT_OPTIONS, CASE_BADGE_OPTIONS, DASHBOARD_OPTIONS, ILLUSTRATION_OPTIONS,
+  OG_TYPE_OPTIONS, TWITTER_CARD_OPTIONS,
 } from './constants';
 import { IconSelect, SelectField, TextAreaField, TextField } from './FormFields';
 
@@ -46,6 +47,12 @@ export default function ServiceForm() {
       closingIllustrationKey: 'youtube',
       caseMediaAccentLine: 'two',
       caseMediaBadge: 'none',
+      ogType: 'website',
+      twitterCard: 'summary_large_image',
+      ogImageWidth: 1200,
+      ogImageHeight: 630,
+      ogImageType: 'image/png',
+      noIndex: false,
     },
   });
 
@@ -196,17 +203,142 @@ export default function ServiceForm() {
           <SelectField register={register} name="closingIllustrationKey" label="Illustration" options={ILLUSTRATION_OPTIONS} />
         </Fieldset>
 
-        <Fieldset title="SEO & Structured Data">
-          <TextField register={register} name="metaTitle" label="Meta Title" placeholder="Defaults to the service name" />
-          <TextAreaField register={register} name="metaDescription" label="Meta Description" rows={3} />
+        <Fieldset
+          title="Image Alt Text"
+          hint="The hero dashboard, the case-study card and the closing artwork are drawn as graphics rather than uploaded images, so this is their alt text. Describe what the picture shows. A blank field marks that graphic decorative, which hides it from screen readers instead of announcing it unlabelled."
+        >
+          <TextField
+            register={register}
+            name="heroMediaAlt"
+            label="Hero Dashboard Alt Text"
+            placeholder="e.g. Illustrated YouTube analytics dashboard showing rising views and subscribers"
+          />
+          <TextField
+            register={register}
+            name="caseMediaAlt"
+            label="Case Study Card Alt Text"
+            placeholder="e.g. Channel artwork placeholder for the Tech Explained YouTube channel"
+          />
+          <TextField
+            register={register}
+            name="closingMediaAlt"
+            label="Closing Illustration Alt Text"
+            placeholder="e.g. Illustration of a play button beside rising growth bars"
+          />
+        </Fieldset>
+
+        <Fieldset
+          title="Search Engine Listing"
+          hint="What Google shows in its results. Aim for a title around 60 characters and a description around 155 — beyond that they get truncated mid-sentence."
+        >
+          <TextField
+            register={register}
+            name="metaTitle"
+            label="SEO Title"
+            placeholder="Defaults to the service name"
+            hint="“ | Cocoma Digital” is appended automatically, so leave it off."
+          />
+          <TextAreaField
+            register={register}
+            name="metaDescription"
+            label="Meta Description"
+            rows={3}
+            hint="One or two sentences giving someone a reason to click. Not a keyword list."
+          />
           <TextAreaField
             register={register}
             name="metaKeywords"
-            label="Meta Keywords"
+            label="Focus Keywords"
             rows={2}
             placeholder="YouTube growth services, YouTube SEO, …"
-            hint="Comma-separated."
+            hint="Comma-separated. The terms this page is written to rank for — keep it to a handful."
           />
+          <TextAreaField
+            register={register}
+            name="metaSecondaryKeywords"
+            label="Secondary Keywords"
+            rows={2}
+            placeholder="YouTube video editing services, YouTube channel optimization, …"
+            hint="Comma-separated supporting terms, published after the focus keywords."
+          />
+          <TextField
+            register={register}
+            name="canonicalUrl"
+            label="Canonical URL"
+            placeholder="https://cocomadigital.com/services/…"
+            hint="Absolute URL. Leave blank to use the page's own address, which is almost always right — set it only when this page duplicates another."
+          />
+          <div>
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input {...register('noIndex')} type="checkbox" className="form-checkbox" />
+              Hide this page from search engines
+            </label>
+            <p className="mt-1 text-xs text-gray-500">
+              Adds a noindex tag. The page stays live and linkable — use Status below to take it down entirely.
+            </p>
+          </div>
+        </Fieldset>
+
+        <Fieldset
+          title="Social Sharing — Open Graph"
+          hint="The preview card shown when this URL is pasted into Facebook, LinkedIn, WhatsApp or Slack. Every field is optional: blank ones inherit the search listing above, and a blank image falls back to a branded card generated from this page's own copy."
+        >
+          <TextField register={register} name="ogTitle" label="OG Title" placeholder="Falls back to the SEO title" />
+          <TextAreaField
+            register={register}
+            name="ogDescription"
+            label="OG Description"
+            rows={2}
+            hint="Falls back to the meta description. Shorter reads better in a feed."
+          />
+          <SelectField register={register} name="ogType" label="OG Type" options={OG_TYPE_OPTIONS} />
+          <TextField
+            register={register}
+            name="ogImage"
+            label="OG Image URL"
+            placeholder="Leave blank to use the generated card"
+            hint="An absolute https:// URL to a public 1200×630 JPG or PNG. Anything behind a login or a redirect will not render — the scrapers fetch it anonymously."
+          />
+          <TextField
+            register={register}
+            name="ogImageAlt"
+            label="OG Image Alt Text"
+            placeholder="e.g. End-to-End YouTube Growth Services from Cocoma Digital"
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="form-label">Image Width</label>
+              <input {...register('ogImageWidth')} type="number" className="form-input" placeholder="1200" />
+            </div>
+            <div>
+              <label className="form-label">Image Height</label>
+              <input {...register('ogImageHeight')} type="number" className="form-input" placeholder="630" />
+            </div>
+            <TextField register={register} name="ogImageType" label="Image MIME Type" placeholder="image/png" />
+          </div>
+        </Fieldset>
+
+        <Fieldset
+          title="Social Sharing — X / Twitter"
+          hint="Blank fields inherit the Open Graph values above, so fill these in only when the card should read differently on X."
+        >
+          <SelectField register={register} name="twitterCard" label="Card Type" options={TWITTER_CARD_OPTIONS} />
+          <TextField register={register} name="twitterTitle" label="Twitter Title" placeholder="Falls back to the OG title" />
+          <TextAreaField register={register} name="twitterDescription" label="Twitter Description" rows={2} />
+          <TextField
+            register={register}
+            name="twitterImage"
+            label="Twitter Image URL"
+            placeholder="Falls back to the OG image"
+            hint="Absolute https:// URL, publicly reachable."
+          />
+          <TextField register={register} name="twitterImageAlt" label="Twitter Image Alt Text" />
+        </Fieldset>
+
+        <Fieldset
+          title="Structured Data"
+          hint="Published as schema.org markup so the page can qualify for rich results. The breadcrumb, FAQ and service-catalogue blocks are generated from this page's own content automatically."
+        >
           <TextField register={register} name="schemaServiceType" label="Schema Service Type" placeholder="e.g. YouTube channel growth and management" />
           <TextAreaField
             register={register}

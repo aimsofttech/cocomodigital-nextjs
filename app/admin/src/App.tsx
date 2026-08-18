@@ -171,6 +171,7 @@ const GrowthShowcaseList = lazy(() => import('@/pages/growthServices/ShowcaseLis
 const GrowthCaseMetricList = lazy(() => import('@/pages/growthServices/CaseMetricList'));
 const GrowthFaqList = lazy(() => import('@/pages/growthServices/FaqList'));
 const GrowthCtaList = lazy(() => import('@/pages/growthServices/CtaList'));
+const GrowthContentList = lazy(() => import('@/pages/growthServices/ContentList'));
 
 // Home Page Sections
 const HomePageSectionList = lazy(() => import('@/pages/settings/HomePageSectionList'));
@@ -392,6 +393,7 @@ export default function App() {
           <Route path="growth-services/case-metric" element={<GrowthCaseMetricList />} />
           <Route path="growth-services/faq" element={<GrowthFaqList />} />
           <Route path="growth-services/cta" element={<GrowthCtaList />} />
+          <Route path="growth-services/content" element={<GrowthContentList />} />
 
           {/* Blog */}
           <Route path="blog/category" element={<BlogCategoryList />} />

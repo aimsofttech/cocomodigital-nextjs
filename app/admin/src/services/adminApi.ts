@@ -180,6 +180,7 @@ export const growthServiceShowcaseApi = createCrudService('growth-service/showca
 export const growthServiceCaseMetricApi = createCrudService('growth-service/case-metric');
 export const growthServiceFaqApi = createCrudService('growth-service/faq');
 export const growthServiceCtaApi = createCrudService('growth-service/cta');
+export const growthServiceContentApi = createCrudService('growth-service/content');
 
 export const meetingApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/meetings`, { params }),

@@ -1,4 +1,5 @@
-import type { FeatureItem } from "./types";
+import type { FeatureItem, HeadingLevel } from "./types";
+import { Heading } from "./Primitives";
 import { CARD_FLAT, ICON_CHIP } from "./theme";
 
 /* One grid drives every icon-card block across the three pages:
@@ -22,10 +23,13 @@ export default function FeatureGrid({
   columns = 3,
   layout = "row",
   compact = false,
+  headingLevel = 3,
   className = "",
 }: {
   items: FeatureItem[];
   columns?: Columns;
+  /** Card titles sit one level under their band heading. */
+  headingLevel?: HeadingLevel;
   /** "row" = icon beside the copy, "stack" = icon above centred copy */
   layout?: "row" | "stack";
   /** tighter type + padding, used by the six-across bands */
@@ -56,16 +60,17 @@ export default function FeatureGrid({
               />
             </span>
             <div>
-              <h3
+              <Heading
+                level={headingLevel}
                 className={`font-black text-strong ${
-                  compact ? "text-[13px] leading-snug" : "text-[15px] leading-snug"
+                  compact ? "text-sm leading-snug" : "text-base leading-snug"
                 }`}
               >
                 {title}
-              </h3>
+              </Heading>
               <p
                 className={`mt-1.5 leading-relaxed text-muted ${
-                  compact ? "text-[11px]" : "text-[13px]"
+                  compact ? "text-[13px]" : "text-sm"
                 }`}
               >
                 {description}

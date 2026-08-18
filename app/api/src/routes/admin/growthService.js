@@ -15,6 +15,7 @@ const attachCsvRoutes = require('./_csvRoutes');
  *   /case-metric   before / after / growth rows
  *   /faq           FAQ accordion entries
  *   /cta           hero + closing call-to-action buttons
+ *   /content       long-form SEO copy blocks    (scoped by sectionKey)
  */
 
 // Build a standard protected CRUD router (plus CSV export/import) for one
@@ -39,5 +40,6 @@ router.use('/showcase', crudRouter(ctrl.showcase));
 router.use('/case-metric', crudRouter(ctrl.caseMetric));
 router.use('/faq', crudRouter(ctrl.faq));
 router.use('/cta', crudRouter(ctrl.cta));
+router.use('/content', crudRouter(ctrl.content));
 
 module.exports = router;

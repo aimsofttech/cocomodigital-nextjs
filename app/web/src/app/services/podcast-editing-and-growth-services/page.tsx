@@ -27,6 +27,16 @@ const FALLBACK = {
     "podcast publishing and distribution",
     "podcast growth services",
   ],
+  secondaryKeywords: [
+    "podcast post-production services",
+    "podcast mixing and mastering",
+    "podcast clip editing",
+    "podcast marketing agency",
+    "video podcast production",
+    "podcast episode publishing",
+    "grow podcast listeners",
+    "podcast editing services India",
+  ],
 };
 
 export async function generateMetadata(): Promise<Metadata> {

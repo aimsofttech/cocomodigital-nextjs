@@ -2,8 +2,8 @@ import ChildListPage from './ChildListPage';
 import ChildForm from './ChildForm';
 import { growthServiceSectionApi } from '@/services/adminApi';
 import {
-  COLUMN_OPTIONS, FAQ_VARIANT_OPTIONS, FEATURE_RENDERERS, LAYOUT_OPTIONS,
-  RENDERER_OPTIONS, SHOWCASE_RENDERERS, TONE_OPTIONS,
+  COLUMN_OPTIONS, CONTENT_RENDERERS, FAQ_VARIANT_OPTIONS, FEATURE_RENDERERS,
+  LAYOUT_OPTIONS, RENDERER_OPTIONS, SHOWCASE_RENDERERS, TONE_OPTIONS,
 } from './constants';
 import { SelectField, TextAreaField, TextField } from './FormFields';
 
@@ -46,9 +46,11 @@ function SectionForm({ editId, lockedServiceId, onSuccess, onCancel }: any) {
                   ? 'Add this section’s items under Features with the same Section Key.'
                   : SHOWCASE_RENDERERS.includes(renderer)
                     ? 'Add this section’s items under Showcases with the same Section Key.'
-                    : renderer === 'faq'
-                      ? 'Content comes from the FAQs list for this service.'
-                      : 'Content comes from Case Metrics plus the case-study fields on the service.'
+                    : CONTENT_RENDERERS.includes(renderer)
+                      ? 'Add this section’s copy under SEO Content with the same Section Key.'
+                      : renderer === 'faq'
+                        ? 'Content comes from the FAQs list for this service.'
+                        : 'Content comes from Case Metrics plus the case-study fields on the service.'
               }
             />
             <TextField register={register} name="eyebrow" label="Eyebrow" placeholder="Small highlighted label above the heading" />

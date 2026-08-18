@@ -135,6 +135,7 @@ const navigation: NavItem[] = [
           { label: 'Case Metrics', path: '/growth-services/case-metric', icon: ChartBarIcon },
           { label: 'FAQs', path: '/growth-services/faq', icon: QuestionMarkCircleIcon },
           { label: 'CTAs', path: '/growth-services/cta', icon: CursorArrowRaysIcon },
+          { label: 'SEO Content', path: '/growth-services/content', icon: DocumentTextIcon },
         ],
       },
     ],

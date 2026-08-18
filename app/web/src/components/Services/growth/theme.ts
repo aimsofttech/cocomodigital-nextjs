@@ -85,4 +85,4 @@ export type CtaTone = keyof typeof CTA_VARIANTS;
 
 /** Section eyebrow: small, wide-tracked, near-black on a yellow marker. */
 export const EYEBROW =
-  "text-[11px] font-black tracking-[0.18em] text-strong uppercase";
+  "text-md sm:text-xl font-black tracking-[0.18em] text-strong uppercase";

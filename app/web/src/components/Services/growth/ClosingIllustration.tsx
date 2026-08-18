@@ -18,7 +18,7 @@ function RisingBars({ heights }: { heights: [string, string, string] }) {
   );
 }
 
-export default function ClosingIllustration({ variant }: { variant: Key }) {
+function Art({ variant }: { variant: Key }) {
   if (variant === "none") return null;
 
   if (variant === "podcast") {
@@ -59,5 +59,29 @@ export default function ClosingIllustration({ variant }: { variant: Key }) {
       </span>
       <RisingBars heights={["h-16 sm:h-24", "h-24 sm:h-36", "h-32 sm:h-48"]} />
     </div>
+  );
+}
+
+/* The illustration is a mock, not information: with no alt text it is hidden
+   from assistive tech entirely rather than announced as an unlabelled graphic.
+   When the admin panel supplies alt text, the whole subtree collapses into one
+   labelled image instead of leaking its decorative parts. */
+
+export default function ClosingIllustration({
+  variant,
+  alt = "",
+}: {
+  variant: Key;
+  alt?: string;
+}) {
+  const art = Art({ variant });
+  if (!art) return null;
+
+  return alt ? (
+    <div role="img" aria-label={alt}>
+      {art}
+    </div>
+  ) : (
+    <div aria-hidden="true">{art}</div>
   );
 }

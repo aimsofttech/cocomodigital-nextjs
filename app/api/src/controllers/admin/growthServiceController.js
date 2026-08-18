@@ -7,6 +7,7 @@ const GrowthServiceShowcase = require('../../models/GrowthServiceShowcase');
 const GrowthServiceCaseMetric = require('../../models/GrowthServiceCaseMetric');
 const GrowthServiceFaq = require('../../models/GrowthServiceFaq');
 const GrowthServiceCta = require('../../models/GrowthServiceCta');
+const GrowthServiceContent = require('../../models/GrowthServiceContent');
 const createCrudController = require('./crudFactory');
 const { cascadeDelete } = require('./cascadeDelete');
 
@@ -29,6 +30,7 @@ const CHILD_SPECS = [
   { model: GrowthServiceCaseMetric, fk: 'growthServiceId' },
   { model: GrowthServiceFaq, fk: 'growthServiceId' },
   { model: GrowthServiceCta, fk: 'growthServiceId' },
+  { model: GrowthServiceContent, fk: 'growthServiceId' },
 ];
 
 // Resolve the parent service name onto every child row so the admin lists can
@@ -97,6 +99,15 @@ const faq = createCrudController(GrowthServiceFaq, {
   slugSource: 'question',
 });
 
+const content = createCrudController(GrowthServiceContent, {
+  searchFields: ['heading', 'body', 'sectionKey'],
+  defaultSort: { displayOrder: 1, createdAt: 1 },
+  parentField: 'growthServiceId',
+  filterFields: ['sectionKey', 'level'],
+  lookups: SERVICE_LOOKUP,
+  slugSource: 'heading',
+});
+
 const cta = createCrudController(GrowthServiceCta, {
   searchFields: ['label', 'href'],
   defaultSort: { displayOrder: 1, createdAt: 1 },
@@ -119,6 +130,7 @@ const NAV_SEGMENTS = [
   { segment: 'case-metrics', label: 'Case Metrics', model: GrowthServiceCaseMetric },
   { segment: 'faqs', label: 'FAQs', model: GrowthServiceFaq },
   { segment: 'ctas', label: 'CTAs', model: GrowthServiceCta },
+  { segment: 'contents', label: 'SEO Content', model: GrowthServiceContent },
 ];
 
 // FK values are Mixed: seeded rows hold ObjectIds while admin-created rows
@@ -191,4 +203,5 @@ module.exports = {
   caseMetric,
   faq,
   cta,
+  content,
 };

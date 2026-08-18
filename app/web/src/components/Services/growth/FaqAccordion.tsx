@@ -1,18 +1,27 @@
 import { FiChevronDown, FiMinus, FiPlus } from "react-icons/fi";
-import type { FaqItem } from "./types";
+import type { FaqItem, HeadingLevel } from "./types";
+import { Heading } from "./Primitives";
 import { ICON_CHIP } from "./theme";
 
 /* Native <details> accordion — keyboard accessible and fully
    functional without JavaScript, so it also renders correctly in
-   the statically prerendered output. */
+   the statically prerendered output.
+
+   Each question is a heading inside its <summary>, the disclosure pattern the
+   HTML spec allows: the questions then show up in the document outline and in
+   a screen reader's heading list, which matters here because the same copy is
+   published as FAQPage structured data. */
 
 export default function FaqAccordion({
   items,
   variant = "plain",
+  headingLevel = 3,
 }: {
   items: FaqItem[];
   /** "marked" adds the brand bullet + chevron treatment */
   variant?: "plain" | "marked";
+  /** Questions sit one level under the FAQ band heading. */
+  headingLevel?: HeadingLevel;
 }) {
   return (
     <div className="mx-auto mt-8 max-w-4xl space-y-3">
@@ -23,14 +32,16 @@ export default function FaqAccordion({
              every other expanded/active surface on the site behaves. */
           className="group rounded-sticker border-2 border-strong bg-page transition-shadow duration-150 open:shadow-[4px_4px_0_var(--brand,#fff000)]"
         >
-          <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 text-sm font-bold text-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-strong sm:px-5 [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 text-base font-bold text-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-strong sm:px-5 [&::-webkit-details-marker]:hidden">
             {variant === "marked" ? (
               <span className={`${ICON_CHIP} h-5.5 w-5.5 rounded-full`}>
                 <FiPlus className="h-3 w-3" aria-hidden="true" />
               </span>
             ) : null}
 
-            <span className="flex-1">{question}</span>
+            <Heading level={headingLevel} className="flex-1 text-base font-bold sm:text-lg">
+              {question}
+            </Heading>
 
             {variant === "marked" ? (
               <FiChevronDown
@@ -51,7 +62,7 @@ export default function FaqAccordion({
             )}
           </summary>
 
-          <div className="border-t-2 border-strong/12 px-4 pt-3 pb-4 text-sm leading-relaxed text-muted sm:px-5">
+          <div className="border-t-2 border-strong/12 px-4 pt-3 pb-4 text-[15px] leading-relaxed text-muted sm:px-5 sm:text-base">
             {answer}
           </div>
         </details>

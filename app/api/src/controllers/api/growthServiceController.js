@@ -7,6 +7,7 @@ const GrowthServiceShowcase = require('../../models/GrowthServiceShowcase');
 const GrowthServiceCaseMetric = require('../../models/GrowthServiceCaseMetric');
 const GrowthServiceFaq = require('../../models/GrowthServiceFaq');
 const GrowthServiceCta = require('../../models/GrowthServiceCta');
+const GrowthServiceContent = require('../../models/GrowthServiceContent');
 
 /* Public read API for the growth landing pages.
  *
@@ -98,12 +99,44 @@ const buildService = (doc) => ({
     description: doc.closingDescription || '',
     illustrationKey: doc.closingIllustrationKey || 'none',
   },
+  /* Alt text for the three illustrated blocks. Empty stays empty: the
+     renderer then marks the graphic decorative rather than inventing a
+     description for a mock that carries no information of its own. */
+  mediaAlt: {
+    hero: doc.heroMediaAlt || '',
+    caseStudy: doc.caseMediaAlt || '',
+    closing: doc.closingMediaAlt || '',
+  },
+  /* Every optional field is resolved here rather than in the web app, so the
+     three landing pages and any future one share a single fallback chain:
+     og/twitter copy inherits the meta copy, and the canonical falls back
+     through pageUrl to the slug-derived path. */
   seo: {
     title: doc.metaTitle || doc.name,
     description: doc.metaDescription || '',
     keywords: toCsvList(doc.metaKeywords),
+    secondaryKeywords: toCsvList(doc.metaSecondaryKeywords),
+    canonicalUrl: doc.canonicalUrl || doc.pageUrl || '',
+    noIndex: !!doc.noIndex,
     serviceType: doc.schemaServiceType || '',
     schemaDescription: doc.schemaDescription || doc.metaDescription || '',
+    openGraph: {
+      title: doc.ogTitle || doc.metaTitle || doc.name,
+      description: doc.ogDescription || doc.metaDescription || '',
+      type: doc.ogType || 'website',
+      image: doc.ogImage || '',
+      imageAlt: doc.ogImageAlt || '',
+      imageWidth: doc.ogImageWidth || 1200,
+      imageHeight: doc.ogImageHeight || 630,
+      imageType: doc.ogImageType || 'image/png',
+    },
+    twitter: {
+      card: doc.twitterCard || 'summary_large_image',
+      title: doc.twitterTitle || doc.ogTitle || doc.metaTitle || doc.name,
+      description: doc.twitterDescription || doc.ogDescription || doc.metaDescription || '',
+      image: doc.twitterImage || doc.ogImage || '',
+      imageAlt: doc.twitterImageAlt || doc.ogImageAlt || '',
+    },
   },
   displayOrder: doc.displayOrder ?? 0,
 });
@@ -127,6 +160,8 @@ const index = async (req, res) => {
       pageUrl: s.pageUrl || '',
       metaTitle: s.metaTitle || s.name,
       metaDescription: s.metaDescription || '',
+      canonicalUrl: s.canonicalUrl || s.pageUrl || '',
+      updatedAt: s.updatedAt || null,
       displayOrder: s.displayOrder ?? 0,
     })),
   });
@@ -147,7 +182,7 @@ const show = async (req, res) => {
   const ids = idVariants(doc._id);
   const scope = { growthServiceId: { $in: ids }, status: 1 };
 
-  const [sections, features, stats, showcases, caseMetrics, faqs, ctas] = await Promise.all([
+  const [sections, features, stats, showcases, caseMetrics, faqs, ctas, contents] = await Promise.all([
     GrowthServiceSection.find(scope).sort(sortByOrder).lean(),
     GrowthServiceFeature.find(scope).sort(sortByOrder).lean(),
     GrowthServiceStat.find(scope).sort(sortByOrder).lean(),
@@ -155,6 +190,7 @@ const show = async (req, res) => {
     GrowthServiceCaseMetric.find(scope).sort(sortByOrder).lean(),
     GrowthServiceFaq.find(scope).sort(sortByOrder).lean(),
     GrowthServiceCta.find(scope).sort(sortByOrder).lean(),
+    GrowthServiceContent.find(scope).sort(sortByOrder).lean(),
   ]);
 
   res.json({
@@ -188,6 +224,17 @@ const show = async (req, res) => {
         growth: m.growth || '',
       })),
       faqs: faqs.map((f) => ({ question: f.question, answer: f.answer })),
+      // Prose blocks keyed by section, same as features/showcases. `level`
+      // is clamped to 3-6 so a bad import can't emit an <h0> or an <h9>.
+      contents: groupBySection(
+        contents.map((c) => ({
+          sectionKey: c.sectionKey || '',
+          level: Math.min(6, Math.max(3, Number(c.level) || 3)),
+          heading: c.heading || '',
+          body: toLines(c.body),
+          bullets: toLines(c.bullets),
+        }))
+      ),
       ctas: {
         hero: ctas.filter((c) => c.placement === 'hero').map(clean),
         closing: ctas.filter((c) => c.placement === 'closing').map(clean),

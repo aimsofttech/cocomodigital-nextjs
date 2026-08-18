@@ -7,7 +7,8 @@ const mongoose = require('mongoose');
  *
  * The `case-study` and `faq` renderers read their content from
  * GrowthServiceCaseMetric / GrowthServiceFaq and the parent record, so those
- * sections carry heading copy only.
+ * sections carry heading copy only. The `article` renderer draws the long-form
+ * SEO copy blocks in GrowthServiceContent.
  */
 const growthServiceSectionSchema = new mongoose.Schema({
   slug: { type: String, trim: true, default: null, index: true },
@@ -16,7 +17,7 @@ const growthServiceSectionSchema = new mongoose.Schema({
   sectionKey: { type: String, required: true, trim: true },
   renderer: {
     type: String,
-    enum: ['grid', 'timeline', 'showcase', 'format-panels', 'case-study', 'faq'],
+    enum: ['grid', 'timeline', 'showcase', 'format-panels', 'case-study', 'faq', 'article'],
     default: 'grid',
   },
   eyebrow: { type: String, trim: true, default: '' },

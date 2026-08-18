@@ -15,7 +15,7 @@ function Badge({ badge }: { badge: Media["badge"] }) {
     return (
       <span
         aria-hidden="true"
-        className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-sm bg-brand px-2 py-1 text-[10px] font-black text-brand-on uppercase"
+        className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-sm bg-brand px-2.5 py-1 text-[11px] font-black text-brand-on uppercase sm:text-xs"
       >
         <FaYoutube className="h-3 w-3" />
         Subscribe
@@ -40,7 +40,7 @@ function Badge({ badge }: { badge: Media["badge"] }) {
   return null;
 }
 
-export default function CaseMedia({ media }: { media: Media }) {
+export default function CaseMedia({ media, alt = "" }: { media: Media; alt?: string }) {
   const { lineOne, lineTwo, accentLine, subtitle, badge } = media;
 
   // The first line inherits the block colour, so only the second needs its own.
@@ -48,14 +48,20 @@ export default function CaseMedia({ media }: { media: Media }) {
   const secondClass = accentLine === "two" ? "text-brand" : "text-white";
 
   return (
-    <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-sticker border-2 border-strong bg-dark-surface p-5">
+    /* A stand-in for the client's channel art. With alt text it reads as one
+       labelled image; without, it is decorative and the case-study copy beside
+       it already carries the same names. */
+    <div
+      {...(alt ? { role: "img", "aria-label": alt } : { "aria-hidden": true })}
+      className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-sticker border-2 border-strong bg-dark-surface p-5"
+    >
       <p
-        className={`text-center font-satoshi text-xl leading-tight font-black tracking-tight uppercase sm:text-2xl ${firstClass}`}
+        className={`text-center font-satoshi text-2xl leading-tight font-black tracking-tight uppercase sm:text-3xl ${firstClass}`}
       >
         {lineOne}
         {lineTwo ? <span className={`block ${secondClass}`}>{lineTwo}</span> : null}
         {subtitle ? (
-          <span className="mt-1 block text-[10px] font-medium tracking-normal text-white/60 normal-case">
+          <span className="mt-1.5 block text-xs font-medium tracking-normal text-white/60 normal-case sm:text-sm">
             {subtitle}
           </span>
         ) : null}

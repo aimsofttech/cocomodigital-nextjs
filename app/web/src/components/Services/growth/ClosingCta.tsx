@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
-import { CtaGroup } from "./Primitives";
-import type { CtaLink } from "./types";
-
-/* Full-bleed closing band. Near-black is the surface the rest of the
-   site uses for hero/footer/CTA bands (--bg-dark), with the brand
-   yellow carried by the headline highlight and the primary button.
-   The halftone dot texture is an arbitrary Tailwind background
-   utility, so no stylesheet is needed for it. */
+import { CtaGroup, Heading } from "./Primitives";
+import type { CtaLink, HeadingLevel } from "./types";
 
 export default function ClosingCta({
   title,
@@ -14,20 +8,21 @@ export default function ClosingCta({
   ctas,
   illustration,
   id,
+  headingLevel = 2,
 }: {
   title: ReactNode;
   description: string;
   ctas: CtaLink[];
   illustration: ReactNode;
   id: string;
+  /** A band heading like any other, so it stays an H2 by default. */
+  headingLevel?: HeadingLevel;
 }) {
   return (
     <section
       aria-labelledby={id}
       className="relative w-full overflow-hidden border-t-2 border-strong bg-dark-surface"
     >
-      {/* Brand-tinted dots rather than white — ties the band to the
-          rest of the page without lifting the background lightness. */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle,rgba(255,240,0,0.22)_1.5px,transparent_1.5px)] bg-size-[16px_16px] lg:block"
@@ -37,13 +32,14 @@ export default function ClosingCta({
         <div className="order-2 lg:order-1">{illustration}</div>
 
         <div className="order-1 lg:order-2">
-          <h2
+          <Heading
+            level={headingLevel}
             id={id}
-            className="font-satoshi text-2xl leading-tight font-black text-balance text-white sm:text-3xl lg:text-[34px]"
+            className="font-satoshi text-2xl leading-tight font-black text-balance text-white sm:text-3xl lg:text-[40px]"
           >
             {title}
-          </h2>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75 sm:text-base">
+          </Heading>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75 sm:text-base md:text-lg">
             {description}
           </p>
 
