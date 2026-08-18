@@ -161,6 +161,17 @@ const ContactUsList = lazy(() => import('@/pages/contact/ContactUsList'));
 const MeetingList = lazy(() => import('@/pages/meetings/MeetingList'));
 const MeetingAvailability = lazy(() => import('@/pages/meetings/MeetingAvailability'));
 
+// Growth Services — the three growth landing pages and all of their sections
+const GrowthServiceList = lazy(() => import('@/pages/growthServices/ServiceList'));
+const GrowthServiceForm = lazy(() => import('@/pages/growthServices/ServiceForm'));
+const GrowthSectionList = lazy(() => import('@/pages/growthServices/SectionList'));
+const GrowthFeatureList = lazy(() => import('@/pages/growthServices/FeatureList'));
+const GrowthStatListPage = lazy(() => import('@/pages/growthServices/StatList'));
+const GrowthShowcaseList = lazy(() => import('@/pages/growthServices/ShowcaseList'));
+const GrowthCaseMetricList = lazy(() => import('@/pages/growthServices/CaseMetricList'));
+const GrowthFaqList = lazy(() => import('@/pages/growthServices/FaqList'));
+const GrowthCtaList = lazy(() => import('@/pages/growthServices/CtaList'));
+
 // Home Page Sections
 const HomePageSectionList = lazy(() => import('@/pages/settings/HomePageSectionList'));
 const HomePageSectionForm = lazy(() => import('@/pages/settings/HomePageSectionForm'));
@@ -369,6 +380,18 @@ export default function App() {
           <Route path="group-service/faq" element={<GroupServiceItemFaqList />} />
           <Route path="group-service/faq/add" element={<GroupServiceItemFaqForm />} />
           <Route path="group-service/faq/edit/:id" element={<GroupServiceItemFaqForm />} />
+
+          {/* Growth Services — child lists are scoped by ?growthServiceId */}
+          <Route path="growth-services/service" element={<GrowthServiceList />} />
+          <Route path="growth-services/service/add" element={<GrowthServiceForm />} />
+          <Route path="growth-services/service/edit/:id" element={<GrowthServiceForm />} />
+          <Route path="growth-services/section" element={<GrowthSectionList />} />
+          <Route path="growth-services/feature" element={<GrowthFeatureList />} />
+          <Route path="growth-services/stat" element={<GrowthStatListPage />} />
+          <Route path="growth-services/showcase" element={<GrowthShowcaseList />} />
+          <Route path="growth-services/case-metric" element={<GrowthCaseMetricList />} />
+          <Route path="growth-services/faq" element={<GrowthFaqList />} />
+          <Route path="growth-services/cta" element={<GrowthCtaList />} />
 
           {/* Blog */}
           <Route path="blog/category" element={<BlogCategoryList />} />

@@ -84,6 +84,7 @@ const adminWhatsappTemplateRoutes = require('./routes/admin/whatsappTemplate');
 const adminAdminPostRoutes = require('./routes/admin/adminPost');
 const adminHomePageSectionRoutes = require('./routes/admin/homePageSection');
 const adminHomePageSectionItemRoutes = require('./routes/admin/homePageSectionItem');
+const adminGrowthServiceRoutes = require('./routes/admin/growthService');
 const adminUploadRoutes = require('./routes/admin/uploads');
 
 // Route imports - Public API
@@ -101,6 +102,7 @@ const apiHomePageSectionRoutes = require('./routes/api/homePageSection');
 const apiFaqRoutes = require('./routes/api/faq');
 const apiGroupServiceFaqRoutes = require('./routes/api/groupServiceFaq');
 const apiJobCategoryRoutes = require('./routes/api/jobCategory');
+const apiGrowthServiceRoutes = require('./routes/api/growthService');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -251,6 +253,9 @@ app.use(`${adminBase}/whatsapp-template`, adminWhatsappTemplateRoutes);
 app.use(`${adminBase}/admin-post`, adminAdminPostRoutes);
 app.use(`${adminBase}/home-page-section`, adminHomePageSectionRoutes);
 app.use(`${adminBase}/home-page-section-item`, adminHomePageSectionItemRoutes);
+// Growth landing pages (YouTube growth / social video editing / podcast
+// editing) — self-contained module, all sub-resources under one mount.
+app.use(`${adminBase}/growth-service`, adminGrowthServiceRoutes);
 app.use(`${adminBase}/uploads`, adminUploadRoutes);
 
 // Public API routes
@@ -268,6 +273,7 @@ app.use('/api/home-page-sections', apiHomePageSectionRoutes);
 app.use('/api/faqs', apiFaqRoutes);
 app.use('/api/group-service/faqs', apiGroupServiceFaqRoutes);
 app.use('/api/job-categories', apiJobCategoryRoutes);
+app.use('/api/growth-services', apiGrowthServiceRoutes);
 
 // CRM (self-contained module under src/crm — mounted at /crm/api).
 // Also mounted at CRM_PUBLIC_PATH when that differs, because provider webhooks

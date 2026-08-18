@@ -169,6 +169,18 @@ export const freeConsultationApi = {
 export const homePageSectionApi = createCrudService('home-page-section');
 export const homePageSectionItemApi = createCrudService('home-page-section-item');
 
+/* Growth Services — the three growth landing pages (YouTube growth, social
+   media video editing, podcast editing). One parent record per page plus seven
+   child collections, every one of them scoped by `growthServiceId`. */
+export const growthServiceApi = createCrudService('growth-service/service');
+export const growthServiceSectionApi = createCrudService('growth-service/section');
+export const growthServiceFeatureApi = createCrudService('growth-service/feature');
+export const growthServiceStatApi = createCrudService('growth-service/stat');
+export const growthServiceShowcaseApi = createCrudService('growth-service/showcase');
+export const growthServiceCaseMetricApi = createCrudService('growth-service/case-metric');
+export const growthServiceFaqApi = createCrudService('growth-service/faq');
+export const growthServiceCtaApi = createCrudService('growth-service/cta');
+
 export const meetingApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/meetings`, { params }),
   getStats: () => api.get(`${BASE}/meetings/stats`),

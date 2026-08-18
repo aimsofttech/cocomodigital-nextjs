@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
-import PodcastEditingPage from "@/src/views/GrowthServices/PodcastEditingPage";
-import { buildMetadata } from "@/src/lib/seo";
+import GrowthServiceRoute, { buildGrowthMetadata } from "@/src/views/GrowthServices/route";
 
 /* Static route — a literal segment wins over /services/[slug],
-   so the existing dynamic service route is left untouched. */
+   so the existing dynamic service route is left untouched.
 
-export const metadata: Metadata = buildMetadata({
+   Content is served from the API (admin panel → Growth Services), so the route
+   renders per-request rather than being baked in at build time. */
+
+export const dynamic = "force-dynamic";
+
+const SLUG = "podcast-editing-and-growth-services";
+
+/* Used only when the API is unreachable, so the page still carries sensible
+   metadata instead of falling back to the site defaults. */
+const FALLBACK = {
   title: "Podcast Editing & Growth Services",
   description:
     "Professional podcast editing and growth services — audio editing, video podcast editing, mixing and mastering, podcast SEO, short-form clips, publishing and distribution.",
-  path: "/services/podcast-editing-and-growth-services",
-  category: "Services",
   keywords: [
     "podcast editing services",
     "podcast editing agency",
@@ -21,8 +27,12 @@ export const metadata: Metadata = buildMetadata({
     "podcast publishing and distribution",
     "podcast growth services",
   ],
-});
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildGrowthMetadata(SLUG, FALLBACK);
+}
 
 export default function PodcastEditingRoute() {
-  return <PodcastEditingPage />;
+  return <GrowthServiceRoute slug={SLUG} />;
 }

@@ -11,6 +11,7 @@ import {
   TrophyIcon,
   ArrowUpTrayIcon,
   CalendarDaysIcon,
+  ArrowTrendingUpIcon, CursorArrowRaysIcon,
 } from '@heroicons/react/24/outline';
 
 // ── Nav tree ────────────────────────────────────────────────────────────────
@@ -116,6 +117,24 @@ const navigation: NavItem[] = [
           { label: 'Portfolio Category', path: '/group-service/portfolio-category', icon: BriefcaseIcon },
           { label: 'Portfolio Items', path: '/group-service/portfolio-item', icon: ListBulletIcon },
           { label: 'FAQ', path: '/group-service/faq', icon: QuestionMarkCircleIcon },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Growth Services', icon: ArrowTrendingUpIcon,
+    children: [
+      { label: 'Services', path: '/growth-services/service', icon: ListBulletIcon },
+      {
+        label: 'Page Content', icon: RectangleStackIcon,
+        children: [
+          { label: 'Sections', path: '/growth-services/section', icon: Squares2X2Icon },
+          { label: 'Features', path: '/growth-services/feature', icon: SparklesIcon },
+          { label: 'Hero Stats', path: '/growth-services/stat', icon: TrophyIcon },
+          { label: 'Showcases', path: '/growth-services/showcase', icon: FilmIcon },
+          { label: 'Case Metrics', path: '/growth-services/case-metric', icon: ChartBarIcon },
+          { label: 'FAQs', path: '/growth-services/faq', icon: QuestionMarkCircleIcon },
+          { label: 'CTAs', path: '/growth-services/cta', icon: CursorArrowRaysIcon },
         ],
       },
     ],
