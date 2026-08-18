@@ -15,9 +15,9 @@ import sharp from "sharp";
  * no retry — a static file under /public is served by the CDN in one hop,
  * where a rendered route risks a cold start and a silently dropped preview.
  *
- * Run with `npm run og:cover -w @cocoma/web` after changing the logo or the
- * brand colours. The output is deterministic, so re-running with no source
- * change produces a byte-identical file.
+ * Run with `npm run og:cover` after changing the logo or the brand colours.
+ * The output is deterministic, so re-running with no source change produces a
+ * byte-identical file.
  */
 
 /* 1200x630 is the 1.91:1 box Facebook, LinkedIn and X all crop to, and the
@@ -31,9 +31,20 @@ const HEIGHT = 630;
 const INK = "#111111";
 const BRAND = "#fff000";
 
-/** Full "butterfly + cocoma digital" lockup — the mark people recognise. */
-const LOGO = "Images/logo/logo-01.png";
-const LOGO_WIDTH = 760;
+/* The lockup is composed from its two parts rather than using the single-line
+   logo-01.png, because the brand's stacked arrangement — butterfly on the
+   left, "cocoma" over "digital" on the right — reads far better in a 1.91:1
+   share card. The one-line version has to shrink to fit the width, which
+   leaves the mark small and the card mostly empty. */
+const MARK = "Images/logo/main-logo.png";
+const WORDMARK = "Images/logo/name-logo.png";
+
+/* Sized by height so both parts share a centre line whatever their source
+   dimensions. The mark is set slightly shorter than the wordmark: matching
+   them exactly makes the butterfly look oversized next to two text lines. */
+const WORDMARK_HEIGHT = 232;
+const MARK_HEIGHT = 214;
+const GAP = 58;
 
 const OUTPUT = "Images/og-cover.png";
 
@@ -41,11 +52,23 @@ async function main() {
   const publicDir = path.join(process.cwd(), "public");
   const outputPath = path.join(publicDir, OUTPUT);
 
-  const logo = await sharp(path.join(publicDir, LOGO))
-    .resize({ width: LOGO_WIDTH, fit: "inside", withoutEnlargement: true })
-    .png()
-    .toBuffer();
-  const { height: logoHeight = 0 } = await sharp(logo).metadata();
+  const resizeToHeight = async (file: string, height: number) => {
+    const buffer = await sharp(path.join(publicDir, file))
+      .resize({ height, fit: "inside" })
+      .png()
+      .toBuffer();
+    const meta = await sharp(buffer).metadata();
+    return { buffer, width: meta.width ?? 0, height: meta.height ?? 0 };
+  };
+
+  const mark = await resizeToHeight(MARK, MARK_HEIGHT);
+  const wordmark = await resizeToHeight(WORDMARK, WORDMARK_HEIGHT);
+
+  /* The two parts are laid out as one block, then the block is centred — so
+     changing either height keeps the lockup centred without re-tuning offsets. */
+  const lockupWidth = mark.width + GAP + wordmark.width;
+  const lockupLeft = Math.round((WIDTH - lockupWidth) / 2);
+  const centreY = Math.round(HEIGHT / 2) - 7;
 
   /* A brand rule along the bottom edge, matching the offset-shadow motif the
      site's cards use. Drawn as SVG so it stays crisp at any scale. */
@@ -64,9 +87,18 @@ async function main() {
     },
   })
     .composite([
-      /* Optically centred: sitting the lockup a little above the true middle
-         reads as centred once the bottom rule is in place. */
-      { input: logo, top: Math.round((HEIGHT - logoHeight) / 2) - 18, left: Math.round((WIDTH - LOGO_WIDTH) / 2) },
+      /* Both parts hang off the same centre line, which sits a few pixels
+         above true middle so the block reads as centred with the rule below. */
+      {
+        input: mark.buffer,
+        top: centreY - Math.round(mark.height / 2),
+        left: lockupLeft,
+      },
+      {
+        input: wordmark.buffer,
+        top: centreY - Math.round(wordmark.height / 2),
+        left: lockupLeft + mark.width + GAP,
+      },
       { input: rule, top: HEIGHT - 14, left: 0 },
     ])
     /* Flattened to RGB: a transparent PNG is composited against an unknown

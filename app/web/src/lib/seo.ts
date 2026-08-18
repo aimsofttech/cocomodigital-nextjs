@@ -11,6 +11,29 @@ export const SITE_NAME = "Cocoma Digital";
    og:image that 404'd and shared with no picture at all. */
 export const DEFAULT_OG_IMAGE = "/Images/og-cover.png";
 
+/* Stand-in artwork that must never be used as a share image.
+ *
+ * A page is normally shared with its own picture, and that is the right
+ * default. But a placeholder is worse than no picture: coming-soon.png is a
+ * 2 MB "designer to fill" stand-in, and WhatsApp abandons an og:image much
+ * past ~300 KB and falls back to a text-only preview — so a post carrying it
+ * shared with no image at all. Substituting the brand card here gives those
+ * pages the logo preview instead.
+ *
+ * This affects the share tags only. The page still renders the placeholder
+ * exactly as before; nothing about the design changes. Drop an entry from
+ * this list as soon as real artwork replaces it.
+ */
+const PLACEHOLDER_IMAGES = new Set(["/images/home/coming-soon.png"]);
+
+function isPlaceholder(url: string): boolean {
+  /* Compare on the path alone so it matches whether the caller passed a
+     root-relative path or a fully-qualified URL on our own domain. */
+  const withoutQuery = url.split(/[?#]/)[0];
+  const pathOnly = withoutQuery.replace(/^https?:\/\/[^/]+/i, "");
+  return PLACEHOLDER_IMAGES.has(pathOnly.toLowerCase());
+}
+
 /* Scrapers take og:image:type at face value and some skip an image whose
    declared type contradicts the bytes, so it is derived from the URL rather
    than assumed. Anything unrecognised (a CDN URL with no extension, say) is
@@ -298,7 +321,9 @@ export function buildMetadata(input: PageSeo): Metadata {
      imageUrl(doc), which returns "" when the doc has no media. `??` wouldn't
      catch that, so an empty string would resolve to the site root and produce
      a broken share image. `||` handles both null/undefined and "". */
-  const image = absoluteUrl(input.image || DEFAULT_OG_IMAGE);
+  const supplied = input.image && !isPlaceholder(input.image) ? input.image : "";
+  const usingDefault = !supplied;
+  const image = absoluteUrl(supplied || DEFAULT_OG_IMAGE);
   const twitterImage = input.twitterImage ? absoluteUrl(input.twitterImage) : image;
   const canonical = input.canonical
     ? absoluteUrl(input.canonical)
@@ -308,7 +333,11 @@ export function buildMetadata(input: PageSeo): Metadata {
     : `${input.title} | ${SITE_NAME}`;
   const ogTitle = input.ogTitle || title;
   const twitterTitle = input.twitterTitle || ogTitle;
-  const imageAlt = input.imageAlt ?? `${input.title} - ${SITE_NAME}`;
+  /* Alt text describes the picture, not the page, so a page that falls back
+     to the brand card must not keep an alt written for its own artwork. */
+  const imageAlt = usingDefault
+    ? `${SITE_NAME} logo`
+    : (input.imageAlt ?? `${input.title} - ${SITE_NAME}`);
 
   return {
     metadataBase: new URL(SITE_URL),
