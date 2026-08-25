@@ -58385,11 +58385,12 @@ html {
   text-align: left;
 }
 
-.pod-table-caption {
-  caption-side: top;
-  text-align: left;
-  padding: var(--space-4) var(--space-4) 0;
+/* Sits above the scroll container, not inside the table, so it wraps to
+   the viewport instead of the table's 640px min-width. */
+.pod-table-note {
+  margin: 0 0 var(--space-3);
   font-size: var(--fs-small);
+  line-height: var(--leading-body);
   /* AA contrast — see note on .pod-trust-caption */
   color: var(--text-muted);
 }
@@ -59276,4 +59277,20 @@ html {
   .pod-textlink:focus-visible {
     gap: var(--space-2);
   }
+}
+
+
+/* The site header is position:fixed at 68px, and nothing sets
+   scroll-padding, so every in-page anchor — including this page's own
+   "See how it works" and "Get a free podcast audit" CTAs — landed with
+   the target heading hidden behind it. Offset the targets by the header
+   plus breathing room.
+   NOTE: the same bug affects every anchor on every page of the site; the
+   one-line global fix is `html { scroll-padding-top: 5.5rem; }`. Kept
+   scoped here so this PR does not change routes it has not tested. */
+.pod-page [id],
+#pricing,
+#podcast-audit,
+#signal-to-scale {
+  scroll-margin-top: 5.5rem;
 }

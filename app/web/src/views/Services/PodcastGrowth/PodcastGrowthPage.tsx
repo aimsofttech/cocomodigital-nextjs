@@ -325,16 +325,23 @@ export default function PodcastGrowthPage() {
           {/* Wide table lives in its own scroll container so the page
               body never scrolls sideways on a phone. tabindex makes the
               scrollable region reachable by keyboard. */}
+          {/* The caption lives OUTSIDE the scroll container. A <caption>
+              belongs to the table, so it inherited the table's 640px
+              min-width and was clipped on any viewport narrower than
+              that — you had to scroll sideways to read a label. It is a
+              paragraph now, tied back to the table with
+              aria-describedby so the association survives. */}
+          <p id="pod-month-caption" className="pod-table-note">
+            Monthly deliverables for a weekly podcast at a full engagement
+          </p>
+
           <div
             className="pod-table-scroll"
             tabIndex={0}
             role="region"
             aria-labelledby="pod-month-title"
           >
-            <table className="pod-table">
-              <caption className="pod-table-caption">
-                Monthly deliverables for a weekly podcast at a full engagement
-              </caption>
+            <table className="pod-table" aria-describedby="pod-month-caption">
               <thead>
                 <tr>
                   <th scope="col">Deliverable</th>
