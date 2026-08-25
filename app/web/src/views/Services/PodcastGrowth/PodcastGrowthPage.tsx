@@ -7,10 +7,12 @@ import PodcastHeroMedia from "./PodcastHeroMedia";
 import { HeroFanOut, Icon, StageRail } from "./PodcastVisuals";
 import {
   AUDIENCES,
+  DISTRIBUTION,
   FAQS,
   FOUNDER,
   HERO,
   MONTH_ROWS,
+  NOT_FOR,
   PRICING,
   PROBLEM_STATS,
   PROCESS,
@@ -44,31 +46,35 @@ export default function PodcastGrowthPage() {
             </h1>
             <p className="pod-hero-sub">{HERO.sub}</p>
 
-            <ul className="pod-badges">
-              <li className="pod-badge pod-badge--price">
-                <Icon name="dollar" className="pod-badge-icon" />
-                {HERO.priceBadge}
-              </li>
-              <li className="pod-badge">
-                <Icon name="clock" className="pod-badge-icon" />
-                {HERO.hoursBadge}
-              </li>
-            </ul>
-
             <p className="pod-hero-signature">{SIGNATURE_LINE}</p>
 
+            {/* One button in the fold. The secondary action is a text
+                link so it cannot compete with the primary CTA — and the
+                site header already contributes its own "Get started"
+                button to this viewport. */}
             <div className="pod-hero-ctas">
               <a href={HERO.primaryCta.href} className="pod-cta pod-cta--primary">
                 {HERO.primaryCta.label}
                 <FaArrowRight aria-hidden="true" />
               </a>
-              <a
-                href={HERO.secondaryCta.href}
-                className="pod-cta pod-cta--secondary"
-              >
-                {HERO.secondaryCta.label}
+              <a href={HERO.secondaryLink.href} className="pod-textlink">
+                {HERO.secondaryLink.label}
+                <FaArrowRight aria-hidden="true" />
               </a>
             </div>
+
+            {/* Metadata, not controls: no border, no pill, so nothing
+                here reads as a third and fourth button. */}
+            <ul className="pod-meta">
+              <li className="pod-meta-item">
+                <Icon name="dollar" className="pod-meta-icon" />
+                {HERO.priceBadge}
+              </li>
+              <li className="pod-meta-item">
+                <Icon name="clock" className="pod-meta-icon" />
+                {HERO.hoursBadge}
+              </li>
+            </ul>
           </div>
 
           <div className="pod-hero-visual">
@@ -205,6 +211,28 @@ export default function PodcastGrowthPage() {
         </div>
       </section>
 
+      {/* -------------------------------------------- distribution */}
+      <section className="pod-dist" aria-labelledby="pod-dist-title">
+        <div className="pod-shell">
+          <p className="pod-eyebrow">{DISTRIBUTION.eyebrow}</p>
+          <h2 id="pod-dist-title" className="pod-section-title">
+            {DISTRIBUTION.heading}
+          </h2>
+          <p className="pod-section-lead">{DISTRIBUTION.lead}</p>
+          <div className="pod-dist-grid">
+            {DISTRIBUTION.pillars.map((d) => (
+              <article key={d.title} className="pod-dist-card">
+                <span className="pod-dist-icon">
+                  <Icon name={d.icon} />
+                </span>
+                <h3 className="pod-dist-title">{d.title}</h3>
+                <p className="pod-dist-body">{d.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ------------------------------------------------- pricing */}
       <section id="pricing" className="pod-pricing" aria-labelledby="pod-pricing-title">
         <div className="pod-shell">
@@ -254,6 +282,26 @@ export default function PodcastGrowthPage() {
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------- who this is not for */}
+      <section className="pod-notfor" aria-labelledby="pod-notfor-title">
+        <div className="pod-shell pod-shell--narrow">
+          <p className="pod-eyebrow">{NOT_FOR.eyebrow}</p>
+          <h2 id="pod-notfor-title" className="pod-section-title">
+            {NOT_FOR.heading}
+          </h2>
+          <p className="pod-section-lead">{NOT_FOR.lead}</p>
+          <ul className="pod-notfor-list">
+            {NOT_FOR.items.map((i) => (
+              <li key={i.slice(0, 24)}>
+                <span className="pod-cross" aria-hidden="true">&times;</span>
+                <span>{i}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="pod-notfor-foot">{NOT_FOR.footnote}</p>
         </div>
       </section>
 

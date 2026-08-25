@@ -131,7 +131,7 @@ export const HERO = {
   sub:
     "We turn one recording into a multi-platform growth engine: YouTube episodes, platform-native clips, thumbnails, publishing and analytics — operated as one system, on your publishing calendar.",
   primaryCta: { label: "Get a free podcast audit", href: "#podcast-audit" },
-  secondaryCta: { label: "See how it works", href: "#signal-to-scale" },
+  secondaryLink: { label: "See how it works", href: "#signal-to-scale" },
   priceBadge: "Engagements start at $2,000/month",
   hoursBadge: "US, Canada & UK hours overlap",
 };
@@ -306,15 +306,15 @@ export const PRICING = {
   eyebrow: "Straight answer on price",
   heading: "Engagements start at $2,000 a month",
   lead:
-    "We publish the floor because it saves everyone a call. Below this number a show is better served by a freelance editor, and we will say so rather than sell you something that does not fit. Above it, scope is built around your cadence, format and how much of the operation you want us to hold.",
-  includedTitle: "Every engagement includes",
+    "You are not buying editing hours. You are buying a production line with a named producer on it, a documented process behind it, and an SLA you can build a publishing calendar around. That is what costs $2,000 a month to run properly, and it is why we publish the number instead of making you sit through a discovery call to hear it.",
+  includedTitle: "What every engagement includes",
   included: [
-    "A named producer who owns your show, not a ticket queue",
-    "Retention-first editing to an agreed turnaround SLA",
-    "Thumbnail and title packaging, built as tested pairs",
+    "A named producer who owns your show — not a ticket queue",
+    "Retention-first editing delivered to an agreed SLA",
+    "Thumbnail and title packaging, built and tested as pairs",
     "Platform-native short-form clips from every episode",
     "Show notes, transcript and chapters written for search",
-    "Publishing across YouTube and the social ring",
+    "Publishing across YouTube and the full social ring",
     "A monthly scorecard that ends in decisions, not screenshots",
   ],
   scalesTitle: "What moves the number",
@@ -323,10 +323,10 @@ export const PRICING = {
     "Clip volume per episode",
     "Whether publishing and community management are included",
     "Back-catalogue re-cutting and re-packaging",
-    "Dubbing and localization into additional languages",
+    "Distribution and language expansion into new markets",
   ],
   note:
-    "Quoted and invoiced in USD. The audit comes back with the scope and the number together — no discovery-call gauntlet before you get a price.",
+    "Quoted and invoiced in USD; GBP and CAD on request. The audit comes back with scope and price together — one document, no gauntlet.",
   cta: { label: "Get a free podcast audit", href: "#podcast-audit" },
 };
 
@@ -376,9 +376,76 @@ export const FOUNDER = {
   lines: [
     "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio runs channel and catalogue operations for some of the biggest entertainment brands in India.",
     "Podcasts are where that same machinery is now most useful outside India — because a show is not an editing job, it is an operation, and operations are the thing we have actually built.",
-    "If you send a show through the audit form, you are not going into a lead funnel. You get findings you can act on whether or not you hire us, and a real number attached to a real scope.",
+    "Your show will not be run by me. It will be run by a producer whose name you will know, against a documented process, to an SLA you agreed. That is deliberate: a studio that only works when the founder is in the room is not a studio, it is a bottleneck.",
   ],
-  cta: { label: "Send me your show", href: "#podcast-audit" },
+  cta: { label: "Get a free podcast audit", href: "#podcast-audit" },
+};
+
+/**
+ * Explicit disqualification.
+ *
+ * Counter-intuitive but load-bearing: saying plainly who this is not for
+ * raises conversion among the people it IS for, and removes the
+ * price-shopping conversations that cost the most time and close the
+ * least. A page that tries to be right for everyone reads as right for
+ * no one.
+ */
+export const NOT_FOR = {
+  eyebrow: "Straight talk",
+  heading: "When we are the wrong call",
+  lead:
+    "We would rather lose the enquiry than take an engagement that cannot work. If any of these describe you, a freelance editor will serve you better and cost you far less.",
+  items: [
+    "You are looking for the cheapest per-episode rate. We are not competitive on rate and do not try to be — you are buying an operation, not an hour of editing.",
+    "You publish occasionally, when there is time. Systems earn their cost through cadence; without one there is nothing for the machinery to compound.",
+    "You want someone to take instructions rather than own an outcome. Our producers push back on packaging and structure. If that sounds like friction rather than value, it will be.",
+    "You need work turned around same-day, unpredictably. We hold an agreed SLA rather than an always-on queue.",
+  ],
+  footnote:
+    "Still reading and none of these fit? Then the audit will probably be worth your time.",
+};
+
+/**
+ * Distribution — the part most podcast vendors do not sell at all.
+ *
+ * TODO (Anil): this is written from capabilities the studio demonstrably
+ * has (multi-platform publishing operations, 20+ language transcreation,
+ * channel management at catalogue scale). If the distribution network
+ * includes concrete assets — owned channels, syndication partners,
+ * placement relationships — tell me what they are and I will name them.
+ * Nothing here claims a partner or a placement we cannot evidence.
+ */
+export const DISTRIBUTION = {
+  eyebrow: "Beyond production",
+  heading: "Content is king. Distribution is the kingdom.",
+  lead:
+    "Most podcast vendors stop when the file is exported. That is the cheap half of the problem. Getting a show in front of people who have never heard of it is the expensive half, and it is the half that decides whether the show grows.",
+  pillars: [
+    {
+      icon: "publish",
+      title: "Multi-platform publishing operations",
+      body:
+        "One show, published natively everywhere it should live — YouTube, Shorts, Instagram, TikTok, LinkedIn, Facebook and X — each with the metadata, format and cadence that platform actually rewards, rather than the same file cross-posted six times.",
+    },
+    {
+      icon: "globe",
+      title: "Language expansion",
+      body:
+        "The studio already runs transcreation in 20+ languages for entertainment clients. For a show that has found its audience in English, opening a second and third language market is the fastest available route to a bigger one.",
+    },
+    {
+      icon: "network",
+      title: "Catalogue and channel operations",
+      body:
+        "Back catalogue re-cut and re-packaged, playlists and end screens structured so one episode leads to the next, and channel operations run the way they are run for platforms with thousands of titles.",
+    },
+    {
+      icon: "chart",
+      title: "Discovery measured, not assumed",
+      body:
+        "Impressions, traffic sources and suggested-video pickup are reported monthly as their own layer — so distribution is a thing you can steer rather than a thing you hope for.",
+    },
+  ],
 };
 
 export const MONTH_ROWS: MonthRow[] = [

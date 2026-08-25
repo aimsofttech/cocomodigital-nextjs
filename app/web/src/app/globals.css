@@ -57809,39 +57809,6 @@ html {
   margin: 0 0 var(--space-5);
 }
 
-.pod-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  list-style: none;
-  margin: 0 0 var(--space-6);
-  padding: 0;
-}
-
-.pod-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border: 2px solid var(--text-strong);
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  font-weight: var(--fw-semibold);
-  color: var(--text-strong);
-}
-
-.pod-badge--price {
-  background: var(--brand);
-  color: var(--brand-on);
-}
-
-.pod-badge-icon {
-  width: 1.05rem;
-  height: 1.05rem;
-}
-
 .pod-hero-signature {
   font-family: var(--font-display);
   font-size: var(--fs-h3);
@@ -59074,5 +59041,194 @@ html {
 
   .pod-founder-portrait {
     max-width: 260px;
+  }
+}
+
+/* ------------------------------ hero meta, text link, new sections */
+
+/* Secondary action as a text link. Two bordered pills side by side in
+   the fold split attention, and the shared site header already puts a
+   yellow "Get started" button in the same viewport. */
+.pod-textlink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+  text-decoration: none;
+  padding: var(--space-3) 0;
+  border-bottom: 2px solid var(--text-strong);
+  transition: gap var(--motion-fast);
+}
+
+.pod-textlink:hover,
+.pod-textlink:focus-visible {
+  gap: var(--space-3);
+}
+
+/* Metadata line — deliberately unbordered so it cannot be mistaken for
+   a control. */
+.pod-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  list-style: none;
+  margin: var(--space-6) 0 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.pod-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+}
+
+.pod-meta-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------- distribution */
+
+.pod-dist {
+  background: var(--bg-dark);
+  color: var(--text-on-dark);
+}
+
+.pod-dist .pod-section-title {
+  color: var(--text-on-dark);
+}
+
+.pod-dist .pod-section-lead,
+.pod-dist .pod-eyebrow {
+  color: var(--text-on-dark-soft);
+}
+
+.pod-dist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.pod-dist-card {
+  padding: var(--space-6);
+  background: var(--bg-dark-elevated);
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-lg);
+}
+
+.pod-dist-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--brand);
+  color: var(--brand-on);
+}
+
+.pod-dist-icon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.pod-dist-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--text-on-dark);
+  margin: 0 0 var(--space-3);
+}
+
+.pod-dist-body {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-on-dark-soft);
+  margin: 0;
+}
+
+/* ------------------------------------------ who this is not for */
+
+.pod-notfor {
+  background: var(--bg-page);
+}
+
+.pod-notfor-list {
+  list-style: none;
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.pod-notfor-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-page-soft);
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-body);
+}
+
+.pod-cross {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background: var(--text-strong);
+  color: var(--bg-page);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
+
+.pod-notfor-foot {
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  border-left: 6px solid var(--brand);
+  background: var(--bg-page-soft);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+}
+
+@media (max-width: 1100px) {
+  .pod-dist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pod-meta {
+    gap: var(--space-3);
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pod-textlink {
+    transition: none;
+  }
+  .pod-textlink:hover,
+  .pod-textlink:focus-visible {
+    gap: var(--space-2);
   }
 }
