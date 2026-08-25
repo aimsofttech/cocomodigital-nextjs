@@ -202,6 +202,9 @@ export const staticPageSeo: Record<string, PageSeo> = {
       "podcast repurposing",
       "podcast channel management",
       "podcast dubbing and localization",
+      "podcast production agency for US shows",
+      "podcast editing services USA",
+      "podcast production agency Canada UK",
     ],
   },
   "/coming-soon": {

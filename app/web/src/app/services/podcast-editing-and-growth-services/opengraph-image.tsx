@@ -27,7 +27,7 @@ export default async function Image() {
           flexDirection: "column",
           justifyContent: "space-between",
           background: "#000000",
-          padding: "72px",
+          padding: "64px 72px",
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -71,14 +71,42 @@ export default async function Image() {
           <div
             style={{
               display: "flex",
-              fontSize: 30,
+              fontSize: 29,
               lineHeight: 1.35,
               color: "rgba(255,255,255,0.78)",
-              maxWidth: 900,
+              maxWidth: 880,
             }}
           >
             One recording becomes a multi-platform growth engine — episodes,
             clips, packaging, publishing and analytics, run as one system.
+          </div>
+          <div style={{ display: "flex", gap: 16, marginTop: 30 }}>
+            <div
+              style={{
+                display: "flex",
+                padding: "10px 22px",
+                borderRadius: 999,
+                background: "#FFF000",
+                color: "#000000",
+                fontSize: 24,
+                fontWeight: 700,
+              }}
+            >
+              From $2,000/month
+            </div>
+            <div
+              style={{
+                display: "flex",
+                padding: "10px 22px",
+                borderRadius: 999,
+                border: "2px solid rgba(255,255,255,0.35)",
+                color: "#FFFFFF",
+                fontSize: 24,
+                fontWeight: 700,
+              }}
+            >
+              US · Canada · UK hours
+            </div>
           </div>
         </div>
       </div>

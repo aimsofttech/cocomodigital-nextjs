@@ -57624,10 +57624,15 @@ html {
 /* ===========================================================
    /services/podcast-editing-and-growth-services
 
-   Canonical podcast money page. Sticker language (2px black
-   border + offset shadow + hover shift) consistent with
-   ProspectPage and the rest of the site; all sizing in the
-   shared tokens so it inherits type scale and spacing.
+   Canonical podcast money page, written for US buyers at a
+   $2,000/month floor. Sticker language (2px black border +
+   offset shadow + hover shift) consistent with ProspectPage
+   and the rest of the site; sized entirely in the shared
+   tokens so it inherits the type scale and spacing.
+
+   All ornament is CSS or inline SVG on purpose — public/Images
+   already carries tens of MB of raster-inside-.svg exports and
+   the page has an LCP budget to hold.
    =========================================================== */
 
 .pod-page {
@@ -57636,6 +57641,7 @@ html {
   flex-direction: column;
   background: var(--bg-page);
   color: var(--text-body);
+  overflow-x: clip;
 }
 
 .pod-shell {
@@ -57646,14 +57652,18 @@ html {
 }
 
 .pod-shell--narrow {
-  max-width: 860px;
+  max-width: 900px;
 }
 
 .pod-page > section {
   padding-block: var(--section-pad-y);
+  position: relative;
 }
 
 .pod-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-eyebrow);
   font-weight: var(--fw-semibold);
@@ -57661,6 +57671,13 @@ html {
   text-transform: uppercase;
   color: var(--text-muted);
   margin: 0 0 var(--space-3);
+}
+
+.pod-eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 2px;
+  background: var(--brand);
 }
 
 .pod-section-title {
@@ -57671,6 +57688,7 @@ html {
   letter-spacing: var(--tracking-tight);
   color: var(--text-strong);
   margin: 0 0 var(--space-4);
+  text-wrap: balance;
 }
 
 .pod-section-lead {
@@ -57731,7 +57749,6 @@ html {
   transform: none;
 }
 
-/* Visible focus for every interactive element on the page. */
 .pod-page a:focus-visible,
 .pod-page button:focus-visible,
 .pod-page input:focus-visible,
@@ -57740,11 +57757,37 @@ html {
   outline-offset: 3px;
 }
 
+.pod-tick {
+  flex: none;
+  margin-top: 0.28em;
+  color: var(--brand-on);
+  background: var(--brand);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  width: 1.05em;
+  height: 1.05em;
+}
+
 /* ---------------------------------------------------- hero */
 
 .pod-hero {
-  background: var(--bg-page-soft);
+  background:
+    radial-gradient(
+      70ch 40ch at 82% 18%,
+      rgba(255, 240, 0, 0.22),
+      transparent 70%
+    ),
+    var(--bg-page-soft);
   border-bottom: 2px solid var(--text-strong);
+  overflow: hidden;
+}
+
+.pod-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: var(--space-8);
+  align-items: center;
+  margin-bottom: var(--space-8);
 }
 
 .pod-hero-title {
@@ -57755,15 +57798,48 @@ html {
   letter-spacing: var(--tracking-tight);
   color: var(--text-strong);
   margin: 0 0 var(--space-4);
-  max-width: 20ch;
+  text-wrap: balance;
 }
 
 .pod-hero-sub {
   font-size: var(--fs-lead);
   line-height: var(--leading-body);
   color: var(--text-body);
-  max-width: 62ch;
+  max-width: 56ch;
   margin: 0 0 var(--space-5);
+}
+
+.pod-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0 0 var(--space-6);
+  padding: 0;
+}
+
+.pod-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+}
+
+.pod-badge--price {
+  background: var(--brand);
+  color: var(--brand-on);
+}
+
+.pod-badge-icon {
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .pod-hero-signature {
@@ -57774,7 +57850,7 @@ html {
   color: var(--text-strong);
   border-left: 6px solid var(--brand);
   padding-left: var(--space-4);
-  max-width: 60ch;
+  max-width: 54ch;
   margin: 0 0 var(--space-6);
 }
 
@@ -57782,13 +57858,49 @@ html {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-bottom: var(--space-8);
 }
 
+/* hero SVG: one recording fanning into the week's output */
+.pod-hero-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.pod-hero-art {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  color: var(--text-strong);
+}
+
+.pod-art-source {
+  fill: var(--brand);
+  stroke: var(--text-strong);
+  stroke-width: 2.5;
+}
+
+.pod-art-wave line {
+  stroke: var(--brand-on);
+}
+
+.pod-art-out rect {
+  fill: var(--bg-page);
+  stroke: var(--text-strong);
+  stroke-width: 2.5;
+}
+
+.pod-art-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  fill: var(--text-strong);
+}
+
+/* trust row */
 .pod-trust-caption {
   font-size: var(--fs-small);
-  /* --text-subtle is only ~3:1 on white and fails WCAG-AA at this size;
-     --text-muted clears 4.5:1. */
+  /* --text-subtle is only ~3:1 on white and fails WCAG-AA at this
+     size; --text-muted clears 4.5:1. */
   color: var(--text-muted);
   margin: 0 0 var(--space-3);
 }
@@ -57837,6 +57949,14 @@ html {
   color: var(--text-on-dark);
 }
 
+.pod-problem .pod-eyebrow {
+  color: var(--text-on-dark-soft);
+}
+
+.pod-problem-lead {
+  color: var(--text-on-dark-soft);
+}
+
 .pod-problem-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -57845,7 +57965,7 @@ html {
 }
 
 .pod-problem-card {
-  padding: var(--space-5);
+  padding: var(--space-6);
   background: var(--bg-dark-elevated);
   border: 2px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-lg);
@@ -57878,6 +57998,25 @@ html {
 
 /* ------------------------------------------ signal-to-scale */
 
+.pod-stage-wrap {
+  position: relative;
+}
+
+.pod-stage-rail {
+  display: none;
+  position: absolute;
+  inset-inline: 8%;
+  top: 3.25rem;
+  width: 84%;
+  height: 8px;
+  color: var(--text-strong);
+  opacity: 0.28;
+}
+
+.pod-stage-rail line {
+  stroke: currentColor;
+}
+
 .pod-stage-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -57885,7 +58024,7 @@ html {
   list-style: none;
   margin: 0;
   padding: 0;
-  counter-reset: none;
+  position: relative;
 }
 
 .pod-stage {
@@ -57898,20 +58037,20 @@ html {
 
 .pod-stage-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
-/* Was --brand-dark on white (~1.6:1) — flagged by axe. Rendered as a
-   brand chip with black text instead: same accent, AA-safe. */
+/* brand chip rather than coloured text — --brand-dark on white is
+   ~1.6:1 and fails contrast. */
 .pod-stage-step {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  min-width: 2.25rem;
-  padding: 0.15em 0.5em;
+  min-width: 2.5rem;
+  padding: 0.2em 0.55em;
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: var(--fw-bold);
@@ -57930,7 +58069,16 @@ html {
 }
 
 .pod-stage-promise {
+  font-family: var(--font-display);
   font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  line-height: var(--leading-snug);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-3);
+}
+
+.pod-stage-detail {
+  font-size: var(--fs-small);
   line-height: var(--leading-body);
   color: var(--text-muted);
   margin: 0 0 var(--space-4);
@@ -57939,7 +58087,8 @@ html {
 .pod-stage-caps {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid var(--border-soft);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -57952,17 +58101,6 @@ html {
   font-size: var(--fs-small);
   line-height: var(--leading-body);
   color: var(--text-body);
-}
-
-.pod-tick {
-  flex: none;
-  margin-top: 0.25em;
-  color: var(--text-strong);
-  background: var(--brand);
-  border-radius: var(--radius-full);
-  padding: 3px;
-  width: 1.1em;
-  height: 1.1em;
 }
 
 /* ------------------------------------------------ services */
@@ -57993,6 +58131,28 @@ html {
   box-shadow: 6px 6px 0 var(--text-strong);
 }
 
+.pod-service-icon,
+.pod-audience-icon,
+.pod-us-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: var(--space-4);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-md);
+  background: var(--brand);
+  color: var(--brand-on);
+}
+
+.pod-service-icon svg,
+.pod-audience-icon svg,
+.pod-us-icon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
 .pod-service-title {
   font-family: var(--font-display);
   font-size: var(--fs-body);
@@ -58008,6 +58168,142 @@ html {
   margin: 0;
 }
 
+/* ------------------------------------------------- pricing */
+
+.pod-pricing {
+  background:
+    radial-gradient(
+      60ch 34ch at 12% 0%,
+      rgba(255, 240, 0, 0.2),
+      transparent 68%
+    ),
+    var(--bg-page);
+}
+
+.pod-pricing-card {
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-xl);
+  background: var(--bg-page);
+  box-shadow: 10px 10px 0 var(--text-strong);
+  overflow: hidden;
+}
+
+.pod-pricing-head {
+  padding: var(--space-7);
+  border-bottom: 2px solid var(--text-strong);
+  background: var(--bg-page-soft);
+}
+
+.pod-pricing-figure {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+
+.pod-pricing-amount {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  background: linear-gradient(
+    to bottom,
+    transparent 62%,
+    var(--brand) 62%
+  );
+  padding-inline: 0.1em;
+}
+
+.pod-pricing-unit {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+}
+
+.pod-pricing-lead {
+  font-size: var(--fs-body);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  max-width: 74ch;
+  margin: 0;
+}
+
+.pod-pricing-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pod-pricing-col {
+  padding: var(--space-6) var(--space-7);
+}
+
+.pod-pricing-col + .pod-pricing-col {
+  border-left: 2px solid var(--text-strong);
+}
+
+.pod-pricing-col-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.pod-pricing-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pod-pricing-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-body);
+}
+
+.pod-dash {
+  flex: none;
+  margin-top: 0.72em;
+  width: 0.85rem;
+  height: 2px;
+  background: var(--text-strong);
+  opacity: 0.45;
+}
+
+.pod-pricing-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-7);
+  border-top: 2px solid var(--text-strong);
+  background: var(--brand);
+}
+
+.pod-pricing-note {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--brand-on);
+  max-width: 62ch;
+}
+
+.pod-pricing-foot .pod-cta--primary {
+  background: var(--bg-page);
+}
+
 /* ----------------------------------------------- audiences */
 
 .pod-audience-grid {
@@ -58017,6 +58313,8 @@ html {
 }
 
 .pod-audience-card {
+  display: flex;
+  flex-direction: column;
   padding: var(--space-6);
   border: 2px solid var(--text-strong);
   border-radius: var(--radius-lg);
@@ -58036,17 +58334,62 @@ html {
   font-size: var(--fs-small);
   line-height: var(--leading-body);
   color: var(--text-muted);
+  margin: 0 0 var(--space-5);
+}
+
+.pod-audience-signal {
+  margin: auto 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+}
+
+/* --------------------------------------- US operating facts */
+
+.pod-us {
+  background: var(--bg-page-soft);
+}
+
+.pod-us-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.pod-us-card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-5);
+  background: var(--bg-page);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg);
+}
+
+.pod-us-card .pod-us-icon {
+  margin-bottom: 0;
+}
+
+.pod-us-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-2);
+}
+
+.pod-us-body {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
   margin: 0;
 }
 
 /* --------------------------------------------- month table */
 
-.pod-month {
-  background: var(--bg-page-soft);
-}
-
-/* Wide table lives in its own scroll container so the page body
-   never scrolls sideways on a phone. */
 .pod-table-scroll {
   width: 100%;
   overflow-x: auto;
@@ -58068,7 +58411,7 @@ html {
   text-align: left;
   padding: var(--space-4) var(--space-4) 0;
   font-size: var(--fs-small);
-  /* see note on .pod-trust-caption — AA contrast */
+  /* AA contrast — see note on .pod-trust-caption */
   color: var(--text-muted);
 }
 
@@ -58098,35 +58441,22 @@ html {
   color: var(--text-muted);
 }
 
+.pod-vol {
+  display: inline-block;
+  min-width: 2.5rem;
+  padding: 0.15em 0.6em;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+  background: var(--brand);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
 .pod-table tbody tr:last-child th,
 .pod-table tbody tr:last-child td {
   border-bottom: none;
-}
-
-.pod-midcta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  margin-top: var(--space-7);
-  padding: var(--space-5);
-  border: 2px solid var(--text-strong);
-  border-radius: var(--radius-lg);
-  background: var(--brand);
-}
-
-.pod-midcta-text {
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  font-weight: var(--fw-semibold);
-  color: var(--brand-on);
-  margin: 0;
-  max-width: 48ch;
-}
-
-.pod-midcta .pod-cta--primary {
-  background: var(--bg-page);
 }
 
 /* ------------------------------------------------- process */
@@ -58137,20 +58467,25 @@ html {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-6);
 }
 
 .pod-process-step {
   display: flex;
   gap: var(--space-5);
   align-items: flex-start;
-  padding-bottom: var(--space-5);
-  border-bottom: 1px solid var(--border-soft);
+  position: relative;
 }
 
-.pod-process-step:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+/* vertical connector between steps */
+.pod-process-step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 1.5rem;
+  top: 3.25rem;
+  bottom: calc(var(--space-6) * -1);
+  width: 2px;
+  background: var(--border-soft);
 }
 
 .pod-process-num {
@@ -58167,6 +58502,16 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.pod-process-headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 .pod-process-name {
@@ -58174,7 +58519,18 @@ html {
   font-size: var(--fs-h3);
   font-weight: var(--fw-bold);
   color: var(--text-strong);
-  margin: 0 0 var(--space-2);
+  margin: 0;
+}
+
+.pod-process-duration {
+  padding: 0.15em 0.65em;
+  border: 1px solid var(--text-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-tiny);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-strong);
 }
 
 .pod-process-body p {
@@ -58283,6 +58639,13 @@ html {
   color: var(--text-on-dark);
 }
 
+.pod-final-inner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+  align-items: start;
+}
+
 .pod-final-title {
   color: var(--text-on-dark);
 }
@@ -58291,15 +58654,36 @@ html {
   font-size: var(--fs-lead);
   line-height: var(--leading-body);
   color: var(--text-on-dark-soft);
-  margin: 0 0 var(--space-6);
-  max-width: 60ch;
+  margin: 0 0 var(--space-5);
+  max-width: 54ch;
+}
+
+.pod-final-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pod-final-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-on-dark-soft);
 }
 
 .pod-audit-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  max-width: 520px;
+  padding: var(--space-6);
+  border: 2px solid var(--brand);
+  border-radius: var(--radius-lg);
+  background: var(--bg-dark-elevated);
 }
 
 .pod-audit-field {
@@ -58319,7 +58703,7 @@ html {
   padding: var(--space-3) var(--space-4);
   border: 2px solid var(--text-on-dark);
   border-radius: var(--radius-md);
-  background: var(--bg-dark-elevated);
+  background: var(--bg-dark);
   color: var(--text-on-dark);
   font-size: var(--fs-body);
 }
@@ -58334,7 +58718,7 @@ html {
 
 .pod-audit-note {
   font-size: var(--fs-small);
-  color: var(--text-on-dark-mute);
+  color: var(--text-on-dark-soft);
   margin: 0;
 }
 
@@ -58352,7 +58736,6 @@ html {
   border: 2px solid var(--brand);
   border-radius: var(--radius-lg);
   background: var(--bg-dark-elevated);
-  max-width: 520px;
 }
 
 .pod-audit-done-title {
@@ -58376,19 +58759,49 @@ html {
 
 /* ------------------------------------------------ responsive */
 
-@media (max-width: 1024px) {
+@media (min-width: 1180px) {
+  .pod-stage-rail {
+    display: block;
+  }
+}
+
+@media (max-width: 1100px) {
+  .pod-hero-inner {
+    grid-template-columns: 1fr;
+  }
+
+  /* Copy leads at every width. Putting the decorative diagram first
+     pushed the H1 below the fold and made an aria-hidden graphic the
+     LCP candidate. */
+  .pod-hero-visual {
+    order: 0;
+    max-width: 520px;
+  }
+
   .pod-service-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .pod-trust-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .pod-us-grid,
+  .pod-audience-grid,
+  .pod-problem-grid,
+  .pod-stage-list {
+    grid-template-columns: 1fr;
   }
 
-  .pod-stage-list,
-  .pod-problem-grid,
-  .pod-audience-grid {
+  .pod-final-inner {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .pod-pricing-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .pod-pricing-col + .pod-pricing-col {
+    border-left: none;
+    border-top: 2px solid var(--text-strong);
   }
 }
 
@@ -58398,21 +58811,31 @@ html {
     grid-template-columns: 1fr;
   }
 
-  .pod-hero-ctas .pod-cta {
+  .pod-hero-ctas .pod-cta,
+  .pod-pricing-foot .pod-cta {
     width: 100%;
   }
 
-  .pod-midcta {
+  .pod-pricing-head,
+  .pod-pricing-col,
+  .pod-pricing-foot {
+    padding: var(--space-5);
+  }
+
+  .pod-us-card {
     flex-direction: column;
-    align-items: flex-start;
   }
 
   .pod-process-step {
     gap: var(--space-4);
   }
+
+  .pod-process-step:not(:last-child)::before {
+    left: 1.5rem;
+  }
 }
 
-/* Respect reduced-motion: the sticker shift is decorative. */
+/* Sticker shift and card lift are decorative. */
 @media (prefers-reduced-motion: reduce) {
   .pod-cta,
   .pod-service-card {
@@ -58426,13 +58849,230 @@ html {
   }
 }
 
-.pod-stage-detail {
+/* ------------------------------------------- hero media + photos */
+
+/* Click-to-play facade. The frame keeps a fixed aspect ratio so
+   swapping the poster for the iframe cannot shift layout — CLS on the
+   hero is the expensive kind. */
+.pod-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1200 / 643;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 10px 10px 0 var(--text-strong);
+  background: var(--bg-page-tint);
+}
+
+.pod-media--button {
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast),
+    box-shadow var(--motion-fast);
+}
+
+.pod-media--button:hover,
+.pod-media--button:focus-visible {
+  transform: translate(-2px, -2px);
+  box-shadow: 12px 12px 0 var(--text-strong);
+}
+
+.pod-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pod-media-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.pod-media-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 4.5rem;
+  height: 4.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-full);
+  background: var(--brand);
+  color: var(--brand-on);
+  font-size: 1.4rem;
+  padding-left: 0.2em;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.pod-media-cue {
+  position: absolute;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+}
+
+/* fan-out diagram, now sitting in the method section */
+.pod-fanout {
+  margin: var(--space-8) 0 0;
+  padding: var(--space-6);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-page-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.pod-fanout .pod-hero-art {
+  max-width: 620px;
+}
+
+.pod-fanout-caption {
   font-size: var(--fs-small);
   line-height: var(--leading-body);
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 62ch;
+}
+
+/* studio strip */
+.pod-studio {
+  background: var(--bg-dark);
+  color: var(--text-on-dark);
+}
+
+.pod-studio .pod-section-title {
+  color: var(--text-on-dark);
+}
+
+.pod-studio .pod-section-lead {
+  color: var(--text-on-dark-soft);
+}
+
+.pod-studio .pod-eyebrow {
+  color: var(--text-on-dark-soft);
+}
+
+.pod-studio-copy {
+  max-width: 70ch;
+}
+
+.pod-studio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pod-studio-item {
+  overflow: hidden;
+  border: 2px solid var(--brand);
+  border-radius: var(--radius-md);
+  aspect-ratio: 16 / 9;
+}
+
+.pod-studio-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 860px) {
+  .pod-studio-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pod-media--button {
+    transition: none;
+  }
+
+  .pod-media--button:hover,
+  .pod-media--button:focus-visible {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------ founder note */
+
+.pod-founder {
+  background: var(--bg-page);
+}
+
+.pod-founder-inner {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: center;
+}
+
+/* The portrait is a cut-out on brand yellow, so the frame carries the
+   same yellow and the subject reads as standing in it rather than
+   pasted on top of it. */
+.pod-founder-portrait {
+  position: relative;
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg);
+  background: var(--brand);
+  box-shadow: 8px 8px 0 var(--text-strong);
+  overflow: hidden;
+  aspect-ratio: 592 / 682;
+}
+
+.pod-founder-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pod-founder-role {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+  margin: -0.25rem 0 var(--space-5);
+}
+
+.pod-founder-line {
+  font-size: var(--fs-body);
+  line-height: var(--leading-body);
   color: var(--text-body);
+  max-width: 66ch;
   margin: 0 0 var(--space-4);
 }
 
-.pod-problem-lead {
-  color: var(--text-on-dark-soft);
+.pod-founder-copy .pod-cta {
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 900px) {
+  .pod-founder-inner {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .pod-founder-portrait {
+    max-width: 260px;
+  }
 }

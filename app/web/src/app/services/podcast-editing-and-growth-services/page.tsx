@@ -60,13 +60,14 @@ export default function Page() {
       { "@type": "Country", name: "India" },
       { "@type": "Country", name: "United States" },
       { "@type": "Country", name: "United Kingdom" },
+      { "@type": "Country", name: "Canada" },
       { "@type": "Country", name: "Singapore" },
       { "@type": "Country", name: "Australia" },
     ],
     audience: {
       "@type": "Audience",
       audienceType:
-        "Podcasters, founders and creators, brands running podcasts, OTT platforms and media networks",
+        "Podcasters, founders and creators, brands running podcasts, OTT platforms and media networks in the United States, Canada and the United Kingdom",
     },
     hasOfferCatalog: {
       "@type": "OfferCatalog",
