@@ -21,12 +21,11 @@ export const metadata: Metadata = {
     category: "Marketing",
   }),
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico" },
-    ],
+    /* public/favicon.ico does not exist — the .ico entries made every
+       page log a 404 in the console. favicon.svg is the real asset. */
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/favicon.svg" }],
-    shortcut: ["/favicon.ico"],
+    shortcut: ["/favicon.svg"],
   },
 };
 

@@ -186,6 +186,24 @@ export const staticPageSeo: Record<string, PageSeo> = {
     path: "/cookie-policy",
     category: "Legal",
   },
+  "/services/podcast-editing-and-growth-services": {
+    title: "Podcast Editing & Growth Services",
+    description:
+      "Full-stack podcast production and growth: video and audio editing, clips, thumbnails, publishing and analytics — run as one system by Cocoma Digital.",
+    path: "/services/podcast-editing-and-growth-services",
+    category: "Services",
+    keywords: [
+      "podcast editing and growth services",
+      "podcast production agency",
+      "video podcast editing services",
+      "podcast growth agency",
+      "YouTube podcast production",
+      "short-form clipping",
+      "podcast repurposing",
+      "podcast channel management",
+      "podcast dubbing and localization",
+    ],
+  },
   "/coming-soon": {
     title: "Coming Soon",
     description: "A new Cocoma Digital page is coming soon.",
@@ -204,7 +222,6 @@ const routeTitles: Record<string, string> = {
   "/solutions/youtube-creators": "YouTube Creator Solutions",
   "/solutions/real-estate-brands": "Real Estate Brand Solutions",
   "/solutions/independent-artists": "Independent Artist Solutions",
-  "/solutions/podcasters": "Podcast Growth Solutions",
   "/solutions/film-studios": "Film Studio Marketing Solutions",
   "/solutions/ott-platforms": "OTT Platform Marketing Solutions",
   "/solutions/educational-hubs": "Educational Hub Marketing Solutions",

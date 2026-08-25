@@ -120,6 +120,12 @@ function addSlugEntry(
 /**
  * Generate sitemap.xml
  */
+/**
+ * Solution slugs that now permanently redirect elsewhere (see
+ * next.config.ts `redirects`). Keep this in sync with that list.
+ */
+const REDIRECTED_SOLUTION_SLUGS = new Set(["podcasters"]);
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   /**
    * Fetch all SEO-relevant data in parallel from the API.
@@ -355,6 +361,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     adaptSlugItem,
   );
   for (const item of solutionsItems) {
+    /* /solutions/podcasters 301s to the canonical
+       /services/podcast-editing-and-growth-services page, so it must
+       not be submitted here — a sitemap should never list a URL that
+       redirects. Filtered in code because the record still exists in
+       the solutions-pages collection. */
+    if (REDIRECTED_SOLUTION_SLUGS.has(String(item.slug ?? ""))) continue;
     addSlugEntry(
       entries,
       "/solutions",

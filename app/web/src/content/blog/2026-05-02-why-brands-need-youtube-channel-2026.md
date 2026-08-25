@@ -177,7 +177,7 @@ We watch this every month in partner-channel dashboards. Channels that hit 50+ u
 
 ## 10. The competitive cost of NOT being there
 
-Your category competitors are launching channels in 2026. We see the deluge: a brand starts with a podcast, commits to weekly video, and suddenly owns the search results for their category in 18 months. Two years from now, that brand is the default video destination for every prospect researching the category.
+Your category competitors are launching channels in 2026. We see the deluge: a brand starts with a [podcast](/services/podcast-editing-and-growth-services), commits to weekly video, and suddenly owns the search results for their category in 18 months. Two years from now, that brand is the default video destination for every prospect researching the category.
 
 The brands who skip 2026 will be playing catch-up against compounding assets. The four years of back-catalogue early movers build will out-rank, out-discover, and out-monetize anything launched late.
 
@@ -211,3 +211,4 @@ Or read more about our work:
 - [How we monetize content IP →](/work/ip-monetization)
 - [How we run social end-to-end →](/work/smm-management)
 - [The 35,000+ videos we've shipped →](/work/content-created)
+- [Podcast editing & growth services →](/services/podcast-editing-and-growth-services)

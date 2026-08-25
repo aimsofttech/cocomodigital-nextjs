@@ -57619,3 +57619,820 @@ html {
   opacity: 0.35;
   cursor: default;
 }
+
+/* src/views/Services/PodcastGrowth/PodcastGrowthPage.css */
+/* ===========================================================
+   /services/podcast-editing-and-growth-services
+
+   Canonical podcast money page. Sticker language (2px black
+   border + offset shadow + hover shift) consistent with
+   ProspectPage and the rest of the site; all sizing in the
+   shared tokens so it inherits type scale and spacing.
+   =========================================================== */
+
+.pod-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  color: var(--text-body);
+}
+
+.pod-shell {
+  width: 100%;
+  max-width: var(--content-max-w);
+  margin: 0 auto;
+  padding-inline: var(--section-pad-x);
+}
+
+.pod-shell--narrow {
+  max-width: 860px;
+}
+
+.pod-page > section {
+  padding-block: var(--section-pad-y);
+}
+
+.pod-eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.pod-section-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-4);
+}
+
+.pod-section-lead {
+  font-size: var(--fs-lead);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  max-width: 68ch;
+  margin: 0 0 var(--space-7);
+}
+
+/* ---------------------------------------------------- CTAs */
+
+.pod-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast),
+    box-shadow var(--motion-fast),
+    background var(--motion-fast);
+}
+
+.pod-cta--primary {
+  background: var(--brand);
+  color: var(--brand-on);
+  box-shadow: 4px 4px 0 var(--text-strong);
+}
+
+.pod-cta--secondary {
+  background: var(--bg-page);
+  color: var(--text-strong);
+  box-shadow: 4px 4px 0 var(--text-strong);
+}
+
+.pod-cta:hover,
+.pod-cta:focus-visible {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--text-strong);
+}
+
+.pod-cta:active {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0 var(--text-strong);
+}
+
+.pod-cta[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Visible focus for every interactive element on the page. */
+.pod-page a:focus-visible,
+.pod-page button:focus-visible,
+.pod-page input:focus-visible,
+.pod-page [tabindex]:focus-visible {
+  outline: 3px solid var(--text-strong);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------- hero */
+
+.pod-hero {
+  background: var(--bg-page-soft);
+  border-bottom: 2px solid var(--text-strong);
+}
+
+.pod-hero-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-4);
+  max-width: 20ch;
+}
+
+.pod-hero-sub {
+  font-size: var(--fs-lead);
+  line-height: var(--leading-body);
+  color: var(--text-body);
+  max-width: 62ch;
+  margin: 0 0 var(--space-5);
+}
+
+.pod-hero-signature {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--leading-snug);
+  color: var(--text-strong);
+  border-left: 6px solid var(--brand);
+  padding-left: var(--space-4);
+  max-width: 60ch;
+  margin: 0 0 var(--space-6);
+}
+
+.pod-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.pod-trust-caption {
+  font-size: var(--fs-small);
+  /* --text-subtle is only ~3:1 on white and fails WCAG-AA at this size;
+     --text-muted clears 4.5:1. */
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.pod-trust-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pod-trust-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--bg-page);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 4px 4px 0 var(--text-strong);
+}
+
+.pod-trust-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+}
+
+.pod-trust-label {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  line-height: var(--leading-snug);
+}
+
+/* ------------------------------------------------- problem */
+
+.pod-problem {
+  background: var(--bg-dark);
+  color: var(--text-on-dark);
+}
+
+.pod-problem .pod-section-title {
+  color: var(--text-on-dark);
+}
+
+.pod-problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+.pod-problem-card {
+  padding: var(--space-5);
+  background: var(--bg-dark-elevated);
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-lg);
+}
+
+.pod-problem-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  color: var(--brand);
+  margin: 0 0 var(--space-3);
+}
+
+.pod-problem-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  color: var(--text-on-dark);
+  margin: 0 0 var(--space-2);
+  line-height: var(--leading-snug);
+}
+
+.pod-problem-body {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-on-dark-soft);
+  margin: 0;
+}
+
+/* ------------------------------------------ signal-to-scale */
+
+.pod-stage-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: none;
+}
+
+.pod-stage {
+  padding: var(--space-6);
+  background: var(--bg-page);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 6px 6px 0 var(--text-strong);
+}
+
+.pod-stage-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Was --brand-dark on white (~1.6:1) — flagged by axe. Rendered as a
+   brand chip with black text instead: same accent, AA-safe. */
+.pod-stage-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 2.25rem;
+  padding: 0.15em 0.5em;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  color: var(--brand-on);
+  background: var(--brand);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-sm);
+}
+
+.pod-stage-name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.pod-stage-promise {
+  font-size: var(--fs-body);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.pod-stage-caps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pod-stage-caps li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-body);
+}
+
+.pod-tick {
+  flex: none;
+  margin-top: 0.25em;
+  color: var(--text-strong);
+  background: var(--brand);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* ------------------------------------------------ services */
+
+.pod-services {
+  background: var(--bg-page-soft);
+}
+
+.pod-service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.pod-service-card {
+  padding: var(--space-5);
+  background: var(--bg-page);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 4px 4px 0 var(--text-strong);
+  transition:
+    transform var(--motion-fast),
+    box-shadow var(--motion-fast);
+}
+
+.pod-service-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--text-strong);
+}
+
+.pod-service-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-2);
+}
+
+.pod-service-body {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ----------------------------------------------- audiences */
+
+.pod-audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.pod-audience-card {
+  padding: var(--space-6);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-page);
+  box-shadow: 6px 6px 0 var(--brand);
+}
+
+.pod-audience-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-3);
+}
+
+.pod-audience-body {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --------------------------------------------- month table */
+
+.pod-month {
+  background: var(--bg-page-soft);
+}
+
+/* Wide table lives in its own scroll container so the page body
+   never scrolls sideways on a phone. */
+.pod-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-page);
+}
+
+.pod-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.pod-table-caption {
+  caption-side: top;
+  text-align: left;
+  padding: var(--space-4) var(--space-4) 0;
+  font-size: var(--fs-small);
+  /* see note on .pod-trust-caption — AA contrast */
+  color: var(--text-muted);
+}
+
+.pod-table th,
+.pod-table td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-soft);
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  vertical-align: top;
+}
+
+.pod-table thead th {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+  background: var(--bg-page-tint);
+  white-space: nowrap;
+}
+
+.pod-table tbody th {
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+}
+
+.pod-table tbody td {
+  color: var(--text-muted);
+}
+
+.pod-table tbody tr:last-child th,
+.pod-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pod-midcta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-7);
+  padding: var(--space-5);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg);
+  background: var(--brand);
+}
+
+.pod-midcta-text {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  color: var(--brand-on);
+  margin: 0;
+  max-width: 48ch;
+}
+
+.pod-midcta .pod-cta--primary {
+  background: var(--bg-page);
+}
+
+/* ------------------------------------------------- process */
+
+.pod-process-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.pod-process-step {
+  display: flex;
+  gap: var(--space-5);
+  align-items: flex-start;
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.pod-process-step:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pod-process-num {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--brand-on);
+  background: var(--brand);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-full);
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pod-process-name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-2);
+}
+
+.pod-process-body p {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 70ch;
+}
+
+/* --------------------------------------------------- proof */
+
+.pod-proof {
+  background: var(--bg-page-soft);
+}
+
+.pod-proof-body {
+  font-size: var(--fs-body);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  max-width: 68ch;
+  margin: 0 0 var(--space-4);
+}
+
+.pod-proof-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+/* ----------------------------------------------------- faq */
+
+.pod-faq-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pod-faq-item {
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-page);
+  overflow: hidden;
+}
+
+.pod-faq-question {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.pod-faq-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+}
+
+.pod-faq-trigger:hover {
+  background: var(--bg-page-soft);
+}
+
+.pod-faq-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  background: var(--brand);
+  color: var(--brand-on);
+  font-size: 0.7rem;
+}
+
+.pod-faq-panel {
+  padding: 0 var(--space-5) var(--space-5);
+}
+
+.pod-faq-answer {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-muted);
+  max-width: 72ch;
+}
+
+/* ----------------------------------------------- final cta */
+
+.pod-final {
+  background: var(--bg-dark);
+  color: var(--text-on-dark);
+}
+
+.pod-final-title {
+  color: var(--text-on-dark);
+}
+
+.pod-final-lead {
+  font-size: var(--fs-lead);
+  line-height: var(--leading-body);
+  color: var(--text-on-dark-soft);
+  margin: 0 0 var(--space-6);
+  max-width: 60ch;
+}
+
+.pod-audit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 520px;
+}
+
+.pod-audit-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pod-audit-field label {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  color: var(--text-on-dark);
+}
+
+.pod-audit-field input {
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--text-on-dark);
+  border-radius: var(--radius-md);
+  background: var(--bg-dark-elevated);
+  color: var(--text-on-dark);
+  font-size: var(--fs-body);
+}
+
+.pod-audit-field input::placeholder {
+  color: var(--text-on-dark-mute);
+}
+
+.pod-audit-submit {
+  align-self: flex-start;
+}
+
+.pod-audit-note {
+  font-size: var(--fs-small);
+  color: var(--text-on-dark-mute);
+  margin: 0;
+}
+
+.pod-audit-error {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: #4a0f0f;
+  color: #ffd9d9;
+  font-size: var(--fs-small);
+}
+
+.pod-audit-done {
+  padding: var(--space-6);
+  border: 2px solid var(--brand);
+  border-radius: var(--radius-lg);
+  background: var(--bg-dark-elevated);
+  max-width: 520px;
+}
+
+.pod-audit-done-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--brand);
+  margin: 0 0 var(--space-2);
+}
+
+.pod-audit-done-body {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-on-dark-soft);
+  margin: 0;
+}
+
+.pod-audit-done-body a {
+  color: var(--brand);
+}
+
+/* ------------------------------------------------ responsive */
+
+@media (max-width: 1024px) {
+  .pod-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pod-trust-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pod-stage-list,
+  .pod-problem-grid,
+  .pod-audience-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pod-service-grid,
+  .pod-trust-list {
+    grid-template-columns: 1fr;
+  }
+
+  .pod-hero-ctas .pod-cta {
+    width: 100%;
+  }
+
+  .pod-midcta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pod-process-step {
+    gap: var(--space-4);
+  }
+}
+
+/* Respect reduced-motion: the sticker shift is decorative. */
+@media (prefers-reduced-motion: reduce) {
+  .pod-cta,
+  .pod-service-card {
+    transition: none;
+  }
+
+  .pod-cta:hover,
+  .pod-cta:focus-visible,
+  .pod-service-card:hover {
+    transform: none;
+  }
+}
+
+.pod-stage-detail {
+  font-size: var(--fs-small);
+  line-height: var(--leading-body);
+  color: var(--text-body);
+  margin: 0 0 var(--space-4);
+}
+
+.pod-problem-lead {
+  color: var(--text-on-dark-soft);
+}

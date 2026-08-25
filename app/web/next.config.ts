@@ -56,6 +56,16 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      /* Podcast: one canonical money page. /solutions/podcasters used
+         to carry near-duplicate podcast copy, which split ranking
+         signals with the service page. It now 301s so all equity lands
+         on the canonical URL. Keep in sync with
+         REDIRECTED_SOLUTION_SLUGS in src/app/sitemap.ts. */
+      {
+        source: "/solutions/podcasters",
+        destination: "/services/podcast-editing-and-growth-services",
+        permanent: true,
+      },
       {
         source: "/service-details/:slug",
         destination: "/service/:slug",
