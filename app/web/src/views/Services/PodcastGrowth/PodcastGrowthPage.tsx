@@ -233,6 +233,28 @@ export default function PodcastGrowthPage() {
         </div>
       </section>
 
+      {/* ----------------------------------------------- audiences */}
+      <section className="pod-audience" aria-labelledby="pod-audience-title">
+        <div className="pod-shell">
+          <p className="pod-eyebrow">Who it&rsquo;s for</p>
+          <h2 id="pod-audience-title" className="pod-section-title">
+            Built for shows that have to earn their budget
+          </h2>
+          <div className="pod-audience-grid">
+            {AUDIENCES.map((a) => (
+              <article key={a.title} className="pod-audience-card">
+                <span className="pod-audience-icon">
+                  <Icon name={a.icon} />
+                </span>
+                <h3 className="pod-audience-title">{a.title}</h3>
+                <p className="pod-audience-body">{a.body}</p>
+                <p className="pod-audience-signal">{a.signal}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ------------------------------------------------- pricing */}
       <section id="pricing" className="pod-pricing" aria-labelledby="pod-pricing-title">
         <div className="pod-shell">
@@ -281,6 +303,56 @@ export default function PodcastGrowthPage() {
                 <FaArrowRight aria-hidden="true" />
               </a>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------- month table */}
+      <section className="pod-month" aria-labelledby="pod-month-title">
+        <div className="pod-shell">
+          <p className="pod-eyebrow">Output</p>
+          <h2 id="pod-month-title" className="pod-section-title">
+            What a full month looks like
+          </h2>
+          <p className="pod-section-lead">
+            A weekly show running the complete system. This is deliverable
+            volume at a full engagement — not a forecast of results, and not the
+            entry tier. Your audit comes back with the scope that fits your
+            cadence.
+          </p>
+
+          {/* Wide table lives in its own scroll container so the page
+              body never scrolls sideways on a phone. tabindex makes the
+              scrollable region reachable by keyboard. */}
+          <div
+            className="pod-table-scroll"
+            tabIndex={0}
+            role="region"
+            aria-labelledby="pod-month-title"
+          >
+            <table className="pod-table">
+              <caption className="pod-table-caption">
+                Monthly deliverables for a weekly podcast at a full engagement
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Deliverable</th>
+                  <th scope="col">Volume</th>
+                  <th scope="col">Detail</th>
+                </tr>
+              </thead>
+              <tbody>
+                {MONTH_ROWS.map((r) => (
+                  <tr key={r.deliverable}>
+                    <th scope="row">{r.deliverable}</th>
+                    <td>
+                      <span className="pod-vol">{r.volume}</span>
+                    </td>
+                    <td>{r.detail}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -338,28 +410,6 @@ export default function PodcastGrowthPage() {
         </div>
       </section>
 
-      {/* ----------------------------------------------- audiences */}
-      <section className="pod-audience" aria-labelledby="pod-audience-title">
-        <div className="pod-shell">
-          <p className="pod-eyebrow">Who it&rsquo;s for</p>
-          <h2 id="pod-audience-title" className="pod-section-title">
-            Built for shows that have to earn their budget
-          </h2>
-          <div className="pod-audience-grid">
-            {AUDIENCES.map((a) => (
-              <article key={a.title} className="pod-audience-card">
-                <span className="pod-audience-icon">
-                  <Icon name={a.icon} />
-                </span>
-                <h3 className="pod-audience-title">{a.title}</h3>
-                <p className="pod-audience-body">{a.body}</p>
-                <p className="pod-audience-signal">{a.signal}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* --------------------------------------- working with a US show */}
       <section className="pod-us" aria-labelledby="pod-us-title">
         <div className="pod-shell">
@@ -408,56 +458,6 @@ export default function PodcastGrowthPage() {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      {/* --------------------------------------------- month table */}
-      <section className="pod-month" aria-labelledby="pod-month-title">
-        <div className="pod-shell">
-          <p className="pod-eyebrow">Output</p>
-          <h2 id="pod-month-title" className="pod-section-title">
-            What a full month looks like
-          </h2>
-          <p className="pod-section-lead">
-            A weekly show running the complete system. This is deliverable
-            volume at a full engagement — not a forecast of results, and not the
-            entry tier. Your audit comes back with the scope that fits your
-            cadence.
-          </p>
-
-          {/* Wide table lives in its own scroll container so the page
-              body never scrolls sideways on a phone. tabindex makes the
-              scrollable region reachable by keyboard. */}
-          <div
-            className="pod-table-scroll"
-            tabIndex={0}
-            role="region"
-            aria-labelledby="pod-month-title"
-          >
-            <table className="pod-table">
-              <caption className="pod-table-caption">
-                Monthly deliverables for a weekly podcast at a full engagement
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Deliverable</th>
-                  <th scope="col">Volume</th>
-                  <th scope="col">Detail</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MONTH_ROWS.map((r) => (
-                  <tr key={r.deliverable}>
-                    <th scope="row">{r.deliverable}</th>
-                    <td>
-                      <span className="pod-vol">{r.volume}</span>
-                    </td>
-                    <td>{r.detail}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </section>
 
