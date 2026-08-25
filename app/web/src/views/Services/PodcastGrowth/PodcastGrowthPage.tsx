@@ -19,6 +19,8 @@ import {
   SERVICES,
   SIGNATURE_LINE,
   STAGES,
+  STUDIO_SCALE,
+  STUDIO_SCALE_NOTE,
   STUDIO_SHOTS,
   STUDIO_STRIP,
   TRUST_STATS,
@@ -451,21 +453,40 @@ export default function PodcastGrowthPage() {
             </h2>
             <p className="pod-section-lead">{STUDIO_STRIP.body}</p>
           </div>
+
+          {/* Capability frames, captioned. Each caption names only what
+              is actually visible in the photograph — no frame is
+              labelled with work it does not show. */}
           <ul className="pod-studio-grid">
             {STUDIO_SHOTS.map((shot) => (
-              <li key={shot.src} className="pod-studio-item">
+              <li
+                key={shot.src}
+                className={`pod-studio-item${shot.wide ? " pod-studio-item--wide" : ""}`}
+              >
                 <Image
                   src={shot.src}
                   alt={shot.alt}
                   width={1200}
                   height={675}
                   loading="lazy"
-                  sizes="(max-width: 860px) 100vw, 33vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
                   className="pod-studio-img"
                 />
+                <span className="pod-studio-caption">{shot.caption}</span>
               </li>
             ))}
           </ul>
+
+          <ul className="pod-scale">
+            {STUDIO_SCALE.map((m) => (
+              <li key={m.label} className="pod-scale-item">
+                <span className="pod-scale-value">{m.value}</span>
+                <span className="pod-scale-label">{m.label}</span>
+                <span className="pod-scale-sub">{m.sub}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="pod-scale-note">{STUDIO_SCALE_NOTE}</p>
         </div>
       </section>
 

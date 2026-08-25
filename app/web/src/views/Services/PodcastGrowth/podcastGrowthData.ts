@@ -95,25 +95,82 @@ export const HERO_MEDIA = {
  */
 export const STUDIO_SHOTS = [
   {
+    src: "/Images/about/studio-2026-09.jpg",
+    alt:
+      "An editor wearing over-ear headphones works at a wide monitor showing a video editing timeline and preview window, with another workstation behind in the darkened room.",
+    caption: "Retention-first editing",
+    wide: true,
+  },
+  {
+    src: "/Images/about/studio-2026-15.jpg",
+    alt:
+      "Two people at desktop workstations; the nearest monitor shows an image editor with a portrait cut out on a transparency checkerboard, the screens beyond showing thumbnail layouts with large headline text.",
+    caption: "Thumbnail and packaging design",
+    wide: false,
+  },
+  {
+    src: "/Images/about/studio-2026-22.jpg",
+    alt:
+      "A room of around fifteen people seated at laptops facing a projected screen headed \"Short/Story videos (9:16)\".",
+    caption: "Short-form review, 9:16",
+    wide: false,
+  },
+  {
     src: "/Images/about/studio-edit-bay.jpg",
-    alt: "A Cocoma editor cutting a video timeline on a wide monitor in the studio edit bay.",
+    alt:
+      "An editor at a wide monitor cutting a video timeline in the studio edit bay, with additional monitors along the desk behind.",
+    caption: "The edit bay",
+    wide: false,
   },
   {
-    src: "/Images/about/team-youtube.jpg",
-    alt: "The Cocoma YouTube team working across laptops at a shared table in the Mumbai studio.",
+    src: "/Images/about/studio-on-set.jpg",
+    alt:
+      "A studio set with a plain backdrop, a camera and shotgun microphone mounted on a horizontal slider rail, a tube light, a softbox and light stands.",
+    caption: "Camera, sound and lighting on set",
+    wide: false,
   },
   {
-    src: "/Images/about/team-marketing.jpg",
-    alt: "Cocoma's marketing team reviewing campaign work together in the studio.",
+    src: "/Images/about/studio-2026-10.jpg",
+    alt:
+      "Four people working at laptops along long white desks in an open workroom.",
+    caption: "Channel operations floor",
+    wide: true,
   },
 ];
+
 
 export const STUDIO_STRIP = {
   eyebrow: "The room this runs from",
   heading: "A working studio, not a marketplace of freelancers",
   body:
-    "Your show is produced by a named team on the Cocoma floor in Andheri West, Mumbai — the same operation that runs channel and catalog work for entertainment platforms. That is what makes an SLA meaningful: there is a bench behind it, not one contractor with a full inbox.",
+    "Your show is produced by a named team on the Cocoma floor in Andheri West, Mumbai — editors, designers, colorists, sound and channel operations under one roof. That is what makes an SLA mean anything: there is a bench behind it, not one contractor with a full inbox.",
 };
+
+/**
+ * Scale-of-operation figures for the studio band.
+ *
+ * SOURCING — every one of these is already published by Cocoma and is
+ * traceable, which is the whole reason they are the only numbers here:
+ *   60-person studio        → about page + site meta description
+ *   60+ partner channels    → blog, "why brands need a YouTube channel"
+ *   $600K+ partner revenue  → same blog post, 2025, YouTube ad revenue
+ *                             before sponsorship and sync
+ *   35,000+ videos, 12B+ views, 20+ languages → homepage
+ *
+ * These are STUDIO-WIDE channel and catalog numbers. They are not
+ * podcast results and the section caption says so. Do not add a figure
+ * here that cannot be pointed at on cocomadigital.com.
+ */
+export const STUDIO_SCALE = [
+  { value: "60", label: "People on the floor", sub: "Editors, design, marketing, channel ops" },
+  { value: "60+", label: "Partner channels run", sub: "Across seven years of operations" },
+  { value: "$600K+", label: "Partner revenue in 2025", sub: "YouTube ads alone, before sponsorship" },
+  { value: "20+", label: "Languages", sub: "Transcreation already running in-house" },
+];
+
+export const STUDIO_SCALE_NOTE =
+  "Studio-wide channel and catalog figures, all published on cocomadigital.com. They are not podcast metrics — they are the size of the operation your show would be produced inside.";
+
 
 export const TRUST_STATS: TrustStat[] = [
   { value: "12B+", label: "Organic views driven" },
