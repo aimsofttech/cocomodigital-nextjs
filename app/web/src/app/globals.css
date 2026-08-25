@@ -58737,12 +58737,45 @@ html {
     grid-template-columns: 1fr;
   }
 
-  /* Copy leads at every width. Putting the decorative diagram first
-     pushed the H1 below the fold and made an aria-hidden graphic the
-     LCP candidate. */
-  .pod-hero-visual {
-    order: 0;
-    max-width: 520px;
+  /* Stacked hero, interleaved.
+     The headline still leads — it is the LCP element and the SEO
+     signal — but the photograph now sits between the sub-headline and
+     the ask. Showing two humans recording before asking for a click is
+     worth more than a tidier column, and previously the photo landed
+     BELOW the CTA and below the fold, which is the one place proof
+     cannot do any work.
+     display:contents lifts the copy's children into the same flow as
+     the visual so they can be interleaved without duplicating markup.
+     .pod-hero-copy is a plain div, so this carries no semantics. */
+  .pod-hero-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .pod-hero-copy {
+    display: contents;
+  }
+
+  .pod-hero .pod-eyebrow { order: 1; }
+  .pod-hero-title        { order: 2; }
+  .pod-hero-sub          { order: 3; }
+  .pod-hero-visual       { order: 4; max-width: 520px; width: 100%; }
+  .pod-hero-signature    { order: 5; }
+  .pod-hero-ctas         { order: 6; }
+  .pod-hero .pod-meta    { order: 7; }
+
+  /* margins collapse oddly once these become flex items — the flex gap
+     handles the rhythm instead. */
+  .pod-hero .pod-eyebrow,
+  .pod-hero-title,
+  .pod-hero-sub,
+  .pod-hero-signature {
+    margin-bottom: 0;
+  }
+
+  .pod-hero .pod-meta {
+    margin-top: 0;
   }
 
   .pod-service-grid {
