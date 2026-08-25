@@ -264,7 +264,8 @@ export default function PodcastGrowthPage() {
               <h2 id="pod-pricing-title" className="pod-section-title">
                 {PRICING.heading}
               </h2>
-              <p className="pod-pricing-figure" aria-hidden="true">
+              <p className="pod-pricing-figure">
+                <span className="pod-pricing-prefix">{PRICING.prefix}</span>
                 <span className="pod-pricing-amount">{PRICING.floor}</span>
                 <span className="pod-pricing-unit">{PRICING.unit}</span>
               </p>
@@ -490,29 +491,32 @@ export default function PodcastGrowthPage() {
       {/* --------------------------------------------------- proof */}
       <section className="pod-proof" aria-labelledby="pod-proof-title">
         <div className="pod-shell">
-          <p className="pod-eyebrow">Selected work</p>
+          <p className="pod-eyebrow">What we can show you</p>
           <h2 id="pod-proof-title" className="pod-section-title">
-            Proof
+            The capability — and what it is not
           </h2>
-          {/* TODO (Anil): replace with cleared podcast client work —
-              named shows, real figures, written permission. Deliberately
-              left as a pointer to existing published work rather than
-              filled with placeholder logos or invented testimonials. */}
+          {/* TODO (Anil): when a podcast client clears a case study, this
+              section becomes a real proof block. Until then it must not
+              imply a podcast roster exists. */}
           <p className="pod-proof-body">
-            Cocoma&rsquo;s published client work spans YouTube channel and
-            catalog operations for entertainment platforms and networks.
-            Podcast-specific case studies are being prepared for publication and
-            will appear here once the clients have cleared them.
+            We do not publish podcast case studies yet. Saying otherwise
+            would be the easiest sentence on this page to write and the
+            fastest one to get caught on.
           </p>
           <p className="pod-proof-body">
-            What is worth saying plainly: the studio-wide figures at the top of
-            this page are channel and catalog numbers built across seven years
-            of entertainment and creator work. They are not podcast metrics, and
-            we will not dress them up as podcast metrics. The reason they belong
-            on this page is that the operating capability behind them —
-            high-volume editing, packaging tested against click-through,
-            multi-platform publishing and localization across 20+ languages — is
-            the same capability a serious podcast needs.
+            What we can show you is the work the studio does publish, and be
+            precise about how it transfers. The figures at the top of this
+            page — 12B+ organic views, 35,000+ videos, 45M+ subscribers — are
+            channel and catalog numbers built across seven years. They are
+            not podcast metrics and we will not dress them up as podcast
+            metrics. What carries across is the operating capability behind
+            them: high-volume editing, packaging tested against
+            click-through, multi-platform publishing, and localization
+            across 20+ languages.
+          </p>
+          <p className="pod-proof-body">
+            On a call we will walk you through that work and the exact
+            process we would run on your show.
           </p>
           <div className="pod-proof-links">
             <Link href="/case-studies" className="pod-cta pod-cta--secondary">

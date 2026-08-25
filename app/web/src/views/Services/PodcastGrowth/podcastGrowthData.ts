@@ -141,13 +141,13 @@ export const HERO = {
 export const PROBLEM_STATS = [
   {
     value: "4–8 hrs",
-    label: "of post-production hide inside every 30 minutes you record",
+    label: "of post-production per 30 minutes recorded — our own measured range",
     body:
       "Cutting, cleaning, color, captions, clip selection, thumbnails, notes, uploads. The recording is the cheapest part of a podcast.",
   },
   {
     value: "60+",
-    label: "pieces of content a week is what serious shows now ship",
+    label: "pieces a week is what a full engagement is built to ship",
     body:
       "An episode is no longer the unit of output. Episodes, cutdowns, vertical clips, carousels and a newsletter all come from the same session.",
   },
@@ -213,7 +213,7 @@ export const STAGES: Stage[] = [
       "Discovery — impressions, traffic sources, suggested-video pickup",
       "Packaging — click-through rate on thumbnail and title pairs",
       "Consumption — retention curves, average view duration, drop-off",
-      "Business — subscribers, enquiries, sponsor conversations",
+      "Business — subscribers, inquiries, sponsor conversations",
     ],
   },
 ];
@@ -288,7 +288,7 @@ export const AUDIENCES: AudienceCard[] = [
     icon: "network",
     title: "Networks & media companies",
     body:
-      "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest — the studio's channel and catalog operations were built for entertainment platforms at exactly this scale.",
+      "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest — the studio's channel and catalog operations were built at exactly this scale — 35,000+ videos produced and 12B+ organic views driven.",
     signal: "Multiple shows, shared production standard",
   },
 ];
@@ -301,12 +301,13 @@ export const AUDIENCES: AudienceCard[] = [
    NOT pinned to the full weekly-show table further down the page. Anil
    to confirm the exact scope-to-price mapping before this ships. */
 export const PRICING = {
+  prefix: "From",
   floor: "$2,000",
   unit: "/month",
   eyebrow: "Straight answer on price",
-  heading: "Engagements start at $2,000 a month",
+  heading: "Priced like a product, not a project",
   lead:
-    "You are not buying editing hours. You are buying a production line with a named producer on it, a documented process behind it, and an SLA you can build a publishing calendar around. That is what costs $2,000 a month to run properly, and it is why we publish the number instead of making you sit through a discovery call to hear it.",
+    "You are not buying editing hours. You are buying a production line with a named producer on it, a documented process behind it, and an SLA you can build a publishing calendar around. That is what it costs to run properly — and it is why the number is on this page instead of behind a discovery call.",
   includedTitle: "What every engagement includes",
   included: [
     "A named producer who owns your show — not a ticket queue",
@@ -374,7 +375,7 @@ export const FOUNDER = {
   portrait: "/Images/podcast/anil-mahato-founder-cocoma.jpg",
   alt: "Anil Mahato, founder of Cocoma Digital.",
   lines: [
-    "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio runs channel and catalog operations for some of the biggest entertainment brands in India.",
+    "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio has produced 35,000+ videos and built 45M+ subscribers across the channels it runs.",
     "Podcasts are where that same machinery is now most useful outside India — because a show is not an editing job, it is an operation, and operations are the thing we have actually built.",
     "Your show will not be run by me. It will be run by a producer whose name you will know, against a documented process, to an SLA you agreed. That is deliberate: a studio that only works when the founder is in the room is not a studio, it is a bottleneck.",
   ],
@@ -394,7 +395,7 @@ export const NOT_FOR = {
   eyebrow: "Straight talk",
   heading: "When we are the wrong call",
   lead:
-    "We would rather lose the enquiry than take an engagement that cannot work. If any of these describe you, a freelance editor will serve you better and cost you far less.",
+    "We would rather lose the inquiry than take an engagement that cannot work. If any of these describe you, a freelance editor will serve you better and cost you far less.",
   items: [
     "You are looking for the cheapest per-episode rate. We are not competitive on rate and do not try to be — you are buying an operation, not an hour of editing.",
     "You publish occasionally, when there is time. Systems earn their cost through cadence; without one there is nothing for the machinery to compound.",
@@ -437,7 +438,7 @@ export const DISTRIBUTION = {
       icon: "network",
       title: "Catalogue and channel operations",
       body:
-        "Back catalog re-cut and re-packaged, playlists and end screens structured so one episode leads to the next, and channel operations run the way they are run for platforms with thousands of titles.",
+        "Back catalog re-cut and re-packaged, playlists and end screens structured so one episode leads to the next, and channel operations run at the volume of a studio that has produced 35,000+ videos.",
     },
     {
       icon: "chart",
@@ -514,7 +515,7 @@ export const FAQS: Faq[] = [
   {
     q: "What do podcast editing and growth services cost?",
     a:
-      "Engagements start at $2,000 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately — below roughly $2,000 a month a show is usually better served by a freelance editor than by a production system, and we would rather say that than sell you something that does not fit. The free audit comes back with the scope and the number together.",
+      "Engagements start at $2,000 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately. Below $2,000 a month a freelance editor will serve you better than a production system, and we would rather say so than sell you something that does not fit. The free audit comes back with the scope and the number together.",
   },
   {
     q: "Why is there a minimum at all?",
@@ -534,7 +535,7 @@ export const FAQS: Faq[] = [
   {
     q: "Do you work on video podcasts, audio-only, or both?",
     a:
-      "Both. Audio-only shows get editing, mastering, notes, transcripts and audio-led clips. Video shows get everything audio does, plus multicam editing, thumbnails, packaging tests and the full short-form ring. Most shows we build for are video-first because that is where discovery now happens.",
+      "Both. Audio-only shows get editing, mastering, notes, transcripts and audio-led clips. Video shows get everything audio does, plus multicam editing, thumbnails, packaging tests and the full short-form ring. We build video-first by default, because that is where discovery now happens.",
   },
   {
     q: "Why does YouTube matter so much for podcasts?",
@@ -544,7 +545,7 @@ export const FAQS: Faq[] = [
   {
     q: "How do you measure success?",
     a:
-      "In four layers. Discovery: impressions and where traffic comes from. Packaging: click-through rate on thumbnail and title. Consumption: retention curve and average view duration. Business: subscribers, enquiries and sponsor conversations. We report on all four monthly and each report ends in specific decisions. We do not promise view counts or subscriber numbers — those are outcomes, not deliverables. What we commit to is output volume, turnaround, and a tested packaging and retention process.",
+      "In four layers. Discovery: impressions and where traffic comes from. Packaging: click-through rate on thumbnail and title. Consumption: retention curve and average view duration. Business: subscribers, inquiries and sponsor conversations. We report on all four monthly and each report ends in specific decisions. We do not promise view counts or subscriber numbers — those are outcomes, not deliverables. What we commit to is output volume, turnaround, and a tested packaging and retention process.",
   },
   {
     q: "Who owns the channel, the accounts and the project files?",
@@ -554,7 +555,7 @@ export const FAQS: Faq[] = [
   {
     q: "Can you work with our existing editor or in-house team?",
     a:
-      "Yes. Cocoma often runs the parts a small team cannot hold at volume — packaging, clipping, publishing operations, localization — while the in-house editor keeps the main edit. The system matters more than who holds each seat.",
+      "Yes. The model is built to run the parts a small team cannot hold at volume — packaging, clipping, publishing operations, localization — while the in-house editor keeps the main edit. The system matters more than who holds each seat.",
   },
   {
     q: "What happens to our back catalog?",

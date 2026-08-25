@@ -58161,11 +58161,28 @@ html {
   background: var(--bg-page-soft);
 }
 
+/* The figure is the only place the number appears in this block, so it
+   carries the whole weight. It sits behind the page's existing yellow
+   left-bar idiom (same as .pod-hero-signature and .pod-notfor-foot)
+   rather than a highlight behind the glyphs — at display size the old
+   62% gradient cut straight through the numerals and read as a
+   strikethrough, which on a price is the worst possible accident. */
 .pod-pricing-figure {
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: var(--space-2);
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-5);
+  padding: var(--space-2) 0 var(--space-2) var(--space-4);
+  border-left: 6px solid var(--brand);
+}
+
+.pod-pricing-prefix {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+  color: var(--text-muted);
+  align-self: center;
 }
 
 .pod-pricing-amount {
@@ -58175,12 +58192,7 @@ html {
   line-height: 1;
   letter-spacing: var(--tracking-tight);
   color: var(--text-strong);
-  background: linear-gradient(
-    to bottom,
-    transparent 62%,
-    var(--brand) 62%
-  );
-  padding-inline: 0.1em;
+  font-variant-numeric: tabular-nums;
 }
 
 .pod-pricing-unit {

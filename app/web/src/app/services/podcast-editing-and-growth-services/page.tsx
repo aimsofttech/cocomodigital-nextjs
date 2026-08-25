@@ -41,9 +41,12 @@ export const metadata: Metadata = buildMetadata({
     "Cocoma Digital — Podcast Editing & Growth Services: one recording becomes a multi-platform growth engine.",
 });
 
-/* No client hooks at page level, so this can be fully prerendered —
-   which is what the LCP budget depends on. */
-export const dynamic = "force-static";
+/* Deliberately NOT force-static. The page body is a module constant so
+   it costs nothing to render, but the shared header and footer pull
+   their nav from the API — freezing this route would pin that nav to
+   whatever the build saw, so an editor's change in the admin would
+   never reach this page. Every other route on the site is dynamic for
+   the same reason. */
 
 export default function Page() {
   const serviceSchema = {
@@ -94,9 +97,11 @@ export default function Page() {
     })),
   };
 
+  /* No middle crumb: /service and /services both 404 — there is no
+     services index page on this site — and a BreadcrumbList that emits a
+     dead URL is worse than a two-level trail. */
   const breadcrumbSchema = breadcrumbJsonLd([
     { name: "Home", path: "/" },
-    { name: "Services", path: "/service" },
     { name: "Podcast Editing & Growth Services", path: PATH },
   ]);
 
