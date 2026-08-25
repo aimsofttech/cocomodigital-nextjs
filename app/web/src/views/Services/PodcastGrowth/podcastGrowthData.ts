@@ -116,10 +116,13 @@ export const STUDIO_SHOTS = [
     wide: false,
   },
   {
-    src: "/Images/about/studio-edit-bay.jpg",
+    /* Was studio-edit-bay.jpg — near-identical to studio-2026-09 above
+       (same editor from behind, headphones, wide monitor, timeline).
+       Two of six frames on one shot reads as a thin library. */
+    src: "/Images/about/studio-2026-33.jpg",
     alt:
-      "An editor at a wide monitor cutting a video timeline in the studio edit bay, with additional monitors along the desk behind.",
-    caption: "The edit bay",
+      "Six people seated around a long white table with open laptops, a camera on a tripod fitted with a shotgun microphone set up at the near end, and a camera lens and accessories on the table.",
+    caption: "Production planning",
     wide: false,
   },
   {
