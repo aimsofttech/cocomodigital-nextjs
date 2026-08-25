@@ -90,7 +90,7 @@ export const HERO_MEDIA = {
 /**
  * Studio strip — real photography from the Cocoma floor, already in the
  * repo and already used on the about page. Documentary black and white,
- * which is why the colour hero still reads as the subject and these read
+ * which is why the color hero still reads as the subject and these read
  * as the room behind it.
  */
 export const STUDIO_SHOTS = [
@@ -112,7 +112,7 @@ export const STUDIO_STRIP = {
   eyebrow: "The room this runs from",
   heading: "A working studio, not a marketplace of freelancers",
   body:
-    "Your show is produced by a named team on the Cocoma floor in Andheri West, Mumbai — the same operation that runs channel and catalogue work for entertainment platforms. That is what makes an SLA meaningful: there is a bench behind it, not one contractor with a full inbox.",
+    "Your show is produced by a named team on the Cocoma floor in Andheri West, Mumbai — the same operation that runs channel and catalog work for entertainment platforms. That is what makes an SLA meaningful: there is a bench behind it, not one contractor with a full inbox.",
 };
 
 export const TRUST_STATS: TrustStat[] = [
@@ -143,7 +143,7 @@ export const PROBLEM_STATS = [
     value: "4–8 hrs",
     label: "of post-production hide inside every 30 minutes you record",
     body:
-      "Cutting, cleaning, colour, captions, clip selection, thumbnails, notes, uploads. The recording is the cheapest part of a podcast.",
+      "Cutting, cleaning, color, captions, clip selection, thumbnails, notes, uploads. The recording is the cheapest part of a podcast.",
   },
   {
     value: "60+",
@@ -223,7 +223,7 @@ export const SERVICES: ServiceCard[] = [
     icon: "video",
     title: "Video podcast editing",
     body:
-      "Multicam editing with speaker-aware cutting, colour and sound balanced across angles. Captions, lower thirds and branded elements applied from a template system so every episode looks like the same show.",
+      "Multicam editing with speaker-aware cutting, color and sound balanced across angles. Captions, lower thirds and branded elements applied from a template system so every episode looks like the same show.",
   },
   {
     icon: "audio",
@@ -288,7 +288,7 @@ export const AUDIENCES: AudienceCard[] = [
     icon: "network",
     title: "Networks & media companies",
     body:
-      "Multi-show operations, large back catalogues and localization across markets. This is the work Cocoma has done longest — the studio's channel and catalogue operations were built for entertainment platforms at exactly this scale.",
+      "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest — the studio's channel and catalog operations were built for entertainment platforms at exactly this scale.",
     signal: "Multiple shows, shared production standard",
   },
 ];
@@ -322,7 +322,7 @@ export const PRICING = {
     "Episodes per month and how many camera angles",
     "Clip volume per episode",
     "Whether publishing and community management are included",
-    "Back-catalogue re-cutting and re-packaging",
+    "Back-catalog re-cutting and re-packaging",
     "Distribution and language expansion into new markets",
   ],
   note:
@@ -374,7 +374,7 @@ export const FOUNDER = {
   portrait: "/Images/podcast/anil-mahato-founder-cocoma.jpg",
   alt: "Anil Mahato, founder of Cocoma Digital.",
   lines: [
-    "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio runs channel and catalogue operations for some of the biggest entertainment brands in India.",
+    "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio runs channel and catalog operations for some of the biggest entertainment brands in India.",
     "Podcasts are where that same machinery is now most useful outside India — because a show is not an editing job, it is an operation, and operations are the thing we have actually built.",
     "Your show will not be run by me. It will be run by a producer whose name you will know, against a documented process, to an SLA you agreed. That is deliberate: a studio that only works when the founder is in the room is not a studio, it is a bottleneck.",
   ],
@@ -410,7 +410,7 @@ export const NOT_FOR = {
  *
  * TODO (Anil): this is written from capabilities the studio demonstrably
  * has (multi-platform publishing operations, 20+ language transcreation,
- * channel management at catalogue scale). If the distribution network
+ * channel management at catalog scale). If the distribution network
  * includes concrete assets — owned channels, syndication partners,
  * placement relationships — tell me what they are and I will name them.
  * Nothing here claims a partner or a placement we cannot evidence.
@@ -437,7 +437,7 @@ export const DISTRIBUTION = {
       icon: "network",
       title: "Catalogue and channel operations",
       body:
-        "Back catalogue re-cut and re-packaged, playlists and end screens structured so one episode leads to the next, and channel operations run the way they are run for platforms with thousands of titles.",
+        "Back catalog re-cut and re-packaged, playlists and end screens structured so one episode leads to the next, and channel operations run the way they are run for platforms with thousands of titles.",
     },
     {
       icon: "chart",
@@ -467,7 +467,7 @@ export const MONTH_ROWS: MonthRow[] = [
   {
     deliverable: "Stories & carousels",
     volume: "Per calendar",
-    detail: "Episode launch beats and evergreen pulls from the back catalogue",
+    detail: "Episode launch beats and evergreen pulls from the back catalog",
   },
   {
     deliverable: "Show notes, transcripts & newsletter",
@@ -492,7 +492,7 @@ export const PROCESS: ProcessStep[] = [
     name: "Free podcast audit",
     duration: "No cost",
     body:
-      "We review the show as it stands — packaging, retention, publishing cadence, back catalogue and where attention is being lost. You get the findings whether or not you work with us, along with scope and pricing for the shape that fits.",
+      "We review the show as it stands — packaging, retention, publishing cadence, back catalog and where attention is being lost. You get the findings whether or not you work with us, along with scope and pricing for the shape that fits.",
   },
   {
     step: "02",
@@ -514,7 +514,7 @@ export const FAQS: Faq[] = [
   {
     q: "What do podcast editing and growth services cost?",
     a:
-      "Engagements start at $2,000 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalogue work and localization are included. We publish the floor deliberately — below roughly $2,000 a month a show is usually better served by a freelance editor than by a production system, and we would rather say that than sell you something that does not fit. The free audit comes back with the scope and the number together.",
+      "Engagements start at $2,000 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately — below roughly $2,000 a month a show is usually better served by a freelance editor than by a production system, and we would rather say that than sell you something that does not fit. The free audit comes back with the scope and the number together.",
   },
   {
     q: "Why is there a minimum at all?",
@@ -539,7 +539,7 @@ export const FAQS: Faq[] = [
   {
     q: "Why does YouTube matter so much for podcasts?",
     a:
-      "YouTube is a search and recommendation engine, not just a hosting platform. A podcast that lives only in audio apps depends almost entirely on people already knowing it exists. On YouTube, packaging and retention decide whether the platform shows the episode to people who have never heard of the show — which is the difference between a back catalogue that compounds and one that sits still.",
+      "YouTube is a search and recommendation engine, not just a hosting platform. A podcast that lives only in audio apps depends almost entirely on people already knowing it exists. On YouTube, packaging and retention decide whether the platform shows the episode to people who have never heard of the show — which is the difference between a back catalog that compounds and one that sits still.",
   },
   {
     q: "How do you measure success?",
@@ -557,9 +557,9 @@ export const FAQS: Faq[] = [
       "Yes. Cocoma often runs the parts a small team cannot hold at volume — packaging, clipping, publishing operations, localization — while the in-house editor keeps the main edit. The system matters more than who holds each seat.",
   },
   {
-    q: "What happens to our back catalogue?",
+    q: "What happens to our back catalog?",
     a:
-      "It is usually the fastest win available. Existing episodes already contain clip-worthy moments, and old packaging can be re-tested without recording anything new. The audit flags which back-catalogue episodes are worth re-cutting or re-packaging first.",
+      "It is usually the fastest win available. Existing episodes already contain clip-worthy moments, and old packaging can be re-tested without recording anything new. The audit flags which back-catalog episodes are worth re-cutting or re-packaging first.",
   },
   {
     q: "How do we start?",

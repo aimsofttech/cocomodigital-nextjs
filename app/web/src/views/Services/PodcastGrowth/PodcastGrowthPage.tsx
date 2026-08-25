@@ -89,7 +89,7 @@ export default function PodcastGrowthPage() {
           <div className="pod-trust">
             <p className="pod-trust-caption">
               Cocoma Digital, studio-wide, across seven years of channel and
-              catalogue work:
+              catalog work:
             </p>
             <ul className="pod-trust-list">
               {TRUST_STATS.map((s) => (
@@ -114,10 +114,10 @@ export default function PodcastGrowthPage() {
             conversation is good, the guests are good, and nothing downstream of
             the record button is built to keep up. Episodes ship late or not at
             all, clips get made when someone has a spare afternoon, thumbnails
-            are decided by whoever is nearest the file, and the back catalogue
+            are decided by whoever is nearest the file, and the back catalog
             sits untouched. None of that is a talent problem — it is a capacity
             and systems problem, and it compounds quietly until the show feels
-            like a cost centre.
+            like a cost center.
           </p>
           <div className="pod-problem-grid">
             {PROBLEM_STATS.map((p) => (
@@ -500,13 +500,13 @@ export default function PodcastGrowthPage() {
               filled with placeholder logos or invented testimonials. */}
           <p className="pod-proof-body">
             Cocoma&rsquo;s published client work spans YouTube channel and
-            catalogue operations for entertainment platforms and networks.
+            catalog operations for entertainment platforms and networks.
             Podcast-specific case studies are being prepared for publication and
             will appear here once the clients have cleared them.
           </p>
           <p className="pod-proof-body">
             What is worth saying plainly: the studio-wide figures at the top of
-            this page are channel and catalogue numbers built across seven years
+            this page are channel and catalog numbers built across seven years
             of entertainment and creator work. They are not podcast metrics, and
             we will not dress them up as podcast metrics. The reason they belong
             on this page is that the operating capability behind them —
@@ -552,7 +552,7 @@ export default function PodcastGrowthPage() {
             </h2>
             <p className="pod-final-lead">
               Send the show link. We&rsquo;ll review packaging, retention,
-              publishing cadence and back catalogue, then come back with what we
+              publishing cadence and back catalog, then come back with what we
               would change first — and what it would cost.
             </p>
             <ul className="pod-final-points">
