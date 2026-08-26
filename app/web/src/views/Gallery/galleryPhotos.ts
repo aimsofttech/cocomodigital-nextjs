@@ -45,6 +45,64 @@
  */
 
 export const GALLERY_PHOTOS = [
+  // ── 2026-08 · the edit floor ──────────────────────────────────────
+  {
+    src: "/Images/about/2026-08/edit-floor-row.jpg",
+    caption: "Four timelines, one row, one afternoon.",
+    categories: ["studio", "team"],
+    date: "2026-08",
+    featured: true,
+  },
+  {
+    src: "/Images/about/2026-08/editor-close-up.jpg",
+    caption: "Headphones on. The rest of the room disappears.",
+    categories: ["studio", "behind-scenes"],
+    date: "2026-08",
+    featured: true,
+  },
+  {
+    src: "/Images/about/2026-08/editor-multicam-timeline.jpg",
+    caption: "Two angles, two voices, one cut.",
+    categories: ["studio", "behind-scenes"],
+    date: "2026-08",
+    featured: false,
+  },
+  {
+    src: "/Images/about/2026-08/editor-two-screen.jpg",
+    caption: "Timeline on the left, the picture on the right.",
+    categories: ["studio", "behind-scenes"],
+    date: "2026-08",
+    featured: false,
+  },
+  {
+    src: "/Images/about/2026-08/editor-promo-cut.jpg",
+    caption: "Sound and picture, sitting together.",
+    categories: ["studio", "behind-scenes"],
+    date: "2026-08",
+    featured: false,
+  },
+  {
+    src: "/Images/about/2026-08/thumbnail-designer.jpg",
+    caption: "The thumbnail is a decision, not a leftover.",
+    categories: ["studio", "behind-scenes"],
+    date: "2026-08",
+    featured: false,
+  },
+  {
+    src: "/Images/about/2026-08/motion-graphics.jpg",
+    caption: "Titles, builds and the last ten percent.",
+    categories: ["studio", "behind-scenes"],
+    date: "2026-08",
+    featured: false,
+  },
+  {
+    src: "/Images/about/2026-08/two-editors.jpg",
+    caption: "Two desks, two shows, same deadline.",
+    categories: ["team", "studio"],
+    date: "2026-08",
+    featured: false,
+  },
+
   // ──────────────────────── 2026-05 (studio-life batch — 37 photos) ────────────────────────
   // Bulk-added May 2026. Captions are varied placeholders Anil can
   // refine over time; categories default to mix of team/studio/

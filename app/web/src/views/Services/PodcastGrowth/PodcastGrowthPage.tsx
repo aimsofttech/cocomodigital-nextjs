@@ -118,12 +118,12 @@ export default function PodcastGrowthPage() {
             the expensive half" faster than a wide room does, and the
             wall behind him is already the brand yellow — which is why
             this one is only partly desaturated.
-            TODO (Anil): shot A-03 on the shot list — the wide,
-            heads-down floor — was specced for this slot. Swap when it
-            exists; it is one line. */}
+            This IS shot A-03 from the shot list — the wide, heads-down
+            floor — now that it exists. Four editors in a row, screens
+            lit, nobody looking at the camera. */}
         <div className="pod-problem-bg" aria-hidden="true">
           <Image
-            src="/Images/service/cocoma-banner.jpg"
+            src="/Images/about/2026-08/edit-floor-row.jpg"
             alt=""
             fill
             sizes="100vw"

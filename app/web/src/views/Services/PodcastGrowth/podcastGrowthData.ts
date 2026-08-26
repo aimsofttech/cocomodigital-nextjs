@@ -94,59 +94,67 @@ export const HERO_MEDIA = {
  * as the room behind it.
  */
 export const STUDIO_SHOTS = [
+  /* Shot on the Cocoma floor, August 2026. Replaces the black-and-white
+     set: these are in colour, every screen carries real work, and the
+     wall behind them is the brand yellow. Captions describe only what is
+     visible in frame.
+
+     Not used here: `two-editors.jpg`, because both subjects are looking
+     at the camera, and `motion-graphics.jpg`, because a client's series
+     title fills the screen. See the flag on the thumbnail frame below —
+     that one is in, but it is Anil's call to keep it. */
   {
-    src: "/Images/about/studio-2026-09.jpg",
+    src: "/Images/about/2026-08/edit-floor-row.jpg",
     alt:
-      "An editor wearing over-ear headphones works at a wide monitor showing a video editing timeline and preview window, with another workstation behind in the darkened room.",
-    caption: "Retention-first editing",
+      "Four editors working in a row at adjacent monitors along a yellow wall, each wearing headphones, timelines and footage open on the screens.",
+    caption: "The edit floor",
     wide: true,
   },
   {
-    src: "/Images/about/studio-2026-15.jpg",
+    src: "/Images/about/2026-08/editor-close-up.jpg",
     alt:
-      "Two people at desktop workstations; the nearest monitor shows an image editor with a portrait cut out on a transparency checkerboard, the screens beyond showing thumbnail layouts with large headline text.",
+      "An editor in headphones at a wide monitor, a dense multi-track timeline below a preview of a single speaker talking to camera.",
+    caption: "Retention-first editing",
+    wide: false,
+  },
+  {
+    src: "/Images/about/2026-08/editor-multicam-timeline.jpg",
+    alt:
+      "An editor at dual monitors cutting a two-person sequence, with a densely stacked colour-coded timeline filling the lower screen.",
+    caption: "Multicam, two speakers",
+    wide: false,
+  },
+  {
+    src: "/Images/about/2026-08/editor-two-screen.jpg",
+    alt:
+      "An editor at two monitors, an editing timeline on the left and the graded footage playing full-screen on the right.",
+    caption: "Cut and review, side by side",
+    wide: false,
+  },
+  {
+    src: "/Images/about/2026-08/editor-promo-cut.jpg",
+    alt:
+      "An editor in headphones working at two screens, an audio-heavy timeline on one and the video playing on the other.",
+    caption: "Audio and picture together",
+    wide: false,
+  },
+  {
+    /* FLAG FOR ANIL: a client's trailer key art is legible on this
+       monitor. It is real Cocoma work and the client is already named
+       publicly on the homepage, but displaying a licensor's artwork in
+       a marketing photo is a different thing from naming them in text.
+       Say the word and this frame comes out — it is the only one in the
+       set with that issue, and the grid re-flows on its own.
+       Kept because packaging is a core claim on this page and this is
+       the clearest proof of it we have. */
+    src: "/Images/about/2026-08/thumbnail-designer.jpg",
+    alt:
+      "A designer at a wide monitor cutting a subject out of a still in Photoshop, the isolated figure shown on a transparency checkerboard beside the source frame.",
     caption: "Thumbnail and packaging design",
-    wide: false,
-  },
-  {
-    src: "/Images/about/studio-2026-22.jpg",
-    alt:
-      "A room of around fifteen people seated at laptops facing a projected screen headed \"Short/Story videos (9:16)\".",
-    caption: "Short-form review, 9:16",
-    wide: false,
-  },
-  {
-    /* Was studio-edit-bay.jpg — near-identical to studio-2026-09 above
-       (same editor from behind, headphones, wide monitor, timeline).
-       Two of six frames on one shot reads as a thin library. */
-    src: "/Images/about/studio-2026-33.jpg",
-    alt:
-      "Six people seated around a long white table with open laptops, a camera on a tripod fitted with a shotgun microphone set up at the near end, and a camera lens and accessories on the table.",
-    caption: "Production planning",
-    wide: false,
-  },
-  {
-    src: "/Images/about/studio-on-set.jpg",
-    alt:
-      "A studio set with a plain backdrop, a camera and shotgun microphone mounted on a horizontal slider rail, a tube light, a softbox and light stands.",
-    caption: "Camera, sound and lighting on set",
-    wide: false,
-  },
-  {
-    /* Replaces studio-2026-10 (four people at laptops), which read as a
-       generic office. This frame is on-subject: the projected style
-       guide is headed "03 / Text on-screen" and both example stills
-       carry burned-in captions — the exact craft the short-form clip
-       service sells. Chosen over studio-2026-20, which shows the same
-       room at greater scale but with a client's logo filling the
-       screen. */
-    src: "/Images/about/studio-2026-21.jpg",
-    alt:
-      "A woman presents a projected video style guide headed \"03 / Text on-screen\", showing two example stills with burned-in captions, to colleagues seated at laptops in a darkened room.",
-    caption: "Caption and on-screen text standards",
     wide: true,
   },
 ];
+
 
 
 export const STUDIO_STRIP = {
