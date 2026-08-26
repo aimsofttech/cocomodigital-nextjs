@@ -58764,6 +58764,12 @@ html {
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
+    /* The desktop rule sets align-items: center for the two-column
+       grid. Without resetting it here every child shrank to its own
+       content and sat centred, so the button and the meta lines were
+       visibly indented against a full-width headline. Stretch gives
+       the whole hero one left edge. */
+    align-items: stretch;
   }
 
   .pod-hero-copy {
@@ -59377,4 +59383,44 @@ html {
 .pod-credentials-line {
   margin-bottom: var(--space-7);
   max-width: 56ch;
+}
+
+/* ------------------------------------------------ mobile hero polish */
+
+@media (max-width: 640px) {
+  /* At 12px with 0.08em tracking the eyebrow measured exactly the width
+     of the column — one character more and it wraps mid-phrase. Ease
+     the tracking and let it break cleanly if it must. */
+  .pod-hero .pod-eyebrow {
+    letter-spacing: var(--tracking-wide);
+    text-wrap: balance;
+  }
+
+  /* Full-width primary action: easier to hit, and it anchors the left
+     edge the rest of the hero now shares. */
+  .pod-hero-ctas {
+    width: 100%;
+  }
+
+  .pod-hero-ctas .pod-cta {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* The meta line is reference information, not a headline. Slightly
+     smaller and a touch more space between the two rows so the price
+     and the hours read as two separate facts. */
+  .pod-meta {
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  .pod-meta-item {
+    font-size: var(--fs-small);
+    align-items: flex-start;
+  }
+
+  .pod-meta-icon {
+    margin-top: 0.15em;
+  }
 }
