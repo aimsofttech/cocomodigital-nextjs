@@ -180,25 +180,6 @@ export function HeroFanOut() {
   );
 }
 
-/**
- * Four-stage rail drawn behind the Signal-to-Scale cards on wide
- * viewports. Decorative reinforcement of the ordering already carried
- * by the ordered list in markup.
- */
-export function StageRail() {
-  return (
-    <svg
-      className="pod-stage-rail"
-      viewBox="0 0 1000 8"
-      preserveAspectRatio="none"
-      role="presentation"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <line x1="0" y1="4" x2="1000" y2="4" strokeWidth="2" strokeDasharray="6 8" />
-    </svg>
-  );
-}
 
 /* ==================================================================
    Stage diagrams — placeholders for the Signal-to-Scale cards.

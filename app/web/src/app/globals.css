@@ -57969,62 +57969,73 @@ html {
   position: relative;
 }
 
-.pod-stage-rail {
-  display: none;
-  position: absolute;
-  inset-inline: 8%;
-  top: 3.25rem;
-  width: 84%;
-  height: 8px;
-  color: var(--text-strong);
-  opacity: 0.28;
-}
-
-.pod-stage-rail line {
-  stroke: currentColor;
-}
-
+/* Four wide bands, not a 2x2 grid. The content is a SEQUENCE — Align
+   then Engineer then Amplify then Optimize — and a grid of four equal
+   quadrants says the opposite: four parallel options. Stacked bands
+   read in order, and they give the landscape diagrams the width they
+   were drawn for instead of stranding a 320px graphic in the middle of
+   an 800px band. */
 .pod-stage-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--space-5);
   list-style: none;
   margin: 0;
   padding: 0;
   position: relative;
+  counter-reset: stage;
 }
 
 .pod-stage {
-  padding: var(--space-6);
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
   background: var(--bg-page);
   border: 2px solid var(--text-strong);
   border-radius: var(--radius-lg);
   box-shadow: 6px 6px 0 var(--text-strong);
+  overflow: hidden;
+}
+
+/* Alternate which side the illustration sits on. Four identical rows
+   would be as monotonous as the grid was; alternating gives the
+   sequence a rhythm and stops the eye tracking straight down one
+   column and skipping the copy. */
+.pod-stage:nth-child(even) {
+  /* Mirror the column widths as well as the order. Reordering alone put
+     the illustration in the wider column on every second row, which
+     squeezed the copy from 1.18fr down to 0.82fr and made alternate
+     stages read as though they had less to say. */
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+}
+
+.pod-stage:nth-child(even) .pod-stage-figure {
+  order: 2;
+  border-right: none;
+  border-left: 2px solid var(--text-strong);
 }
 
 .pod-stage-head {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
-/* brand chip rather than coloured text — --brand-dark on white is
-   ~1.6:1 and fails contrast. */
-.pod-stage-step {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  min-width: 2.5rem;
-  padding: 0.2em 0.55em;
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--fw-bold);
-  color: var(--brand-on);
-  background: var(--brand);
-  border: 2px solid var(--text-strong);
-  border-radius: var(--radius-sm);
+/* A rule running off the heading to the edge of the card — it gives the
+   name somewhere to sit rather than floating at the top of a text
+   stack, and it repeats the horizontal language of the diagrams. */
+.pod-stage-rule {
+  flex: 1;
+  height: 2px;
+  background: var(--text-strong);
+  opacity: 0.14;
+}
+
+.pod-stage-body {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .pod-stage-name {
@@ -58053,7 +58064,7 @@ html {
 
 .pod-stage-caps {
   list-style: none;
-  margin: 0;
+  margin: auto 0 0;
   padding: var(--space-4) 0 0;
   border-top: 1px solid var(--border-soft);
   display: flex;
@@ -58738,12 +58749,6 @@ html {
 }
 
 /* ------------------------------------------------ responsive */
-
-@media (min-width: 1180px) {
-  .pod-stage-rail {
-    display: block;
-  }
-}
 
 @media (max-width: 1100px) {
   .pod-hero-inner {
@@ -59512,19 +59517,47 @@ html {
 /* Sits above the stage heading as a banded illustration. Reads as a
    diagram, not a photograph, which is the point: it explains the stage
    without pretending to be evidence. Swap for shots M-01 to M-04. */
+/* The illustration panel. Full-bleed inside the card with the ordinal
+   sitting in the corner, so the number reads as a position in a
+   sequence rather than a chip stuck on a heading. */
 .pod-stage-figure {
-  margin: calc(var(--space-6) * -1) calc(var(--space-6) * -1) var(--space-5);
-  padding: var(--space-5) var(--space-6);
-  background: var(--bg-page-soft);
-  border-bottom: 2px solid var(--text-strong);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
+  background:
+    radial-gradient(
+      70% 90% at 50% 40%,
+      rgba(255, 240, 0, 0.16),
+      transparent 70%
+    ),
+    var(--bg-page-soft);
+  border-right: 2px solid var(--text-strong);
+  min-height: 200px;
+}
+
+/* Large ghosted numeral. Sequence made visible without another yellow
+   chip competing with the CTAs elsewhere on the page. */
+.pod-stage-ordinal {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-4);
+  font-family: var(--font-display);
+  font-size: 3.25rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  opacity: 0.1;
+  pointer-events: none;
 }
 
 .pod-stage-art {
   display: block;
   width: 100%;
+  max-width: 320px;
   height: auto;
-  max-height: 132px;
   color: var(--text-strong);
 }
 
@@ -59559,5 +59592,37 @@ html {
 @media (max-width: 640px) {
   .pod-stage-figure {
     padding: var(--space-4) var(--space-5);
+  }
+}
+
+/* -------------------------------------- stage bands, responsive */
+
+@media (max-width: 900px) {
+  /* Stack, and put the illustration on top for every stage — the
+     alternation only means anything when the two halves sit side by
+     side.
+
+     Both selectors are needed. .pod-stage:nth-child(even) is more
+     specific than .pod-stage, so it wins on specificity no matter which
+     comes later in the file, and without naming it here the mirrored
+     two-column template survived into the phone layout and squeezed
+     every second diagram to 152px. */
+  .pod-stage,
+  .pod-stage:nth-child(even) {
+    grid-template-columns: 1fr;
+  }
+
+  .pod-stage-figure,
+  .pod-stage:nth-child(even) .pod-stage-figure {
+    order: 0;
+    border-right: none;
+    border-left: none;
+    border-bottom: 2px solid var(--text-strong);
+    min-height: 0;
+    padding: var(--space-5);
+  }
+
+  .pod-stage-ordinal {
+    font-size: 2.5rem;
   }
 }

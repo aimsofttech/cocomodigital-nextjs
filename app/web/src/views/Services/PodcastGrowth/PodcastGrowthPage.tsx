@@ -4,7 +4,7 @@ import { FaArrowRight, FaCheck } from "react-icons/fa";
 import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastHeroMedia from "./PodcastHeroMedia";
-import { HeroFanOut, Icon, StageDiagram, StageRail } from "./PodcastVisuals";
+import { HeroFanOut, Icon, StageDiagram } from "./PodcastVisuals";
 import {
   AUDIENCES,
   DISTRIBUTION,
@@ -174,7 +174,6 @@ export default function PodcastGrowthPage() {
           </p>
 
           <div className="pod-stage-wrap">
-            <StageRail />
             <ol className="pod-stage-list">
               {STAGES.map((stage) => (
                 <li key={stage.id} className="pod-stage">
@@ -183,24 +182,28 @@ export default function PodcastGrowthPage() {
                       filling space, and imitates nothing — no fake
                       screenshot, no implied number. */}
                   <div className="pod-stage-figure">
-                    <StageDiagram id={stage.id} />
-                  </div>
-                  <div className="pod-stage-head">
-                    <span className="pod-stage-step" aria-hidden="true">
+                    <span className="pod-stage-ordinal" aria-hidden="true">
                       {stage.step}
                     </span>
-                    <h3 className="pod-stage-name">{stage.name}</h3>
+                    <StageDiagram id={stage.id} />
                   </div>
-                  <p className="pod-stage-promise">{stage.promise}</p>
-                  <p className="pod-stage-detail">{stage.detail}</p>
-                  <ul className="pod-stage-caps">
-                    {stage.capabilities.map((c) => (
-                      <li key={c}>
-                        <FaCheck aria-hidden="true" className="pod-tick" />
-                        <span>{c}</span>
-                      </li>
-                    ))}
-                  </ul>
+
+                  <div className="pod-stage-body">
+                    <div className="pod-stage-head">
+                      <h3 className="pod-stage-name">{stage.name}</h3>
+                      <span className="pod-stage-rule" aria-hidden="true" />
+                    </div>
+                    <p className="pod-stage-promise">{stage.promise}</p>
+                    <p className="pod-stage-detail">{stage.detail}</p>
+                    <ul className="pod-stage-caps">
+                      {stage.capabilities.map((c) => (
+                        <li key={c}>
+                          <FaCheck aria-hidden="true" className="pod-tick" />
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </li>
               ))}
             </ol>
