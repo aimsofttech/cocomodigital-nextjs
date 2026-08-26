@@ -48,8 +48,6 @@ export default function PodcastGrowthPage() {
             </h1>
             <p className="pod-hero-sub">{HERO.sub}</p>
 
-            <p className="pod-hero-signature">{SIGNATURE_LINE}</p>
-
             {/* One button in the fold. The secondary action is a text
                 link so it cannot compete with the primary CTA — and the
                 site header already contributes its own "Get started"
@@ -84,10 +82,19 @@ export default function PodcastGrowthPage() {
           </div>
         </div>
 
-        {/* Studio-wide credentials, labelled as such. Channel and video
-            numbers from Cocoma's homepage — not podcast metrics, and the
-            caption plus the proof section both say so. */}
+      </section>
+
+      {/* --------------------------------------------- credentials */}
+      {/* Both of these were inside the hero. Eight competing blocks in
+          the first screen meant nothing led it. The hero now carries the
+          headline, the promise, the photograph and one button; the
+          positioning line and the numbers arrive a beat later, where
+          they get read instead of scanned past. */}
+      <section className="pod-credentials" aria-label="Studio credentials">
         <div className="pod-shell">
+          <p className="pod-hero-signature pod-credentials-line">
+            {SIGNATURE_LINE}
+          </p>
           <div className="pod-trust">
             <p className="pod-trust-caption">
               Cocoma Digital, studio-wide, across seven years of channel and

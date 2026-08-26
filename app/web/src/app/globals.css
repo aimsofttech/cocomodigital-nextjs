@@ -59391,3 +59391,19 @@ html {
 #signal-to-scale {
   scroll-margin-top: 5.5rem;
 }
+
+/* ------------------------------------------- credentials band */
+
+/* Was inside the hero. Eight blocks competed in the first screen, so
+   nothing led. The hero now carries headline, promise, photograph and
+   one button; the positioning line and the numbers land here, a beat
+   later, where they get read instead of scanned past. */
+.pod-credentials {
+  background: var(--bg-page-soft);
+  border-bottom: 2px solid var(--text-strong);
+}
+
+.pod-credentials-line {
+  margin-bottom: var(--space-7);
+  max-width: 56ch;
+}
