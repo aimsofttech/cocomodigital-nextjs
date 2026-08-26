@@ -48,17 +48,14 @@ export default function PodcastGrowthPage() {
             </h1>
             <p className="pod-hero-sub">{HERO.sub}</p>
 
-            {/* One button in the fold. The secondary action is a text
-                link so it cannot compete with the primary CTA — and the
-                site header already contributes its own "Get started"
-                button to this viewport. */}
+            {/* Exactly one action. "See how it works" was a second
+                decision to make in the fold, and the thing it pointed at
+                is simply the next screen down — scrolling already does
+                it. The site header contributes its own "Get started"
+                button to this viewport, so one here is really two. */}
             <div className="pod-hero-ctas">
               <a href={HERO.primaryCta.href} className="pod-cta pod-cta--primary">
                 {HERO.primaryCta.label}
-                <FaArrowRight aria-hidden="true" />
-              </a>
-              <a href={HERO.secondaryLink.href} className="pod-textlink">
-                {HERO.secondaryLink.label}
                 <FaArrowRight aria-hidden="true" />
               </a>
             </div>

@@ -195,10 +195,12 @@ export const SIGNATURE_LINE =
 export const HERO = {
   eyebrow: "For podcasters in the US, Canada & UK",
   h1: "Podcast Editing & Growth Services",
+  /* Was a 30-word sentence listing five deliverables. The hero does not
+     need to enumerate the service — the eight service cards do that a
+     screen later. One idea, one line. */
   sub:
-    "We turn one recording into a multi-platform growth engine: YouTube episodes, platform-native clips, thumbnails, publishing and analytics — operated as one system, on your publishing calendar.",
+    "One recording becomes a week of content — produced, packaged and published as one system.",
   primaryCta: { label: "Get a free podcast audit", href: "#podcast-audit" },
-  secondaryLink: { label: "See how it works", href: "#signal-to-scale" },
   priceBadge: "Engagements start at $2,000/month",
   hoursBadge: "US, Canada & UK hours overlap",
 };

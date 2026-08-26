@@ -59189,28 +59189,6 @@ html {
 
 /* ------------------------------ hero meta, text link, new sections */
 
-/* Secondary action as a text link. Two bordered pills side by side in
-   the fold split attention, and the shared site header already puts a
-   yellow "Get started" button in the same viewport. */
-.pod-textlink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--fw-semibold);
-  color: var(--text-strong);
-  text-decoration: none;
-  padding: var(--space-3) 0;
-  border-bottom: 2px solid var(--text-strong);
-  transition: gap var(--motion-fast);
-}
-
-.pod-textlink:hover,
-.pod-textlink:focus-visible {
-  gap: var(--space-3);
-}
-
 /* Metadata line — deliberately unbordered so it cannot be mistaken for
    a control. */
 .pod-meta {
@@ -59367,13 +59345,6 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pod-textlink {
-    transition: none;
-  }
-  .pod-textlink:hover,
-  .pod-textlink:focus-visible {
-    gap: var(--space-2);
-  }
 }
 
 
