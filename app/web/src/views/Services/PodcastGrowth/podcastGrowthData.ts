@@ -133,10 +133,17 @@ export const STUDIO_SHOTS = [
     wide: false,
   },
   {
-    src: "/Images/about/studio-2026-10.jpg",
+    /* Replaces studio-2026-10 (four people at laptops), which read as a
+       generic office. This frame is on-subject: the projected style
+       guide is headed "03 / Text on-screen" and both example stills
+       carry burned-in captions — the exact craft the short-form clip
+       service sells. Chosen over studio-2026-20, which shows the same
+       room at greater scale but with a client's logo filling the
+       screen. */
+    src: "/Images/about/studio-2026-21.jpg",
     alt:
-      "Four people working at laptops along long white desks in an open workroom.",
-    caption: "Channel operations floor",
+      "A woman presents a projected video style guide headed \"03 / Text on-screen\", showing two example stills with burned-in captions, to colleagues seated at laptops in a darkened room.",
+    caption: "Caption and on-screen text standards",
     wide: true,
   },
 ];
