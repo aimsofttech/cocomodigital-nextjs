@@ -59506,3 +59506,58 @@ html {
     opacity: 0.16;
   }
 }
+
+/* ------------------------------------- stage placeholder diagrams */
+
+/* Sits above the stage heading as a banded illustration. Reads as a
+   diagram, not a photograph, which is the point: it explains the stage
+   without pretending to be evidence. Swap for shots M-01 to M-04. */
+.pod-stage-figure {
+  margin: calc(var(--space-6) * -1) calc(var(--space-6) * -1) var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  background: var(--bg-page-soft);
+  border-bottom: 2px solid var(--text-strong);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.pod-stage-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 132px;
+  color: var(--text-strong);
+}
+
+.pod-art-fill {
+  fill: var(--brand);
+  stroke: var(--text-strong);
+  stroke-width: 2;
+}
+
+.pod-art-outline {
+  fill: none;
+  stroke: var(--text-strong);
+  stroke-width: 2;
+}
+
+.pod-art-line {
+  fill: none;
+  stroke: var(--text-strong);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pod-art-tiny {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  fill: var(--text-strong);
+}
+
+@media (max-width: 640px) {
+  .pod-stage-figure {
+    padding: var(--space-4) var(--space-5);
+  }
+}

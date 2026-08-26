@@ -199,3 +199,136 @@ export function StageRail() {
     </svg>
   );
 }
+
+/* ==================================================================
+   Stage diagrams — placeholders for the Signal-to-Scale cards.
+
+   PLACEHOLDER, but deliberately not decoration. Each one draws the
+   idea the stage argues, so the section is scannable before the
+   photography exists. Shots M-01 to M-04 on the shot list replace
+   them; a diagram that explains something is a better stand-in than
+   a grey box, and an honest one — nothing here imitates a screenshot
+   or implies a result.
+
+   Drawn in the page's existing language: 2px strokes, brand yellow
+   for the thing being emphasised, currentColor for everything else.
+   ================================================================== */
+
+const diagramBox = {
+  viewBox: "0 0 320 132",
+  role: "presentation" as const,
+  "aria-hidden": true as const,
+  focusable: "false" as const,
+  className: "pod-stage-art",
+};
+
+/** Align — one goal, three pillars hanging off it. */
+function AlignDiagram() {
+  return (
+    <svg {...diagramBox}>
+      <rect x="112" y="8" width="96" height="26" rx="6" className="pod-art-fill" />
+      <text x="160" y="26" className="pod-art-tiny" textAnchor="middle">GOAL</text>
+      <path d="M160 34v18M52 74V60h216v14M160 52v22" className="pod-art-line" />
+      {[
+        { x: 16, label: "PILLAR" },
+        { x: 116, label: "PILLAR" },
+        { x: 216, label: "PILLAR" },
+      ].map((p) => (
+        <g key={p.x}>
+          <rect x={p.x} y="74" width="88" height="46" rx="6" className="pod-art-outline" />
+          <text x={p.x + 44} y="94" className="pod-art-tiny" textAnchor="middle">{p.label}</text>
+          <path d={`M${p.x + 16} 106h56`} className="pod-art-line" opacity="0.35" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/** Engineer — two packaging routes, one winning on click-through. */
+function EngineerDiagram() {
+  return (
+    <svg {...diagramBox}>
+      {[
+        { x: 14, bar: 34, win: false, tag: "A" },
+        { x: 172, bar: 96, win: true, tag: "B" },
+      ].map((o) => (
+        <g key={o.tag}>
+          <rect
+            x={o.x} y="8" width="134" height="74" rx="6"
+            className={o.win ? "pod-art-fill" : "pod-art-outline"}
+          />
+          <path d={`M${o.x + 14} 68l24-22 18 16 20-18 24 24`} className="pod-art-line" />
+          <circle cx={o.x + 34} cy="30" r="7" className="pod-art-line" />
+          <text x={o.x + 118} y="24" className="pod-art-tiny" textAnchor="middle">{o.tag}</text>
+          <rect x={o.x} y="94" width={o.bar} height="10" rx="5" className="pod-art-fill" />
+          <rect x={o.x} y="94" width="134" height="10" rx="5" className="pod-art-outline" />
+        </g>
+      ))}
+      <text x="160" y="126" className="pod-art-tiny" textAnchor="middle">CLICK-THROUGH</text>
+    </svg>
+  );
+}
+
+/** Amplify — one session, many platform-shaped outputs. */
+function AmplifyDiagram() {
+  return (
+    <svg {...diagramBox}>
+      <rect x="8" y="42" width="72" height="48" rx="6" className="pod-art-fill" />
+      <g className="pod-art-line">
+        {[24, 34, 44, 54, 64].map((x, i) => (
+          <line key={x} x1={x} y1={66 - [8, 14, 6, 16, 10][i]} x2={x} y2={66 + [8, 14, 6, 16, 10][i]} />
+        ))}
+      </g>
+      <path
+        d="M80 66h26M106 66c14 0 14-44 28-44M106 66c14 0 14-14 28-14M106 66c14 0 14 14 28 14M106 66c14 0 14 44 28 44"
+        className="pod-art-line"
+        fill="none"
+      />
+      <rect x="134" y="8" width="178" height="26" rx="5" className="pod-art-outline" />
+      <text x="146" y="26" className="pod-art-tiny">EPISODE</text>
+      {[0, 1, 2].map((i) => (
+        <rect key={i} x={134 + i * 26} y="42" width="20" height="34" rx="4" className="pod-art-outline" />
+      ))}
+      <text x="216" y="64" className="pod-art-tiny">CLIPS 9:16</text>
+      <rect x="134" y="86" width="120" height="26" rx="5" className="pod-art-outline" />
+      <text x="146" y="104" className="pod-art-tiny">NOTES</text>
+    </svg>
+  );
+}
+
+/** Optimize — a retention curve with the drop-off called out. */
+function OptimizeDiagram() {
+  return (
+    <svg {...diagramBox}>
+      <path d="M20 14v88h284" className="pod-art-line" />
+      <path
+        d="M20 22c30 0 34 30 62 38 30 8 44 4 70 10 30 7 60 14 132 20"
+        className="pod-art-line"
+        fill="none"
+        strokeWidth="3"
+      />
+      <circle cx="82" cy="60" r="7" className="pod-art-fill" />
+      <path d="M82 60v-30" className="pod-art-line" strokeDasharray="3 4" />
+      <text x="90" y="26" className="pod-art-tiny">DROP-OFF</text>
+      {[
+        { x: 24, t: "DISCOVERY" },
+        { x: 104, t: "PACKAGING" },
+        { x: 188, t: "CONSUMPTION" },
+      ].map((l) => (
+        <text key={l.t} x={l.x} y="118" className="pod-art-tiny">{l.t}</text>
+      ))}
+    </svg>
+  );
+}
+
+export const STAGE_DIAGRAMS: Record<string, () => React.ReactElement> = {
+  align: AlignDiagram,
+  engineer: EngineerDiagram,
+  amplify: AmplifyDiagram,
+  optimize: OptimizeDiagram,
+};
+
+export function StageDiagram({ id }: { id: string }) {
+  const D = STAGE_DIAGRAMS[id];
+  return D ? <D /> : null;
+}

@@ -4,7 +4,7 @@ import { FaArrowRight, FaCheck } from "react-icons/fa";
 import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastHeroMedia from "./PodcastHeroMedia";
-import { HeroFanOut, Icon, StageRail } from "./PodcastVisuals";
+import { HeroFanOut, Icon, StageDiagram, StageRail } from "./PodcastVisuals";
 import {
   AUDIENCES,
   DISTRIBUTION,
@@ -178,6 +178,13 @@ export default function PodcastGrowthPage() {
             <ol className="pod-stage-list">
               {STAGES.map((stage) => (
                 <li key={stage.id} className="pod-stage">
+                  {/* Placeholder illustration until shots M-01 to M-04
+                      exist. Draws the stage's argument rather than
+                      filling space, and imitates nothing — no fake
+                      screenshot, no implied number. */}
+                  <div className="pod-stage-figure">
+                    <StageDiagram id={stage.id} />
+                  </div>
                   <div className="pod-stage-head">
                     <span className="pod-stage-step" aria-hidden="true">
                       {stage.step}
