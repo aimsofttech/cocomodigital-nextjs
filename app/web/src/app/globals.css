@@ -57827,40 +57827,11 @@ html {
   gap: var(--space-3);
 }
 
-/* hero SVG: one recording fanning into the week's output */
+/* Holds the hero photograph. The SVG rules that used to live here went
+   with the fan-out diagram. */
 .pod-hero-visual {
   display: flex;
   justify-content: center;
-}
-
-.pod-hero-art {
-  width: 100%;
-  max-width: 480px;
-  height: auto;
-  color: var(--text-strong);
-}
-
-.pod-art-source {
-  fill: var(--brand);
-  stroke: var(--text-strong);
-  stroke-width: 2.5;
-}
-
-.pod-art-wave line {
-  stroke: var(--brand-on);
-}
-
-.pod-art-out rect {
-  fill: var(--bg-page);
-  stroke: var(--text-strong);
-  stroke-width: 2.5;
-}
-
-.pod-art-label {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 700;
-  fill: var(--text-strong);
 }
 
 /* trust row */
@@ -58948,31 +58919,6 @@ html {
   font-family: var(--font-display);
   font-size: var(--fs-small);
   font-weight: var(--fw-semibold);
-}
-
-/* fan-out diagram, now sitting in the method section */
-.pod-fanout {
-  margin: var(--space-8) 0 0;
-  padding: var(--space-6);
-  border: 2px solid var(--text-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-page-soft);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.pod-fanout .pod-hero-art {
-  max-width: 620px;
-}
-
-.pod-fanout-caption {
-  font-size: var(--fs-small);
-  line-height: var(--leading-body);
-  color: var(--text-muted);
-  text-align: center;
-  max-width: 62ch;
 }
 
 /* studio strip */

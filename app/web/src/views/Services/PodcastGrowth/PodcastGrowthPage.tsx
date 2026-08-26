@@ -4,7 +4,7 @@ import { FaArrowRight, FaCheck } from "react-icons/fa";
 import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastHeroMedia from "./PodcastHeroMedia";
-import { HeroFanOut, Icon, StageDiagram } from "./PodcastVisuals";
+import { Icon, StageDiagram } from "./PodcastVisuals";
 import {
   AUDIENCES,
   DISTRIBUTION,
@@ -208,15 +208,6 @@ export default function PodcastGrowthPage() {
               ))}
             </ol>
           </div>
-
-          <figure className="pod-fanout">
-            <HeroFanOut />
-            <figcaption className="pod-fanout-caption">
-              Amplify in one picture: a single recording becomes the episode,
-              the clips, the packaging and the written assets — produced
-              together, from one session.
-            </figcaption>
-          </figure>
         </div>
       </section>
 

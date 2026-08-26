@@ -118,67 +118,6 @@ export function Icon({ name, className }: { name: string; className?: string }) 
   return C ? C({ className }) : null;
 }
 
-/**
- * Hero diagram: one recording fanning out into the week's output.
- * Purely decorative — the same idea is stated in the hero copy, so it
- * carries aria-hidden and contributes nothing to the accessible name.
- */
-export function HeroFanOut() {
-  return (
-    <svg
-      className="pod-hero-art"
-      viewBox="0 0 440 260"
-      role="presentation"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        <linearGradient id="podFade" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="currentColor" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="currentColor" stopOpacity="0.08" />
-        </linearGradient>
-      </defs>
-
-      {/* source: the recording */}
-      <rect
-        x="8" y="96" width="112" height="68" rx="14"
-        className="pod-art-source"
-      />
-      {/* waveform inside the source block */}
-      <g className="pod-art-wave" strokeLinecap="round" strokeWidth="3.5">
-        {[
-          [30, 14], [40, 26], [50, 38], [60, 24],
-          [70, 44], [80, 20], [90, 30], [100, 12],
-        ].map(([x, h]) => (
-          <line key={x} x1={x} y1={130 - h / 2} x2={x} y2={130 + h / 2} />
-        ))}
-      </g>
-
-      {/* connectors fanning to each output */}
-      <g stroke="url(#podFade)" strokeWidth="2" fill="none">
-        <path d="M120 130 C 175 130, 175 34, 236 34" />
-        <path d="M120 130 C 175 130, 175 98, 236 98" />
-        <path d="M120 130 C 175 130, 175 162, 236 162" />
-        <path d="M120 130 C 175 130, 175 226, 236 226" />
-      </g>
-
-      {/* outputs */}
-      {[
-        { y: 12, w: 190, label: "Episode" },
-        { y: 76, w: 156, label: "Clips" },
-        { y: 140, w: 172, label: "Packaging" },
-        { y: 204, w: 138, label: "Notes" },
-      ].map((o) => (
-        <g key={o.label} className="pod-art-out">
-          <rect x="236" y={o.y} width={o.w} height="44" rx="10" />
-          <text x="252" y={o.y + 28} className="pod-art-label">
-            {o.label}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 
 /* ==================================================================
