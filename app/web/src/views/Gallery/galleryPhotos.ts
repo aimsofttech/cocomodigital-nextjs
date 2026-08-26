@@ -147,7 +147,7 @@ export const GALLERY_PHOTOS = [
     caption: "Daily grind, the good kind.",
     categories: ["team", "studio"],
     date: "2026-05",
-    featured: false,
+    featured: true,
   },
   {
     src: "/Images/about/studio-2026-15.jpg",
