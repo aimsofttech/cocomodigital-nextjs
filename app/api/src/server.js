@@ -84,6 +84,7 @@ const adminAdminPostRoutes = require('./routes/admin/adminPost');
 const adminHomePageSectionRoutes = require('./routes/admin/homePageSection');
 const adminHomePageSectionItemRoutes = require('./routes/admin/homePageSectionItem');
 const adminUploadRoutes = require('./routes/admin/uploads');
+const adminMediaAssetRoutes = require('./routes/admin/mediaAssets');
 
 // Route imports - Public API
 const apiHomeRoutes = require('./routes/api/home');
@@ -215,6 +216,7 @@ app.use(`${adminBase}/admin-post`, adminAdminPostRoutes);
 app.use(`${adminBase}/home-page-section`, adminHomePageSectionRoutes);
 app.use(`${adminBase}/home-page-section-item`, adminHomePageSectionItemRoutes);
 app.use(`${adminBase}/uploads`, adminUploadRoutes);
+app.use(`${adminBase}/media`, adminMediaAssetRoutes);
 
 // Public API routes
 app.use('/api/home', apiHomeRoutes);
