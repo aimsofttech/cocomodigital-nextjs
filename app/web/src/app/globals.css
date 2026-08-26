@@ -59444,9 +59444,12 @@ html {
 
 .pod-problem-bg-img {
   object-fit: cover;
-  object-position: center right;
-  opacity: 0.55;
-  filter: grayscale(1) contrast(1.1);
+  object-position: center;
+  /* Anil asked for it to read more. Desaturated rather than fully grey
+     so some of the yellow wall behind the editor survives — it is the
+     brand colour, and it warms a section that is otherwise flat black. */
+  opacity: 0.78;
+  filter: grayscale(0.72) contrast(1.06);
 }
 
 /* Horizontal scrim rather than vertical. The heading and the lead
@@ -59461,10 +59464,10 @@ html {
   background:
     linear-gradient(
       to right,
-      rgba(0, 0, 0, 0.94) 0%,
-      rgba(0, 0, 0, 0.9) 42%,
-      rgba(0, 0, 0, 0.62) 72%,
-      rgba(0, 0, 0, 0.5) 100%
+      rgba(0, 0, 0, 0.93) 0%,
+      rgba(0, 0, 0, 0.88) 44%,
+      rgba(0, 0, 0, 0.46) 72%,
+      rgba(0, 0, 0, 0.3) 100%
     ),
     linear-gradient(
       to bottom,
@@ -59478,7 +59481,7 @@ html {
    to being pure texture underneath it. */
 @media (max-width: 900px) {
   .pod-problem-bg-img {
-    opacity: 0.28;
+    opacity: 0.42;
   }
 
   .pod-problem-bg::after {

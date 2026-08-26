@@ -111,17 +111,19 @@ export default function PodcastGrowthPage() {
 
       {/* ------------------------------------------------- problem */}
       <section className="pod-problem" aria-labelledby="pod-problem-title">
-        {/* Backdrop, not an illustration — the floor behind the argument.
-            Deliberately decorative: aria-hidden, and heavily scrimmed so
-            it never competes with the text sitting on it. Nothing in it
-            is legible at this treatment, which is also why a frame with
-            a client's screen in shot is safe here where it would not be
-            as a captioned gallery tile.
-            TODO (Anil): swap for shot A-03 when the wide floor shot
-            exists — same slot, one line. */}
+        {/* Backdrop, not an illustration. Deliberately decorative:
+            aria-hidden, and scrimmed hard on the left so it never
+            competes with the text sitting on it.
+            A close-up of an editor mid-cut argues "post-production is
+            the expensive half" faster than a wide room does, and the
+            wall behind him is already the brand yellow — which is why
+            this one is only partly desaturated.
+            TODO (Anil): shot A-03 on the shot list — the wide,
+            heads-down floor — was specced for this slot. Swap when it
+            exists; it is one line. */}
         <div className="pod-problem-bg" aria-hidden="true">
           <Image
-            src="/Images/about/studio-2026-20.jpg"
+            src="/Images/service/cocoma-banner.jpg"
             alt=""
             fill
             sizes="100vw"
