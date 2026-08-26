@@ -111,6 +111,23 @@ export default function PodcastGrowthPage() {
 
       {/* ------------------------------------------------- problem */}
       <section className="pod-problem" aria-labelledby="pod-problem-title">
+        {/* Backdrop, not an illustration — the floor behind the argument.
+            Deliberately decorative: aria-hidden, and heavily scrimmed so
+            it never competes with the text sitting on it. Nothing in it
+            is legible at this treatment, which is also why a frame with
+            a client's screen in shot is safe here where it would not be
+            as a captioned gallery tile.
+            TODO (Anil): swap for shot A-03 when the wide floor shot
+            exists — same slot, one line. */}
+        <div className="pod-problem-bg" aria-hidden="true">
+          <Image
+            src="/Images/about/studio-2026-20.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="pod-problem-bg-img"
+          />
+        </div>
         <div className="pod-shell">
           <h2 id="pod-problem-title" className="pod-section-title">
             The recording is the cheapest part
