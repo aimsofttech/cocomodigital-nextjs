@@ -362,7 +362,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
   for (const item of solutionsItems) {
     /* /solutions/podcasters 301s to the canonical
-       /services/podcast-editing-and-growth-services page, so it must
+       /podcast-video-editing-marketing-services page, so it must
        not be submitted here — a sitemap should never list a URL that
        redirects. Filtered in code because the record still exists in
        the solutions-pages collection. */

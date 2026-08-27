@@ -1,5 +1,5 @@
 /**
- * Content model for /services/podcast-editing-and-growth-services.
+ * Content model for /podcast-video-editing-marketing-services.
  *
  * Hand-authored, not API-driven. This page is the canonical money page
  * for podcast production + growth, so the copy is version-controlled and
@@ -203,7 +203,11 @@ export const SIGNATURE_LINE =
 
 export const HERO = {
   eyebrow: "For podcasters in the US, Canada & UK",
-  h1: "Podcast Editing & Growth Services",
+  /* Matches the URL and the <title>. Deliberately NOT the identical
+     string to Anshu's admin-driven page at
+     /services/podcast-editing-and-growth-services — two Cocoma pages
+     with the same h1 and title would compete for the same query. */
+  h1: "Podcast Video Editing & Marketing Services",
   /* Was a 30-word sentence listing five deliverables. The hero does not
      need to enumerate the service — the eight service cards do that a
      screen later. One idea, one line. */

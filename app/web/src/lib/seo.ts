@@ -186,11 +186,11 @@ export const staticPageSeo: Record<string, PageSeo> = {
     path: "/cookie-policy",
     category: "Legal",
   },
-  "/services/podcast-editing-and-growth-services": {
-    title: "Podcast Editing & Growth Services",
+  "/podcast-video-editing-marketing-services": {
+    title: "Podcast Video Editing & Marketing Services",
     description:
       "Full-stack podcast production and growth: video and audio editing, clips, thumbnails, publishing and analytics — run as one system by Cocoma Digital.",
-    path: "/services/podcast-editing-and-growth-services",
+    path: "/podcast-video-editing-marketing-services",
     category: "Services",
     keywords: [
       "podcast editing and growth services",

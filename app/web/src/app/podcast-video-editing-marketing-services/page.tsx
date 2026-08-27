@@ -11,24 +11,25 @@ import {
 } from "@/src/lib/seo";
 
 /**
- * /services/podcast-editing-and-growth-services — canonical money page.
+ * /podcast-video-editing-marketing-services — canonical money page.
  *
  * This is a STATIC route segment that deliberately sits alongside the
- * dynamic /services/[slug] route. Next.js resolves static segments
- * before dynamic ones, so this file takes over the URL that was
- * previously rendered from the database `services` collection.
+ * dynamic /services/[slug] route. It deliberately sits OUTSIDE
+ * /services/ so it cannot collide with the database-driven
+ * GrowthServices module, which owns
+ * /services/podcast-editing-and-growth-services.
  *
  * That is intentional: this page is the single ranking target for
  * podcast queries, so its copy, schema and internal linking are
  * version-controlled and reviewed rather than editable from the admin.
  *
- * FOLLOW-UP FOR ANSHU: the old database record for this slug is now
- * unreachable but still exists. It should be deactivated so editors
- * don't change content that no longer renders — and because it carries
- * placeholder analytics figures that were never real.
+ * NOTE ON THE TWO PODCAST PAGES: Anshu's admin-editable page keeps
+ * /services/podcast-editing-and-growth-services. This one is the
+ * hand-authored ranking target. Their <title>s are deliberately
+ * different so the two do not compete for the same query.
  */
 
-const PATH = "/services/podcast-editing-and-growth-services";
+const PATH = "/podcast-video-editing-marketing-services";
 
 /* buildMetadata always fills openGraph/twitter images from the
    site-wide default, which beats Next's file-based opengraph-image
@@ -38,7 +39,7 @@ export const metadata: Metadata = buildMetadata({
   ...getStaticSeo(PATH),
   image: `${PATH}/opengraph-image`,
   imageAlt:
-    "Cocoma Digital — Podcast Editing & Growth Services: one recording becomes a multi-platform growth engine.",
+    "Cocoma Digital — Podcast Video Editing & Marketing Services: one recording becomes a multi-platform growth engine.",
 });
 
 /* Deliberately NOT force-static. The page body is a module constant so
@@ -53,7 +54,7 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "Service",
     "@id": `${SITE_URL}${PATH}#service`,
-    name: "Podcast Editing & Growth Services",
+    name: "Podcast Video Editing & Marketing Services",
     serviceType: "Podcast production, editing and growth",
     description:
       "Full-stack podcast production and growth: video and audio editing, short-form clipping, thumbnails and packaging, show notes and SEO, publishing, dubbing and localization, and analytics — operated as one system.",
@@ -102,7 +103,7 @@ export default function Page() {
      dead URL is worse than a two-level trail. */
   const breadcrumbSchema = breadcrumbJsonLd([
     { name: "Home", path: "/" },
-    { name: "Podcast Editing & Growth Services", path: PATH },
+    { name: "Podcast Video Editing & Marketing Services", path: PATH },
   ]);
 
   return (

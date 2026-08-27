@@ -1,22 +1,27 @@
 import { ImageResponse } from "next/og";
 
 /**
- * Designed OG card for the podcast money page.
+ * The social card for the podcast money page, shared by opengraph-image
+ * and twitter-image.
  *
- * Generated with next/og at build time rather than shipped as another
- * raster in public/ — the folder is already carrying far more image
- * weight than it should, and this keeps the card in sync with the copy
- * automatically. No webfont is fetched: remote font loading would make
- * the build depend on the network, and the system stack renders fine at
- * this size.
+ * Generated with next/og rather than shipped as another raster in
+ * public/ — that folder already carries far more image weight than it
+ * should, and this keeps the card in sync with the copy automatically.
+ * No webfont is fetched: remote font loading would make the build depend
+ * on the network, and the system stack renders fine at this size.
+ *
+ * Deliberately a shared FUNCTION, not a re-export. Next reads route
+ * segment config (`runtime`, `size`, `alt`) at compile time from literal
+ * exports in the route file itself; a re-export is not statically
+ * analysable and fails the build. Credit to Anshu for catching that on
+ * the Growth Services routes.
  */
-export const runtime = "nodejs";
-export const alt =
-  "Cocoma Digital — Podcast Editing & Growth Services";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const OG_SIZE = { width: 1200, height: 630 };
+export const OG_CONTENT_TYPE = "image/png";
+export const OG_ALT =
+  "Cocoma Digital — Podcast Video Editing & Marketing Services";
 
-export default async function Image() {
+export function podcastOgCard() {
   return new ImageResponse(
     (
       <div
@@ -54,7 +59,7 @@ export default async function Image() {
               maxWidth: 940,
             }}
           >
-            Podcast Editing &amp; Growth Services
+            Podcast Video Editing &amp; Marketing Services
           </div>
         </div>
 
@@ -111,6 +116,6 @@ export default async function Image() {
         </div>
       </div>
     ),
-    { ...size },
+    { ...OG_SIZE },
   );
 }

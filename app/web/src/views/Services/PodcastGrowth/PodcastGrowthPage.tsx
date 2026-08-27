@@ -27,7 +27,7 @@ import {
 } from "./podcastGrowthData";
 
 /**
- * /services/podcast-editing-and-growth-services
+ * /podcast-video-editing-marketing-services
  *
  * Server component by design — only the FAQ accordion and the audit
  * form ship JavaScript. Everything above the fold is static HTML with
