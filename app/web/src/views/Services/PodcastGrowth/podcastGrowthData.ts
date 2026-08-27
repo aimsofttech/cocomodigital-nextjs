@@ -84,7 +84,7 @@ export const HERO_MEDIA = {
   videoId: null as string | null,
   poster: "/Images/podcast/podcast-recording-cocoma-studio.jpg",
   alt:
-    "Two hosts recording a podcast episode on set at Cocoma Digital's Mumbai studio, each on a boom-mounted microphone.",
+    "Two hosts recording a podcast episode on set at Cocoma Digital’s Mumbai studio, each on a boom-mounted microphone.",
   playLabel: "Play the pitch video",
 };
 
@@ -96,7 +96,7 @@ export const HERO_MEDIA = {
  */
 export const STUDIO_SHOTS = [
   /* Shot on the Cocoma floor, August 2026. Replaces the black-and-white
-     set: these are in colour, every screen carries real work, and the
+     set: these are in color, every screen carries real work, and the
      wall behind them is the brand yellow. Captions describe only what is
      visible in frame.
 
@@ -121,7 +121,7 @@ export const STUDIO_SHOTS = [
   {
     src: "/Images/about/2026-08/editor-multicam-timeline.jpg",
     alt:
-      "An editor at dual monitors cutting a two-person sequence, with a densely stacked colour-coded timeline filling the lower screen.",
+      "An editor at dual monitors cutting a two-person sequence, with a densely stacked color-coded timeline filling the lower screen.",
     caption: "Multicam, two speakers",
     wide: false,
   },
@@ -162,7 +162,7 @@ export const STUDIO_STRIP = {
   eyebrow: "The room this runs from",
   heading: "A working studio, not a marketplace of freelancers",
   body:
-    "Your show is produced by a named team on the Cocoma floor in Andheri West, Mumbai — editors, designers, colorists, sound and channel operations under one roof. That is what makes an SLA mean anything: there is a bench behind it, not one contractor with a full inbox.",
+    "Your show is produced by a named team on the Cocoma floor in Andheri West, Mumbai — editors, designers, colorists, sound and channel operations under one roof. That’s what makes an SLA mean anything: there’s a bench behind it, not one contractor with a full inbox.",
 };
 
 /**
@@ -188,7 +188,7 @@ export const STUDIO_SCALE = [
 ];
 
 export const STUDIO_SCALE_NOTE =
-  "Studio-wide channel and catalog figures, all published on cocomadigital.com. They are not podcast metrics — they are the size of the operation your show would be produced inside.";
+  "Studio-wide channel and catalog figures, all published on cocomadigital.com. They’re not podcast metrics. They’re the size of the operation your show would be produced inside.";
 
 
 export const TRUST_STATS: TrustStat[] = [
@@ -231,7 +231,7 @@ export const PROBLEM_STATS = [
   },
   {
     value: "1",
-    label: "editor cannot carry that load — a system can",
+    label: "editor can’t carry that load — a system can",
     body:
       "Hiring one more editor buys you throughput for a month. A production system with defined roles, templates and SLAs is what holds at volume.",
   },
@@ -244,7 +244,7 @@ export const STAGES: Stage[] = [
     name: "Align",
     promise: "Decide what the show is actually for before a single cut is made.",
     detail:
-      "Most shows are formatted before anyone decides what they are for, which is why they drift. Align happens once, before production, and it makes every later decision cheap: when the goal, the audience and the pillars are written down, choosing a title or cutting a segment stops being a matter of opinion.",
+      "Most shows are formatted before anyone decides what they’re for, which is why they drift. Align happens once, before production, and it makes every later decision cheap: when the goal, the audience and the pillars are written down, choosing a title or cutting a segment stops being a matter of opinion.",
     capabilities: [
       "Business goal — leads, authority, sponsorship, product pull-through",
       "Audience definition and competitive positioning",
@@ -305,7 +305,7 @@ export const SERVICES: ServiceCard[] = [
   {
     icon: "video",
     title: "Video podcast editing",
-    body: "Multicam, cut speaker-aware, colour and sound matched across every angle.",
+    body: "Multicam, cut speaker-aware, color and sound matched across every angle.",
     includes: ["Multicam", "Captions", "Lower thirds", "Template system"],
   },
   {
@@ -335,7 +335,7 @@ export const SERVICES: ServiceCard[] = [
   {
     icon: "publish",
     title: "Publishing & channel management",
-    body: "An ongoing operation across YouTube and the social ring, not a hand-off.",
+    body: "We keep running it week to week across YouTube and the whole social ring.",
     includes: ["Scheduling", "Metadata", "Playlists", "End screens", "Community"],
   },
   {
@@ -358,21 +358,21 @@ export const AUDIENCES: AudienceCard[] = [
     icon: "mic",
     title: "Founders & operators with a show",
     body:
-      "Whether you are in New York, Toronto or London, the podcast is a growth channel for the business, not a hobby. You record consistently and the back end is the bottleneck — you want the episode, the clips and the packaging handled to a standard, on a calendar you can plan around.",
+      "Whether you’re in New York, Toronto or London, the podcast is a growth channel for the business, not a hobby. You record consistently and the back end is the bottleneck. You want the episode, the clips and the packaging handled to a standard, on a calendar you can plan around.",
     signal: "Weekly or bi-weekly cadence, video-first",
   },
   {
     icon: "brand",
     title: "Brands running podcasts as marketing",
     body:
-      "The show has to earn its budget. That means it is measured against pipeline and brand search, given a real content calendar, and treated as a distribution channel rather than a side project someone owns on top of their day job.",
+      "The show has to earn its budget. That means it’s measured against pipeline and brand search, it runs on a real content calendar, and someone owns it as their actual job.",
     signal: "Marketing-owned, reports to a number",
   },
   {
     icon: "network",
     title: "Networks & media companies",
     body:
-      "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest — the studio's channel and catalog operations were built at exactly this scale — 35,000+ videos produced and 12B+ organic views driven.",
+      "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest: the studio’s channel and catalog operations were built at exactly this scale — 35,000+ videos produced and 12B+ organic views driven.",
     signal: "Multiple shows, shared production standard",
   },
 ];
@@ -391,7 +391,7 @@ export const PRICING = {
   eyebrow: "Straight answer on price",
   heading: "Priced like a product, not a project",
   lead:
-    "You are not buying editing hours. You are buying a production line with a named producer on it, a documented process behind it, and an SLA you can build a publishing calendar around. That is what it costs to run properly — and it is why the number is on this page instead of behind a discovery call.",
+    "You’re not buying editing hours. You’re buying a production line with a named producer on it, a documented process behind it, and an SLA you can build a publishing calendar around. That’s what it costs to run properly, and it’s why the number is on this page instead of behind a discovery call.",
   includedTitle: "What every engagement includes",
   included: [
     "A named producer who owns your show — not a ticket queue",
@@ -423,7 +423,7 @@ export const US_OPERATIONS = [
     icon: "clock",
     title: "Overlap with your working day",
     body:
-      "Reviews, calls and approvals happen in maintained overlap windows with US, Canadian and UK business hours — mornings India-side for the UK, evenings for North America. Production itself runs on the agreed SLA rather than on your clock, which is the advantage of the time difference rather than the cost of it.",
+      "Reviews, calls and approvals happen inside your working day. India evenings overlap the North American morning, Eastern and Pacific both, and India mornings overlap the UK afternoon. Production runs to the agreed SLA while you are offline, so you send a recording at the end of your day and the work has moved by the time you are back.",
   },
   {
     icon: "dollar",
@@ -435,7 +435,7 @@ export const US_OPERATIONS = [
     icon: "lock",
     title: "You own everything",
     body:
-      "Channels and social accounts stay in your ownership with access granted to us, never the other way round. Project files, templates and assets are yours and are handed over on request.",
+      "Channels and social accounts stay in your ownership with access granted to us, never the other way around. Project files, templates and assets are yours and are handed over on request.",
   },
 ];
 
@@ -453,15 +453,15 @@ export const US_OPERATIONS = [
  * it should be your wording.
  */
 export const FOUNDER = {
-  eyebrow: "Who you are actually dealing with",
+  eyebrow: "Who you’re actually dealing with",
   name: "Anil Mahato",
   role: "Founder, Cocoma Digital",
   portrait: "/Images/podcast/anil-mahato-founder-cocoma.jpg",
   alt: "Anil Mahato, founder of Cocoma Digital.",
   lines: [
     "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio has produced 35,000+ videos and built 45M+ subscribers across the channels it runs.",
-    "Podcasts are where that same machinery is now most useful outside India — because a show is not an editing job, it is an operation, and operations are the thing we have actually built.",
-    "Your show will not be run by me. It will be run by a producer whose name you will know, against a documented process, to an SLA you agreed. That is deliberate: a studio that only works when the founder is in the room is not a studio, it is a bottleneck.",
+    "Podcasts are where that same machinery is now most useful outside India, because a show isn’t an editing job, it’s an operation, and operations are the thing we have actually built.",
+    "Your show won’t be run by me. It will be run by a producer whose name you’ll know, against a documented process, to an SLA you agreed. That’s deliberate: a studio that only works when the founder is in the room isn’t a studio, it’s a bottleneck.",
   ],
   cta: { label: "Get a free podcast audit", href: "#podcast-audit" },
 };
@@ -477,14 +477,14 @@ export const FOUNDER = {
  */
 export const NOT_FOR = {
   eyebrow: "Straight talk",
-  heading: "When we are the wrong call",
+  heading: "When we’re the wrong call",
   lead:
-    "We would rather lose the inquiry than take an engagement that cannot work. If any of these describe you, a freelance editor will serve you better and cost you far less.",
+    "We’d rather lose the inquiry than take an engagement that can’t work. If any of these describe you, a freelance editor will serve you better and cost you far less.",
   items: [
-    "You are looking for the cheapest per-episode rate. We are not competitive on rate and do not try to be — you are buying an operation, not an hour of editing.",
-    "You publish occasionally, when there is time. Systems earn their cost through cadence; without one there is nothing for the machinery to compound.",
-    "You want someone to take instructions rather than own an outcome. Our producers push back on packaging and structure. If that sounds like friction rather than value, it will be.",
-    "You need work turned around same-day, unpredictably. We hold an agreed SLA rather than an always-on queue.",
+    "You’re looking for the cheapest per-episode rate. We’re not competitive on rate and don’t try to be — you’re buying an operation, not an hour of editing.",
+    "You publish occasionally, when there’s time. Systems earn their cost through cadence; without one there’s nothing for the machinery to compound.",
+    "You want someone who takes instructions and stops there. Our producers push back on packaging and structure, and if that sounds like friction, it will be.",
+    "You need work turned around same-day, unpredictably. We work to an SLA we agree up front, and we’re not an always-on queue.",
   ],
   footnote:
     "Still reading and none of these fit? Then the audit will probably be worth your time.",
@@ -543,7 +543,7 @@ export const PROCESS: ProcessStep[] = [
     name: "Engine build",
     duration: "Setup phase",
     body:
-      "Strategy, show architecture, edit and thumbnail templates, naming conventions, publishing calendar and the baseline benchmarks we will measure against. This is the part most shows never had.",
+      "Strategy, show architecture, edit and thumbnail templates, naming conventions, publishing calendar and the baseline benchmarks we’ll measure against. This is the part most shows never had.",
   },
   {
     step: "03",
@@ -558,7 +558,7 @@ export const FAQS: Faq[] = [
   {
     q: "What do podcast editing and growth services cost?",
     a:
-      "Engagements start at $2,000 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately. Below $2,000 a month a freelance editor will serve you better than a production system, and we would rather say so than sell you something that does not fit. The free audit comes back with the scope and the number together.",
+      "Engagements start at $2,000 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately. Below $2,000 a month a freelance editor will serve you better than a production system, and we’d rather say so than sell you something that doesn’t fit. The free audit comes back with the scope and the number together.",
   },
   {
     q: "Why is there a minimum at all?",
@@ -566,44 +566,44 @@ export const FAQS: Faq[] = [
       "Because the thing we sell is a system, not hours. A named producer, template build, packaging tests, a publishing operation and a monthly optimization loop have a fixed cost to stand up and run properly. Below that floor we would be delivering a worse version of what a good freelance editor already does well, at a higher price. The minimum is honesty about where this model starts working.",
   },
   {
-    q: "You're based in India. How does that work for a show in the US, Canada or the UK?",
+    q: "You’re based in India. How does that work for a show in the US, Canada or the UK?",
     a:
-      "The studio is in Mumbai and the team maintains overlap windows with US, Canadian and UK business hours for reviews, calls and approvals — India mornings line up with the UK working day, India evenings with North America. Production runs on the agreed SLA rather than on your clock, which usually means you send a recording at the end of your day and the work has moved by the time you are back. Everything is quoted and invoiced in USD, with GBP and CAD available on request.",
+      "The studio is in Mumbai. India evenings overlap the North American working day, Eastern and Pacific both, and India mornings overlap the UK afternoon, so reviews, calls and approvals land inside your hours. Production runs to the agreed SLA while you are offline, which usually means you send a recording at the end of your day and the work has moved by the time you’re back. Everything is quoted and invoiced in USD, with GBP and CAD available on request.",
   },
   {
     q: "What are your turnaround times?",
     a:
-      "Turnaround is agreed as an SLA before work starts and written into the engagement, so you can plan a publishing calendar around it rather than chasing updates. The SLA depends on format and volume; it is set during the engine-build stage and then held.",
+      "Turnaround is agreed as an SLA before work starts and written into the engagement, so you can plan a publishing calendar around it instead of chasing us for updates. The SLA depends on format and volume; it’s set during the engine-build stage and then held.",
   },
   {
     q: "Do you work on video podcasts, audio-only, or both?",
     a:
-      "Both. Audio-only shows get editing, mastering, notes, transcripts and audio-led clips. Video shows get everything audio does, plus multicam editing, thumbnails, packaging tests and the full short-form ring. We build video-first by default, because that is where discovery now happens.",
+      "Both. Audio-only shows get editing, mastering, notes, transcripts and audio-led clips. Video shows get everything audio does, plus multicam editing, thumbnails, packaging tests and the full short-form ring. We build video-first by default, because that’s where discovery now happens.",
   },
   {
     q: "Why does YouTube matter so much for podcasts?",
     a:
-      "YouTube is a search and recommendation engine, not just a hosting platform. A podcast that lives only in audio apps depends almost entirely on people already knowing it exists. On YouTube, packaging and retention decide whether the platform shows the episode to people who have never heard of the show — which is the difference between a back catalog that compounds and one that sits still.",
+      "YouTube is a search and recommendation engine, not just a hosting platform. A podcast that lives only in audio apps depends almost entirely on people already knowing it exists. On YouTube, packaging and retention decide whether the platform shows the episode to people who have never heard of the show. That is the difference between a back catalog that compounds and one that sits still.",
   },
   {
     q: "How do you measure success?",
     a:
-      "In four layers. Discovery: impressions and where traffic comes from. Packaging: click-through rate on thumbnail and title. Consumption: retention curve and average view duration. Business: subscribers, inquiries and sponsor conversations. We report on all four monthly and each report ends in specific decisions. We do not promise view counts or subscriber numbers — those are outcomes, not deliverables. What we commit to is output volume, turnaround, and a tested packaging and retention process.",
+      "In four layers. Discovery: impressions and where traffic comes from. Packaging: click-through rate on thumbnail and title. Consumption: retention curve and average view duration. Business: subscribers, inquiries and sponsor conversations. We report on all four monthly and each report ends in specific decisions. We don’t promise view counts or subscriber numbers. Those are outcomes, not deliverables. What we commit to is output volume, turnaround, and a tested packaging and retention process.",
   },
   {
     q: "Who owns the channel, the accounts and the project files?",
     a:
-      "You do, always. Channels and social accounts stay in your ownership with access granted to us, never the other way round. Project files, templates and assets are yours and are handed over on request. Nothing about the engagement is designed to make leaving difficult.",
+      "You do, always. Channels and social accounts stay in your ownership with access granted to us, never the other way around. Project files, templates and assets are yours and are handed over on request. Nothing about the engagement is designed to make leaving difficult.",
   },
   {
     q: "Can you work with our existing editor or in-house team?",
     a:
-      "Yes. The model is built to run the parts a small team cannot hold at volume — packaging, clipping, publishing operations, localization — while the in-house editor keeps the main edit. The system matters more than who holds each seat.",
+      "Yes. The model is built to run the parts a small team can’t hold at volume — packaging, clipping, publishing operations, localization — while the in-house editor keeps the main edit. The system matters more than who holds each seat.",
   },
   {
     q: "What happens to our back catalog?",
     a:
-      "It is usually the fastest win available. Existing episodes already contain clip-worthy moments, and old packaging can be re-tested without recording anything new. The audit flags which back-catalog episodes are worth re-cutting or re-packaging first.",
+      "It’s usually the fastest win available. Existing episodes already contain clip-worthy moments, and old packaging can be re-tested without recording anything new. The audit flags which back-catalog episodes are worth re-cutting or re-packaging first.",
   },
   {
     q: "How do we start?",

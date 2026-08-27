@@ -139,8 +139,7 @@ export default function PodcastGrowthPage() {
             the record button is built to keep up. Episodes ship late or not at
             all, clips get made when someone has a spare afternoon, thumbnails
             are decided by whoever is nearest the file, and the back catalog
-            sits untouched. None of that is a talent problem — it is a capacity
-            and systems problem, and it compounds quietly until the show feels
+            sits untouched. None of that is a talent problem. It&rsquo;s a capacity and systems problem, and it compounds quietly until the show feels
             like a cost center.
           </p>
           <div className="pod-problem-grid">
@@ -219,8 +218,7 @@ export default function PodcastGrowthPage() {
           </h2>
           <p className="pod-section-lead">
             Every piece below is run by the same team against the same
-            templates. You can take the whole system or the parts your team
-            cannot hold at volume.
+            templates. You can take the whole system or the parts your team can&rsquo;t hold at volume.
           </p>
           <div className="pod-service-grid">
             {SERVICES.map((s) => (
@@ -324,9 +322,7 @@ export default function PodcastGrowthPage() {
             What a full month looks like
           </h2>
           <p className="pod-section-lead">
-            A weekly show running the complete system. This is deliverable
-            volume at a full engagement — not a forecast of results, and not the
-            entry tier. Your audit comes back with the scope that fits your
+            A weekly show running the complete system. This is deliverable volume at a full engagement. It isn&rsquo;t a forecast of results, and it isn&rsquo;t the entry tier. Your audit comes back with the scope that fits your
             cadence.
           </p>
 
@@ -527,19 +523,18 @@ export default function PodcastGrowthPage() {
         <div className="pod-shell">
           <p className="pod-eyebrow">What we can show you</p>
           <h2 id="pod-proof-title" className="pod-section-title">
-            The capability — and what it is not
+            The capability, and what it isn&rsquo;t
           </h2>
           {/* TODO (Anil): when a podcast client clears a case study, this
               section becomes a real proof block. Until then it must not
               imply a podcast roster exists. */}
           <p className="pod-proof-body">
-            We do not publish podcast case studies yet. Saying otherwise
+            We don&rsquo;t publish podcast case studies yet. Saying otherwise
             would be the easiest sentence on this page to write and the
             fastest one to get caught on.
           </p>
           <p className="pod-proof-body">
-            What we can show you is the work the studio does publish, and be
-            precise about how it transfers. The figures at the top of this
+            What we can show you is the work the studio does publish, and we&rsquo;ll be precise about how it transfers. The figures at the top of this
             page — 12B+ organic views, 35,000+ videos, 45M+ subscribers — are
             channel and catalog numbers built across seven years. They are
             not podcast metrics and we will not dress them up as podcast
@@ -549,8 +544,7 @@ export default function PodcastGrowthPage() {
             across 20+ languages.
           </p>
           <p className="pod-proof-body">
-            On a call we will walk you through that work and the exact
-            process we would run on your show.
+            On a call we&rsquo;ll walk you through that work and the exact process we&rsquo;d run on your show.
           </p>
           <div className="pod-proof-links">
             <Link href="/case-studies" className="pod-cta pod-cta--secondary">
@@ -590,8 +584,7 @@ export default function PodcastGrowthPage() {
             </h2>
             <p className="pod-final-lead">
               Send the show link. We&rsquo;ll review packaging, retention,
-              publishing cadence and back catalog, then come back with what we
-              would change first — and what it would cost.
+              publishing cadence and back catalog, then come back with what we&rsquo;d change first, and what it would cost.
             </p>
             <ul className="pod-final-points">
               {[
