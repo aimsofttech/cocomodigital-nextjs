@@ -504,47 +504,39 @@ export const DISTRIBUTION = {
   eyebrow: "Beyond production",
   heading: "Content is king. Distribution is the kingdom.",
   lead:
-    "Most podcast vendors stop when the file is exported. That is the cheap half. Getting the show in front of people who have never heard of it is the expensive half — and the half that decides whether it grows.",
-  /* Each pillar leads with a figure. This section argues reach, so a
-     number is the fastest way to make that argument, and it gives the
-     eye four anchors instead of four paragraphs.
+    "Most vendors stop when the file is exported. The half that decides whether a show grows comes after.",
+  /* A proof strip, not an essay. This section only has to establish that
+     distribution is run at scale — the argument is already made by the
+     heading, so each pillar is a figure plus the nouns that evidence it.
 
-     statUnit is a UNIT, not a second sentence — it shares a baseline
-     with the number so the two read as one quantity. Qualifiers that
-     used to live here ("natively", "in-house") belong in the body.
+     It carried a title AND a ~25-word paragraph per pillar before: four
+     numbers wrapped in four paragraphs, which is four things to read in
+     a section whose whole job is to be glanced at.
 
      Every figure is checkable: six named platforms, the 20+ languages
      and 35,000+ videos Cocoma already publishes, and the four
-     measurement layers described in the Optimize stage. Nothing here is
-     a podcast result. */
+     measurement layers named in the Optimize stage above. Nothing here
+     is a podcast result. */
   pillars: [
     {
       stat: "6",
       statUnit: "platforms",
-      title: "Multi-platform publishing",
-      body:
-        "YouTube, Shorts, Instagram, TikTok, LinkedIn and X — each with the format and cadence that platform rewards, not one file cross-posted six times.",
+      detail: "YouTube, Shorts, Instagram, TikTok, LinkedIn, X",
     },
     {
       stat: "20+",
       statUnit: "languages",
-      title: "Language expansion",
-      body:
-        "Transcreation already runs in-house at this scale for entertainment clients. For a show that works in English, a second market is the fastest route to a bigger one.",
+      detail: "In-house dubbing, subtitles, transcreation",
     },
     {
       stat: "35,000+",
       statUnit: "videos",
-      title: "Catalog and channel operations",
-      body:
-        "Back catalog re-cut and re-packaged, playlists and end screens structured so one episode leads to the next.",
+      detail: "Back catalog, playlists, end screens",
     },
     {
       stat: "4",
       statUnit: "layers",
-      title: "Discovery measured, not assumed",
-      body:
-        "Impressions, traffic sources and suggested-video pickup get their own layer — so distribution is something you steer, not something you hope for.",
+      detail: "Discovery, packaging, consumption, business",
     },
   ],
 };

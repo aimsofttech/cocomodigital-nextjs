@@ -252,15 +252,15 @@ export default function PodcastGrowthPage() {
           <p className="pod-section-lead">{DISTRIBUTION.lead}</p>
           <div className="pod-dist-grid">
             {DISTRIBUTION.pillars.map((d) => (
-              <article key={d.title} className="pod-dist-card">
-                <p className="pod-dist-stat">
-                  <span className="pod-dist-stat-value">{d.stat}</span>
+              <article key={d.statUnit} className="pod-dist-card">
+                {/* The figure IS the heading — an article with no heading
+                    is an a11y smell, and a separate title line was only
+                    restating the unit. */}
+                <h3 className="pod-dist-stat">
+                  <span className="pod-dist-stat-value">{d.stat}</span>{" "}
                   <span className="pod-dist-stat-unit">{d.statUnit}</span>
-                </p>
-                <h3 className="pod-dist-title">
-                  {d.title}
                 </h3>
-                <p className="pod-dist-body">{d.body}</p>
+                <p className="pod-dist-detail">{d.detail}</p>
               </article>
             ))}
           </div>

@@ -59242,11 +59242,12 @@ html {
    title / body) inside a 265px column is one level too many — the label
    and the title were saying the same thing twice. */
 .pod-dist-stat {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0 var(--space-2);
+  /* Inline, not flex. A flex container discards the whitespace text node
+     between the number and its unit, so the accessible name came out as
+     "6platforms". Inline layout keeps the space and gives baseline
+     alignment for free, which is all the flexbox was buying. */
   margin: 0 0 var(--space-3);
+  line-height: 1;
 }
 
 .pod-dist-stat-value {
@@ -59263,6 +59264,7 @@ html {
 }
 
 .pod-dist-stat-unit {
+  margin-left: 0.12em;
   font-size: var(--fs-small);
   font-weight: var(--fw-bold);
   line-height: 1;
@@ -59274,18 +59276,14 @@ html {
 /* No icon in this card. The number is its one accent — a second yellow
    glyph beside the title gave a 265px column two focal points of the
    same colour, and these four glyphs (arrow, globe, node, chart) carried
-   no meaning the title did not already carry. */
-.pod-dist-title {
-  font-family: var(--font-display);
-  font-size: var(--fs-body);
-  font-weight: var(--fw-bold);
-  line-height: var(--leading-snug);
-  color: var(--text-on-dark);
-  margin: 0 0 var(--space-2);
-}
+   no meaning the title did not already carry.
 
-.pod-dist-body {
-  font-size: var(--fs-small);
+   The title and the body paragraph are gone too. Four numbers each
+   wrapped in a heading and a 25-word paragraph is four things to read in
+   a section whose only job is to be glanced at. What is left is the
+   figure and the nouns that evidence it. */
+.pod-dist-detail {
+  font-size: var(--fs-body);
   line-height: var(--leading-body);
   color: var(--text-on-dark-soft);
   margin: 0;
