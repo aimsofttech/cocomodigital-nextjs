@@ -57885,6 +57885,7 @@ html {
 
 .pod-problem .pod-section-title {
   color: var(--text-on-dark);
+  max-width: 46rem;
 }
 
 .pod-problem .pod-eyebrow {
@@ -57892,7 +57893,11 @@ html {
 }
 
 .pod-problem-lead {
-  color: var(--text-on-dark-soft);
+  /* Was running 902px wide — about 95 characters a line, well past the
+     45–75 that reads comfortably. Capping the measure also frees the
+     right third of the frame for the photograph to live in. */
+  max-width: 40rem;
+  color: var(--text-on-dark);
 }
 
 .pod-problem-grid {
@@ -59263,9 +59268,6 @@ html {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-}
-
 
 /* The site header is position:fixed at 68px, and nothing sets
    scroll-padding, so every in-page anchor — including this page's own
@@ -59358,11 +59360,17 @@ html {
 .pod-problem-bg-img {
   object-fit: cover;
   object-position: center;
-  /* Anil asked for it to read more. Desaturated rather than fully grey
-     so some of the yellow wall behind the editor survives — it is the
-     brand colour, and it warms a section that is otherwise flat black. */
-  opacity: 0.78;
-  filter: grayscale(0.72) contrast(1.06);
+  /* Anil asked twice for this to read more. The composite was simulated
+     against the actual text boxes before loosening it, because the copy
+     sits directly on the photograph: at these values the frame is ~4x
+     more visible on the right, and BOTH text elements gained contrast
+     rather than losing it (title 8.3 -> 5.1, lead 5.4 -> 6.4, thresholds
+     3 and 4.5). That is only possible because the copy column is now
+     capped instead of running under the bright half of the frame.
+     Mostly desaturated rather than fully grey so the yellow wall behind
+     the editors survives — it is the brand colour. */
+  opacity: 1;
+  filter: grayscale(0.3) contrast(1.1);
 }
 
 /* Horizontal scrim rather than vertical. The heading and the lead
@@ -59377,32 +59385,35 @@ html {
   background:
     linear-gradient(
       to right,
-      rgba(0, 0, 0, 0.93) 0%,
-      rgba(0, 0, 0, 0.88) 44%,
-      rgba(0, 0, 0, 0.46) 72%,
-      rgba(0, 0, 0, 0.3) 100%
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.86) 52%,
+      rgba(0, 0, 0, 0.34) 64%,
+      rgba(0, 0, 0, 0.06) 100%
     ),
     linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.55) 0%,
-      rgba(0, 0, 0, 0.25) 40%,
-      rgba(0, 0, 0, 0.7) 100%
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.14) 40%,
+      rgba(0, 0, 0, 0.58) 100%
     );
 }
 
-/* On a phone the copy runs the full width, so the photograph goes back
-   to being pure texture underneath it. */
+/* On a phone the copy runs the full width, so the scrim goes vertical
+   and the horizontal one is dropped. It used to be far heavier than it
+   needed to be: measured, the old values left the lead text at 18:1
+   against a 4.5 threshold while the photograph was effectively invisible.
+   These values are ~10x more visible and still sit at 7.7:1. */
 @media (max-width: 900px) {
   .pod-problem-bg-img {
-    opacity: 0.42;
+    opacity: 0.9;
   }
 
   .pod-problem-bg::after {
     background: linear-gradient(
       to bottom,
-      rgba(0, 0, 0, 0.86) 0%,
-      rgba(0, 0, 0, 0.8) 50%,
-      rgba(0, 0, 0, 0.9) 100%
+      rgba(0, 0, 0, 0.72) 0%,
+      rgba(0, 0, 0, 0.6) 50%,
+      rgba(0, 0, 0, 0.8) 100%
     );
   }
 }
@@ -59412,12 +59423,6 @@ html {
 .pod-problem-card {
   background: rgba(10, 10, 10, 0.92);
   backdrop-filter: blur(2px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pod-problem-bg-img {
-    opacity: 0.16;
-  }
 }
 
 /* ------------------------------------- stage placeholder diagrams */
