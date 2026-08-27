@@ -39,6 +39,7 @@ export interface ServiceCard {
   icon: string;
   title: string;
   body: string;
+  includes: string[];
 }
 
 export interface AudienceCard {
@@ -296,55 +297,61 @@ export const STAGES: Stage[] = [
 ];
 
 export const SERVICES: ServiceCard[] = [
+  /* One line each, not a paragraph. Eight cards carrying eight
+     thirty-word paragraphs put ~240 words of near-identical grey text
+     in a single grid — it reads as a wall and gets skipped. The line
+     states the promise; the `includes` nouns carry the detail and the
+     search terms in a form the eye can actually scan. */
   {
     icon: "video",
     title: "Video podcast editing",
-    body:
-      "Multicam editing with speaker-aware cutting, color and sound balanced across angles. Captions, lower thirds and branded elements applied from a template system so every episode looks like the same show.",
+    body: "Multicam, cut speaker-aware, colour and sound matched across every angle.",
+    includes: ["Multicam", "Captions", "Lower thirds", "Template system"],
   },
   {
     icon: "audio",
     title: "Audio editing & mastering",
-    body:
-      "Noise, room tone, plosives and filler words removed. Levels matched across speakers and mastered to platform loudness targets so the episode sounds right on headphones, car speakers and phone alike.",
+    body: "Cleaned, levelled and mastered so it sounds right on headphones and in a car.",
+    includes: ["Noise & room tone", "Filler words", "Level matching", "Loudness targets"],
   },
   {
     icon: "clip",
     title: "Short-form clipping",
-    body:
-      "Moments chosen for a reason, not scrubbed at random. Each clip is reframed vertically, captioned, hooked in the first second and cut to what Shorts, Reels and TikTok each reward.",
+    body: "Moments chosen for a reason, cut to what each platform actually rewards.",
+    includes: ["Shorts", "Reels", "TikTok", "Vertical reframe", "Burned-in captions"],
   },
   {
     icon: "thumb",
     title: "Thumbnails & packaging",
-    body:
-      "Thumbnail and title designed together as one decision. Variants built for A/B testing so packaging becomes a measured experiment rather than a matter of taste.",
+    body: "Thumbnail and title designed as one decision, then tested as a pair.",
+    includes: ["A/B variants", "Title systems", "Click-through testing"],
   },
   {
     icon: "notes",
     title: "Show notes, SEO & transcripts",
-    body:
-      "Episode titles, descriptions, chapters and timestamps written for search as well as for listeners. Full transcripts for accessibility, for repurposing, and because search engines and AI assistants read text.",
+    body: "Written for search engines and AI assistants as well as for listeners.",
+    includes: ["Chapters", "Timestamps", "Full transcripts", "Descriptions"],
   },
   {
     icon: "publish",
     title: "Publishing & channel management",
-    body:
-      "Scheduling, uploads, metadata, playlists, end screens and community posts across YouTube and the social ring. Channel management as an ongoing operation, not a hand-off.",
+    body: "An ongoing operation across YouTube and the social ring, not a hand-off.",
+    includes: ["Scheduling", "Metadata", "Playlists", "End screens", "Community"],
   },
   {
     icon: "globe",
     title: "Dubbing & localization",
-    body:
-      "Podcast repurposing across languages, drawing on the transcreation work Cocoma already runs in 20+ languages — so a show built for the US market can open in several more.",
+    body: "Open a second and third market using the languages already running in-house.",
+    includes: ["Transcreation", "20+ languages", "Subtitles"],
   },
   {
     icon: "chart",
     title: "Analytics & growth reporting",
-    body:
-      "A monthly scorecard across discovery, packaging, consumption and business outcomes. Every report ends in decisions for the next month, not a wall of screenshots.",
+    body: "A monthly scorecard that ends in decisions, not a wall of screenshots.",
+    includes: ["Discovery", "Packaging", "Consumption", "Business"],
   },
 ];
+
 
 export const AUDIENCES: AudienceCard[] = [
   {

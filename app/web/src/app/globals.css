@@ -58065,6 +58065,8 @@ html {
 }
 
 .pod-service-card {
+  display: flex;
+  flex-direction: column;
   padding: var(--space-5);
   background: var(--bg-page);
   border: 2px solid var(--text-strong);
@@ -58114,7 +58116,34 @@ html {
   font-size: var(--fs-small);
   line-height: var(--leading-body);
   color: var(--text-muted);
-  margin: 0;
+  margin: 0 0 var(--space-4);
+}
+
+/* The detail, as nouns rather than prose. Small, uppercase and set on
+   a rule so the eye reads the grid as a spec sheet instead of eight
+   paragraphs — and so the search terms survive the copy being cut. */
+.pod-service-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: auto 0 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.pod-service-tags li {
+  font-family: var(--font-display);
+  font-size: var(--fs-tiny);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-body);
+  background: var(--bg-page-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 0.22em 0.5em;
+  white-space: nowrap;
 }
 
 /* ------------------------------------------------- pricing */

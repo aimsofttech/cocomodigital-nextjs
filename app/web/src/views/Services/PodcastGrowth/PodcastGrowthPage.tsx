@@ -231,6 +231,11 @@ export default function PodcastGrowthPage() {
                 </span>
                 <h3 className="pod-service-title">{s.title}</h3>
                 <p className="pod-service-body">{s.body}</p>
+                <ul className="pod-service-tags">
+                  {s.includes.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
               </article>
             ))}
           </div>
