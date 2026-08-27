@@ -504,34 +504,51 @@ export const DISTRIBUTION = {
   eyebrow: "Beyond production",
   heading: "Content is king. Distribution is the kingdom.",
   lead:
-    "Most podcast vendors stop when the file is exported. That is the cheap half of the problem. Getting a show in front of people who have never heard of it is the expensive half, and it is the half that decides whether the show grows.",
+    "Most podcast vendors stop when the file is exported. That is the cheap half. Getting the show in front of people who have never heard of it is the expensive half — and the half that decides whether it grows.",
+  /* Each pillar leads with a figure. This section argues reach, so a
+     number is the fastest way to make that argument, and it gives the
+     eye four anchors instead of four paragraphs.
+
+     Every figure is checkable: six named platforms, the 20+ languages
+     and 35,000+ videos Cocoma already publishes, and the four
+     measurement layers described in the Optimize stage. Nothing here is
+     a podcast result. */
   pillars: [
     {
       icon: "publish",
-      title: "Multi-platform publishing operations",
+      stat: "6",
+      statLabel: "platforms, natively",
+      title: "Multi-platform publishing",
       body:
-        "One show, published natively everywhere it should live — YouTube, Shorts, Instagram, TikTok, LinkedIn, Facebook and X — each with the metadata, format and cadence that platform actually rewards, rather than the same file cross-posted six times.",
+        "YouTube, Shorts, Instagram, TikTok, LinkedIn and X — each with the format and cadence that platform rewards, not one file cross-posted six times.",
     },
     {
       icon: "globe",
+      stat: "20+",
+      statLabel: "languages in-house",
       title: "Language expansion",
       body:
-        "The studio already runs transcreation in 20+ languages for entertainment clients. For a show that has found its audience in English, opening a second and third language market is the fastest available route to a bigger one.",
+        "Transcreation already runs at this scale for entertainment clients. For a show that works in English, a second market is the fastest route to a bigger one.",
     },
     {
       icon: "network",
-      title: "Catalogue and channel operations",
+      stat: "35,000+",
+      statLabel: "videos of operating depth",
+      title: "Catalog and channel operations",
       body:
-        "Back catalog re-cut and re-packaged, playlists and end screens structured so one episode leads to the next, and channel operations run at the volume of a studio that has produced 35,000+ videos.",
+        "Back catalog re-cut and re-packaged, playlists and end screens structured so one episode leads to the next.",
     },
     {
       icon: "chart",
+      stat: "4",
+      statLabel: "layers, reported monthly",
       title: "Discovery measured, not assumed",
       body:
-        "Impressions, traffic sources and suggested-video pickup are reported monthly as their own layer — so distribution is a thing you can steer rather than a thing you hope for.",
+        "Impressions, traffic sources and suggested-video pickup get their own layer — so distribution is something you steer, not something you hope for.",
     },
   ],
 };
+
 
 export const MONTH_ROWS: MonthRow[] = [
   {

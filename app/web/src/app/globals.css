@@ -59219,42 +59219,64 @@ html {
   color: var(--text-on-dark-soft);
 }
 
+/* Four columns, no boxes. Two rows of heavy bordered cards on a black
+   section read as furniture — the eye sees rectangles before it sees
+   anything inside them. A rule across the top of each column carries
+   the same separation for none of the weight. */
 .pod-dist-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-6) var(--space-5);
 }
 
 .pod-dist-card {
-  padding: var(--space-6);
-  background: var(--bg-dark-elevated);
-  border: 2px solid rgba(255, 255, 255, 0.16);
-  border-radius: var(--radius-lg);
+  padding: var(--space-4) 0 0;
+  border-top: 2px solid var(--brand);
 }
 
+/* The figure is the entry point. This section argues reach, and a
+   number lands faster than a sentence about reach. */
+.pod-dist-stat {
+  margin: 0 0 var(--space-4);
+}
+
+.pod-dist-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--brand);
+}
+
+.pod-dist-stat-label {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--fs-small);
+  line-height: var(--leading-snug);
+  color: var(--text-on-dark-soft);
+}
+
+/* Icon sits inline with the title now, at text size — a 44px yellow
+   tile per card was a fifth box competing with the four it sat in. */
 .pod-dist-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  margin-bottom: var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--brand);
-  color: var(--brand-on);
-}
-
-.pod-dist-icon svg {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+  color: var(--brand);
 }
 
 .pod-dist-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--fs-h3);
+  font-size: var(--fs-body);
   font-weight: var(--fw-bold);
+  line-height: var(--leading-snug);
   color: var(--text-on-dark);
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-2);
 }
 
 .pod-dist-body {
@@ -59315,12 +59337,6 @@ html {
   font-size: var(--fs-body);
   font-weight: var(--fw-semibold);
   color: var(--text-strong);
-}
-
-@media (max-width: 1100px) {
-  .pod-dist-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 640px) {
@@ -59599,5 +59615,17 @@ html {
 
   .pod-stage-ordinal {
     font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .pod-dist-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .pod-dist-grid {
+    grid-template-columns: 1fr;
   }
 }

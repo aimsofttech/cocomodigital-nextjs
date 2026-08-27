@@ -253,10 +253,14 @@ export default function PodcastGrowthPage() {
           <div className="pod-dist-grid">
             {DISTRIBUTION.pillars.map((d) => (
               <article key={d.title} className="pod-dist-card">
-                <span className="pod-dist-icon">
-                  <Icon name={d.icon} />
-                </span>
-                <h3 className="pod-dist-title">{d.title}</h3>
+                <p className="pod-dist-stat">
+                  <span className="pod-dist-stat-value">{d.stat}</span>
+                  <span className="pod-dist-stat-label">{d.statLabel}</span>
+                </p>
+                <h3 className="pod-dist-title">
+                  <Icon name={d.icon} className="pod-dist-icon" />
+                  {d.title}
+                </h3>
                 <p className="pod-dist-body">{d.body}</p>
               </article>
             ))}
