@@ -7,7 +7,6 @@ import PodcastHeroMedia from "./PodcastHeroMedia";
 import { Icon, StageDiagram } from "./PodcastVisuals";
 import {
   AUDIENCES,
-  DISTRIBUTION,
   FAQS,
   FOUNDER,
   HERO,
@@ -236,31 +235,6 @@ export default function PodcastGrowthPage() {
                     <li key={t}>{t}</li>
                   ))}
                 </ul>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* -------------------------------------------- distribution */}
-      <section className="pod-dist" aria-labelledby="pod-dist-title">
-        <div className="pod-shell">
-          <p className="pod-eyebrow">{DISTRIBUTION.eyebrow}</p>
-          <h2 id="pod-dist-title" className="pod-section-title">
-            {DISTRIBUTION.heading}
-          </h2>
-          <p className="pod-section-lead">{DISTRIBUTION.lead}</p>
-          <div className="pod-dist-grid">
-            {DISTRIBUTION.pillars.map((d) => (
-              <article key={d.statUnit} className="pod-dist-card">
-                {/* The figure IS the heading — an article with no heading
-                    is an a11y smell, and a separate title line was only
-                    restating the unit. */}
-                <h3 className="pod-dist-stat">
-                  <span className="pod-dist-stat-value">{d.stat}</span>{" "}
-                  <span className="pod-dist-stat-unit">{d.statUnit}</span>
-                </h3>
-                <p className="pod-dist-detail">{d.detail}</p>
               </article>
             ))}
           </div>

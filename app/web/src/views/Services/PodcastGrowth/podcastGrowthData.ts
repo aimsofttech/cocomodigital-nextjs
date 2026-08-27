@@ -490,56 +490,6 @@ export const NOT_FOR = {
     "Still reading and none of these fit? Then the audit will probably be worth your time.",
 };
 
-/**
- * Distribution — the part most podcast vendors do not sell at all.
- *
- * TODO (Anil): this is written from capabilities the studio demonstrably
- * has (multi-platform publishing operations, 20+ language transcreation,
- * channel management at catalog scale). If the distribution network
- * includes concrete assets — owned channels, syndication partners,
- * placement relationships — tell me what they are and I will name them.
- * Nothing here claims a partner or a placement we cannot evidence.
- */
-export const DISTRIBUTION = {
-  eyebrow: "Beyond production",
-  heading: "Content is king. Distribution is the kingdom.",
-  lead:
-    "Most vendors stop when the file is exported. The half that decides whether a show grows comes after.",
-  /* A proof strip, not an essay. This section only has to establish that
-     distribution is run at scale — the argument is already made by the
-     heading, so each pillar is a figure plus the nouns that evidence it.
-
-     It carried a title AND a ~25-word paragraph per pillar before: four
-     numbers wrapped in four paragraphs, which is four things to read in
-     a section whose whole job is to be glanced at.
-
-     Every figure is checkable: six named platforms, the 20+ languages
-     and 35,000+ videos Cocoma already publishes, and the four
-     measurement layers named in the Optimize stage above. Nothing here
-     is a podcast result. */
-  pillars: [
-    {
-      stat: "6",
-      statUnit: "platforms",
-      detail: "YouTube, Shorts, Instagram, TikTok, LinkedIn, X",
-    },
-    {
-      stat: "20+",
-      statUnit: "languages",
-      detail: "In-house dubbing, subtitles, transcreation",
-    },
-    {
-      stat: "35,000+",
-      statUnit: "videos",
-      detail: "Back catalog, playlists, end screens",
-    },
-    {
-      stat: "4",
-      statUnit: "layers",
-      detail: "Discovery, packaging, consumption, business",
-    },
-  ],
-};
 
 
 export const MONTH_ROWS: MonthRow[] = [
