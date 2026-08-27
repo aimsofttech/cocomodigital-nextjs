@@ -24,6 +24,26 @@ interface CocomaFooterProps {
   solutions: ShellSolutionNavItem[];
 }
 
+/* Static growth-service pages. These live as literal routes under
+   src/app/services/ rather than in the API's services collection, so
+   they never appear in `serviceItems` — they're appended to the end of
+   the Services column by hand. Keep the hrefs in sync with the route
+   folder names if either side is ever renamed. */
+const GROWTH_SERVICE_LINKS: { href: string; label: string }[] = [
+  {
+    href: "/services/end-to-end-youtube-growth-services",
+    label: "End-to-End YouTube Growth Services",
+  },
+  {
+    href: "/services/social-media-video-editing-services",
+    label: "Social Media Video Editing Services",
+  },
+  {
+    href: "/services/podcast-editing-and-growth-services",
+    label: "Podcast Editing & Growth Services",
+  },
+];
+
 const FOOTER_COPY = {
   tagline: "India's leading YouTube & social media growth studio.",
   columns: {
@@ -114,15 +134,19 @@ export default function CocomaFooter({ serviceItems, otherServices, solutions }:
               {FOOTER_COPY.columns.services}
             </p>
             <ul className="footer-link-list">
-              {serviceItems.length > 0 ? (
-                serviceItems.map((item, index) => (
-                  <li key={index}>
-                    <Link to={`/services/${item?.slug}`}>{item?.service_title}</Link>
-                  </li>
-                ))
-              ) : (
-                <li className="footer-muted">No services available</li>
-              )}
+              {serviceItems.map((item, index) => (
+                <li key={index}>
+                  <Link to={`/services/${item?.slug}`}>{item?.service_title}</Link>
+                </li>
+              ))}
+              {/* Appended after the API-driven list. The old "No services
+                  available" fallback is gone: these three always render, so
+                  the column can no longer end up bare. */}
+              {GROWTH_SERVICE_LINKS.map((item) => (
+                <li key={item.href}>
+                  <Link to={item.href}>{item.label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 

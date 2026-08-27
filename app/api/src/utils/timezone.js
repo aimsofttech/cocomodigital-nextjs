@@ -1,13 +1,6 @@
 'use strict';
 
 /**
- * Convert a wall-clock "YYYY-MM-DD" + "HH:mm" pair, interpreted in the given
- * IANA timezone, to the equivalent UTC Date instant. No external tz library —
- * uses the Intl per-timezone-offset trick: stamp the wall-clock numbers as if
- * they were UTC, then measure how far that same instant drifts when displayed
- * in `timeZone` vs UTC; that drift is the zone's offset at that date, which we
- * subtract to land on the real UTC instant.
- *
  * @returns {Date|null} null if the inputs can't be parsed.
  */
 const zonedTimeToUtc = (dateStr, timeStr, timeZone) => {
@@ -22,4 +15,98 @@ const zonedTimeToUtc = (dateStr, timeStr, timeZone) => {
   return new Date(asUTC.getTime() - offsetMs);
 };
 
-module.exports = { zonedTimeToUtc };
+// The owner/admin's fixed reference zone — regardless of where the visitor
+// or the admin's own browser happens to be.
+const IST_TIMEZONE = 'Asia/Kolkata';
+
+/**
+ * Render a UTC instant as a wall-clock date/time string in `timeZone`. This is
+ * the display-side counterpart to `zonedTimeToUtc` — it never mutates the
+ * instant, only how it's shown.
+ *
+ * @returns {{date:string, time:string}|null} null if `date` doesn't parse.
+ */
+const formatInTimeZone = (date, timeZone) => {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return {
+    date: d.toLocaleDateString('en-US', { timeZone, day: '2-digit', month: 'short', year: 'numeric' }),
+    time: d.toLocaleTimeString('en-US', { timeZone, hour: 'numeric', minute: '2-digit', hour12: true }),
+  };
+};
+
+/**
+ * Machine-readable counterpart to `formatInTimeZone`: the wall-clock date and
+ * time of a UTC instant in `timeZone`, as "YYYY-MM-DD" / "HH:mm".
+ *
+ * Exists so booking rules stated in wall-clock terms ("no Sundays", "10:00 to
+ * 18:45") can be checked even when a caller posts only a UTC instant and skips
+ * the meeting_date/meeting_time fields the UI normally sends.
+ *
+ * @returns {{date:string, time:string}|null} null if `date` doesn't parse.
+ */
+const wallClockInZone = (date, timeZone) => {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  try {
+    // en-CA renders ISO-style dates (2026-08-10); en-GB gives 24-hour times.
+    const day = d.toLocaleDateString('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+    });
+    const time = d.toLocaleTimeString('en-GB', {
+      timeZone, hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    // Some ICU builds render midnight as "24:00" — normalise to "00:00".
+    return { date: day, time: time.replace(/^24:/, '00:') };
+  } catch {
+    return null; // unrecognised timeZone
+  }
+};
+
+/** True when `tz` is an IANA zone this runtime recognises. */
+const isValidTimeZone = (tz) => {
+  if (!tz || typeof tz !== 'string') return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * A reusable `wallClockInZone` bound to one zone.
+ *
+ * Slot generation converts hundreds of instants per request; building a single
+ * Intl formatter up front and calling formatToParts is an order of magnitude
+ * cheaper than a toLocaleString pair per instant.
+ *
+ * @returns {(date: Date) => {date: string, time: string}}
+ * @throws {RangeError} if `timeZone` isn't a recognised IANA zone.
+ */
+const wallClockFormatter = (timeZone) => {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    // h23 rather than hour12:false — the latter renders midnight as "24:00" on
+    // some ICU builds, which would pair the next day's hour with today's date.
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  });
+  return (date) => {
+    const parts = {};
+    for (const p of fmt.formatToParts(date)) parts[p.type] = p.value;
+    return {
+      date: `${parts.year}-${parts.month}-${parts.day}`,
+      time: `${parts.hour}:${parts.minute}`,
+    };
+  };
+};
+
+module.exports = {
+  zonedTimeToUtc,
+  formatInTimeZone,
+  wallClockInZone,
+  wallClockFormatter,
+  isValidTimeZone,
+  IST_TIMEZONE,
+};

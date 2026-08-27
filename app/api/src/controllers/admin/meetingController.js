@@ -2,19 +2,14 @@ const Meeting = require('../../models/Meeting');
 const MeetingAssignee = require('../../models/MeetingAssignee');
 const { createMeetingEvent } = require('../../services/calendarService');
 const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
-const { zonedTimeToUtc } = require('../../utils/timezone');
 const logger = require('../../utils/logger');
-
-// 10:00–18:45 in 15-minute steps — mirrors the reschedule picker's slot grid.
-const DAY_SLOTS = (() => {
-  const slots = [];
-  for (let h = 10; h < 19; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-    }
-  }
-  return slots;
-})();
+// The slot grid and open/closed rule are the admin's own configuration, read
+// through the one module the public booking path also uses.
+const {
+  getAvailabilityConfig,
+  slotsForViewerDate,
+  validateBookingSlot,
+} = require('../../utils/bookingWindow');
 
 // GET /admin/api/meetings
 const index = async (req, res) => {
@@ -102,6 +97,9 @@ const confirm = async (req, res) => {
       phone: doc.phone,
       meetingDate: doc.meetingDate,
       meetingTime: doc.meetingTime,
+      meeting_timezone: doc.meetingTimezone,
+      meeting_start_utc: doc.meeting_start_utc,
+      createdAt: doc.createdAt,
       meetLink: doc.meetLink,
       assigneeEmail: doc.assignedTo?.email,
     });
@@ -110,56 +108,70 @@ const confirm = async (req, res) => {
   res.json({ status: 'success', message: 'Meeting confirmed and emails sent', data: doc });
 };
 
-// GET /admin/api/meetings/availability?date=YYYY-MM-DD&timezone=Asia/Kolkata&excludeId=<id>
-// Which of the day's 15-min slots are already taken by another pending/confirmed
-// meeting, so the reschedule picker can disable them. Computed server-side so the
-// admin's browser timezone never has to be reconciled with the meeting's timezone.
-const availability = async (req, res) => {
-  const { date, timezone, excludeId } = req.query;
-  if (!date) return res.status(400).json({ status: 'error', message: 'date is required' });
-  const tz = timezone || process.env.BOOKING_TIMEZONE || 'Asia/Kolkata';
 
-  const slotKeys = DAY_SLOTS
-    .map((time) => {
-      const d = zonedTimeToUtc(date, time, tz);
-      return d ? { time, slot_key: d.toISOString().slice(0, 16) } : null;
-    })
-    .filter(Boolean);
+// GET /admin/api/meetings/availability?date=YYYY-MM-DD[&excludeId=]
+// Feeds the reschedule picker. `slots` is what the admin configured for that
+// date and `booked` the subset another meeting already holds — both as IST
+// "HH:mm", the zone the reschedule form works in.
+const availability = async (req, res) => {
+  const { date, excludeId } = req.query;
+  if (!date) return res.status(400).json({ status: 'error', message: 'date is required' });
+
+  const config = await getAvailabilityConfig();
+  const { configured, slots } = slotsForViewerDate(config, date, config.timezone);
+  if (!slots.length) {
+    /* No bookable slot: either the day is switched off / has no times, or every
+       one of today's has already passed. `closed` distinguishes them so the
+       picker can word it correctly. */
+    return res.json({
+      status: 'success',
+      slots: [],
+      booked: [],
+      closed: configured === 0,
+      timezone: config.timezone,
+    });
+  }
 
   const filter = {
-    slot_key: { $in: slotKeys.map((s) => s.slot_key) },
+    slot_key: { $in: slots.map((s) => s.slotKey) },
     status: { $in: ['pending', 'confirmed'] },
   };
   if (excludeId) filter._id = { $ne: excludeId };
 
   const docs = await Meeting.find(filter).select('slot_key -_id').lean();
   const bookedKeys = new Set(docs.map((d) => d.slot_key));
-  const booked = slotKeys.filter((s) => bookedKeys.has(s.slot_key)).map((s) => s.time);
 
-  res.json({ status: 'success', booked });
+  res.json({
+    status: 'success',
+    slots: slots.map((s) => s.time),
+    booked: slots.filter((s) => bookedKeys.has(s.slotKey)).map((s) => s.time),
+    closed: false,
+    timezone: config.timezone,
+  });
 };
 
-// PUT /admin/api/meetings/:id/reschedule
-// Admin picks a new date/time for a meeting (typically one whose original slot
-// already expired), regenerates the Google Meet link for the new slot, and
-// notifies both the user and the owner. Keeps the meeting's original timezone
-// so the wall-clock time stays meaningful to the visitor who requested it.
+
 const reschedule = async (req, res) => {
   const { meetingDate, meetingTime } = req.body;
   if (!meetingDate || !meetingTime) {
     return res.status(400).json({ status: 'error', message: 'meetingDate and meetingTime are required' });
   }
 
+  /* Reschedule moves a customer onto a new slot, so it has to honour the same
+     availability as a fresh booking — otherwise a disabled day would hold for
+     visitors but not for meetings an admin drags onto it. Admin times are
+     studio wall-clock (the picker's own zone), which is also the zone the
+     configuration is written in. */
+  const config = await getAvailabilityConfig();
+  const slotCheck = await validateBookingSlot(meetingDate, meetingTime, config.timezone);
+  if (!slotCheck.ok) {
+    return res.status(400).json({ status: 'error', message: slotCheck.message });
+  }
+
   const doc = await Meeting.findById(req.params.id);
   if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
 
-  const timezone = doc.meetingTimezone || process.env.BOOKING_TIMEZONE || 'Asia/Kolkata';
-  const startUtc = zonedTimeToUtc(meetingDate, meetingTime, timezone);
-  if (!startUtc) return res.status(400).json({ status: 'error', message: 'Invalid meetingDate/meetingTime' });
-  if (startUtc.getTime() <= Date.now()) {
-    return res.status(400).json({ status: 'error', message: 'Please pick a time in the future' });
-  }
-
+  const startUtc = slotCheck.startUtc;
   const slot_key = startUtc.toISOString().slice(0, 16);
   const clash = await Meeting.findOne({
     _id: { $ne: doc._id },
@@ -177,13 +189,18 @@ const reschedule = async (req, res) => {
     message: doc.notes,
     notes: doc.notes,
     meeting_date: meetingDate,
+    // The admin typed these in the studio's own zone, so that's the zone the
+    // calendar event has to be created in.
     meeting_time: meetingTime,
-    meeting_timezone: timezone,
+    meeting_timezone: config.timezone,
   });
 
+  // meetingDate/meetingTime become "the admin's literal IST input" — reference
+  // only. meetingTimezone is deliberately left untouched: it still holds the
+  // visitor's original zone, which is what their reschedule email is rendered
+  // in. meeting_start_utc (below) is the only field anything displays from.
   doc.meetingDate = meetingDate;
   doc.meetingTime = meetingTime;
-  doc.meetingTimezone = timezone;
   doc.meeting_start_utc = startUtc;
   doc.slot_key = slot_key;
   doc.status = 'confirmed';
@@ -212,6 +229,9 @@ const reschedule = async (req, res) => {
       phone: doc.phone,
       meetingDate: doc.meetingDate,
       meetingTime: doc.meetingTime,
+      meeting_timezone: doc.meetingTimezone,
+      meeting_start_utc: doc.meeting_start_utc,
+      createdAt: doc.createdAt,
       meetLink: doc.meetLink,
       assigneeEmail: doc.assignedTo?.email,
     });
@@ -237,6 +257,7 @@ const reject = async (req, res) => {
         meeting_date: doc.meetingDate,
         meeting_time: doc.meetingTime,
         meeting_timezone: doc.meetingTimezone,
+        meeting_start_utc: doc.meeting_start_utc,
         assigneeEmail: doc.assignedTo?.email,
       });
     }
@@ -286,6 +307,7 @@ const assign = async (req, res) => {
         meeting_date: doc.meetingDate,
         meeting_time: doc.meetingTime,
         meeting_timezone: doc.meetingTimezone,
+        meeting_start_utc: doc.meeting_start_utc,
         meetingId: doc._id.toString(),
       },
       doc.assignedTo
@@ -301,8 +323,21 @@ const updateStatus = async (req, res) => {
   const allowed = ['pending', 'confirmed', 'rejected', 'completed'];
   if (!allowed.includes(status)) return res.status(400).json({ status: 'error', message: 'Invalid status value' });
 
-  const doc = await Meeting.findByIdAndUpdate(req.params.id, { status }, { new: true });
+  const doc = await Meeting.findById(req.params.id);
   if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
+
+  /* Saved through the document rather than findByIdAndUpdate so the model's
+     slot-hold hook runs: moving a meeting to rejected/completed has to release
+     its slot, and moving it back to pending has to re-take it. */
+  doc.status = status;
+  try {
+    await doc.save();
+  } catch (err) {
+    if (err && err.code === 11000) {
+      return res.status(409).json({ status: 'error', message: 'Another meeting already holds that time slot.' });
+    }
+    throw err;
+  }
   res.json({ status: 'success', data: doc });
 };
 

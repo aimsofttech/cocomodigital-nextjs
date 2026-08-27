@@ -48,6 +48,11 @@ const storeApplicant = async (req, res) => {
     currentCtc, annualCtc, noticePeriodDays, jobPrefrence, workType,
     resume: resumeKey,
   });
+  require('../../crm/services/leadIngest').ingestSafe({
+    channel: 'job_applicant', externalCollection: 'job_applicants', externalId: applicant._id,
+    name, email, phone, message: coverLetter,
+    raw: { jobListId, experience, currentCtc, noticePeriodDays, workType },
+  });
   res.status(201).json({ status: 'success', message: 'Application submitted successfully', data: applicant });
 };
 

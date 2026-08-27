@@ -2,25 +2,39 @@
  * Frees the dev-server ports before `npm run dev`.
  *
  * On Windows, nodemon/concurrently frequently leave orphaned node
- * processes holding the API (5000), web (3000), or admin (5173) ports
- * after a dev session ends, which makes the next `npm run dev` crash
- * with EADDRINUSE. This script kills whatever is still LISTENING on
- * those ports so the stack always starts clean. Wired up as the
- * `predev` script in the root package.json.
+ * processes holding the API (5000), web (3000), admin (5173), or CRM
+ * (5174) ports after a dev session ends, which makes the next
+ * `npm run dev` crash with EADDRINUSE. This script kills whatever is
+ * still LISTENING on those ports so the stack always starts clean.
+ * Wired up as the `predev` script in the root package.json.
  */
 const { execSync } = require('child_process');
 
-const PORTS = [3000, 5000, 5173];
+const PORTS = [3000, 5000, 5173, 5174];
+
+/** Port out of a netstat local-address column (`0.0.0.0:3000`, `[::1]:5173`). */
+function addressPort(address) {
+  const i = address.lastIndexOf(':');
+  return i === -1 ? NaN : Number(address.slice(i + 1));
+}
 
 function listeningPids(port) {
   try {
     if (process.platform === 'win32') {
-      const out = execSync('netstat -ano -p TCP', { encoding: 'utf8' });
+      /* `-p TCP` restricts the listing to IPv4 only — IPv6 sockets live in a
+         separate `TCPv6` section. Vite binds `localhost`, which resolves to
+         ::1 first on Windows, so every stale Vite server was invisible here
+         and survived the sweep (admin/CRM then drift to 5175/5176). Listing
+         everything and filtering on the parsed columns catches both families. */
+      const out = execSync('netstat -ano', { encoding: 'utf8' });
       const pids = out
         .split(/\r?\n/)
-        .filter((line) => line.includes('LISTENING'))
-        .filter((line) => new RegExp(`[:\\]]${port}\\s`).test(line))
-        .map((line) => line.trim().split(/\s+/).pop())
+        .map((line) => line.trim().split(/\s+/))
+        /* proto, local, foreign, state, pid — match the LOCAL address only, so
+           an outbound connection to :3000 never gets mistaken for a listener. */
+        .filter((c) => c.length >= 5 && (c[0] === 'TCP' || c[0] === 'TCPv6'))
+        .filter((c) => c[3] === 'LISTENING' && addressPort(c[1]) === port)
+        .map((c) => c[4])
         .filter((pid) => pid && pid !== '0');
       return [...new Set(pids)];
     }
@@ -59,5 +73,5 @@ for (const port of PORTS) {
   }
 }
 if (!killedAny) {
-  console.log('[free-ports] ports 3000/5000/5173 already free');
+  console.log(`[free-ports] ports ${PORTS.join('/')} already free`);
 }

@@ -6,17 +6,23 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed": "node src/database/seed.js"
+    "seed": "node src/database/seed.js",
+    "seed:growth": "node src/database/seedGrowthServices.js",
+    "tunnel": "cloudflared tunnel --url http://localhost:5000",
+    "check:twilio": "node scripts/check-twilio.js",
+    "check:whatsapp": "node scripts/check-whatsapp.js",
+    "dryrun:whatsapp": "node scripts/dryrun-whatsapp.js",
+    "test:voice": "node scripts/test-voice.js",
+    "test:messaging": "node scripts/test-messaging.js"
   },
   "dependencies": {
-    "aws-sdk": "^2.1691.0",
+    "@aws-sdk/client-s3": "^3.1058.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "express-async-errors": "^3.1.1",
     "express-rate-limit": "^7.4.1",
-    "express-validator": "^7.2.0",
     "googleapis": "^173.0.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
@@ -26,6 +32,8 @@
     "multer-s3": "^3.0.1",
     "nodemailer": "^9.0.1",
     "slugify": "^1.6.6",
+    "socket.io": "^4.8.3",
+    "twilio": "^6.0.2",
     "winston": "^3.17.0",
     "xlsx": "^0.18.5"
   },

@@ -76,6 +76,7 @@ const adminPageRoutes = require('./routes/admin/page');
 const adminContactUsRoutes = require('./routes/admin/contactUs');
 const adminFreeConsultationRoutes = require('./routes/admin/freeConsultation');
 const adminMeetingRoutes = require('./routes/admin/meeting');
+const adminMeetingAvailabilityRoutes = require('./routes/admin/meetingAvailability');
 const adminFaqRoutes = require('./routes/admin/faq');
 const adminMarketingFaqRoutes = require('./routes/admin/marketingHouseFaq');
 const adminGroupServiceItemFaqRoutes = require('./routes/admin/groupServiceItemFaq');
@@ -83,6 +84,7 @@ const adminWhatsappTemplateRoutes = require('./routes/admin/whatsappTemplate');
 const adminAdminPostRoutes = require('./routes/admin/adminPost');
 const adminHomePageSectionRoutes = require('./routes/admin/homePageSection');
 const adminHomePageSectionItemRoutes = require('./routes/admin/homePageSectionItem');
+const adminGrowthServiceRoutes = require('./routes/admin/growthService');
 const adminUploadRoutes = require('./routes/admin/uploads');
 const adminMediaAssetRoutes = require('./routes/admin/mediaAssets');
 
@@ -101,6 +103,7 @@ const apiHomePageSectionRoutes = require('./routes/api/homePageSection');
 const apiFaqRoutes = require('./routes/api/faq');
 const apiGroupServiceFaqRoutes = require('./routes/api/groupServiceFaq');
 const apiJobCategoryRoutes = require('./routes/api/jobCategory');
+const apiGrowthServiceRoutes = require('./routes/api/growthService');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -124,7 +127,8 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000').split(',');
+const allowedOrigins = (process.env.CORS_ORIGINS ||
+  'http://localhost:3000,http://localhost:5173,http://localhost:5174').split(',');
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -136,9 +140,43 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({
+  limit: '50mb',
+  // Meta signs the raw bytes of its webhook body, so the parsed object cannot
+  // verify it. Captured for that one route only — buffering every request body
+  // at a 50mb limit would be a real memory cost for no benefit.
+  verify: (req, res, buf) => {
+    if (req.originalUrl && req.originalUrl.includes('/webhooks/whatsapp')) req.rawBody = buf;
+  },
+}));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
+
+/**
+ * Short-circuit API requests while the database is unreachable.
+ *
+ * Without this, every request queues in Mongoose's buffer, waits the full 10s
+ * timeout and then fails with `Operation "crm_users.findOne()" buffering timed
+ * out` — a 500 that names an internal driver detail. A login spinner that hangs
+ * for ten seconds and then reports a generic server error is indistinguishable
+ * from a broken build; "database unavailable, retrying" is not.
+ *
+ * Deliberately not applied to /health, which exists precisely to be reachable
+ * when this is the case.
+ */
+app.use((req, res, next) => {
+  if (req.path === '/health') return next();
+  // Only guard the API surfaces; static assets and redirects need no database.
+  const needsDb = req.path.startsWith('/api/') || req.path.startsWith('/admin/api/')
+    || req.path.startsWith('/crm/');
+  if (!needsDb) return next();
+  if (require('mongoose').connection.readyState === 1) return next();
+  return res.status(503).json({
+    status: 'error',
+    message: 'Database unavailable — the API is retrying the connection. Please try again shortly.',
+    code: 'DB_UNAVAILABLE',
+  });
+});
 
 // Admin routes
 const adminBase = '/admin/api';
@@ -209,12 +247,16 @@ app.use(`${adminBase}/page`, adminPageRoutes);
 app.use(`${adminBase}/contact-us`, adminContactUsRoutes);
 app.use(`${adminBase}/free-consultation`, adminFreeConsultationRoutes);
 app.use(`${adminBase}/meetings`, adminMeetingRoutes);
+app.use(`${adminBase}/meeting-availability`, adminMeetingAvailabilityRoutes);
 app.use(`${adminBase}/faq`, adminFaqRoutes);
 app.use(`${adminBase}/group-service-item-faq`, adminGroupServiceItemFaqRoutes);
 app.use(`${adminBase}/whatsapp-template`, adminWhatsappTemplateRoutes);
 app.use(`${adminBase}/admin-post`, adminAdminPostRoutes);
 app.use(`${adminBase}/home-page-section`, adminHomePageSectionRoutes);
 app.use(`${adminBase}/home-page-section-item`, adminHomePageSectionItemRoutes);
+// Growth landing pages (YouTube growth / social video editing / podcast
+// editing) — self-contained module, all sub-resources under one mount.
+app.use(`${adminBase}/growth-service`, adminGrowthServiceRoutes);
 app.use(`${adminBase}/uploads`, adminUploadRoutes);
 app.use(`${adminBase}/media`, adminMediaAssetRoutes);
 
@@ -233,20 +275,59 @@ app.use('/api/home-page-sections', apiHomePageSectionRoutes);
 app.use('/api/faqs', apiFaqRoutes);
 app.use('/api/group-service/faqs', apiGroupServiceFaqRoutes);
 app.use('/api/job-categories', apiJobCategoryRoutes);
+app.use('/api/growth-services', apiGrowthServiceRoutes);
+
+// CRM (self-contained module under src/crm — mounted at /crm/api).
+// Also mounted at CRM_PUBLIC_PATH when that differs, because provider webhooks
+// can only reach whatever prefix the reverse proxy forwards to this app.
+{
+  const crmRoutes = require('./crm/routes');
+  const { mountPaths } = require('./crm/publicUrl');
+  for (const mount of mountPaths()) app.use(mount, crmRoutes);
+}
 
 // Health check
-app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+app.get('/health', (req, res) => {
+  // The process being up says nothing about whether it can serve data. Report
+  // the database separately so "the API is running but everything 500s" is one
+  // request away from being explained.
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const db = states[require('mongoose').connection.readyState] || 'unknown';
+  return res.status(db === 'connected' ? 200 : 503).json({
+    status: db === 'connected' ? 'ok' : 'degraded',
+    db,
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+
+// Socket.IO needs the raw HTTP server, so Express can no longer own listen().
+// Same port, same process — the upgrade handshake is routed by path
+// (/crm/socket.io), leaving every existing REST route untouched.
+const http = require('http');
+
+const server = http.createServer(app);
+try {
+  require('./crm/realtime').init(server, { origins: allowedOrigins });
+} catch (err) {
+  // A broken realtime layer must not stop the API from serving requests; the
+  // inbox falls back to its polling refresh.
+  logger.error(`CRM realtime init failed: ${err.message}`);
+}
+
+server.listen(PORT, () => {
   console.log('\n================================');
   console.log(`  API    : http://localhost:${PORT}`);
+  console.log(`  Socket : ws://localhost:${PORT}/crm/socket.io`);
   console.log(`  Mode   : ${process.env.NODE_ENV || 'development'}`);
   console.log('================================\n');
   // Verify SMTP at boot so a misconfiguration surfaces immediately (non-fatal).
   require('./services/mailer').verify().catch(() => {});
+  // Start the CRM scheduler + job handlers (Mongo-backed, no Redis).
+  try { require('./crm/services/workers').init(); } catch (err) { logger.error(`CRM workers init failed: ${err.message}`); }
   // Report Google Meet / Calendar status so it's obvious whether booking emails
   // will include a Meet link.
   if (require('./services/calendarService').isConfigured()) {
@@ -257,6 +338,13 @@ app.listen(PORT, () => {
         '/api/google/oauth/start to connect (bookings still work without a link).'
     );
   }
+  if (process.env.NODE_ENV !== 'test') {
+    require('./services/reminderService').startReminderPoller();
+  }
 });
 
 module.exports = app;
+// The raw HTTP server, for callers that need to close it or reuse the socket
+// binding (scripts/test-realtime.js). Requiring this module already starts it,
+// so a test must never create a second server on the same port.
+module.exports.httpServer = server;

@@ -41,7 +41,6 @@ import CreativeHouseServices from "../../components/SingleVideo/CreativeHouseSer
 // after sub-services so social proof lands once they've seen
 // what's included.
 import ServiceTrustStrip from "../../components/Services/ServiceTrustStrip/ServiceTrustStrip";
-import ServiceQuote from "../../components/Services/ServiceQuote/ServiceQuote";
 // Sticker FAQ accordion — sits between the trust signals and
 // the book-call CTA so common pre-call objections (timing,
 // commitment, team, exit, pricing) are answered before the

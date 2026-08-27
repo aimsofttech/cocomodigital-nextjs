@@ -11,6 +11,7 @@ import {
   getSocialPosts,
   getSolutionsPages,
 } from "@/src/lib/content";
+import { getGrowthServices } from "@/src/lib/growthServices";
 import blogManifest from "@/src/content/blog.generated.json";
 import { SITE_URL, staticSeoPaths } from "@/src/lib/seo";
 
@@ -174,6 +175,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     limit: 50,
     depth: 0,
   }).catch(() => ({ docs: [] }));
+
+  /* The three growth landing pages are static routes under /services, so they
+     are not in the services collection the loop below walks. Without this they
+     never reach the sitemap at all. */
+  const growthServices = await getGrowthServices().catch(() => []);
 
   const serviceItems: SlugItem[] = (servicesResult.docs || []).map(adaptSlugItem);
   const serviceGroups: SlugItem[] = serviceItems;
@@ -373,6 +379,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       item,
       DEFAULTS.servicePriority,
       DEFAULTS.staticFrequency,
+    );
+  }
+
+  /**
+   * /services/<growth-page> — the three growth landing pages.
+   * Highest service priority: these are the pages the service campaigns
+   * point at.
+   */
+  for (const item of growthServices) {
+    if (!item.slug) continue;
+    entries.push(
+      createEntry(
+        `/services/${item.slug}`,
+        DEFAULTS.servicePriority,
+        DEFAULTS.staticFrequency,
+        item.updatedAt || NOW,
+      ),
     );
   }
 

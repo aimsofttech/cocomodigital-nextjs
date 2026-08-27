@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   HomeIcon, ChartBarIcon, MegaphoneIcon, PaintBrushIcon, CodeBracketIcon,
@@ -6,10 +6,12 @@ import {
   DocumentTextIcon, EnvelopeIcon, ChevronRightIcon, XMarkIcon,
   RectangleGroupIcon, TagIcon, BuildingOffice2Icon, Squares2X2Icon,
   VideoCameraIcon, StarIcon, FilmIcon, RectangleStackIcon, ListBulletIcon,
-  RocketLaunchIcon, ClipboardDocumentListIcon, SparklesIcon, UserGroupIcon,
+  SparklesIcon, UserGroupIcon,
   QuestionMarkCircleIcon, NewspaperIcon, UsersIcon, UserIcon, PhoneIcon,
-  CursorArrowRaysIcon, TrophyIcon, ChatBubbleLeftRightIcon,
+  TrophyIcon,
   ArrowUpTrayIcon,
+  CalendarDaysIcon,
+  ArrowTrendingUpIcon, CursorArrowRaysIcon,
 } from '@heroicons/react/24/outline';
 
 // ── Nav tree ────────────────────────────────────────────────────────────────
@@ -120,6 +122,25 @@ const navigation: NavItem[] = [
     ],
   },
   {
+    label: 'Growth Services', icon: ArrowTrendingUpIcon,
+    children: [
+      { label: 'Services', path: '/growth-services/service', icon: ListBulletIcon },
+      {
+        label: 'Page Content', icon: RectangleStackIcon,
+        children: [
+          { label: 'Sections', path: '/growth-services/section', icon: Squares2X2Icon },
+          { label: 'Features', path: '/growth-services/feature', icon: SparklesIcon },
+          { label: 'Hero Stats', path: '/growth-services/stat', icon: TrophyIcon },
+          { label: 'Showcases', path: '/growth-services/showcase', icon: FilmIcon },
+          { label: 'Case Metrics', path: '/growth-services/case-metric', icon: ChartBarIcon },
+          { label: 'FAQs', path: '/growth-services/faq', icon: QuestionMarkCircleIcon },
+          { label: 'CTAs', path: '/growth-services/cta', icon: CursorArrowRaysIcon },
+          { label: 'SEO Content', path: '/growth-services/content', icon: DocumentTextIcon },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Blog', icon: BookOpenIcon,
     children: [
       { label: 'Categories', path: '/blog/category', icon: TagIcon },
@@ -155,7 +176,7 @@ const navigation: NavItem[] = [
     children: [
       { label: 'Contact Us', path: '/contact/contact-us', icon: EnvelopeIcon },
       { label: 'Meeting Requests', path: '/contact/meetings', icon: PhoneIcon },
-      { label: 'Form Submissions', path: '/marketing/form-submissions', icon: ClipboardDocumentListIcon },
+      { label: 'Booking Availability', path: '/contact/meeting-availability', icon: CalendarDaysIcon },
     ],
   },
 ];

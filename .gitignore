@@ -8,6 +8,11 @@ cocoma-react-admin/node_modules/
 .env.example
 .env.local
 .env.*.local
+# Timestamped env backups written by deploy/edit scripts (app/api/.env.bak.<ts>)
+.env.bak
+.env.bak.*
+*.env.bak
+*.env.bak.*
 # cocoma-node-backend/.env
 
 # Logs
@@ -23,7 +28,8 @@ cocoma-react-admin/dist/
 .DS_Store
 Thumbs.db
 
-# Active monorepo deploy (web/api/admin) — local env, build output, machine config
+# Active monorepo deploy (web/api/admin/crm) — local env, build output, machine config
 .env.production
 app/admin/dist/
+app/crm/dist/
 ecosystem.deploy.js

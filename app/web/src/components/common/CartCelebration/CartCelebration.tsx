@@ -73,8 +73,6 @@ export default function CartCelebration() {
 
   useEffect(() => {
     if (cartCount > prevCountRef.current) {
-
-      console.log("[CartCelebration] fired — count is now", cartCount);
       setCelebration({
         id: Date.now(),
         count: cartCount,

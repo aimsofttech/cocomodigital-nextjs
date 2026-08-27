@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useLocation } from "@/src/lib/navigation";
 import { useCart } from "@/src/lib/cart";
-import { FaRegClock, FaVideo, FaGlobeAsia, FaArrowLeft, FaCheck, FaChevronRight } from "react-icons/fa";
+import { FaRegClock, FaVideo, FaGlobeAsia, FaArrowLeft } from "react-icons/fa";
 import ScheduleMeeting   from "./ScheduleMeeting";
 import BookingConfirmed  from "./BookingConfirmed";
 
@@ -75,6 +75,11 @@ const ScheduleMeetingDetails = () => {
   const [pickedDate,   setPickedDate]   = useState<Date | null>(null);
   const [pickedTime,   setPickedTime]   = useState<string>("");
   const [pickedTz,     setPickedTz]     = useState<string>("");
+  /* The exact UTC instant the availability feed offered for this slot. Sent
+     verbatim so the reservation lands on the slot the visitor saw, rather than
+     on one re-derived from a wall-clock string (which is ambiguous across a
+     DST fall-back hour). */
+  const [pickedStartUtc, setPickedStartUtc] = useState<string>("");
   const [bookingInfo,  setBookingInfo]  = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -86,6 +91,7 @@ const ScheduleMeetingDetails = () => {
     setPickedDate(incomingDate);
     setPickedTime(navOnce.time);
     setPickedTz(navOnce.timeZone || "");
+    setPickedStartUtc(navOnce.startUtc || "");
     setStage("form");
   }, [navOnce]);
 
@@ -105,10 +111,11 @@ const ScheduleMeetingDetails = () => {
   const [submitting,  setSubmitting]  = useState(false);
 
   /* Called by <ScheduleMeeting onConfirm={…}> when user confirms a slot */
-  const handleTimeConfirmed = useCallback((date: Date, time: string, tz: string) => {
+  const handleTimeConfirmed = useCallback((date: Date, time: string, tz: string, startUtc: string) => {
     setPickedDate(date);
     setPickedTime(time);
     setPickedTz(tz);
+    setPickedStartUtc(startUtc || "");
     setStage("form");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -151,9 +158,16 @@ const ScheduleMeetingDetails = () => {
     const t24 = convertTo24Hour(pickedTime);
     if (!t24) { setSubmitError("Invalid time — go back and pick again."); return; }
 
-    // Exact slot instant (UTC) — the server uses this to reserve the slot and
-    // reject duplicate bookings. Built from the picked local wall-clock time.
-    const meetingStartUtc = (() => {
+    /* Exact slot instant (UTC) — the server uses this to reserve the slot and
+       reject duplicate bookings. Normally the instant the availability feed
+       offered; rebuilt from the local wall-clock only for a slot that reached
+       this page without one (e.g. older persisted navigation state).
+
+       No availability rule is checked here. Which days and times are bookable
+       is the admin's configuration, and the API is the only place that decides
+       it — a stale tab or a hand-crafted state object gets a 400 below with the
+       server's own reason, and is sent back to the picker. */
+    const meetingStartUtc = pickedStartUtc || (() => {
       const d = new Date(`${finalDate}T${t24}`);
       return Number.isNaN(d.getTime()) ? null : d.toISOString();
     })();
@@ -185,9 +199,12 @@ const ScheduleMeetingDetails = () => {
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
-        // Slot was taken between picking and submitting — send the user back to
-        // the picker, which re-fetches availability and disables the taken slot.
-        if (res.status === 409) {
+        /* 409 — taken between picking and submitting.
+           400 — the slot is no longer offered at all (an admin closed the day
+           or hid the time while this tab sat open).
+           Both send the user back to the picker, which re-fetches availability
+           and shows the schedule as it now stands. */
+        if (res.status === 409 || res.status === 400) {
           setSubmitError(b?.message || "That time slot is no longer available. Please pick another.");
           setStage("picker");
           setStep(1);

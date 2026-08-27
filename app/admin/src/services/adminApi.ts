@@ -169,6 +169,19 @@ export const freeConsultationApi = {
 export const homePageSectionApi = createCrudService('home-page-section');
 export const homePageSectionItemApi = createCrudService('home-page-section-item');
 
+/* Growth Services — the three growth landing pages (YouTube growth, social
+   media video editing, podcast editing). One parent record per page plus seven
+   child collections, every one of them scoped by `growthServiceId`. */
+export const growthServiceApi = createCrudService('growth-service/service');
+export const growthServiceSectionApi = createCrudService('growth-service/section');
+export const growthServiceFeatureApi = createCrudService('growth-service/feature');
+export const growthServiceStatApi = createCrudService('growth-service/stat');
+export const growthServiceShowcaseApi = createCrudService('growth-service/showcase');
+export const growthServiceCaseMetricApi = createCrudService('growth-service/case-metric');
+export const growthServiceFaqApi = createCrudService('growth-service/faq');
+export const growthServiceCtaApi = createCrudService('growth-service/cta');
+export const growthServiceContentApi = createCrudService('growth-service/content');
+
 export const meetingApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/meetings`, { params }),
   getStats: () => api.get(`${BASE}/meetings/stats`),
@@ -180,8 +193,38 @@ export const meetingApi = {
   getAssignees: () => api.get(`${BASE}/meetings/assignees`),
   assign: (id: string, data: { name: string; email: string }) =>
     api.put(`${BASE}/meetings/${id}/assign`, data),
-  checkAvailability: (params: { date: string; timezone?: string; excludeId?: string }) =>
+  checkAvailability: (params: { date: string; excludeId?: string }) =>
     api.get(`${BASE}/meetings/availability`, { params }),
   updateStatus: (id: string, status: string) => api.put(`${BASE}/meetings/${id}/status`, { status }),
   delete: (id: string) => api.delete(`${BASE}/meetings/${id}`),
+};
+
+/* The bookable schedule itself — which weekdays are open and which 15-minute
+   slots each one offers. One document, replaced whole on save, and the single
+   source of truth for the public picker as well as the reschedule form. */
+export interface AvailabilityDay {
+  weekday: number; // 0 = Sunday … 6 = Saturday
+  enabled: boolean;
+  slots: string[]; // enabled slot starts, "HH:mm" in the studio's timezone
+}
+export interface AvailabilityConfig {
+  timezone: string;
+  slotStepMinutes: number;
+  minNoticeMinutes: number;
+  days: AvailabilityDay[];
+  /* One-off closures, "YYYY-MM-DD" in the studio's timezone. A listed date is
+     unbookable whatever its weekday rules say; removing it restores them. */
+  blockedDates: string[];
+  updatedAt: string | null;
+  allSlots: string[];
+  weekdayNames: string[];
+}
+export const meetingAvailabilityApi = {
+  get: () => api.get(`${BASE}/meeting-availability`),
+  update: (data: {
+    timezone?: string;
+    minNoticeMinutes?: number;
+    days: AvailabilityDay[];
+    blockedDates?: string[];
+  }) => api.put(`${BASE}/meeting-availability`, data),
 };
