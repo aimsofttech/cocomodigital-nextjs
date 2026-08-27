@@ -18,7 +18,7 @@
     "build": "npm run build -w @cocoma/admin",
     "start": "npm run start -w @cocoma/api",
     "seed": "npm run seed -w @cocoma/api",
-    "install:all": "npm install"
+    "install:all": "npm install && npm install --prefix app/web"
   },
   "devDependencies": {
     "concurrently": "^9.0.0",

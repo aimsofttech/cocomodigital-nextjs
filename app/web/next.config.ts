@@ -60,10 +60,29 @@ const nextConfig: NextConfig = {
          to carry near-duplicate podcast copy, which split ranking
          signals with the service page. It now 301s so all equity lands
          on the canonical URL. Keep in sync with
-         REDIRECTED_SOLUTION_SLUGS in src/app/sitemap.ts. */
+         REDIRECTED_SOLUTION_SLUGS in src/app/sitemap.ts.
+
+         2026-08-27: retargeted. b70fac9 moved the canonical money page
+         out to /podcast-video-editing-marketing-services but left this
+         destination pointing at the old path, which Anshu's
+         admin-driven GrowthServices module has since reclaimed with a
+         DIFFERENT page. So podcast equity was landing on a page this
+         redirect was never meant to feed. sitemap.ts already documented
+         the intended target; only this line was stale. */
       {
         source: "/solutions/podcasters",
-        destination: "/services/podcast-editing-and-growth-services",
+        destination: "/podcast-video-editing-marketing-services",
+        permanent: true,
+      },
+      /* The canonical page lived under /services/ until b70fac9. The
+         old-location-plus-new-slug URL is the natural thing to type (and
+         to have bookmarked), and /services/[slug] answers it with HTTP
+         200 and an empty "Service Category" shell rather than a 404 —
+         a soft-404 that reads to a human as "the page is broken".
+         Send it to the real page instead. */
+      {
+        source: "/services/podcast-video-editing-marketing-services",
+        destination: "/podcast-video-editing-marketing-services",
         permanent: true,
       },
       {

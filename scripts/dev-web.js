@@ -15,7 +15,8 @@
  *
  * Wired up as the `dev:web` script in the root package.json.
  */
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 const HEALTH_URL = process.env.API_HEALTH_URL || 'http://localhost:5000/health';
@@ -49,7 +50,38 @@ async function waitForApi() {
   return false;
 }
 
+/**
+ * Installs app/web's dependencies if they are missing.
+ *
+ * app/web is deliberately NOT a root workspace — it ships its own
+ * package-lock.json and its own Dockerfile that runs `npm install` inside the
+ * directory. The cost of that independence is that root `npm install` never
+ * touches it, so on a fresh clone `npm run dev` reached this script with no
+ * `next` binary and died with "'next' is not recognized", which reads like a
+ * broken PATH rather than a missing install. Doing it here keeps the one-command
+ * `npm run dev` promise true for the web pane too.
+ */
+function ensureDeps() {
+  if (fs.existsSync(path.join(WEB_DIR, 'node_modules', 'next'))) return true;
+  console.log('[dev-web] app/web dependencies missing — running npm install …');
+  const res = spawnSync('npm', ['install'], {
+    cwd: WEB_DIR,
+    stdio: 'inherit',
+    shell: true,
+  });
+  if (res.status !== 0) {
+    console.error(
+      `[dev-web] npm install failed in app/web (exit ${res.status}). ` +
+        'Run it there by hand to see the full error.',
+    );
+    return false;
+  }
+  return true;
+}
+
 function startNext() {
+  if (!ensureDeps()) process.exit(1);
+
   /* npm resolves through a shell on Windows (npm.cmd), so shell:true is
      required for the command to be found at all. */
   const child = spawn('npm', ['run', 'dev'], {

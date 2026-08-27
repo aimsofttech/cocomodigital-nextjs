@@ -24,11 +24,17 @@ interface CocomaFooterProps {
   solutions: ShellSolutionNavItem[];
 }
 
-/* Static growth-service pages. These live as literal routes under
-   src/app/services/ rather than in the API's services collection, so
-   they never appear in `serviceItems` — they're appended to the end of
-   the Services column by hand. Keep the hrefs in sync with the route
-   folder names if either side is ever renamed. */
+/* Static growth-service pages. These are literal route folders under
+   src/app/ rather than rows in the API's services collection, so they
+   never appear in `serviceItems` — they're appended to the end of the
+   Services column by hand. Keep the hrefs in sync with the route
+   folder names if either side is ever renamed.
+
+   Most sit under src/app/services/, but not all: the podcast money
+   page deliberately lives at the root (b70fac9) so it cannot collide
+   with the admin-driven GrowthServices module, so its href has no
+   /services/ prefix. Write each href out in full rather than deriving
+   it from a slug. */
 const GROWTH_SERVICE_LINKS: { href: string; label: string }[] = [
   {
     href: "/services/end-to-end-youtube-growth-services",
@@ -41,6 +47,13 @@ const GROWTH_SERVICE_LINKS: { href: string; label: string }[] = [
   {
     href: "/services/podcast-editing-and-growth-services",
     label: "Podcast Editing & Growth Services",
+  },
+  /* The canonical podcast ranking target. Sits next to the entry above
+     on purpose: they are two different pages with deliberately
+     different titles (b70fac9), not a duplicate. */
+  {
+    href: "/podcast-video-editing-marketing-services",
+    label: "Podcast Video Editing & Marketing Services",
   },
 ];
 
@@ -140,8 +153,8 @@ export default function CocomaFooter({ serviceItems, otherServices, solutions }:
                 </li>
               ))}
               {/* Appended after the API-driven list. The old "No services
-                  available" fallback is gone: these three always render, so
-                  the column can no longer end up bare. */}
+                  available" fallback is gone: these always render, so the
+                  column can no longer end up bare. */}
               {GROWTH_SERVICE_LINKS.map((item) => (
                 <li key={item.href}>
                   <Link to={item.href}>{item.label}</Link>
