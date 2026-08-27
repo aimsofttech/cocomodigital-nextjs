@@ -59235,42 +59235,47 @@ html {
 }
 
 /* The figure is the entry point. This section argues reach, and a
-   number lands faster than a sentence about reach. */
+   number lands faster than a sentence about reach.
+
+   Number and unit share a baseline so they read as one quantity rather
+   than two stacked lines. Four typographic levels (number / label /
+   title / body) inside a 265px column is one level too many — the label
+   and the title were saying the same thing twice. */
 .pod-dist-stat {
-  margin: 0 0 var(--space-4);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  margin: 0 0 var(--space-3);
 }
 
 .pod-dist-stat-value {
-  display: block;
   font-family: var(--font-display);
-  font-size: var(--fs-h2);
+  /* Not --fs-h2 (56px). At that size "35,000+" ran to 95% of a 311px
+     column while "4" sat at 32% — the row's visual weight tracked digit
+     count rather than importance, and the longest stat had no air before
+     the column edge. */
+  font-size: clamp(2.5rem, 3vw, 2.75rem);
   font-weight: var(--fw-bold);
   line-height: 1;
   letter-spacing: var(--tracking-tight);
   color: var(--brand);
 }
 
-.pod-dist-stat-label {
-  display: block;
-  margin-top: var(--space-2);
+.pod-dist-stat-unit {
   font-size: var(--fs-small);
-  line-height: var(--leading-snug);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   color: var(--text-on-dark-soft);
 }
 
-/* Icon sits inline with the title now, at text size — a 44px yellow
-   tile per card was a fifth box competing with the four it sat in. */
-.pod-dist-icon {
-  width: 1.1em;
-  height: 1.1em;
-  flex: none;
-  color: var(--brand);
-}
-
+/* No icon in this card. The number is its one accent — a second yellow
+   glyph beside the title gave a 265px column two focal points of the
+   same colour, and these four glyphs (arrow, globe, node, chart) carried
+   no meaning the title did not already carry. */
 .pod-dist-title {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: var(--fw-bold);

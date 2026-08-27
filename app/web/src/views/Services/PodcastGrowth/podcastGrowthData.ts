@@ -509,39 +509,39 @@ export const DISTRIBUTION = {
      number is the fastest way to make that argument, and it gives the
      eye four anchors instead of four paragraphs.
 
+     statUnit is a UNIT, not a second sentence — it shares a baseline
+     with the number so the two read as one quantity. Qualifiers that
+     used to live here ("natively", "in-house") belong in the body.
+
      Every figure is checkable: six named platforms, the 20+ languages
      and 35,000+ videos Cocoma already publishes, and the four
      measurement layers described in the Optimize stage. Nothing here is
      a podcast result. */
   pillars: [
     {
-      icon: "publish",
       stat: "6",
-      statLabel: "platforms, natively",
+      statUnit: "platforms",
       title: "Multi-platform publishing",
       body:
         "YouTube, Shorts, Instagram, TikTok, LinkedIn and X — each with the format and cadence that platform rewards, not one file cross-posted six times.",
     },
     {
-      icon: "globe",
       stat: "20+",
-      statLabel: "languages in-house",
+      statUnit: "languages",
       title: "Language expansion",
       body:
-        "Transcreation already runs at this scale for entertainment clients. For a show that works in English, a second market is the fastest route to a bigger one.",
+        "Transcreation already runs in-house at this scale for entertainment clients. For a show that works in English, a second market is the fastest route to a bigger one.",
     },
     {
-      icon: "network",
       stat: "35,000+",
-      statLabel: "videos of operating depth",
+      statUnit: "videos",
       title: "Catalog and channel operations",
       body:
         "Back catalog re-cut and re-packaged, playlists and end screens structured so one episode leads to the next.",
     },
     {
-      icon: "chart",
       stat: "4",
-      statLabel: "layers, reported monthly",
+      statUnit: "layers",
       title: "Discovery measured, not assumed",
       body:
         "Impressions, traffic sources and suggested-video pickup get their own layer — so distribution is something you steer, not something you hope for.",

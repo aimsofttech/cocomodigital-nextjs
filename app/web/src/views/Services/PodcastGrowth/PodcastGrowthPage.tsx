@@ -255,10 +255,9 @@ export default function PodcastGrowthPage() {
               <article key={d.title} className="pod-dist-card">
                 <p className="pod-dist-stat">
                   <span className="pod-dist-stat-value">{d.stat}</span>
-                  <span className="pod-dist-stat-label">{d.statLabel}</span>
+                  <span className="pod-dist-stat-unit">{d.statUnit}</span>
                 </p>
                 <h3 className="pod-dist-title">
-                  <Icon name={d.icon} className="pod-dist-icon" />
                   {d.title}
                 </h3>
                 <p className="pod-dist-body">{d.body}</p>
