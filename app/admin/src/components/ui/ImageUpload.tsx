@@ -25,6 +25,10 @@ interface ImageUploadProps {
   label?: string;
   /** Current stored S3 URL (controlled). */
   value?: string;
+  /** Thumbnail source, when it differs from the stored value. Used where a
+      record can hold a site-relative path (a file shipped with the website)
+      that the admin origin cannot resolve on its own. Defaults to `value`. */
+  previewSrc?: string;
   /** Called with the uploaded S3 URL (or '' when cleared). */
   onChange: (url: string) => void;
   /** Which dedicated upload API to use. Defaults to 'image'. */
@@ -58,6 +62,7 @@ export default function ImageUpload({
   name,
   label,
   value,
+  previewSrc,
   onChange,
   uploadType = 'image',
   folder,
@@ -125,6 +130,8 @@ export default function ImageUpload({
   };
 
   const hasMedia = Boolean(value);
+  // Only the thumbnail uses this; onChange still emits the stored value.
+  const preview = previewSrc || value;
 
   return (
     <div>
@@ -139,13 +146,13 @@ export default function ImageUpload({
           <div className="relative group">
             {isVideo ? (
               <video
-                src={value}
+                src={preview}
                 className="w-24 h-24 object-cover rounded-lg border border-gray-200 bg-black"
                 muted
               />
             ) : (
               <img
-                src={value}
+                src={preview}
                 alt="preview"
                 className="w-24 h-24 object-cover rounded-lg border border-gray-200"
               />

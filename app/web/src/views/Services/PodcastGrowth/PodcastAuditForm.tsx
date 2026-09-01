@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
+import type { PodcastAuditFormCopy } from "@/src/lib/podcast";
 
 /**
  * Free-podcast-audit capture. Three fields only — name, email, show link.
@@ -12,8 +13,16 @@ import { FaArrowRight } from "react-icons/fa";
  * message body behind a `[Type: ...]` tag, matching the convention
  * already used by ContactUs so podcast-audit leads are filterable in
  * the admin without a schema change.
+ *
+ * Every label, placeholder and message comes from the API so the copy is
+ * editable in the admin panel; the endpoint and the field names are not,
+ * because they are a contract with the leads collection rather than content.
  */
-export default function PodcastAuditForm() {
+export default function PodcastAuditForm({
+  copy,
+}: {
+  copy: PodcastAuditFormCopy;
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [showLink, setShowLink] = useState("");
@@ -36,7 +45,7 @@ export default function PodcastAuditForm() {
           name: name.trim(),
           email: email.trim(),
           phone: "",
-          message: `[Type: Podcast audit request]\n\nShow link: ${showLink.trim()}`,
+          message: `[Type: ${copy.leadTag}]\n\nShow link: ${showLink.trim()}`,
         }),
       });
       if (!res.ok) {
@@ -47,10 +56,7 @@ export default function PodcastAuditForm() {
       }
       setDone(true);
     } catch (err: any) {
-      setError(
-        err?.message ||
-          "Something went wrong. Try again, or email anil@cocomadigital.com directly.",
-      );
+      setError(err?.message || copy.errorFallback);
     } finally {
       setSubmitting(false);
     }
@@ -59,11 +65,10 @@ export default function PodcastAuditForm() {
   if (done) {
     return (
       <div className="pod-audit-done" role="status">
-        <p className="pod-audit-done-title">Got it.</p>
+        <p className="pod-audit-done-title">{copy.doneTitle}</p>
         <p className="pod-audit-done-body">
-          We&rsquo;ll review the show and come back with the audit findings.
-          If it&rsquo;s urgent, email{" "}
-          <a href="mailto:anil@cocomadigital.com">anil@cocomadigital.com</a>.
+          {copy.doneBody}{" "}
+          <a href={`mailto:${copy.contactEmail}`}>{copy.contactEmail}</a>.
         </p>
       </div>
     );
@@ -72,7 +77,7 @@ export default function PodcastAuditForm() {
   return (
     <form className="pod-audit-form" onSubmit={handleSubmit} noValidate={false}>
       <div className="pod-audit-field">
-        <label htmlFor="pod-audit-name">Name</label>
+        <label htmlFor="pod-audit-name">{copy.nameLabel}</label>
         <input
           id="pod-audit-name"
           name="name"
@@ -81,11 +86,11 @@ export default function PodcastAuditForm() {
           autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
+          placeholder={copy.namePlaceholder}
         />
       </div>
       <div className="pod-audit-field">
-        <label htmlFor="pod-audit-email">Email</label>
+        <label htmlFor="pod-audit-email">{copy.emailLabel}</label>
         <input
           id="pod-audit-email"
           name="email"
@@ -94,11 +99,11 @@ export default function PodcastAuditForm() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@company.com"
+          placeholder={copy.emailPlaceholder}
         />
       </div>
       <div className="pod-audit-field">
-        <label htmlFor="pod-audit-show">Show link</label>
+        <label htmlFor="pod-audit-show">{copy.showLabel}</label>
         <input
           id="pod-audit-show"
           name="showLink"
@@ -106,7 +111,7 @@ export default function PodcastAuditForm() {
           required
           value={showLink}
           onChange={(e) => setShowLink(e.target.value)}
-          placeholder="https://youtube.com/@yourshow"
+          placeholder={copy.showPlaceholder}
         />
       </div>
 
@@ -121,12 +126,10 @@ export default function PodcastAuditForm() {
         className="pod-cta pod-cta--primary pod-audit-submit"
         disabled={submitting}
       >
-        {submitting ? "Sending…" : "Get a free podcast audit"}
+        {submitting ? copy.submittingLabel : copy.submitLabel}
         <FaArrowRight aria-hidden="true" />
       </button>
-      <p className="pod-audit-note">
-        No obligation. You get the findings either way.
-      </p>
+      <p className="pod-audit-note">{copy.note}</p>
     </form>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { FaPlay } from "react-icons/fa";
-import { HERO_MEDIA } from "./podcastGrowthData";
+import type { PodcastHeroMediaData } from "@/src/lib/podcast";
 
 /**
  * Hero media: a real Cocoma recording still, ready to become the pitch
@@ -18,11 +18,16 @@ import { HERO_MEDIA } from "./podcastGrowthData";
  *
  * With no videoId set, this renders as a plain photograph — deliberately
  * no play button, because a control that does nothing is worse than no
- * control. Set HERO_MEDIA.videoId in podcastGrowthData to switch it on.
+ * control. Set the hero video id in the admin panel (Podcast → Pages) to
+ * switch it on.
  */
-export default function PodcastHeroMedia() {
+export default function PodcastHeroMedia({
+  media,
+}: {
+  media: PodcastHeroMediaData;
+}) {
   const [playing, setPlaying] = useState(false);
-  const { videoId, poster, alt, playLabel } = HERO_MEDIA;
+  const { videoId, poster, alt, playLabel } = media;
 
   if (videoId && playing) {
     return (
@@ -37,6 +42,10 @@ export default function PodcastHeroMedia() {
       </div>
     );
   }
+
+  /* No poster on the record — render the frame without an image rather than
+     an <img> with an empty src, which would draw a broken-image glyph. */
+  if (!poster) return <figure className="pod-media" />;
 
   const poster_ = (
     <Image

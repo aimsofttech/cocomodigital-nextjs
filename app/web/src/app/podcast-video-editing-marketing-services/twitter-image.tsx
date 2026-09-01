@@ -11,6 +11,9 @@ import {
    Route segment config must be declared with literal exports HERE — Next
    reads it at compile time and cannot follow a re-export. The card
    itself comes from the shared generator so the two never drift. */
+/* Rendered per request rather than at build time: the card copy lives in the
+   admin panel and the API is not reachable during `next build`. */
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const alt = OG_ALT;
 export const size = OG_SIZE;

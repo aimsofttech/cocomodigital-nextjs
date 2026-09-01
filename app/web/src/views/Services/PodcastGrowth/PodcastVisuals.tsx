@@ -22,8 +22,10 @@ const box = {
   focusable: "false" as const,
 };
 
-/* Service + audience + operations iconography. Keyed by the `icon`
-   field in podcastGrowthData so content and art stay decoupled. */
+/* Service + audience + operations iconography. Keyed by the `icon` field on
+   each card record in the API so content and art stay decoupled — a name the
+   registry does not know renders no icon, which is why the admin offers these
+   as a closed list rather than free text. */
 export const ICONS: Record<string, (p: IconProps) => React.ReactElement> = {
   video: (p) => (
     <svg {...box} className={p.className}>

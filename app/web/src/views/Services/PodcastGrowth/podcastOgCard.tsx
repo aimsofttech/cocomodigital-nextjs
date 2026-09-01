@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { getPodcastPage } from "@/src/lib/podcast";
+import { PODCAST_FALLBACK } from "./podcastFallback";
 
 /**
  * The social card for the podcast money page, shared by opengraph-image
@@ -9,6 +11,10 @@ import { ImageResponse } from "next/og";
  * should, and this keeps the card in sync with the copy automatically.
  * No webfont is fetched: remote font loading would make the build depend
  * on the network, and the system stack renders fine at this size.
+ *
+ * The copy comes from the API (admin panel → Podcast → the share-card
+ * fields), falling back to the shipped copy when the API is unreachable, so a
+ * scraper always gets a real card.
  *
  * Deliberately a shared FUNCTION, not a re-export. Next reads route
  * segment config (`runtime`, `size`, `alt`) at compile time from literal
@@ -21,7 +27,10 @@ export const OG_CONTENT_TYPE = "image/png";
 export const OG_ALT =
   "Cocoma Digital — Podcast Video Editing & Marketing Services";
 
-export function podcastOgCard() {
+export async function podcastOgCard() {
+  const page = (await getPodcastPage()) ?? PODCAST_FALLBACK;
+  const card = page.ogCard;
+
   return new ImageResponse(
     (
       <div
@@ -46,7 +55,7 @@ export function podcastOgCard() {
               fontWeight: 700,
             }}
           >
-            Cocoma Digital
+            {card.eyebrow}
           </div>
           <div
             style={{
@@ -59,7 +68,7 @@ export function podcastOgCard() {
               maxWidth: 940,
             }}
           >
-            Podcast Video Editing &amp; Marketing Services
+            {card.title}
           </div>
         </div>
 
@@ -82,36 +91,39 @@ export function podcastOgCard() {
               maxWidth: 880,
             }}
           >
-            One recording becomes a multi-platform growth engine — episodes,
-            clips, packaging, publishing and analytics, run as one system.
+            {card.description}
           </div>
           <div style={{ display: "flex", gap: 16, marginTop: 30 }}>
-            <div
-              style={{
-                display: "flex",
-                padding: "10px 22px",
-                borderRadius: 999,
-                background: "#FFF000",
-                color: "#000000",
-                fontSize: 24,
-                fontWeight: 700,
-              }}
-            >
-              From $2,000/month
-            </div>
-            <div
-              style={{
-                display: "flex",
-                padding: "10px 22px",
-                borderRadius: 999,
-                border: "2px solid rgba(255,255,255,0.35)",
-                color: "#FFFFFF",
-                fontSize: 24,
-                fontWeight: 700,
-              }}
-            >
-              US · Canada · UK hours
-            </div>
+            {card.badgeOne ? (
+              <div
+                style={{
+                  display: "flex",
+                  padding: "10px 22px",
+                  borderRadius: 999,
+                  background: "#FFF000",
+                  color: "#000000",
+                  fontSize: 24,
+                  fontWeight: 700,
+                }}
+              >
+                {card.badgeOne}
+              </div>
+            ) : null}
+            {card.badgeTwo ? (
+              <div
+                style={{
+                  display: "flex",
+                  padding: "10px 22px",
+                  borderRadius: 999,
+                  border: "2px solid rgba(255,255,255,0.35)",
+                  color: "#FFFFFF",
+                  fontSize: 24,
+                  fontWeight: 700,
+                }}
+              >
+                {card.badgeTwo}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

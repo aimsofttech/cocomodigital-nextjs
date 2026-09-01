@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import type { Faq } from "./podcastGrowthData";
+import type { PodcastFaqItem } from "@/src/lib/podcast";
 
 /**
  * Accessible FAQ accordion.
@@ -14,7 +14,7 @@ import type { Faq } from "./podcastGrowthData";
  * being unmounted, so the answer text is present for crawlers even when
  * the row is closed, matching the FAQPage JSON-LD emitted by the page.
  */
-export default function PodcastFaq({ items }: { items: Faq[] }) {
+export default function PodcastFaq({ items }: { items: PodcastFaqItem[] }) {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
@@ -22,7 +22,7 @@ export default function PodcastFaq({ items }: { items: Faq[] }) {
       {items.map((item, i) => {
         const isOpen = open === i;
         return (
-          <li key={item.q} className="pod-faq-item">
+          <li key={item.question} className="pod-faq-item">
             <h3 className="pod-faq-question">
               <button
                 type="button"
@@ -32,7 +32,7 @@ export default function PodcastFaq({ items }: { items: Faq[] }) {
                 id={`pod-faq-trigger-${i}`}
                 onClick={() => setOpen(isOpen ? null : i)}
               >
-                <span className="pod-faq-trigger-text">{item.q}</span>
+                <span className="pod-faq-trigger-text">{item.question}</span>
                 <span className="pod-faq-icon" aria-hidden="true">
                   {isOpen ? <FaMinus /> : <FaPlus />}
                 </span>
@@ -45,7 +45,7 @@ export default function PodcastFaq({ items }: { items: Faq[] }) {
               className="pod-faq-panel"
               hidden={!isOpen}
             >
-              <p className="pod-faq-answer">{item.a}</p>
+              <p className="pod-faq-answer">{item.answer}</p>
             </div>
           </li>
         );

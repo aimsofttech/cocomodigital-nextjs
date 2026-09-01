@@ -12,6 +12,7 @@ import {
   ArrowUpTrayIcon,
   CalendarDaysIcon,
   ArrowTrendingUpIcon, CursorArrowRaysIcon,
+  MicrophoneIcon,
 } from '@heroicons/react/24/outline';
 
 // ── Nav tree ────────────────────────────────────────────────────────────────
@@ -136,6 +137,23 @@ const navigation: NavItem[] = [
           { label: 'FAQs', path: '/growth-services/faq', icon: QuestionMarkCircleIcon },
           { label: 'CTAs', path: '/growth-services/cta', icon: CursorArrowRaysIcon },
           { label: 'SEO Content', path: '/growth-services/content', icon: DocumentTextIcon },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Podcast', icon: MicrophoneIcon,
+    children: [
+      { label: 'Pages', path: '/podcast/page', icon: ListBulletIcon },
+      {
+        label: 'Page Sections', icon: RectangleStackIcon,
+        children: [
+          { label: 'Figure Tiles', path: '/podcast/stat', icon: TrophyIcon },
+          { label: 'Section Items', path: '/podcast/card', icon: SparklesIcon },
+          { label: 'Method Stages', path: '/podcast/stage', icon: Squares2X2Icon },
+          { label: 'Studio Shots', path: '/podcast/shot', icon: PhotoIcon },
+          { label: 'FAQs', path: '/podcast/faq', icon: QuestionMarkCircleIcon },
+          { label: 'Buttons & Links', path: '/podcast/cta', icon: CursorArrowRaysIcon },
         ],
       },
     ],

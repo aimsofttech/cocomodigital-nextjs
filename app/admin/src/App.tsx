@@ -173,6 +173,16 @@ const GrowthFaqList = lazy(() => import('@/pages/growthServices/FaqList'));
 const GrowthCtaList = lazy(() => import('@/pages/growthServices/CtaList'));
 const GrowthContentList = lazy(() => import('@/pages/growthServices/ContentList'));
 
+// Podcast — the podcast money page and all of its sections
+const PodcastPageList = lazy(() => import('@/pages/podcast/PageList'));
+const PodcastPageForm = lazy(() => import('@/pages/podcast/PageForm'));
+const PodcastStatList = lazy(() => import('@/pages/podcast/StatList'));
+const PodcastCardList = lazy(() => import('@/pages/podcast/CardList'));
+const PodcastStageList = lazy(() => import('@/pages/podcast/StageList'));
+const PodcastShotList = lazy(() => import('@/pages/podcast/ShotList'));
+const PodcastFaqList = lazy(() => import('@/pages/podcast/FaqList'));
+const PodcastCtaList = lazy(() => import('@/pages/podcast/CtaList'));
+
 // Home Page Sections
 const HomePageSectionList = lazy(() => import('@/pages/settings/HomePageSectionList'));
 const HomePageSectionForm = lazy(() => import('@/pages/settings/HomePageSectionForm'));
@@ -394,6 +404,17 @@ export default function App() {
           <Route path="growth-services/faq" element={<GrowthFaqList />} />
           <Route path="growth-services/cta" element={<GrowthCtaList />} />
           <Route path="growth-services/content" element={<GrowthContentList />} />
+
+          {/* Podcast — section lists are scoped by ?podcastPageId and ?sectionKey */}
+          <Route path="podcast/page" element={<PodcastPageList />} />
+          <Route path="podcast/page/add" element={<PodcastPageForm />} />
+          <Route path="podcast/page/edit/:id" element={<PodcastPageForm />} />
+          <Route path="podcast/stat" element={<PodcastStatList />} />
+          <Route path="podcast/card" element={<PodcastCardList />} />
+          <Route path="podcast/stage" element={<PodcastStageList />} />
+          <Route path="podcast/shot" element={<PodcastShotList />} />
+          <Route path="podcast/faq" element={<PodcastFaqList />} />
+          <Route path="podcast/cta" element={<PodcastCtaList />} />
 
           {/* Blog */}
           <Route path="blog/category" element={<BlogCategoryList />} />

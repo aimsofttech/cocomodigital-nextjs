@@ -182,6 +182,18 @@ export const growthServiceFaqApi = createCrudService('growth-service/faq');
 export const growthServiceCtaApi = createCrudService('growth-service/cta');
 export const growthServiceContentApi = createCrudService('growth-service/content');
 
+/* Podcast — the podcast money page at
+   /podcast-video-editing-marketing-services. One parent record plus six section
+   collections, every one of them scoped by `podcastPageId` (and, where a
+   collection carries more than one band, by `sectionKey`). */
+export const podcastPageApi = createCrudService('podcast/page');
+export const podcastStatApi = createCrudService('podcast/stat');
+export const podcastCardApi = createCrudService('podcast/card');
+export const podcastStageApi = createCrudService('podcast/stage');
+export const podcastShotApi = createCrudService('podcast/shot');
+export const podcastFaqApi = createCrudService('podcast/faq');
+export const podcastCtaApi = createCrudService('podcast/cta');
+
 export const meetingApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/meetings`, { params }),
   getStats: () => api.get(`${BASE}/meetings/stats`),
