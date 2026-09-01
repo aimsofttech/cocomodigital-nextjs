@@ -361,6 +361,20 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <div className="pod-service-grid">
               {data.serviceCards.map((s) => (
                 <article key={s.title} className="pod-service-card">
+                  {/* Backdrop, not an illustration. It sits under the card's
+                      own words at low opacity and is hidden from assistive
+                      tech unless someone gives it a description, because a
+                      texture behind text has nothing to announce. */}
+                  {s.image && (
+                    <img
+                      className="pod-service-card-bg"
+                      src={s.image}
+                      alt={s.imageAlt || ""}
+                      loading="lazy"
+                      decoding="async"
+                      {...(s.imageAlt ? {} : { "aria-hidden": true })}
+                    />
+                  )}
                   <EditItem pageId={data.id} kind="services" id={s.id} label={s.title} />
                   <span className="pod-service-icon">
                     <Icon name={s.icon} />

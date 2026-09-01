@@ -33,6 +33,12 @@ const podcastCardSchema = new mongoose.Schema({
   meta: { type: String, trim: true, default: '' },
   /** One tag per row. Service cards only. */
   points: { type: String, default: '' },
+  /* Background artwork behind the card. Stored as the S3 object key, or as a
+   * path under the website's /public folder — `buildS3Url` resolves either into
+   * an address on the way out. Empty means the card renders on its plain
+   * background, exactly as it did before artwork existed. */
+  image: { type: String, trim: true, default: '' },
+  imageAlt: { type: String, default: '' },
   displayOrder: { type: Number, default: 0 },
   status: { type: Number, enum: [0, 1], default: 1 },
   userId: { type: mongoose.Schema.Types.Mixed, default: null },

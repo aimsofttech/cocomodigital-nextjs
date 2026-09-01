@@ -61,6 +61,8 @@ const statOut = (s) => ({
 
 const cardOut = (c) => ({
   id: c._id,
+  image: mediaUrl(c.image),
+  imageAlt: c.imageAlt || '',
   icon: c.icon || '',
   step: c.step || '',
   title: c.title || '',

@@ -115,6 +115,18 @@ export const STAGE_ART_SPEC = {
   note: 'line art on a transparent background; it sits on a tinted panel',
 };
 
+/* Artwork behind a service card. It sits under the card's own text at low
+   opacity, so what reads well here is a soft texture rather than a photograph
+   with a subject someone will try to look at. */
+export const CARD_BG_SPEC = {
+  width: 640,
+  height: 420,
+  ratio: '~3:2',
+  formats: 'SVG, PNG, WebP, JPG',
+  maxSizeMB: 1,
+  note: 'soft background texture; it sits behind the text at low opacity',
+};
+
 export const STUDIO_SHOT_SPEC = {
   width: 1200,
   height: 675,

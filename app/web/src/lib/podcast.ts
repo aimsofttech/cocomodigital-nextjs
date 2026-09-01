@@ -29,6 +29,10 @@ export interface PodcastStat {
 
 export interface PodcastCard {
   id?: string;
+  /** Background artwork behind the card. "" renders the plain card. */
+  image: string;
+  /** "" marks the artwork decorative, which is right for a backdrop. */
+  imageAlt: string;
   /** Registry name from PodcastVisuals' icon map (e.g. "video", "mic"). */
   icon: string;
   /** Printed ordinal — process steps only. */

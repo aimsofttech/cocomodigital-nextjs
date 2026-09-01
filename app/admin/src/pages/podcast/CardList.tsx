@@ -1,7 +1,10 @@
+import { useSearchParams } from 'react-router-dom';
 import ChildListPage from './ChildListPage';
 import ChildForm from './ChildForm';
+import ImageUpload from '@/components/ui/ImageUpload';
+import { ImageCell } from '@/components/ui/MediaCell';
 import { podcastCardApi } from '@/services/adminApi';
-import { CARD_SECTION_OPTIONS } from './constants';
+import { CARD_SECTION_OPTIONS, CARD_BG_SPEC, previewUrl } from './constants';
 import { PodcastIconSelect, SelectField, TextAreaField, TextField } from './FormFields';
 
 /* The repeating items across five bands — service cards, audience cards, the
@@ -33,6 +36,9 @@ const FIELDS: Record<string, {
   pointsHint?: string;
   step?: string;
   icon?: boolean;
+  /* Background artwork. Only the service cards carry one today — the other
+     bands render on a plain surface, so the field would only be clutter. */
+  image?: boolean;
 }> = {
   services: {
     title: 'Card Title',
@@ -41,6 +47,7 @@ const FIELDS: Record<string, {
     points: 'Tags',
     pointsHint: 'One tag per row. These carry the detail and the search terms in a form the eye can scan.',
     icon: true,
+    image: true,
   },
   audiences: {
     title: 'Audience',
@@ -82,7 +89,7 @@ export function CardForm({ editId, lockedPageId, lockedSectionKey, onSuccess, on
       onCancel={onCancel}
       defaultValues={{ sectionKey: lockedSectionKey || 'services' }}
     >
-      {({ register, errors, watch }) => {
+      {({ register, errors, watch, setValue }) => {
         const section = watch('sectionKey') || lockedSectionKey || 'services';
         const f = FIELDS[section] || FIELDS.services;
         return (
@@ -138,6 +145,27 @@ export function CardForm({ editId, lockedPageId, lockedSectionKey, onSuccess, on
               />
             )}
             {f.icon && <PodcastIconSelect register={register} />}
+            {f.image && (
+              <>
+                <ImageUpload
+                  name="image"
+                  label="Background Image"
+                  uploadType="image"
+                  folder="podcast/services"
+                  recommended={CARD_BG_SPEC}
+                  value={watch('image')}
+                  previewSrc={previewUrl(watch('image'))}
+                  onChange={(url) => setValue('image', url)}
+                />
+                <TextAreaField
+                  register={register}
+                  name="imageAlt"
+                  label="Background Alt Text"
+                  rows={2}
+                  hint="Usually leave this empty. The artwork sits behind the card's own words and adds nothing a reader needs, so it is better announced as decorative than described twice."
+                />
+              </>
+            )}
           </>
         );
       }}
@@ -146,6 +174,15 @@ export function CardForm({ editId, lockedPageId, lockedSectionKey, onSuccess, on
 }
 
 export default function CardList() {
+  /* Which band the list is pinned to, if any — the same `?sectionKey` the list
+     page itself reads. Only the service cards carry background artwork, so the
+     column is worth a slot only there; pinned to any other band it would be a
+     row of dashes. With no band pinned the list mixes every band together and
+     the service rows still have something to show, so the column stays. */
+  const [searchParams] = useSearchParams();
+  const band = searchParams.get('sectionKey') || '';
+  const showBackground = !band || Boolean(FIELDS[band]?.image);
+
   const columns = [
     {
       key: 'sectionKey', label: 'Band', sortable: true, className: 'min-w-[120px]',
@@ -168,6 +205,12 @@ export default function CardList() {
       render: (row: any) => <span className="block truncate" title={row.meta}>{row.meta || '—'}</span>,
     },
     { key: 'icon', label: 'Icon', render: (row: any) => row.icon || '—' },
+    ...(showBackground ? [{
+      key: 'image', label: 'Background', className: 'min-w-[130px]',
+      render: (row: any) => (row.image
+        ? <ImageCell src={previewUrl(row.image)} alt={row.imageAlt || 'card background'} size="w-24 h-14" />
+        : <span className="text-xs text-gray-400">—</span>),
+    }] : []),
   ];
 
   return (

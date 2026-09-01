@@ -25,7 +25,7 @@ const { s3KeyFromValue } = require('../../utils/s3Upload');
 // plus the media fields whose S3 objects go with the record.
 const CHILD_SPECS = [
   { model: PodcastStat, fk: 'podcastPageId' },
-  { model: PodcastCard, fk: 'podcastPageId' },
+  { model: PodcastCard, fk: 'podcastPageId', media: ['image'] },
   { model: PodcastStage, fk: 'podcastPageId', media: ['image'] },
   { model: PodcastShot, fk: 'podcastPageId', media: ['image'] },
   { model: PodcastFaq, fk: 'podcastPageId' },
@@ -98,6 +98,7 @@ const stat = createCrudController(PodcastStat, {
 });
 
 const card = createCrudController(PodcastCard, {
+  imageFields: ['image'],
   searchFields: ['title', 'body', 'meta', 'sectionKey'],
   defaultSort: { displayOrder: 1, createdAt: 1 },
   parentField: 'podcastPageId',
@@ -229,7 +230,7 @@ const destroy = async (req, res) => {
 module.exports = {
   page: withMediaKeys({ ...page, index, destroy }, PAGE_MEDIA_FIELDS),
   stat,
-  card,
+  card: withMediaKeys(card, ['image']),
   stage: withMediaKeys(stage, ['image']),
   shot: withMediaKeys(shot, ['image']),
   faq,

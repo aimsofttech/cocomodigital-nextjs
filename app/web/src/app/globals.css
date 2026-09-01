@@ -58236,9 +58236,51 @@ html {
   border: 2px solid var(--text-strong);
   border-radius: var(--radius-md);
   box-shadow: 4px 4px 0 var(--text-strong);
+  /* Contains the backdrop below. The card holds nothing else that is
+     positioned, so this changes no layout — and the backdrop is out of flow,
+     so it never becomes a flex item. `isolate` makes the card its own stacking
+     context, which is what lets the backdrop sit at a negative z-index: above
+     the card's own background, below everything written on it. Without it the
+     backdrop would escape to the nearest stacking context and paint behind the
+     card entirely. */
+  position: relative;
+  isolation: isolate;
   transition:
     transform var(--motion-fast),
     box-shadow var(--motion-fast);
+}
+
+/* Artwork behind a service card.
+   Kept faint on purpose: the card is text on a light surface with a 2px rule
+   and a hard shadow, and anything more assertive here costs the words their
+   contrast. Editors set it per card from the admin; a card with none renders
+   exactly as it always did. */
+.pod-service-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  /* Low enough that the card's own words stay the thing you read: brand yellow
+     on white at this strength registers as a tint, not as highlighter drawn
+     through the text. */
+  opacity: 0.09;
+  /* Behind the card's content, by painting order rather than by touching the
+     content at all. An earlier attempt lifted every sibling with
+     `position: relative`, which also overrode the Edit pencil's slot and threw
+     it out of its corner — the backdrop should not be reaching into the card's
+     other children to get itself out of the way. */
+  z-index: -1;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  /* Someone who has asked for less visual noise gets the plain card. */
+  .pod-service-card-bg {
+    display: none;
+  }
 }
 
 .pod-service-card:hover {

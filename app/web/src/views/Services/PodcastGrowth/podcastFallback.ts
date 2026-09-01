@@ -324,6 +324,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   serviceCards: [
     {
+      image: "",
+      imageAlt: "",
       icon: "video",
       step: "",
       title: "Video podcast editing",
@@ -332,6 +334,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: ["Multicam", "Captions", "Lower thirds", "Template system"],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "audio",
       step: "",
       title: "Audio editing & mastering",
@@ -345,6 +349,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       ],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "clip",
       step: "",
       title: "Short-form clipping",
@@ -359,6 +365,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       ],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "thumb",
       step: "",
       title: "Thumbnails & packaging",
@@ -367,6 +375,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: ["A/B variants", "Title systems", "Click-through testing"],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "notes",
       step: "",
       title: "Show notes, SEO & transcripts",
@@ -375,6 +385,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: ["Chapters", "Timestamps", "Full transcripts", "Descriptions"],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "publish",
       step: "",
       title: "Publishing & channel management",
@@ -389,6 +401,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       ],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "globe",
       step: "",
       title: "Dubbing & localization",
@@ -397,6 +411,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: ["Transcreation", "20+ languages", "Subtitles"],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "chart",
       step: "",
       title: "Analytics & growth reporting",
@@ -408,6 +424,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   audienceCards: [
     {
+      image: "",
+      imageAlt: "",
       icon: "mic",
       step: "",
       title: "Founders & operators with a show",
@@ -416,6 +434,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "brand",
       step: "",
       title: "Brands running podcasts as marketing",
@@ -424,6 +444,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "network",
       step: "",
       title: "Networks & media companies",
@@ -435,6 +457,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   operationCards: [
     {
+      image: "",
+      imageAlt: "",
       icon: "clock",
       step: "",
       title: "Overlap with your working day",
@@ -443,6 +467,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "dollar",
       step: "",
       title: "Priced and invoiced in USD",
@@ -451,6 +477,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "lock",
       step: "",
       title: "You own everything",
@@ -462,6 +490,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   processSteps: [
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "01",
       title: "Free podcast audit",
@@ -470,6 +500,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "02",
       title: "Engine build",
@@ -478,6 +510,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "03",
       title: "Operate & grow",
@@ -489,6 +523,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   monthRows: [
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "",
       title: "Full episodes",
@@ -497,6 +533,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "",
       title: "Platform-native clips",
@@ -505,6 +543,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "",
       title: "Thumbnails with A/B variants",
@@ -513,6 +553,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "",
       title: "Stories & carousels",
@@ -521,6 +563,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "",
       title: "Show notes, transcripts & newsletter",
@@ -529,6 +573,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "",
       title: "Publishing",
@@ -537,6 +583,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       points: [],
     },
     {
+      image: "",
+      imageAlt: "",
       icon: "",
       step: "",
       title: "Growth scorecard",
