@@ -26,11 +26,14 @@ export interface SectionEditLinkProps {
   module: string;
   /** Admin path to open, relative to the panel root (no leading slash). */
   to: string;
-  /** Names the section in the tooltip and for screen readers. */
+  /** Names the section or item in the tooltip and for screen readers. */
   label: string;
+  /* Icon only, and smaller — for a single card or row, where the word "Edit"
+     would crowd the content it sits on. */
+  compact?: boolean;
 }
 
-export default function SectionEditLink({ module, to, label }: SectionEditLinkProps) {
+export default function SectionEditLink({ module, to, label, compact = false }: SectionEditLinkProps) {
   const { can } = useAdminSession();
 
   if (!can(module, "update")) return null;
@@ -41,9 +44,9 @@ export default function SectionEditLink({ module, to, label }: SectionEditLinkPr
      positioned children (the problem band's full-bleed backdrop, for one) whose
      containing block would have changed underneath them. */
   return (
-    <div className="section-edit-slot">
+    <div className={`section-edit-slot${compact ? " section-edit-slot--item" : ""}`}>
     <a
-      className="section-edit-link"
+      className={`section-edit-link${compact ? " section-edit-link--item" : ""}`}
       href={`${ADMIN_BASE_URL}/${to.replace(/^\/+/, "")}`}
       target="_blank"
       rel="noopener noreferrer"
@@ -51,7 +54,7 @@ export default function SectionEditLink({ module, to, label }: SectionEditLinkPr
       aria-label={`Edit ${label} in the admin panel`}
     >
       <FaPencilAlt aria-hidden="true" />
-      <span>Edit</span>
+      {!compact && <span>Edit</span>}
     </a>
     </div>
   );

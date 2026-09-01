@@ -46382,6 +46382,74 @@
 
   }
 
+  /* The per-item pencil: one card, one row, one question. Icon only and tucked
+     into the corner so it never crowds the content it belongs to.
+
+     The slot is ABSOLUTELY positioned, which is the whole point: many of these
+     cards are flex or grid containers (.pod-stage is a two-column grid, the
+     service and audience cards are flex columns with gaps), and an in-flow slot
+     became a flex/grid item — displacing the real content and adding a gap.
+     Out of flow, it creates no item and occupies no track, so the card lays out
+     exactly as it always did. */
+  .section-edit-slot--item {
+
+    position: absolute;
+
+    top: 0;
+
+    right: 0;
+
+    width: 0;
+
+    height: 0;
+
+  }
+
+  /* …which needs the card to be the positioning context. Applied through :has()
+     so it lands ONLY on a card that actually contains a pencil — that is, only
+     for a signed-in editor. For everyone else the selector never matches and
+     not one property changes, which is what keeps the public rendering of this
+     page identical. Cards that were already positioned are unaffected. */
+  .pod-trust-item:has(> .section-edit-slot--item),
+  .pod-problem-card:has(> .section-edit-slot--item),
+  .pod-stage:has(> .section-edit-slot--item),
+  .pod-service-card:has(> .section-edit-slot--item),
+  .pod-audience-card:has(> .section-edit-slot--item),
+  .pod-us-card:has(> .section-edit-slot--item),
+  .pod-studio-item:has(> .section-edit-slot--item),
+  .pod-scale-item:has(> .section-edit-slot--item),
+  .pod-process-step:has(> .section-edit-slot--item),
+  .pod-faq-item:has(> .section-edit-slot--item),
+  .pod-proof-links:has(> .section-edit-slot--item),
+  .pod-table th:has(> .section-edit-slot--item) {
+
+    position: relative;
+
+  }
+
+  .section-edit-link--item {
+
+    top: 6px;
+
+    right: 6px;
+
+    padding: 5px;
+
+    font-size: 11px;
+
+    opacity: 0.35;
+
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+
+  }
+
+  .section-edit-link--item:hover,
+  .section-edit-link--item:focus-visible {
+
+    opacity: 1;
+
+  }
+
   .login-container {
 
     display: flex;

@@ -55,6 +55,9 @@ export default function ChildListPage({
   const [searchParams] = useSearchParams();
   const pageId = searchParams.get('podcastPageId') || '';
   const sectionKey = searchParams.get('sectionKey') || '';
+  /* Set by an Edit pencil on the public site, which links straight to one
+     record. CrudListPage opens its edit modal on mount. */
+  const editId = searchParams.get('editId') || '';
 
   // Seed the filter so the very first fetch is already scoped.
   const urlScope: Record<string, any> = {
@@ -178,6 +181,7 @@ export default function ChildListPage({
       })}
       modalTitle={modalTitle}
       modalSize={modalSize}
+      initialEditId={editId || undefined}
       onRefresh={fetchAll}
     />
   );

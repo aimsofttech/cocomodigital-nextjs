@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import type { PodcastFaqItem } from "@/src/lib/podcast";
+import SectionEditLink from "@/src/components/common/SectionEditLink/SectionEditLink";
 
 /**
  * Accessible FAQ accordion.
@@ -14,7 +15,15 @@ import type { PodcastFaqItem } from "@/src/lib/podcast";
  * being unmounted, so the answer text is present for crawlers even when
  * the row is closed, matching the FAQPage JSON-LD emitted by the page.
  */
-export default function PodcastFaq({ items }: { items: PodcastFaqItem[] }) {
+export default function PodcastFaq({
+  items,
+  pageId,
+}: {
+  items: PodcastFaqItem[];
+  /* Only used to build an editor's link to a question's own form; the
+     component renders nothing extra without it. */
+  pageId?: string;
+}) {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
@@ -23,6 +32,14 @@ export default function PodcastFaq({ items }: { items: PodcastFaqItem[] }) {
         const isOpen = open === i;
         return (
           <li key={item.question} className="pod-faq-item">
+            {pageId && item.id && (
+              <SectionEditLink
+                module="podcast"
+                compact
+                to={`podcast/faq?podcastPageId=${pageId}&editId=${item.id}`}
+                label={item.question}
+              />
+            )}
             <h3 className="pod-faq-question">
               <button
                 type="button"

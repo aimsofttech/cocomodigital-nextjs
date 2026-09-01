@@ -12,7 +12,15 @@ import { apiGet } from "./apiClient";
 
 export const PODCAST_PAGE_SLUG = "podcast-video-editing-marketing-services";
 
+/* Every repeating row carries the id of the record it came from, so an editor
+   viewing the page can be linked straight to that record's form in the admin.
+   Content ids only — the admin's own auth still gates anything actionable.
+
+   Optional because the shipped fallback copy in podcastFallback.ts has no
+   database rows behind it; with no id there is nothing to link to, and the
+   Edit pencil renders nothing. */
 export interface PodcastStat {
+  id?: string;
   value: string;
   label: string;
   /** Supporting line under the label. Empty on the trust strip. */
@@ -20,6 +28,7 @@ export interface PodcastStat {
 }
 
 export interface PodcastCard {
+  id?: string;
   /** Registry name from PodcastVisuals' icon map (e.g. "video", "mic"). */
   icon: string;
   /** Printed ordinal — process steps only. */
@@ -33,6 +42,7 @@ export interface PodcastCard {
 }
 
 export interface PodcastStage {
+  id?: string;
   /** Key into PodcastVisuals' diagram registry; "none" draws nothing. */
   diagramKey: string;
   step: string;
@@ -43,6 +53,7 @@ export interface PodcastStage {
 }
 
 export interface PodcastShot {
+  id?: string;
   image: string;
   alt: string;
   caption: string;
@@ -51,11 +62,13 @@ export interface PodcastShot {
 }
 
 export interface PodcastFaqItem {
+  id?: string;
   question: string;
   answer: string;
 }
 
 export interface PodcastCta {
+  id?: string;
   label: string;
   href: string;
   variant: "primary" | "secondary";

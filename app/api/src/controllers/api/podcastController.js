@@ -41,13 +41,18 @@ const sortByOrder = { displayOrder: 1, createdAt: 1 };
 /** Rows of one band, in display order. */
 const bySection = (rows, key) => rows.filter((r) => r.sectionKey === key);
 
+/* `id` is included on every row so the website can offer an editor a direct
+ * link to that specific record in the admin. These are content ids, carry
+ * nothing sensitive, and are only actionable behind the admin's own auth. */
 const statOut = (s) => ({
+  id: s._id,
   value: s.value || '',
   label: s.label || '',
   description: s.description || '',
 });
 
 const cardOut = (c) => ({
+  id: c._id,
   icon: c.icon || '',
   step: c.step || '',
   title: c.title || '',
@@ -57,6 +62,7 @@ const cardOut = (c) => ({
 });
 
 const ctaOut = (c) => ({
+  id: c._id,
   label: c.label || '',
   href: c.href || '',
   variant: c.variant || 'primary',
@@ -318,6 +324,7 @@ const show = async (req, res) => {
       processSteps: bySection(cards, 'process').map(cardOut),
       monthRows: bySection(cards, 'month').map(cardOut),
       stages: stages.map((s) => ({
+        id: s._id,
         diagramKey: s.diagramKey || 'none',
         step: s.step || '',
         name: s.name || '',
@@ -326,12 +333,13 @@ const show = async (req, res) => {
         capabilities: toLines(s.capabilities),
       })),
       studioShots: shots.map((s) => ({
+        id: s._id,
         image: s.image || '',
         alt: s.alt || '',
         caption: s.caption || '',
         wide: !!s.wide,
       })),
-      faqs: faqs.map((f) => ({ question: f.question, answer: f.answer })),
+      faqs: faqs.map((f) => ({ id: f._id, question: f.question, answer: f.answer })),
       ctas: {
         hero: ctas.filter((c) => c.placement === 'hero').map(ctaOut),
         pricing: ctas.filter((c) => c.placement === 'pricing').map(ctaOut),

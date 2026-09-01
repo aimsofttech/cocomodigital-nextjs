@@ -50,6 +50,42 @@ const EDIT_STEP: Record<string, number> = {
   closing: 17,
 };
 
+/* Where each kind of repeating row is managed in the admin. `segment` is the
+ * section list that owns it and `sectionKey` narrows the two collections that
+ * carry more than one band. Together with the record id these produce a link
+ * that opens that exact record's edit form. */
+const ITEM_ROUTE: Record<string, { segment: string; sectionKey?: string }> = {
+  trust: { segment: "stat", sectionKey: "trust" },
+  problem: { segment: "stat", sectionKey: "problem" },
+  scale: { segment: "stat", sectionKey: "scale" },
+  services: { segment: "card", sectionKey: "services" },
+  audiences: { segment: "card", sectionKey: "audiences" },
+  operations: { segment: "card", sectionKey: "operations" },
+  process: { segment: "card", sectionKey: "process" },
+  month: { segment: "card", sectionKey: "month" },
+  stage: { segment: "stage" },
+  shot: { segment: "shot" },
+  faq: { segment: "faq" },
+  cta: { segment: "cta" },
+};
+
+/** The pencil for one card, row or question — opens that record's own form. */
+function EditItem({
+  pageId, kind, id, label,
+}: { pageId: string; kind: string; id?: string; label: string }) {
+  const route = ITEM_ROUTE[kind];
+  if (!route || !id) return null;
+  const section = route.sectionKey ? `&sectionKey=${route.sectionKey}` : "";
+  return (
+    <SectionEditLink
+      module="podcast"
+      compact
+      to={`podcast/${route.segment}?podcastPageId=${pageId}${section}&editId=${id}`}
+      label={label}
+    />
+  );
+}
+
 /** The pencil for one band, addressed at its own step of the page editor. */
 function EditSection({ pageId, section, label }: { pageId: string; section: string; label: string }) {
   return (
@@ -182,6 +218,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               <ul className="pod-trust-list">
                 {data.trustStats.map((s) => (
                   <li key={s.label} className="pod-trust-item">
+                    <EditItem pageId={data.id} kind="trust" id={s.id} label={s.label} />
                     <span className="pod-trust-value">{s.value}</span>
                     <span className="pod-trust-label">{s.label}</span>
                   </li>
@@ -224,6 +261,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <div className="pod-problem-grid">
               {data.problemStats.map((p) => (
                 <article key={p.label} className="pod-problem-card">
+                  <EditItem pageId={data.id} kind="problem" id={p.id} label={p.label} />
                   <p className="pod-problem-value">{p.value}</p>
                   <p className="pod-problem-label">{p.label}</p>
                   <p className="pod-problem-body">{p.description}</p>
@@ -253,6 +291,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               <ol className="pod-stage-list">
                 {data.stages.map((stage) => (
                   <li key={stage.name} className="pod-stage">
+                    <EditItem pageId={data.id} kind="stage" id={stage.id} label={stage.name} />
                     {/* Placeholder illustration until real photography
                         exists. Draws the stage's argument rather than
                         filling space, and imitates nothing — no fake
@@ -301,6 +340,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <div className="pod-service-grid">
               {data.serviceCards.map((s) => (
                 <article key={s.title} className="pod-service-card">
+                  <EditItem pageId={data.id} kind="services" id={s.id} label={s.title} />
                   <span className="pod-service-icon">
                     <Icon name={s.icon} />
                   </span>
@@ -330,6 +370,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <div className="pod-audience-grid">
               {data.audienceCards.map((a) => (
                 <article key={a.title} className="pod-audience-card">
+                  <EditItem pageId={data.id} kind="audiences" id={a.id} label={a.title} />
                   <span className="pod-audience-icon">
                     <Icon name={a.icon} />
                   </span>
@@ -434,7 +475,10 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               <tbody>
                 {data.monthRows.map((r) => (
                   <tr key={r.title}>
-                    <th scope="row">{r.title}</th>
+                    <th scope="row">
+                      <EditItem pageId={data.id} kind="month" id={r.id} label={r.title} />
+                      {r.title}
+                    </th>
                     <td>
                       <span className="pod-vol">{r.meta}</span>
                     </td>
@@ -513,6 +557,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <div className="pod-us-grid">
               {data.operationCards.map((o) => (
                 <article key={o.title} className="pod-us-card">
+                  <EditItem pageId={data.id} kind="operations" id={o.id} label={o.title} />
                   <span className="pod-us-icon">
                     <Icon name={o.icon} />
                   </span>
@@ -551,6 +596,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                     key={shot.image}
                     className={`pod-studio-item${shot.wide ? " pod-studio-item--wide" : ""}`}
                   >
+                    <EditItem pageId={data.id} kind="shot" id={shot.id} label={shot.caption || "this photograph"} />
                     <Image
                       src={shot.image}
                       alt={shot.alt}
@@ -570,6 +616,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <ul className="pod-scale">
               {data.scaleStats.map((m) => (
                 <li key={m.label} className="pod-scale-item">
+                  <EditItem pageId={data.id} kind="scale" id={m.id} label={m.label} />
                   <span className="pod-scale-value">{m.value}</span>
                   <span className="pod-scale-label">{m.label}</span>
                   <span className="pod-scale-sub">{m.description}</span>
@@ -592,6 +639,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
           <ol className="pod-process-list">
             {data.processSteps.map((p) => (
               <li key={p.title} className="pod-process-step">
+                <EditItem pageId={data.id} kind="process" id={p.id} label={p.title} />
                 <span className="pod-process-num" aria-hidden="true">
                   {p.step}
                 </span>
@@ -630,6 +678,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               {data.ctas.proof.map((c) => (
                 <Cta key={c.href} cta={c} />
               ))}
+              <EditItem pageId={data.id} kind="cta" id={data.ctas.proof[0].id} label="these links" />
             </div>
           )}
         </div>
@@ -644,7 +693,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <h2 id="pod-faq-title" className="pod-section-title">
               {faq.title}
             </h2>
-            <PodcastFaq items={data.faqs} />
+            <PodcastFaq items={data.faqs} pageId={data.id} />
           </div>
         </section>
       )}

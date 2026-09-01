@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
 import DataTable, { Column } from './DataTable';
@@ -64,6 +64,11 @@ interface CrudListPageProps<T = any> {
   /** When provided, table rows become drag-and-drop reorderable
       (see DataTable.onReorder). Indexes refer to the `data` prop. */
   onReorder?: (fromIndex: number, toIndex: number) => void;
+  /* Open one record's edit modal as soon as the page mounts. Lets a link from
+     elsewhere — the Edit pencils on the public site, say — land on the exact
+     record rather than on a list the editor then has to search. Optional, so
+     every existing caller is unaffected. */
+  initialEditId?: string;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -81,7 +86,7 @@ export default function CrudListPage<T extends { _id?: string }>({
   disableEdit: disableEditProp,
   filterFields, onServerFilterChange,
   renderModal, modalTitle, modalSize = 'lg', onRefresh, renderExpanded, csv,
-  viewDetails, onReorder,
+  viewDetails, onReorder, initialEditId,
 }: CrudListPageProps<T>) {
   const { pathname } = useLocation();
 
@@ -133,6 +138,17 @@ export default function CrudListPage<T extends { _id?: string }>({
   const openAddModal = () => { setModalMode('add'); setModalId(undefined); setModalOpen(true); };
   const openEditModal = (id: string) => { setModalMode('edit'); setModalId(id); setModalOpen(true); };
   const closeModal = () => setModalOpen(false);
+
+  /* Arrived with ?editId=… — open that record straight away. Tracked by id so
+     following a second link on the same page opens the new record, while
+     closing the modal does not immediately reopen the old one. */
+  const openedFor = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!initialEditId || !renderModal) return;
+    if (openedFor.current === initialEditId) return;
+    openedFor.current = initialEditId;
+    openEditModal(initialEditId);
+  }, [initialEditId, renderModal]);
 
   const handleModalSuccess = useCallback(() => {
     setModalOpen(false);

@@ -141,44 +141,93 @@ export interface AdminSessionState {
   can: (moduleKey: string, action: AdminAction) => boolean;
 }
 
+/* ── One session, shared by every subscriber ───────────────────────────────
+ *
+ * A page can hold dozens of Edit affordances, and each one asks whether it
+ * should be drawn. If every one of them ran its own request the page would open
+ * with a burst of identical calls to /admin/api/profile — enough on this page to
+ * trip the API's rate limiter and leave most of the pencils never resolving.
+ *
+ * So the lookup lives here, at module scope: the first subscriber starts it,
+ * everyone else waits on the same promise, and the answer is cached until the
+ * session changes. One request per page, however many pencils are on it. */
+type Listener = (state: { session: AdminSession | null; loading: boolean }) => void;
+
+let cachedSession: AdminSession | null = null;
+let cachedToken: string | null = null;
+let resolved = false;
+let inFlight: Promise<void> | null = null;
+const listeners = new Set<Listener>();
+
+const publish = () => {
+  const state = { session: cachedSession, loading: !resolved };
+  listeners.forEach((fn) => fn(state));
+};
+
+const load = (force = false): Promise<void> => {
+  const token = readAdminToken();
+
+  // Same token, already answered — nothing to do.
+  if (!force && resolved && token === cachedToken) return Promise.resolve();
+  if (inFlight && !force) return inFlight;
+
+  cachedToken = token;
+  if (!token) {
+    cachedSession = null;
+    resolved = true;
+    publish();
+    return Promise.resolve();
+  }
+
+  inFlight = fetchSession(token).then((next) => {
+    cachedSession = next;
+    resolved = true;
+    inFlight = null;
+    publish();
+  });
+  return inFlight;
+};
+
+/** Throw the cache away and look again — used when a session changes. */
+const invalidate = () => {
+  resolved = false;
+  inFlight = null;
+  cachedSession = null;
+  publish();
+  load(true);
+};
+
+if (typeof window !== "undefined") {
+  window.addEventListener(ADMIN_AUTH_EVENT, invalidate);
+  window.addEventListener("storage", invalidate); // another tab signed in or out
+}
+
 /**
- * The current admin session, kept live.
+ * The current admin session.
  *
  * Starts as null so the server render and the first client render agree; the
- * real answer arrives after the profile request resolves.
+ * real answer arrives once the single shared lookup resolves.
  */
 export function useAdminSession(): AdminSessionState {
-  const [session, setSession] = useState<AdminSession | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<{ session: AdminSession | null; loading: boolean }>(
+    () => ({ session: null, loading: true }),
+  );
 
   useEffect(() => {
-    let cancelled = false;
-
-    const sync = async () => {
-      const token = readAdminToken();
-      if (!token) {
-        if (!cancelled) { setSession(null); setLoading(false); }
-        return;
-      }
-      const next = await fetchSession(token);
-      if (!cancelled) { setSession(next); setLoading(false); }
-    };
-
-    sync();
-    window.addEventListener(ADMIN_AUTH_EVENT, sync);
-    window.addEventListener("storage", sync); // another tab signed in or out
-    return () => {
-      cancelled = true;
-      window.removeEventListener(ADMIN_AUTH_EVENT, sync);
-      window.removeEventListener("storage", sync);
-    };
+    const listener: Listener = (next) => setState(next);
+    listeners.add(listener);
+    // Adopt whatever is already known, then make sure a lookup has happened.
+    if (resolved) listener({ session: cachedSession, loading: false });
+    load();
+    return () => { listeners.delete(listener); };
   }, []);
 
   const can = (moduleKey: string, action: AdminAction) => {
+    const { session } = state;
     if (!session) return false;
     if (session.isSuperAdmin) return true;
     return Boolean(session.permissions[moduleKey]?.[action]);
   };
 
-  return { session, loading, can };
+  return { session: state.session, loading: state.loading, can };
 }
