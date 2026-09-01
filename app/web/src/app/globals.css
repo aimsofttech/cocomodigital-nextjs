@@ -46297,6 +46297,91 @@
 
   }
 
+  /* ── Section edit affordance ───────────────────────────────────────────
+     The pencil beside a section, rendered only for editors who hold update
+     permission (see components/common/SectionEditLink). It is positioned
+     absolutely inside its section so it never takes part in the layout —
+     adding it cannot shift a single pixel of the page for anyone else, and
+     for the public it is not in the DOM at all. */
+  .section-edit-slot {
+
+    position: relative;
+
+    height: 0;
+
+  }
+
+  .section-edit-link {
+
+    position: absolute;
+
+    top: 12px;
+
+    right: 12px;
+
+    z-index: 20;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    background-color: var(--color-primary, #fff000);
+
+    border: 1px solid rgba(0, 0, 0, 0.12);
+
+    color: #000;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    text-decoration: none;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+
+    opacity: 0.55;
+
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+  }
+
+  .section-edit-link:hover,
+  .section-edit-link:focus-visible {
+
+    opacity: 1;
+
+    transform: translateY(-1px);
+
+    color: #000;
+
+    text-decoration: none;
+
+  }
+
+  @media (max-width: 640px) {
+
+    .section-edit-link span {
+
+      display: none;
+
+    }
+
+    .section-edit-link {
+
+      padding: 8px;
+
+    }
+
+  }
+
   .login-container {
 
     display: flex;

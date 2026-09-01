@@ -1,22 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { clearAdminToken } from "./adminSession";
 
 /**
- * The demo sign-in used by /login, and the header's view of it.
+ * The site's sign-in, and the header's view of it.
  *
- * DELIBERATELY NOT REAL AUTHENTICATION. The credentials below are compared in
- * the browser, so anyone can read them in the page source. There is no API, no
- * token and no server-side session — signing in records a flag in this
- * browser's own storage and nothing on the site is gated behind it.
+ * This now authenticates for real, against the admin panel's existing
+ * /admin/api/auth/login — no new endpoint, no second account system. The
+ * credentials are unchanged (demo@gmail.com is the Super Admin account), but
+ * the session it produces is a genuine JWT rather than a flag, which is what
+ * lets the Edit pencils on a page be driven by the real RBAC permissions
+ * instead of a guess. See lib/adminSession.ts for the permission side.
  *
- * It lives here rather than inside the login page because the header needs to
- * know about it too, and two copies of the same rule would eventually disagree.
+ * A signed-in flag is still mirrored into storage so the header can show
+ * Logout without waiting on a network round trip; the token is the thing that
+ * actually matters and the server checks it on every request.
+ *
+ * This module keeps the header and the login page agreeing with each other —
+ * two copies of the same rule would eventually drift.
  */
-
-/** The demo credentials. Not secrets, and not treated as such. */
-export const DEMO_EMAIL = "demo@gmail.com";
-export const DEMO_PASSWORD = "demo";
 
 const SESSION_KEY = "cocoma_demo_login";
 
@@ -40,11 +43,6 @@ export function readDemoSession(): string | null {
   }
 }
 
-/** Do these credentials match the demo account? */
-export function checkDemoCredentials(email: string, password: string): boolean {
-  return email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD;
-}
-
 export function signInDemo(email: string): void {
   try {
     window.localStorage.setItem(SESSION_KEY, email.trim().toLowerCase());
@@ -60,6 +58,9 @@ export function signOutDemo(): void {
   } catch {
     /* nothing to clear */
   }
+  /* Drop the admin token too, so signing out of the site really does end the
+     session the Edit pencils depend on rather than leaving it live. */
+  clearAdminToken();
   announce();
 }
 

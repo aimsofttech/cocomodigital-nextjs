@@ -20,12 +20,8 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@/src/lib/navigation";
-import {
-  checkDemoCredentials,
-  signInDemo,
-  signOutDemo,
-  useDemoSession,
-} from "@/src/lib/demoAuth";
+import { signInDemo, signOutDemo, useDemoSession } from "@/src/lib/demoAuth";
+import { adminLogin, storeAdminToken } from "@/src/lib/adminSession";
 
 const Login = () => {
   const router = useRouter();
@@ -40,12 +36,24 @@ const Login = () => {
   const signedInAs = useDemoSession();
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setError(null);
       setSubmitting(true);
 
-      if (!checkDemoCredentials(email, password)) {
+      /* Checked by the admin panel's own login endpoint — the same accounts,
+         the same password hashes, the same roles. Nothing is verified in the
+         browser, so a session here means what it means in the panel. */
+      let result: { token: string; name: string } | null = null;
+      try {
+        result = await adminLogin(email, password);
+      } catch {
+        setError("Could not reach the server. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+
+      if (!result) {
         /* One message for both fields: saying which half was wrong tells an
            attacker which addresses exist, and is no help to a real user. */
         setError("Incorrect email or password.");
@@ -53,6 +61,7 @@ const Login = () => {
         return;
       }
 
+      storeAdminToken(result.token);
       signInDemo(email);
       router.push("/");
     },

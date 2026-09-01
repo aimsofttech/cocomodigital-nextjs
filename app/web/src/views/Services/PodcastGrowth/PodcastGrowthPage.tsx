@@ -6,6 +6,7 @@ import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastHeroMedia from "./PodcastHeroMedia";
 import { Icon, StageDiagram } from "./PodcastVisuals";
+import SectionEditLink from "@/src/components/common/SectionEditLink/SectionEditLink";
 
 /**
  * /podcast-video-editing-marketing-services
@@ -23,6 +24,42 @@ import { Icon, StageDiagram } from "./PodcastVisuals";
  * Optional content degrades rather than breaking: an empty band is skipped, a
  * missing image is simply not drawn, and the surrounding layout is unchanged.
  */
+
+/* Which step of the admin's Podcast page wizard edits each band.
+ *
+ * The wizard already walks this page one band at a time, in page order, and
+ * each of its steps carries that band's copy AND its repeating items — so the
+ * Edit pencils need no new admin screens at all, only the step number. Keep
+ * this in step with STEPS in app/admin/src/pages/podcast/PageWizard.tsx. */
+const EDIT_STEP: Record<string, number> = {
+  hero: 1,
+  credentials: 2,
+  problem: 3,
+  method: 4,
+  services: 5,
+  audiences: 6,
+  pricing: 7,
+  month: 8,
+  notFor: 9,
+  founder: 10,
+  operations: 11,
+  studio: 12,
+  process: 14,
+  proof: 15,
+  faq: 16,
+  closing: 17,
+};
+
+/** The pencil for one band, addressed at its own step of the page editor. */
+function EditSection({ pageId, section, label }: { pageId: string; section: string; label: string }) {
+  return (
+    <SectionEditLink
+      module="podcast"
+      to={`podcast/page/edit/${pageId}?step=${EDIT_STEP[section]}`}
+      label={label}
+    />
+  );
+}
 
 /** The page's one button treatment, rendered from a CTA record. */
 function Cta({ cta }: { cta: PodcastCta }) {
@@ -76,6 +113,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
     <div className="pod-page">
       {/* ---------------------------------------------------- hero */}
       <section className="pod-hero" aria-labelledby="pod-hero-title">
+        <EditSection pageId={data.id} section="hero" label="the hero" />
         <div className="pod-shell pod-hero-inner">
           <div className="pod-hero-copy">
             {hero.eyebrow && <p className="pod-eyebrow">{hero.eyebrow}</p>}
@@ -129,6 +167,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
           positioning line and the numbers arrive a beat later, where
           they get read instead of scanned past. */}
       <section className="pod-credentials" aria-label="Studio credentials">
+        <EditSection pageId={data.id} section="credentials" label="the credentials strip" />
         <div className="pod-shell">
           {credentials.signature && (
             <p className="pod-hero-signature pod-credentials-line">
@@ -155,6 +194,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* ------------------------------------------------- problem */}
       <section className="pod-problem" aria-labelledby="pod-problem-title">
+        <EditSection pageId={data.id} section="problem" label="the problem band" />
         {/* Backdrop, not an illustration. Deliberately decorative:
             aria-hidden, and scrimmed hard on the left so it never
             competes with the text sitting on it.
@@ -200,6 +240,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
         className="pod-method"
         aria-labelledby="pod-method-title"
       >
+        <EditSection pageId={data.id} section="method" label="the Signal-to-Scale band" />
         <div className="pod-shell">
           {method.eyebrow && <p className="pod-eyebrow">{method.eyebrow}</p>}
           <h2 id="pod-method-title" className="pod-section-title">
@@ -249,6 +290,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* ------------------------------------------------ services */}
       <section className="pod-services" aria-labelledby="pod-services-title">
+        <EditSection pageId={data.id} section="services" label="the services band" />
         <div className="pod-shell">
           {services.eyebrow && <p className="pod-eyebrow">{services.eyebrow}</p>}
           <h2 id="pod-services-title" className="pod-section-title">
@@ -278,6 +320,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* ----------------------------------------------- audiences */}
       <section className="pod-audience" aria-labelledby="pod-audience-title">
+        <EditSection pageId={data.id} section="audiences" label="the audience band" />
         <div className="pod-shell">
           {audience.eyebrow && <p className="pod-eyebrow">{audience.eyebrow}</p>}
           <h2 id="pod-audience-title" className="pod-section-title">
@@ -302,6 +345,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* ------------------------------------------------- pricing */}
       <section id="pricing" className="pod-pricing" aria-labelledby="pod-pricing-title">
+        <EditSection pageId={data.id} section="pricing" label="the pricing band" />
         <div className="pod-shell">
           <div className="pod-pricing-card">
             <div className="pod-pricing-head">
@@ -352,6 +396,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* --------------------------------------------- month table */}
       <section className="pod-month" aria-labelledby="pod-month-title">
+        <EditSection pageId={data.id} section="month" label="the month table" />
         <div className="pod-shell">
           {month.eyebrow && <p className="pod-eyebrow">{month.eyebrow}</p>}
           <h2 id="pod-month-title" className="pod-section-title">
@@ -404,6 +449,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* --------------------------------------- who this is not for */}
       <section className="pod-notfor" aria-labelledby="pod-notfor-title">
+        <EditSection pageId={data.id} section="notFor" label="the wrong-call band" />
         <div className="pod-shell pod-shell--narrow">
           {notFor.eyebrow && <p className="pod-eyebrow">{notFor.eyebrow}</p>}
           <h2 id="pod-notfor-title" className="pod-section-title">
@@ -424,6 +470,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* -------------------------------------------- founder note */}
       <section className="pod-founder" aria-labelledby="pod-founder-title">
+        <EditSection pageId={data.id} section="founder" label="the founder note" />
         <div className="pod-shell pod-founder-inner">
           {founder.portrait && (
             <div className="pod-founder-portrait">
@@ -456,6 +503,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* --------------------------------------- working with a US show */}
       <section className="pod-us" aria-labelledby="pod-us-title">
+        <EditSection pageId={data.id} section="operations" label="the time zones band" />
         <div className="pod-shell">
           {operations.eyebrow && <p className="pod-eyebrow">{operations.eyebrow}</p>}
           <h2 id="pod-us-title" className="pod-section-title">
@@ -481,6 +529,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* -------------------------------------------- studio strip */}
       <section className="pod-studio" aria-labelledby="pod-studio-title">
+        <EditSection pageId={data.id} section="studio" label="the studio strip" />
         <div className="pod-shell">
           <div className="pod-studio-copy">
             {studio.eyebrow && <p className="pod-eyebrow">{studio.eyebrow}</p>}
@@ -534,6 +583,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* ------------------------------------------------- process */}
       <section className="pod-process" aria-labelledby="pod-process-title">
+        <EditSection pageId={data.id} section="process" label="the process band" />
         <div className="pod-shell">
           {process.eyebrow && <p className="pod-eyebrow">{process.eyebrow}</p>}
           <h2 id="pod-process-title" className="pod-section-title">
@@ -560,6 +610,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
       {/* --------------------------------------------------- proof */}
       <section className="pod-proof" aria-labelledby="pod-proof-title">
+        <EditSection pageId={data.id} section="proof" label="the proof band" />
         <div className="pod-shell">
           {proof.eyebrow && <p className="pod-eyebrow">{proof.eyebrow}</p>}
           <h2 id="pod-proof-title" className="pod-section-title">
@@ -587,6 +638,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
       {/* ----------------------------------------------------- faq */}
       {data.faqs.length > 0 && (
         <section className="pod-faq" aria-labelledby="pod-faq-title">
+        <EditSection pageId={data.id} section="faq" label="the FAQ band" />
           <div className="pod-shell pod-shell--narrow">
             {faq.eyebrow && <p className="pod-eyebrow">{faq.eyebrow}</p>}
             <h2 id="pod-faq-title" className="pod-section-title">
@@ -603,6 +655,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
         className="pod-final"
         aria-labelledby="pod-final-title"
       >
+        <EditSection pageId={data.id} section="closing" label="the closing band" />
         <div className="pod-shell pod-final-inner">
           <div className="pod-final-copy">
             <h2 id="pod-final-title" className="pod-section-title pod-final-title">
