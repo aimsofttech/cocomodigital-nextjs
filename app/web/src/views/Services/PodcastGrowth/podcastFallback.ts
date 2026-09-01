@@ -549,6 +549,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
   stages: [
     {
       diagramKey: "align",
+      image: "",
+      imageAlt: "",
       step: "01",
       name: "Align",
       promise:
@@ -564,6 +566,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     },
     {
       diagramKey: "engineer",
+      image: "",
+      imageAlt: "",
       step: "02",
       name: "Engineer",
       promise: "Build the craft layer that decides whether anyone watches.",
@@ -578,6 +582,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     },
     {
       diagramKey: "amplify",
+      image: "",
+      imageAlt: "",
       step: "03",
       name: "Amplify",
       promise: "One recording becomes everything the week needs.",
@@ -592,6 +598,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     },
     {
       diagramKey: "optimize",
+      image: "",
+      imageAlt: "",
       step: "04",
       name: "Optimize",
       promise: "Measure in four layers, then change something specific.",

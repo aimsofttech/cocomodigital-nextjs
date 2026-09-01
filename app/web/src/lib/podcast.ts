@@ -45,6 +45,10 @@ export interface PodcastStage {
   id?: string;
   /** Key into PodcastVisuals' diagram registry; "none" draws nothing. */
   diagramKey: string;
+  /** The illustration. "" falls back to drawing `diagramKey` inline. */
+  image: string;
+  /** "" marks the illustration decorative, which is right for a diagram. */
+  imageAlt: string;
   step: string;
   name: string;
   promise: string;

@@ -1,7 +1,9 @@
 import ChildListPage from './ChildListPage';
 import ChildForm from './ChildForm';
+import ImageUpload from '@/components/ui/ImageUpload';
+import { ImageCell } from '@/components/ui/MediaCell';
 import { podcastStageApi } from '@/services/adminApi';
-import { DIAGRAM_OPTIONS } from './constants';
+import { DIAGRAM_OPTIONS, STAGE_ART_SPEC, previewUrl } from './constants';
 import { SelectField, TextAreaField, TextField } from './FormFields';
 
 /* The four stages of the Signal-to-Scale band. Each one carries a promise line,
@@ -19,7 +21,7 @@ export function StageForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
       onCancel={onCancel}
       defaultValues={{ diagramKey: 'none' }}
     >
-      {({ register, errors }) => (
+      {({ register, errors, watch, setValue }) => (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TextField
@@ -59,12 +61,30 @@ export function StageForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
             placeholder={'One per line, e.g.\nAudience definition and competitive positioning'}
             hint="One ticked bullet per line."
           />
+          <ImageUpload
+            name="image"
+            label="Illustration"
+            uploadType="image"
+            folder="podcast/stages"
+            accept="image/*,.svg"
+            recommended={STAGE_ART_SPEC}
+            value={watch('image')}
+            previewSrc={previewUrl(watch('image'))}
+            onChange={(url) => setValue('image', url)}
+          />
+          <TextAreaField
+            register={register}
+            name="imageAlt"
+            label="Illustration Alt Text"
+            rows={2}
+            hint="Describe what the illustration shows. Leave it empty and the picture is treated as decorative, which is right for a diagram that only restates the copy beside it."
+          />
           <SelectField
             register={register}
             name="diagramKey"
-            label="Diagram"
+            label="Fallback Diagram"
             options={DIAGRAM_OPTIONS}
-            hint="The inline illustration drawn beside the copy. Each one draws a specific idea, so pick the one that matches this stage."
+            hint="Drawn only when no illustration is uploaded above. These are the four diagrams the page shipped with, drawn in code."
           />
         </>
       )}
@@ -88,7 +108,12 @@ export default function StageList() {
         <span className="block truncate" title={row.promise}>{row.promise || '—'}</span>
       ),
     },
-    { key: 'diagramKey', label: 'Diagram', render: (row: any) => row.diagramKey || '—' },
+    {
+      key: 'image', label: 'Illustration', className: 'min-w-[150px]',
+      render: (row: any) => (row.image
+        ? <ImageCell src={previewUrl(row.image)} alt={row.imageAlt || 'stage illustration'} size="w-28 h-16" />
+        : <span className="text-xs text-gray-400">drawn: {row.diagramKey || '—'}</span>),
+    },
   ];
 
   return (

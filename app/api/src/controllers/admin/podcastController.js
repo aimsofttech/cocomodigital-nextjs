@@ -8,6 +8,7 @@ const PodcastFaq = require('../../models/PodcastFaq');
 const PodcastCta = require('../../models/PodcastCta');
 const createCrudController = require('./crudFactory');
 const { cascadeDelete } = require('./cascadeDelete');
+const { s3KeyFromValue } = require('../../utils/s3Upload');
 
 /* Admin CRUD for the podcast money page
  * (/podcast-video-editing-marketing-services). One parent record per page plus
@@ -25,11 +26,42 @@ const { cascadeDelete } = require('./cascadeDelete');
 const CHILD_SPECS = [
   { model: PodcastStat, fk: 'podcastPageId' },
   { model: PodcastCard, fk: 'podcastPageId' },
-  { model: PodcastStage, fk: 'podcastPageId' },
+  { model: PodcastStage, fk: 'podcastPageId', media: ['image'] },
   { model: PodcastShot, fk: 'podcastPageId', media: ['image'] },
   { model: PodcastFaq, fk: 'podcastPageId' },
   { model: PodcastCta, fk: 'podcastPageId' },
 ];
+
+/* Store media as the S3 object key, never as a full URL.
+ *
+ * The uploader hands the form back an absolute address; keeping that in the
+ * database would bake today's bucket and region into every row, so moving the
+ * bucket or putting a CDN in front of it would mean rewriting content. The key
+ * is the durable half — `buildS3Url` turns it back into an address on the way
+ * out, for both the admin's previews and the public API.
+ *
+ * A value starting with "/" is a file shipped inside the website's own /public
+ * folder rather than an upload, and is left exactly as it is. */
+const asStoredMedia = (value) => {
+  if (!value || typeof value !== 'string') return value;
+  return /^https?:\/\//i.test(value) ? s3KeyFromValue(value) : value;
+};
+
+/** Wrap a controller so its media fields are normalised before every write. */
+const withMediaKeys = (controller, fields) => {
+  const normalise = (req) => {
+    for (const field of fields) {
+      if (Object.prototype.hasOwnProperty.call(req.body || {}, field)) {
+        req.body[field] = asStoredMedia(req.body[field]);
+      }
+    }
+  };
+  return {
+    ...controller,
+    store: (req, res) => { normalise(req); return controller.store(req, res); },
+    update: (req, res) => { normalise(req); return controller.update(req, res); },
+  };
+};
 
 // Resolve the parent page name onto every child row so the admin lists can show
 // which page a record belongs to without a second request.
@@ -48,8 +80,10 @@ const PAGE_LOOKUP = [{
  * page named "… Video Editing & Marketing Services" would be saved under a slug
  * no route asks for. Leaving slugSource off means `pickSlugSource` honours the
  * slug field, and only falls back to the name when it is left blank. */
+const PAGE_MEDIA_FIELDS = ['heroPoster', 'problemBgImage', 'founderPortrait'];
+
 const page = createCrudController(PodcastPage, {
-  imageFields: ['heroPoster', 'problemBgImage', 'founderPortrait'],
+  imageFields: PAGE_MEDIA_FIELDS,
   searchFields: ['name', 'slug', 'metaTitle', 'heroTitle'],
   defaultSort: { displayOrder: 1, createdAt: -1 },
 });
@@ -73,6 +107,7 @@ const card = createCrudController(PodcastCard, {
 });
 
 const stage = createCrudController(PodcastStage, {
+  imageFields: ['image'],
   searchFields: ['name', 'promise', 'detail'],
   defaultSort: { displayOrder: 1, createdAt: 1 },
   parentField: 'podcastPageId',
@@ -192,11 +227,11 @@ const destroy = async (req, res) => {
 };
 
 module.exports = {
-  page: { ...page, index, destroy },
+  page: withMediaKeys({ ...page, index, destroy }, PAGE_MEDIA_FIELDS),
   stat,
   card,
-  stage,
-  shot,
+  stage: withMediaKeys(stage, ['image']),
+  shot: withMediaKeys(shot, ['image']),
   faq,
   cta,
 };

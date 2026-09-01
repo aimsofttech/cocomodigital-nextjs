@@ -300,7 +300,28 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                       <span className="pod-stage-ordinal" aria-hidden="true">
                         {stage.step}
                       </span>
-                      <StageDiagram id={stage.diagramKey} />
+                      {/* The illustration now comes from the API, so an editor
+                          can replace it. A plain <img> rather than next/image:
+                          these are SVGs, which the image optimiser refuses
+                          unless SVG handling is enabled site-wide, and that is
+                          not a trade worth making for four line drawings.
+                          With no image stored, the diagram the page shipped
+                          with is still drawn inline — so a stage is never
+                          left blank. */}
+                      {stage.image ? (
+                        <img
+                          className="pod-stage-art"
+                          src={stage.image}
+                          alt={stage.imageAlt || ""}
+                          width={320}
+                          height={132}
+                          loading="lazy"
+                          decoding="async"
+                          {...(stage.imageAlt ? {} : { role: "presentation" })}
+                        />
+                      ) : (
+                        <StageDiagram id={stage.diagramKey} />
+                      )}
                     </div>
 
                     <div className="pod-stage-body">

@@ -6,6 +6,7 @@ const PodcastStage = require('../../models/PodcastStage');
 const PodcastShot = require('../../models/PodcastShot');
 const PodcastFaq = require('../../models/PodcastFaq');
 const PodcastCta = require('../../models/PodcastCta');
+const { buildS3Url } = require('../../utils/s3Upload');
 
 /* Public read API for the podcast money page.
  *
@@ -28,6 +29,13 @@ const toLines = (value) =>
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
+
+/* Media is stored as the S3 object key — "podcast/stages/123_align.svg" — not
+ * as a full URL, so the bucket or CDN in front of it can change without a
+ * migration. The website is handed the resolved address instead of having to
+ * know any of that. A path that starts with "/" is a file shipped inside the
+ * website's own /public folder and is passed through untouched. */
+const mediaUrl = (value) => buildS3Url(value || '');
 
 /** Split a comma-separated field into a trimmed, non-empty list. */
 const toCsvList = (value) =>
@@ -90,7 +98,7 @@ const buildPage = (doc) => {
            stays a plain truthiness test, matching what it did when the id
            was a hand-edited constant. */
         videoId: doc.heroVideoId || null,
-        poster: doc.heroPoster || '',
+        poster: mediaUrl(doc.heroPoster),
         alt: doc.heroPosterAlt || '',
         playLabel: doc.heroPlayLabel || '',
       },
@@ -102,7 +110,7 @@ const buildPage = (doc) => {
     problem: {
       title: doc.problemTitle || '',
       lead: doc.problemLead || '',
-      backgroundImage: doc.problemBgImage || '',
+      backgroundImage: mediaUrl(doc.problemBgImage),
     },
     method: {
       eyebrow: doc.methodEyebrow || '',
@@ -153,7 +161,7 @@ const buildPage = (doc) => {
       eyebrow: doc.founderEyebrow || '',
       name: doc.founderName || '',
       role: doc.founderRole || '',
-      portrait: doc.founderPortrait || '',
+      portrait: mediaUrl(doc.founderPortrait),
       portraitAlt: doc.founderPortraitAlt || '',
       lines: toLines(doc.founderLines),
     },
@@ -326,6 +334,8 @@ const show = async (req, res) => {
       stages: stages.map((s) => ({
         id: s._id,
         diagramKey: s.diagramKey || 'none',
+        image: mediaUrl(s.image),
+        imageAlt: s.imageAlt || '',
         step: s.step || '',
         name: s.name || '',
         promise: s.promise || '',
@@ -334,7 +344,7 @@ const show = async (req, res) => {
       })),
       studioShots: shots.map((s) => ({
         id: s._id,
-        image: s.image || '',
+        image: mediaUrl(s.image),
         alt: s.alt || '',
         caption: s.caption || '',
         wide: !!s.wide,

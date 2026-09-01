@@ -24,6 +24,12 @@ const podcastStageSchema = new mongoose.Schema({
   detail: { type: String, default: '' },
   /** One capability per row, rendered as the ticked list. */
   capabilities: { type: String, default: '' },
+  /* The illustration beside the stage. An uploaded file (S3) or a path under
+   * the website's /public folder — the four diagrams the page shipped with are
+   * stored as the latter. Leave it empty and the page falls back to drawing
+   * `diagramKey` inline, which is how this band worked before images existed. */
+  image: { type: String, trim: true, default: '' },
+  imageAlt: { type: String, default: '' },
   displayOrder: { type: Number, default: 0 },
   status: { type: Number, enum: [0, 1], default: 1 },
   userId: { type: mongoose.Schema.Types.Mixed, default: null },

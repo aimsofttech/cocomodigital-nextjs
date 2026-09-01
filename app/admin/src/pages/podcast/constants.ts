@@ -104,6 +104,17 @@ export const PORTRAIT_SPEC = {
   note: 'the founder portrait — a vertical crop, head and shoulders',
 };
 
+/* The Signal-to-Scale illustrations. Wide and short, drawn as line art — an
+   SVG keeps the strokes crisp at any size, which a screenshot would not. */
+export const STAGE_ART_SPEC = {
+  width: 320,
+  height: 132,
+  ratio: '~2.4:1',
+  formats: 'SVG, PNG, WebP',
+  maxSizeMB: 1,
+  note: 'line art on a transparent background; it sits on a tinted panel',
+};
+
 export const STUDIO_SHOT_SPEC = {
   width: 1200,
   height: 675,
