@@ -46321,7 +46321,13 @@
 
     border-radius: 12px;
 
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow:
+
+      0 14px 36px -10px rgba(255, 240, 0, 0.55),
+
+      0 8px 20px -8px rgba(230, 179, 23, 0.45),
+
+      0 1px 3px rgba(0, 0, 0, 0.06);
 
     width: 100%;
 

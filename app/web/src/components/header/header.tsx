@@ -2,7 +2,9 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Link, useLocation } from "@/src/lib/navigation";
+import { signOutDemo, useDemoSession } from "@/src/lib/demoAuth";
 import { RiMenuFill } from "react-icons/ri";
 import { IoIosArrowForward } from "react-icons/io";
 import { HiArrowUpRight } from "react-icons/hi2";
@@ -37,8 +39,12 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [serviceData, setServiceData] = useState<ShellNavService[]>(initialServices);
 
-  const user: string | null = null;
+  /* The demo sign-in from /login. Null until the effect inside the hook reads
+     storage, so the header renders signed-out on the server and swaps a tick
+     later — signing in or out anywhere updates this without a reload. */
+  const demoUser = useDemoSession();
 
+  const router = useRouter();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -131,8 +137,9 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
   };
 
   const logoutHandler = (): void => {
-    /* Phase 5b: dispatch(clearUser()) removed alongside me slice. */
-    localStorage.removeItem("user");
+    signOutDemo();
+    setExpanded(false);          // close the mobile menu if it was open
+    router.push("/login");       // clear confirmation that the session ended
   };
 
   const isCareerArea =
@@ -197,7 +204,7 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
               </Link>
 
               <div className="header-right-actions header-right-actions-mobile">
-                {user === "admin" && (
+                {demoUser && (
                   <button
                     type="button"
                     className="logout-text logout-text-mobile"
@@ -436,7 +443,7 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
                   />
                 </Link>
 
-                {user === "admin" && (
+                {demoUser && (
                   <button type="button" className="logout-text" onClick={logoutHandler}>
                     Logout
                   </button>
