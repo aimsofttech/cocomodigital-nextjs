@@ -86,6 +86,9 @@ const adminHomePageSectionRoutes = require('./routes/admin/homePageSection');
 const adminHomePageSectionItemRoutes = require('./routes/admin/homePageSectionItem');
 const adminGrowthServiceRoutes = require('./routes/admin/growthService');
 const adminPodcastRoutes = require('./routes/admin/podcast');
+const adminUsersRoutes = require('./routes/admin/adminUsers');
+const adminRolesRoutes = require('./routes/admin/adminRoles');
+const adminProfileRoutes = require('./routes/admin/profile');
 const adminUploadRoutes = require('./routes/admin/uploads');
 const adminMediaAssetRoutes = require('./routes/admin/mediaAssets');
 
@@ -111,6 +114,18 @@ const app = express();
 app.set('trust proxy', 1);
 
 connectDB();
+
+/* Create the four admin roles if they are missing and map any account that
+ * predates the permission system onto one. Idempotent, and never overwrites
+ * a role or a permission set that already exists. Runs on every (re)connect
+ * because connectDB retries in the background rather than blocking boot. */
+const { bootstrapAdminAccess } = require('./config/bootstrapAdminAccess');
+const { authorizeAdmin } = require('./middleware/adminAccess');
+{
+  const mongooseConn = require('mongoose').connection;
+  if (mongooseConn.readyState === 1) bootstrapAdminAccess();
+  else mongooseConn.once('connected', () => { bootstrapAdminAccess(); });
+}
 
 // Security middleware
 app.use(helmet());
@@ -182,7 +197,21 @@ app.use((req, res, next) => {
 
 // Admin routes
 const adminBase = '/admin/api';
+/* ── Admin authentication & authorization ─────────────────────────────────
+ * Every /admin/api request passes through here before it reaches a router:
+ * the token is verified, the account is checked for being live, and the
+ * request's module and action are matched against the caller's role.
+ *
+ * Mounted once rather than per route so a new module cannot ship without a
+ * permission check — an unrecognised admin path is denied, not allowed. The
+ * `protect` calls inside each router stay exactly as they were and simply
+ * reuse the user this has already loaded. */
+app.use(adminBase, authorizeAdmin);
+
 app.use(`${adminBase}/auth`, adminAuthRoutes);
+app.use(`${adminBase}/profile`, adminProfileRoutes);
+app.use(`${adminBase}/users`, adminUsersRoutes);
+app.use(`${adminBase}/roles`, adminRolesRoutes);
 app.use(`${adminBase}/dashboard`, adminDashboardRoutes);
 app.use(`${adminBase}/top-banner`, adminTopBannerRoutes);
 app.use(`${adminBase}/brands`, adminBrandsRoutes);

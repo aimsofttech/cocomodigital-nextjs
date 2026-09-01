@@ -194,6 +194,32 @@ export const podcastShotApi = createCrudService('podcast/shot');
 export const podcastFaqApi = createCrudService('podcast/faq');
 export const podcastCtaApi = createCrudService('podcast/cta');
 
+/* Admin access control — Super Admin only, except `profileApi`, which is every
+   signed-in user's own account and carries no id (the server works from the
+   session, so there is nothing to point at someone else). */
+export const adminUserApi = {
+  ...createCrudService('users'),
+  /** The user types a Super Admin may assign. */
+  assignableRoles: () => api.get(`${BASE}/users/roles`),
+  /** Issue a fresh generated password; returned once, for handing over. */
+  resetPassword: (id: string) => api.post(`${BASE}/users/${id}/reset-password`),
+};
+
+export const adminRoleApi = {
+  getAll: () => api.get(`${BASE}/roles`),
+  getOne: (key: string) => api.get(`${BASE}/roles/${key}`),
+  /** The module list the permission matrix is drawn from. */
+  catalog: () => api.get(`${BASE}/roles/catalog`),
+  update: (key: string, data: Record<string, any>) => api.put(`${BASE}/roles/${key}`, data),
+};
+
+export const profileApi = {
+  get: () => api.get(`${BASE}/profile`),
+  update: (data: Record<string, any>) => api.put(`${BASE}/profile`, data),
+  changePassword: (data: { current_password: string; new_password: string }) =>
+    api.put(`${BASE}/profile/password`, data),
+};
+
 export const meetingApi = {
   getAll: (params?: Record<string, any>) => api.get(`${BASE}/meetings`, { params }),
   getStats: () => api.get(`${BASE}/meetings/stats`),

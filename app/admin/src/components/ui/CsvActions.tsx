@@ -18,6 +18,10 @@ export interface CsvConfig {
   filename?: string;
   /** Called after a successful import so the list can refresh. */
   onImported?: () => void;
+  /* Set by CrudListPage from the signed-in role. Export and import are
+     separate permissions, so a role can hold one without the other. */
+  disableExport?: boolean;
+  disableImport?: boolean;
 }
 
 /**
@@ -26,6 +30,7 @@ export interface CsvConfig {
  */
 export default function CsvActions({
   api, exportParams, importFields, filename = 'export', onImported,
+  disableExport = false, disableImport = false,
 }: CsvConfig) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<'export' | 'import' | null>(null);
@@ -77,6 +82,7 @@ export default function CsvActions({
 
   return (
     <>
+      {!disableExport && (
       <Tooltip content="Export all rows to CSV">
         <button
           type="button"
@@ -88,6 +94,8 @@ export default function CsvActions({
           {busy === 'export' ? 'Exporting…' : 'Export'}
         </button>
       </Tooltip>
+      )}
+      {!disableImport && (
       <Tooltip content="Bulk add records from a CSV / Excel file">
         <button
           type="button"
@@ -99,6 +107,7 @@ export default function CsvActions({
           {busy === 'import' ? 'Importing…' : 'Import'}
         </button>
       </Tooltip>
+      )}
       <input
         ref={fileRef}
         type="file"

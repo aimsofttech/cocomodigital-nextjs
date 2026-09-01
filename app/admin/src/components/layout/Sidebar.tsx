@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   HomeIcon, ChartBarIcon, MegaphoneIcon, PaintBrushIcon, CodeBracketIcon,
@@ -13,7 +13,9 @@ import {
   CalendarDaysIcon,
   ArrowTrendingUpIcon, CursorArrowRaysIcon,
   MicrophoneIcon,
+  ShieldCheckIcon, UserPlusIcon,
 } from '@heroicons/react/24/outline';
+import { usePermissions } from '@/features/auth/permissions';
 
 // ── Nav tree ────────────────────────────────────────────────────────────────
 
@@ -24,6 +26,9 @@ interface NavItem {
   children?: NavItem[];
   /** Show the item but make it non-clickable (greyed out). */
   disabled?: boolean;
+  /* Which permission module gates this item. Only needed for entries with no
+     path of their own — everything else is resolved from its path. */
+  module?: string;
 }
 
 const navigation: NavItem[] = [
@@ -96,7 +101,7 @@ const navigation: NavItem[] = [
     ],
   },
   // Development House is shown but disabled — not consumed by the web app yet.
-  { label: 'Development House', icon: CodeBracketIcon, disabled: true },
+  { label: 'Development House', icon: CodeBracketIcon, disabled: true, module: 'development' },
   {
     label: 'Group Services', icon: BuildingStorefrontIcon,
     children: [
@@ -197,7 +202,43 @@ const navigation: NavItem[] = [
       { label: 'Booking Availability', path: '/contact/meeting-availability', icon: CalendarDaysIcon },
     ],
   },
+  /* Super Admin only. Both entries disappear for every other role because
+     `canOpenPath` refuses their modules — the same rule the API applies. */
+  {
+    label: 'Administration', icon: ShieldCheckIcon,
+    children: [
+      { label: 'User Management', path: '/users', icon: UserPlusIcon },
+      { label: 'Roles & Permissions', path: '/roles', icon: ShieldCheckIcon },
+    ],
+  },
 ];
+
+/**
+ * Drop the items this role cannot reach.
+ *
+ * A group survives only if something inside it did, so a user never sees an
+ * expandable section that opens onto nothing. Purely cosmetic: the routes and
+ * the API enforce the same rule independently.
+ */
+const visibleNav = (
+  items: NavItem[],
+  allowed: (path: string) => boolean,
+  canView: (moduleKey: string) => boolean,
+): NavItem[] =>
+  items.reduce<NavItem[]>((acc, item) => {
+    if (item.children) {
+      const children = visibleNav(item.children, allowed, canView);
+      if (children.length) acc.push({ ...item, children });
+      return acc;
+    }
+    if (item.path) {
+      if (allowed(item.path)) acc.push(item);
+      return acc;
+    }
+    // Path-less entries (the disabled placeholder) declare their module.
+    if (!item.module || canView(item.module)) acc.push(item);
+    return acc;
+  }, []);
 
 // ── NavGroup — handles a single item (leaf or collapsible group) ─────────────
 
@@ -359,6 +400,13 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, mobileOpen, onMobileClose }: SidebarProps) {
+  const { canOpenPath, canView } = usePermissions();
+  // Recomputed only when the role changes, not on every navigation.
+  const nav = useMemo(
+    () => visibleNav(navigation, canOpenPath, canView),
+    [canOpenPath, canView],
+  );
+
   return (
     <aside
       className={[
@@ -398,7 +446,7 @@ export default function Sidebar({ collapsed, mobileOpen, onMobileClose }: Sideba
         className={`flex-1 overflow-y-auto p-3 space-y-0.5 ${collapsed ? 'lg:hidden' : 'block'
           }`}
       >
-        {navigation.map((item) => (
+        {nav.map((item) => (
           <NavGroup key={item.label} item={item} />
         ))}
       </nav>
@@ -408,7 +456,7 @@ export default function Sidebar({ collapsed, mobileOpen, onMobileClose }: Sideba
         className={`hidden flex-col flex-1 overflow-y-auto py-3 px-1 space-y-1 ${collapsed ? 'lg:flex' : ''
           }`}
       >
-        {navigation.map((item) => (
+        {nav.map((item) => (
           <CollapsedItem key={item.label} item={item} />
         ))}
       </nav>

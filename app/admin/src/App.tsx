@@ -4,9 +4,17 @@ import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import { logout } from '@/features/auth/authSlice';
 import Layout from '@/components/layout/Layout';
 import AppLoader from '@/components/ui/AppLoader';
+import RequireModuleAccess from '@/components/auth/RequireModuleAccess';
+import { loadSession } from '@/features/auth/authSlice';
 
 // Auth
 const Login = lazy(() => import('@/pages/auth/Login'));
+
+// Access control — Super Admin only, plus every user's own profile
+const UserList = lazy(() => import('@/pages/users/UserList'));
+const RolePermissions = lazy(() => import('@/pages/roles/RolePermissions'));
+const Profile = lazy(() => import('@/pages/profile/Profile'));
+const Unauthorized = lazy(() => import('@/pages/Unauthorized'));
 
 // Dashboard
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
@@ -224,12 +232,40 @@ export default function App() {
     return () => window.removeEventListener('auth:logout', handleAuthLogout);
   }, [dispatch, navigate]);
 
+  /* Re-read the role and its permissions once per load. The cached copy drew
+   * the first paint; this makes sure a change made by a Super Admin since the
+   * last sign-in is picked up on a refresh rather than a re-login. */
+  const { token } = useAppSelector((state) => state.auth);
+  useEffect(() => {
+    if (token) dispatch(loadSession());
+  }, [token, dispatch]);
+
   return (
     <Suspense fallback={<AppLoader />}>
       <Routes>
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        {/* Every route below is checked twice: `ProtectedRoute` for a session,
+            then `RequireModuleAccess` for the signed-in role's permission on the
+            module that owns the path. Typing a URL therefore gets the same answer
+            as clicking a menu item — and the API enforces it a third time. */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <RequireModuleAccess>
+                <Layout />
+              </RequireModuleAccess>
+            </ProtectedRoute>
+          }
+        >
+          {/* Available to every signed-in admin, whatever their role. */}
+          <Route path="profile" element={<Profile />} />
+          <Route path="unauthorized" element={<Unauthorized />} />
+
+          {/* Super Admin only — enforced by the guard above and by the API. */}
+          <Route path="users" element={<UserList />} />
+          <Route path="roles" element={<RolePermissions />} />
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
 

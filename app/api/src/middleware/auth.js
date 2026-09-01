@@ -2,6 +2,13 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const protect = async (req, res, next) => {
+  /* `authorizeAdmin` runs ahead of every /admin/api route and has already
+   * verified the token, loaded the user and checked that the account is live.
+   * Reuse that instead of paying for a second verify + query on every request.
+   * The check below still runs for any router mounted outside that prefix, so
+   * this middleware remains safe to use on its own. */
+  if (req.user) return next();
+
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
@@ -18,6 +25,12 @@ const protect = async (req, res, next) => {
 
     if (!req.user) {
       return res.status(401).json({ status: 'error', message: 'User not found' });
+    }
+    if (req.user.deletedAt) {
+      return res.status(401).json({ status: 'error', message: 'This account has been removed' });
+    }
+    if (req.user.status === 0) {
+      return res.status(401).json({ status: 'error', message: 'This account has been deactivated' });
     }
 
     next();

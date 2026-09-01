@@ -15,6 +15,7 @@ import TableFilter, {
   isEmptyValue,
 } from './TableFilter';
 import CsvActions, { CsvConfig } from './CsvActions';
+import { usePermissions } from '@/features/auth/permissions';
 
 interface Breadcrumb { label: string; path?: string; }
 
@@ -74,12 +75,30 @@ function getSessionKey(pathname: string) {
 export default function CrudListPage<T extends { _id?: string }>({
   title, breadcrumbs = [], addPath, editPath, columns, data,
   loading, submitting, pagination, onPageChange, onSearch, onDelete,
-  extraActions, rowActions, disableAdd, disableDelete, disableEdit,
+  extraActions, rowActions,
+  disableAdd: disableAddProp,
+  disableDelete: disableDeleteProp,
+  disableEdit: disableEditProp,
   filterFields, onServerFilterChange,
   renderModal, modalTitle, modalSize = 'lg', onRefresh, renderExpanded, csv,
   viewDetails, onReorder,
 }: CrudListPageProps<T>) {
   const { pathname } = useLocation();
+
+  /* Action buttons follow the signed-in role.
+   *
+   * Resolved from the current path rather than a prop, so every list page in
+   * the panel is covered without touching any of them — and a page added later
+   * is covered the moment it is routed. A caller that already passes
+   * `disableAdd` / `disableEdit` / `disableDelete` keeps that behaviour: the
+   * permission can only ever take a button away, never add one back.
+   *
+   * Hiding is a convenience, not the control. The same rules are enforced on
+   * every request by the API, so a user who forges the call still gets a 403. */
+  const perms = usePermissions();
+  const disableAdd = disableAddProp || !perms.current.create;
+  const disableEdit = disableEditProp || !perms.current.update;
+  const disableDelete = disableDeleteProp || !perms.current.delete;
   const sessionKey = getSessionKey(pathname);
   const pageSizeKey = `${sessionKey}_ps`;
 
@@ -249,9 +268,13 @@ export default function CrudListPage<T extends { _id?: string }>({
         actions={
           <div className="flex items-center gap-2">
             {extraActions}
-            {csv && (
+            {csv && (perms.current.export || perms.current.import) && (
               <CsvActions
                 {...csv}
+                /* Export and import are separate permissions; a role with only
+                   one of them sees only that half of the control. */
+                disableExport={!perms.current.export}
+                disableImport={!perms.current.import}
                 onImported={() => { csv.onImported?.(); onRefresh?.(); }}
               />
             )}

@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { logout } from '@/features/auth/authSlice';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import {
-  Bars3Icon, ArrowRightOnRectangleIcon, UserCircleIcon,
+  Bars3Icon, ArrowRightOnRectangleIcon, UserCircleIcon, UserIcon,
   ChevronLeftIcon, ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 
@@ -58,7 +59,15 @@ export default function Header({ collapsed, onToggleSidebar, onOpenMobileMenu }:
           onClick={() => setShowDropdown((v) => !v)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
         >
-          <UserCircleIcon className="w-6 h-6 text-gray-500" />
+          {user?.profileImage ? (
+            <img
+              src={user.profileImage}
+              alt=""
+              className="w-6 h-6 rounded-full object-cover border border-gray-200"
+            />
+          ) : (
+            <UserCircleIcon className="w-6 h-6 text-gray-500" />
+          )}
           <span className="text-sm font-medium text-gray-700 hidden sm:block max-w-[140px] truncate">
             {user?.name}
           </span>
@@ -72,7 +81,18 @@ export default function Header({ collapsed, onToggleSidebar, onOpenMobileMenu }:
               <div className="px-3 py-2.5 border-b border-gray-100">
                 <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
                 <p className="text-xs text-gray-500 truncate mt-0.5">{user?.email}</p>
+                {user?.roleName && (
+                  <p className="text-[11px] text-gray-400 truncate mt-0.5">{user.roleName}</p>
+                )}
               </div>
+              <Link
+                to="/profile"
+                onClick={() => setShowDropdown(false)}
+                className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <UserIcon className="w-4 h-4" />
+                My Profile
+              </Link>
               <button
                 onClick={() => { setShowDropdown(false); setShowLogoutConfirm(true); }}
                 className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
