@@ -12,12 +12,26 @@ const s3 = new S3Client({
   },
 });
 
+// A stored media value that is a site-root-relative path — a file that ships
+// inside the website's own /public folder rather than an uploaded object.
+// S3 keys are stored without a leading slash (multer-s3 produces
+// "folder/name.jpg"), so a leading slash is what tells the two apart.
+const isSitePath = (value) => /^\//.test(String(value));
+
 // Build a public URL from a stored value. Idempotent: a value that is already a
 // full URL is returned untouched, while a bare S3 key is prefixed with AWS_URL.
 // This lets the DB hold either legacy keys or new full URLs transparently.
+//
+// A site-relative path is returned untouched too. Prefixing one produced
+// "<bucket>//Images/x.jpg" — a double-slashed URL for an object that was never
+// in the bucket, and because admin forms round-trip whatever the API hands
+// them, saving the record then wrote that dead URL back over a perfectly good
+// path. Modules whose media can be either an upload or a shipped site asset
+// (the podcast page is the first) depend on this.
 const buildS3Url = (value) => {
   if (!value) return '';
   if (/^https?:\/\//i.test(value)) return value;
+  if (isSitePath(value)) return value;
   return `${process.env.AWS_URL}/${value}`;
 };
 
@@ -143,6 +157,9 @@ const uploadYoutubeThumbnailToS3 = async (thumbnailUrl, baseName, folder = 'yout
 
 // Delete an object from S3. Accepts either a bare key or a full URL.
 const deleteFromS3 = async (value) => {
+  // Never aim a delete at a file that ships with the website: it is not in the
+  // bucket, and a key derived from it could collide with a real object.
+  if (isSitePath(value)) return;
   const key = s3KeyFromValue(value);
   if (!key) return;
   try {
@@ -171,6 +188,7 @@ module.exports = {
   createS3Upload,
   createMediaUpload,
   buildS3Url,
+  isSitePath,
   s3KeyFromValue,
   uploadYoutubeThumbnailToS3,
   deleteFromS3,

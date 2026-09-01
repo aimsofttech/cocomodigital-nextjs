@@ -175,7 +175,7 @@ const GrowthContentList = lazy(() => import('@/pages/growthServices/ContentList'
 
 // Podcast — the podcast money page and all of its sections
 const PodcastPageList = lazy(() => import('@/pages/podcast/PageList'));
-const PodcastPageForm = lazy(() => import('@/pages/podcast/PageForm'));
+const PodcastPageWizard = lazy(() => import('@/pages/podcast/PageWizard'));
 const PodcastStatList = lazy(() => import('@/pages/podcast/StatList'));
 const PodcastCardList = lazy(() => import('@/pages/podcast/CardList'));
 const PodcastStageList = lazy(() => import('@/pages/podcast/StageList'));
@@ -407,8 +407,9 @@ export default function App() {
 
           {/* Podcast — section lists are scoped by ?podcastPageId and ?sectionKey */}
           <Route path="podcast/page" element={<PodcastPageList />} />
-          <Route path="podcast/page/add" element={<PodcastPageForm />} />
-          <Route path="podcast/page/edit/:id" element={<PodcastPageForm />} />
+          {/* Both add and edit walk the page one band at a time. */}
+          <Route path="podcast/page/add" element={<PodcastPageWizard />} />
+          <Route path="podcast/page/edit/:id" element={<PodcastPageWizard />} />
           <Route path="podcast/stat" element={<PodcastStatList />} />
           <Route path="podcast/card" element={<PodcastCardList />} />
           <Route path="podcast/stage" element={<PodcastStageList />} />

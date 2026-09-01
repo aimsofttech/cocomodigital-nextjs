@@ -15,7 +15,7 @@ const SECTION_LABELS: Record<string, string> = {
   scale: 'Scale Tiles',
 };
 
-function StatForm({ editId, lockedPageId, lockedSectionKey, onSuccess, onCancel }: any) {
+export function StatForm({ editId, lockedPageId, lockedSectionKey, onSuccess, onCancel }: any) {
   return (
     <ChildForm
       api={podcastStatApi}

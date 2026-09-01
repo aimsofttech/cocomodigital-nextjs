@@ -6,7 +6,7 @@ import { TextAreaField, TextField } from './FormFields';
 /* FAQ accordion entries. These also feed the page's FAQPage structured data, so
  * an answer should read as a complete reply on its own. */
 
-function FaqForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
+export function FaqForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
   return (
     <ChildForm
       api={podcastFaqApi}

@@ -15,7 +15,7 @@ const WIDTH_OPTIONS = [
   { value: 'true', label: 'Wide — spans two columns' },
 ];
 
-function ShotForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
+export function ShotForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
   return (
     <ChildForm
       api={podcastShotApi}

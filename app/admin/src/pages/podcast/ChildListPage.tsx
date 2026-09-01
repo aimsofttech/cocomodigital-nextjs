@@ -38,7 +38,11 @@ interface Props {
   /** Human labels for the section keys, used in the page title. */
   sectionLabels?: Record<string, string>;
   renderForm: (
-    props: ModalRenderProps & { lockedPageId?: string; lockedSectionKey?: string },
+    props: ModalRenderProps & {
+      editId?: string;
+      lockedPageId?: string;
+      lockedSectionKey?: string;
+    },
   ) => ReactNode;
   modalTitle: (mode: 'add' | 'edit') => string;
   modalSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -164,6 +168,11 @@ export default function ChildListPage({
       onServerFilterChange={handleFilterChange}
       renderModal={(props) => renderForm({
         ...props,
+        /* CrudListPage hands the record being edited over as `id`; the section
+           forms take it as `editId`. Without this the forms saw no id at all,
+           so Edit opened blank and saving created a second record instead of
+           updating the one you clicked. */
+        editId: props.id,
         lockedPageId: pageId || undefined,
         lockedSectionKey: sectionKey || undefined,
       })}

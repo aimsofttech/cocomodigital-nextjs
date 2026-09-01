@@ -18,7 +18,7 @@ const PLACEMENT_LABELS: Record<string, string> = {
   proof: 'Proof',
 };
 
-function CtaForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
+export function CtaForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
   return (
     <ChildForm
       api={podcastCtaApi}

@@ -9,7 +9,7 @@ import { SelectField, TextAreaField, TextField } from './FormFields';
  * diagram drawn beside it. The diagrams are drawn in code, so the key is a
  * closed list — a name the page doesn't know renders no diagram at all. */
 
-function StageForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
+export function StageForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
   return (
     <ChildForm
       api={podcastStageApi}

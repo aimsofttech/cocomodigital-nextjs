@@ -71,7 +71,7 @@ const FIELDS: Record<string, {
   },
 };
 
-function CardForm({ editId, lockedPageId, lockedSectionKey, onSuccess, onCancel }: any) {
+export function CardForm({ editId, lockedPageId, lockedSectionKey, onSuccess, onCancel }: any) {
   return (
     <ChildForm
       api={podcastCardApi}
