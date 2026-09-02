@@ -367,3 +367,120 @@ export function ProblemContrast() {
     </div>
   );
 }
+
+/* ------------------------------------------------------------------
+   Audience illustrations.
+
+   The three audience cards were a heading, a paragraph and a one-line
+   signal — true, and completely flat. Each of these draws the shape of
+   that reader's operation rather than decorating the card: one show
+   feeding a business, one brand feeding several platforms, several shows
+   sharing one production spine.
+
+   Same schematic language as the Signal-to-Scale diagrams (same viewBox,
+   same pod-art-* classes) so the page reads as one hand. Decorative by
+   construction — the card's own words carry the meaning — so they are
+   aria-hidden and carry no text a screen reader would need. */
+
+const audienceBox = {
+  viewBox: "0 0 320 132",
+  role: "presentation" as const,
+  "aria-hidden": true as const,
+  focusable: "false" as const,
+  className: "pod-audience-art",
+};
+
+/* One show, pointed at a business outcome. */
+function FounderArt() {
+  return (
+    <svg {...audienceBox}>
+      <circle cx="46" cy="46" r="15" className="pod-art-outline" />
+      <path d="M46 61v10M34 71h24" className="pod-art-line" />
+      <rect x="30" y="80" width="32" height="26" rx="5" className="pod-art-fill" />
+      <text x="46" y="97" className="pod-art-tiny" textAnchor="middle">SHOW</text>
+      <path d="M70 93h34" className="pod-art-line" />
+      <path d="M112 100l26-14 24 8 30-26 28-12" className="pod-art-line" />
+      {[
+        [138, 86],
+        [162, 94],
+        [192, 68],
+        [220, 56],
+      ].map(([cx, cy]) => (
+        <circle key={cx} cx={cx} cy={cy} r="3.5" className="pod-art-fill" />
+      ))}
+      <rect x="240" y="34" width="64" height="24" rx="5" className="pod-art-outline" />
+      <text x="272" y="49" className="pod-art-tiny" textAnchor="middle">PIPELINE</text>
+      <path d="M112 112h192" className="pod-art-line" opacity="0.3" />
+    </svg>
+  );
+}
+
+/* One brand, several platforms, measured. */
+function BrandArt() {
+  return (
+    <svg {...audienceBox}>
+      <rect x="14" y="48" width="58" height="36" rx="6" className="pod-art-fill" />
+      <text x="43" y="70" className="pod-art-tiny" textAnchor="middle">BRAND</text>
+      <path d="M72 66h26M98 66V26h18M98 66v40h18M98 66h18" className="pod-art-line" />
+      {[
+        { y: 14, label: "YOUTUBE" },
+        { y: 54, label: "SHORTS" },
+        { y: 94, label: "SOCIAL" },
+      ].map((r) => (
+        <g key={r.y}>
+          <rect x="116" y={r.y} width="86" height="24" rx="5" className="pod-art-outline" />
+          <text x="159" y={r.y + 16} className="pod-art-tiny" textAnchor="middle">{r.label}</text>
+          <path d={`M202 ${r.y + 12}h28`} className="pod-art-line" opacity="0.5" />
+        </g>
+      ))}
+      <rect x="232" y="42" width="72" height="48" rx="6" className="pod-art-outline" />
+      <path d="M244 78l14-12 12 8 20-22" className="pod-art-line" />
+      <text x="268" y="102" className="pod-art-tiny" textAnchor="middle">MEASURED</text>
+    </svg>
+  );
+}
+
+/* Several shows, one production spine. */
+function NetworkArt() {
+  return (
+    <svg {...audienceBox}>
+      {[16, 54, 92].map((y, i) => (
+        <g key={y}>
+          <rect x="14" y={y} width="74" height="26" rx="5" className="pod-art-outline" />
+          <text x="51" y={y + 17} className="pod-art-tiny" textAnchor="middle">
+            {`SHOW ${i + 1}`}
+          </text>
+          <path d={`M88 ${y + 13}h34`} className="pod-art-line" />
+        </g>
+      ))}
+      <path d="M122 29v76" className="pod-art-line" />
+      <rect x="122" y="40" width="74" height="52" rx="6" className="pod-art-fill" />
+      <text x="159" y="62" className="pod-art-tiny" textAnchor="middle">ONE</text>
+      <text x="159" y="78" className="pod-art-tiny" textAnchor="middle">STANDARD</text>
+      <path d="M196 66h30" className="pod-art-line" />
+      {[
+        { y: 22, label: "CATALOG" },
+        { y: 56, label: "LANGUAGES" },
+        { y: 90, label: "REPORTING" },
+      ].map((r) => (
+        <g key={r.y}>
+          <rect x="226" y={r.y} width="78" height="22" rx="5" className="pod-art-outline" />
+          <text x="265" y={r.y + 15} className="pod-art-tiny" textAnchor="middle">{r.label}</text>
+        </g>
+      ))}
+      <path d="M226 33h-14v33h14M212 66v35h14" className="pod-art-line" opacity="0.45" />
+    </svg>
+  );
+}
+
+export const AUDIENCE_ART: Record<string, () => React.ReactElement> = {
+  mic: FounderArt,
+  brand: BrandArt,
+  network: NetworkArt,
+};
+
+/** Falls back to nothing when an editor picks an icon we have no scene for. */
+export function AudienceArt({ id }: { id: string }) {
+  const Art = AUDIENCE_ART[id];
+  return Art ? <Art /> : null;
+}

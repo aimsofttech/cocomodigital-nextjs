@@ -57669,7 +57669,13 @@ html {
 }
 
 .pod-page > section {
-  padding-block: var(--section-pad-y);
+  /* Not --section-pad-y. That token resolves to 65px here, so every pair
+     of bands had 130px of dead air between them — 2,080px in total, 15%
+     of the page's height, which is what Anil was reading as "too much
+     gap". 44px keeps the bands distinct at 88px apart and gives ~670px
+     back. The site-wide token is left alone: this is a judgement about
+     this page, which has sixteen bands, not about every page. */
+  padding-block: clamp(2rem, 3vw, 2.75rem);
   position: relative;
 }
 
@@ -59879,6 +59885,116 @@ html {
 
   .pod-contrast {
     padding: var(--space-4);
+  }
+}
+
+/* ------------------------------------------- audience scenes */
+
+/* The three audience cards were heading + paragraph + one-line signal:
+   true and completely flat. The scene sits above the words in the same
+   schematic language as the Signal-to-Scale diagrams. */
+.pod-audience-figure {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-3) 0;
+  border-bottom: 2px solid var(--brand);
+}
+
+.pod-audience-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* --------------------------------------- reveal on scroll */
+
+/* Animation-timeline does the work where it exists, so there is no
+   observer and no JS. Browsers without it simply show the finished
+   state, which is the correct fallback for content that must be
+   readable either way. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .pod-reveal {
+      animation: pod-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 42%;
+    }
+  }
+}
+
+@keyframes pod-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The photograph behind a service card lifts slightly on hover. Cheap,
+   GPU-only, and it makes an eight-card grid feel handled rather than
+   printed. Pointer devices only — on touch, hover states stick. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pod-service-card-bg {
+    transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 480ms ease;
+  }
+
+  .pod-service-card--art:hover .pod-service-card-bg {
+    transform: scale(1.06);
+  }
+
+  .pod-service-card {
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 260ms ease;
+  }
+
+  .pod-service-card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* -------------------------------- proof: admission vs. where to look */
+
+.pod-proof-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.pod-proof-aside {
+  padding: var(--space-4);
+  border: 2px solid var(--text-strong, currentColor);
+  border-radius: 12px;
+}
+
+.pod-proof-aside-kicker {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Stacked, full-width links — these are the only actionable thing in the
+   band and they were sitting in a row under three paragraphs. */
+.pod-proof-aside .pod-proof-links {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.pod-proof-aside .pod-proof-links > a {
+  width: 100%;
+  justify-content: space-between;
+}
+
+@media (max-width: 900px) {
+  .pod-proof-split {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
   }
 }
 

@@ -6,7 +6,7 @@ import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastAutoVideo from "./PodcastAutoVideo";
 import PodcastHeroMedia from "./PodcastHeroMedia";
-import { Icon, ProblemContrast, StageDiagram } from "./PodcastVisuals";
+import { AudienceArt, Icon, ProblemContrast, StageDiagram } from "./PodcastVisuals";
 import SectionEditLink from "@/src/components/common/SectionEditLink/SectionEditLink";
 
 /**
@@ -120,6 +120,10 @@ function Cta({ cta }: { cta: PodcastCta }) {
     </a>
   );
 }
+
+/* Icons we have drawn an audience scene for. Kept beside the component
+   so adding a scene is one edit in PodcastVisuals plus one entry here. */
+const AUDIENCE_HAS_ART = new Set(["mic", "brand", "network"]);
 
 export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
   const {
@@ -383,14 +387,18 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
           </h2>
           {services.lead && <p className="pod-section-lead">{services.lead}</p>}
           {data.serviceCards.length > 0 && (
-            <div className="pod-service-grid">
-              {data.serviceCards.map((s) => (
+            <div className="pod-service-grid pod-reveal-group">
+              {data.serviceCards.map((s, i) => (
                 <article
                   key={s.title}
+                  /* Staggered purely in CSS off an index custom property —
+                     no JS, no observer, and the whole thing is disabled
+                     under prefers-reduced-motion. */
+                  style={{ "--i": i } as React.CSSProperties}
                   className={
                     s.image
-                      ? "pod-service-card pod-service-card--art"
-                      : "pod-service-card"
+                      ? "pod-service-card pod-reveal pod-service-card--art"
+                      : "pod-service-card pod-reveal"
                   }
                 >
                   {/* Backdrop, not an illustration. It sits under the card's
@@ -438,9 +446,18 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               {data.audienceCards.map((a) => (
                 <article key={a.title} className="pod-audience-card">
                   <EditItem pageId={data.id} kind="audiences" id={a.id} label={a.title} />
-                  <span className="pod-audience-icon">
-                    <Icon name={a.icon} />
-                  </span>
+                  {/* Draws the shape of this reader's operation rather than
+                      decorating the card. Falls back to the icon when an
+                      editor picks something we have no scene for. */}
+                  {AUDIENCE_HAS_ART.has(a.icon) ? (
+                    <div className="pod-audience-figure">
+                      <AudienceArt id={a.icon} />
+                    </div>
+                  ) : (
+                    <span className="pod-audience-icon">
+                      <Icon name={a.icon} />
+                    </span>
+                  )}
                   <h3 className="pod-audience-title">{a.title}</h3>
                   <p className="pod-audience-body">{a.body}</p>
                   <p className="pod-audience-signal">{a.meta}</p>
@@ -763,19 +780,31 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               real proof block. Until then it must not imply a podcast roster
               exists — which is now an editorial decision made in the admin
               panel rather than a code change. */}
-          {proof.paragraphs.map((p) => (
-            <p key={p.slice(0, 24)} className="pod-proof-body">
-              {p}
-            </p>
-          ))}
-          {data.ctas.proof.length > 0 && (
-            <div className="pod-proof-links">
-              {data.ctas.proof.map((c) => (
-                <Cta key={c.href} cta={c} />
+          {/* Two columns, because this band is doing two jobs at once: it
+              admits what does not exist yet, and it points at what does.
+              Run together as one stack of paragraphs, the admission buried
+              the links — which are the only actionable thing here. */}
+          <div className="pod-proof-split">
+            <div className="pod-proof-statement">
+              {proof.paragraphs.map((p) => (
+                <p key={p.slice(0, 24)} className="pod-proof-body">
+                  {p}
+                </p>
               ))}
-              <EditItem pageId={data.id} kind="cta" id={data.ctas.proof[0].id} label="these links" />
             </div>
-          )}
+
+            {data.ctas.proof.length > 0 && (
+              <aside className="pod-proof-aside">
+                <p className="pod-proof-aside-kicker">Go and look</p>
+                <div className="pod-proof-links">
+                  {data.ctas.proof.map((c) => (
+                    <Cta key={c.href} cta={c} />
+                  ))}
+                  <EditItem pageId={data.id} kind="cta" id={data.ctas.proof[0].id} label="these links" />
+                </div>
+              </aside>
+            )}
+          </div>
         </div>
       </section>
 
