@@ -1,6 +1,7 @@
 import type { HeadingLevel, ProcessStep } from "./types";
 import { Heading } from "./Primitives";
 import { STEP_MARKER } from "./theme";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 
 /* Numbered six-step timeline. The dashed connector only appears
    once the steps sit on a single row (lg+); on smaller screens
@@ -22,7 +23,8 @@ export default function ProcessTimeline({
       />
       <ol className="relative grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-6 lg:gap-4">
         {steps.map((step, index) => (
-          <li key={step.title} className="text-center">
+          <li key={step.title} className="text-center edit-host">
+            {step.editTo ? <EditPencil to={step.editTo} label={step.title} /> : null}
             {/* The ring matches the section surface so the marker punches a
                 clean gap through the dashed connector behind it. Both call
                 sites render inside a default-tone <Section> (bg-page); if one

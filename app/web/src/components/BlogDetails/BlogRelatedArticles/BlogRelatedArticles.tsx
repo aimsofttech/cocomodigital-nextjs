@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Link } from "@/src/lib/navigation";
 import moment from "moment/moment";
 import { FaArrowRight } from "react-icons/fa";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 
 const BlogRelatedArticles = ({
   currentArticle,
@@ -112,8 +114,13 @@ const BlogRelatedArticles = ({
           <Link
             key={post.id}
             to={`/blog/${post.slug}`}
-            className="blog-related-article-card"
+            className="blog-related-article-card edit-host"
           >
+            <EditPencil
+              asButton
+              to={adminRoutes.blog.post(post.id)}
+              label={post.title || "this post"}
+            />
             <div className="blog-related-article-image-wrapper">
               {post?.image && (
                 <Image

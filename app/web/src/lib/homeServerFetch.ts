@@ -49,6 +49,9 @@ export interface HomeData {
 
 export interface YoutubeSection {
   category?: string;
+  /** The home-page-section record this rail was grouped from, so its
+   *  heading can address its own admin form. */
+  categoryId?: string;
   items?: Record<string, unknown>[];
 }
 
@@ -264,12 +267,18 @@ export async function fetchHomePageData(
      order — so Map insertion order gives us the right section
      sequence too. */
   const sectionBuckets = new Map<string, any[]>();
+  /* The section id per bucket, so the rail heading can be edited. Kept
+     beside the bucket rather than on every card: the cards are grouped by
+     the section NAME, and every card in a bucket came from the same
+     section, so one lookup answers for the whole rail. */
+  const sectionIds = new Map<string, string | undefined>();
   for (const card of youtubeFromPayload.docs as any[]) {
     const sectionKey =
       (typeof card.subtitle === "string" && card.subtitle.trim()) ||
       "Featured";
     if (!sectionBuckets.has(sectionKey)) {
       sectionBuckets.set(sectionKey, []);
+      sectionIds.set(sectionKey, card.sectionId);
     }
     sectionBuckets.get(sectionKey)!.push({
       id: card.id,
@@ -284,6 +293,7 @@ export async function fetchHomePageData(
     sectionBuckets.size > 0
       ? Array.from(sectionBuckets.entries()).map(([category, items]) => ({
           category,
+          categoryId: sectionIds.get(category),
           items,
         }))
       : null;

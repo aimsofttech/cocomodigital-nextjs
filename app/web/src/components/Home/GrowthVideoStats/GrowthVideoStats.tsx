@@ -1,8 +1,8 @@
 // @ts-nocheck
 "use client";
 import Image from "next/image";
-import { ADMIN_URL } from "../../../utils/constant";
-import EditLink from "../../Edit-Link/Edit-Link";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
+import EditPencil from "../../common/EditPencil/EditPencil";
 import { Suspense, lazy, useMemo } from "react";
 import StatsSection, { StatItem } from "../StatsSection/StatsSection";
 
@@ -17,9 +17,9 @@ const GrowthVideoStats = ({ VideoData = {}, stats = [] }: { VideoData?: any; sta
   return (
     <div className="home-video-main-wrapper">
       <div className="home-video-main">
-        <h1 className="home-video-section-title font-primary">
+        <h1 className="home-video-section-title font-primary edit-host">
           Growth at a glance
-          <EditLink path={`${ADMIN_URL}/home/video/show/${VideoData?.id}`} />
+          <EditPencil to={adminRoutes.home.video(VideoData?.id)} label="the growth video" />
         </h1>
 
         <StatsSection stats={stats} />

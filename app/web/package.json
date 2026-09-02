@@ -39,6 +39,8 @@
     "og:cover": "tsx scripts/generate-og-cover.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "verify:admin-routes": "node scripts/verify-admin-routes.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run verify:admin-routes",
     "format": "prettier --write ."
   },
   "eslintConfig": {

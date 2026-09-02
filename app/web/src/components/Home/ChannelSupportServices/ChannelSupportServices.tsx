@@ -2,8 +2,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GoArrowUpRight } from "react-icons/go";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 // import { useSelector } from "react-redux";
 
 const ChannelSupportServices = ({ ServicesToShow }) => {
@@ -39,7 +39,11 @@ const ChannelSupportServices = ({ ServicesToShow }) => {
         <div className="home-service-platform-card-wrapper">
           {servicesList?.length > 0 ? (
             servicesList?.map((service, index) => (
-              <div className="home-service-platform-card" key={service?.id || index}>
+              <div className="home-service-platform-card edit-host" key={service?.id || index}>
+                <EditPencil
+                  to={adminRoutes.home.serviceCategory(service?.id)}
+                  label={service?.service_title || "this service"}
+                />
 
                   <Link href={`/services/${service?.slug}`}>
                     {service?.service_image && <Image
@@ -61,11 +65,6 @@ const ChannelSupportServices = ({ ServicesToShow }) => {
                     </div>
                   </Link>
 
-                <div className="absolute bottom-0 right-0 mb-2 mr-2">
-                  <EditLink
-                    path={`${ADMIN_URL}/home/service/service_item/show/${service?.id}`}
-                  />
-                </div>
               </div>
             ))
           ) : (

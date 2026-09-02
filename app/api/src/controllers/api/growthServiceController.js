@@ -54,6 +54,18 @@ const clean = (doc) => {
   return rest;
 };
 
+/* Every row in this payload carries its own `id`.
+ *
+ * The public site draws an edit pencil beside each section and card for
+ * signed-in editors, and a pencil has to know which record it opens — the
+ * five collections re-shaped below used to drop `_id` on the way out, which
+ * left those bands the only ones on the site that could not be edited from
+ * the page. `clean()` already passes `_id` through for features, showcases
+ * and CTAs, so this only makes the rest consistent.
+ *
+ * The ids are not secret: they address admin routes that check the role
+ * again on open, and every write is checked once more by the API. */
+
 /** Group rows by their `sectionKey` so the renderer can look items up by section. */
 const groupBySection = (rows) => {
   const map = {};
@@ -198,6 +210,7 @@ const show = async (req, res) => {
     data: {
       ...buildService(doc),
       sections: sections.map((s) => ({
+        id: s._id,
         key: s.sectionKey,
         renderer: s.renderer || 'grid',
         eyebrow: s.eyebrow || '',
@@ -215,19 +228,21 @@ const show = async (req, res) => {
       showcases: groupBySection(
         showcases.map((s) => ({ ...clean(s), points: toLines(s.points) }))
       ),
-      stats: stats.map((s) => ({ icon: s.icon || '', value: s.value, label: s.label })),
+      stats: stats.map((s) => ({ id: s._id, icon: s.icon || '', value: s.value, label: s.label })),
       caseMetrics: caseMetrics.map((m) => ({
+        id: m._id,
         label: m.label,
         icon: m.icon || '',
         before: m.before || '',
         after: m.after || '',
         growth: m.growth || '',
       })),
-      faqs: faqs.map((f) => ({ question: f.question, answer: f.answer })),
+      faqs: faqs.map((f) => ({ id: f._id, question: f.question, answer: f.answer })),
       // Prose blocks keyed by section, same as features/showcases. `level`
       // is clamped to 3-6 so a bad import can't emit an <h0> or an <h9>.
       contents: groupBySection(
         contents.map((c) => ({
+          id: c._id,
           sectionKey: c.sectionKey || '',
           level: Math.min(6, Math.max(3, Number(c.level) || 3)),
           heading: c.heading || '',

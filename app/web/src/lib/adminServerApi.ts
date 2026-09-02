@@ -54,6 +54,9 @@ export interface AuthorTemplate {
 }
 
 export interface BlogAuthor {
+  /** The author template's own record id, so the card can address its edit
+   *  form. Absent on `fallbackBlogAuthor`, which is not a record. */
+  id?: number | string;
   author_image: string;
   author_name: string;
   role_line: string;
@@ -116,6 +119,7 @@ export function buildBlogAuthor(
   if (match.cto_text) roleParts.push(`CTO · ${match.cto_text}`);
 
   return {
+    id: match.id,
     author_image: match.author_image || fallbackBlogAuthor.author_image,
     author_name: match.author_name || fallbackBlogAuthor.author_name,
     role_line: roleParts.join(" & "),

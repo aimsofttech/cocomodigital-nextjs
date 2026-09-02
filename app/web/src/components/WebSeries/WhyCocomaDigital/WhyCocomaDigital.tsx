@@ -2,8 +2,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Image from "next/image";
-import EditLink from '../../Edit-Link/Edit-Link';
-import { ADMIN_URL } from '../../../utils/constant';
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import ReactPlayer from 'react-player';
 
 export default function WhyCocomaDigital({ our_advantage_id }) {
@@ -36,10 +36,11 @@ export default function WhyCocomaDigital({ our_advantage_id }) {
             <section className="why-wrapper">
                 <div className="why-container">
                     <section className="why-content-wrapper">
-                        <h1 className="why-content-main-title font-priamry font-primary">
+                        <h1 className="why-content-main-title font-priamry font-primary edit-host">
                             Why India’s Biggest Brands Grow With Us?
-                            <EditLink
-                                path={`${ADMIN_URL}/template/our_advantage/show/${our_advantage_id}`}
+                            <EditPencil
+                                to={adminRoutes.templates.ourAdvantage(our_advantage_id)}
+                                label="our advantages"
                             />
                         </h1>
                         <p className="why-content-description mt-2">
@@ -118,10 +119,11 @@ export default function WhyCocomaDigital({ our_advantage_id }) {
                         for the current case study, not a homepage logo wall. */}
 
                     <section className="why-content-wrapper">
-                        <h2 className="why-content-main-title font-primary">
+                        <h2 className="why-content-main-title font-primary edit-host">
                             INDUSTRY EXPERIENCE
-                            <EditLink
-                                path={`${ADMIN_URL}/template/our_advantage/show/${our_advantage_id}`}
+                            <EditPencil
+                                to={adminRoutes.templates.ourAdvantage(our_advantage_id)}
+                                label="the industry experience"
                             />
                         </h2>
                         <p className="why-content-description">

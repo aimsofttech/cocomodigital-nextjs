@@ -4,8 +4,8 @@ import { useCallback } from "react";
 import Image from "next/image";
 import { useNavigate } from "@/src/lib/navigation";
 import { useCart } from "@/src/lib/cart";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 const getPlainText = (value) => {
   if (!value) return "";
@@ -126,8 +126,11 @@ const ServiceCards = ({ data }) => {
         className="absolute top-0 right-0 mt-2 mr-2 pb-1 pe-1 flex justify-center content-center"
         style={{ backgroundColor: "white" }}
       >
-        <EditLink
-          path={`${ADMIN_URL}/home/group/service/group_service_item/show/${data?.id}`} />
+        <EditPencil
+          bare
+          to={adminRoutes.groupService.item(data?.id)}
+          label={data?.title || "this service"}
+        />
       </span>
     </div>
   );

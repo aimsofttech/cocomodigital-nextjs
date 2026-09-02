@@ -1,3 +1,6 @@
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
+
 // @ts-nocheck
 /**
  * <ServiceFAQ />
@@ -20,7 +23,15 @@
  * to override.
  */
 
-const DEFAULT_QUESTIONS = [
+/** One question. `id` is present only on the admin-managed set, which is
+ *  what decides whether the row can carry a pencil. */
+interface ServiceFaqEntry {
+  q: string;
+  a: string;
+  id?: string;
+}
+
+const DEFAULT_QUESTIONS: ServiceFaqEntry[] = [
   {
     q: "How quickly can we get started?",
     a:
@@ -53,12 +64,18 @@ const DEFAULT_QUESTIONS = [
   },
 ];
 
-export default function ServiceFAQ({ questions = DEFAULT_QUESTIONS }) {
+export default function ServiceFAQ({ questions = DEFAULT_QUESTIONS, serviceId = undefined }) {
   return (
     <section
-      className="service-faq-section"
+      className="service-faq-section edit-host"
       aria-labelledby="service-faq-heading"
     >
+      {/* Only the admin-managed set is addressable. DEFAULT_QUESTIONS is the
+          copy this component ships with when a service has none configured —
+          there is no record behind it, so it gets no pencil. */}
+      {serviceId ? (
+        <EditPencil to={adminRoutes.groupService.faq()} label="the service FAQs" />
+      ) : null}
       <div className="service-faq-inner">
         <header className="service-faq-header">
           <p className="service-faq-eyebrow">Before you book</p>
@@ -74,7 +91,10 @@ export default function ServiceFAQ({ questions = DEFAULT_QUESTIONS }) {
 
         <ul className="service-faq-list">
           {questions.map((item, idx) => (
-            <li key={idx} className="service-faq-item">
+            <li key={idx} className="service-faq-item edit-host">
+              {item.id ? (
+                <EditPencil to={adminRoutes.groupService.faq(item.id)} label={item.q} />
+              ) : null}
               {/* Native <details> = zero-JS accordion. Default
                   closed. Click anywhere on the summary to toggle. */}
               <details className="service-faq-details">

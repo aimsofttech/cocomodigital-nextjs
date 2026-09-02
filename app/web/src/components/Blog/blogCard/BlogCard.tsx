@@ -3,8 +3,8 @@ import Image from "next/image";
 import { Link } from "@/src/lib/navigation";
 import moment from "moment/moment";
 import { FaArrowRight } from "react-icons/fa";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 /**
  * <BlogCard /> — sticker card grid for /blog list.
@@ -14,7 +14,7 @@ import { ADMIN_URL } from "../../../utils/constant";
  * behaviour and made hover states inconsistent across breakpoints)
  * to a plain CSS-grid wrapper with sticker cards inside. Each card
  * is now a self-contained Link with sticker treatment, hover
- * sticker-shift, and the EditLink badge as a corner overlay.
+ * sticker-shift, and the edit pencil as a corner overlay.
  */
 const BlogCard = ({ data }) => {
   return (
@@ -56,14 +56,19 @@ const BlogCard = ({ data }) => {
               </span>
             </div>
           </Link>
-          {/* EditLink overlays in the top-right; click stops the
-              card-level Link navigation so admin's edit click
-              doesn't bounce them into the article. */}
+          {/* The pencil overlays in the top-right. EditPencil stops the
+              click itself, so it no longer bounces an editor into the
+              article; the wrapper stays because it is what positions the
+              corner. */}
           <div
             className="blog-card-edit"
             onClick={(e) => e.stopPropagation()}
           >
-            <EditLink path={`${ADMIN_URL}/blog_items/show/${item?.id}`} />
+            <EditPencil
+              bare
+              to={adminRoutes.blog.post(item?.id)}
+              label={item?.title || "this post"}
+            />
           </div>
         </article>
       ))}

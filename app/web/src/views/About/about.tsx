@@ -5,6 +5,8 @@ import { Link } from "@/src/lib/navigation";
 import { FaArrowRight } from "react-icons/fa";
 /* Phase 5b: useSelector removed — about.tsx now takes brands as prop. */
 import FloatingCallChip from "../../components/SingleVideo/FloatingCallChip/FloatingCallChip";
+import EditPencil from "../../components/common/EditPencil/EditPencil";
+import { adminRoutes } from "../../lib/adminEditRoutes";
 import { getFeaturedPhotos } from "../Gallery/galleryPhotos";
 import { getFeaturedMembers } from "../Team/teamMembers";
 
@@ -522,13 +524,25 @@ const AboutUs = ({ brands: brandsProp }: AboutUsProps = {}) => {
                 render an image grid (same source as Section02 on
                 the homepage). Otherwise fall back to text pills so
                 the section is never empty during data load. */}
+            {/* The partner logos are the one band on this page that comes from
+                the admin (the same `brands` feed the homepage marquee reads),
+                so it is the one band that can carry a pencil. Everything else
+                here — the story chapters, the manifesto, the numbers, the team
+                and gallery previews — is a constant in this file, and a pencil
+                over a constant would open a screen whose edits never reach the
+                page. */}
             {brands?.length > 0 ? (
-              <div className="about-partners-logos-grid">
+              <div className="about-partners-logos-grid edit-host">
+                <EditPencil to={adminRoutes.home.brands()} label="the partner logos" />
                 {brands.map(({ id, brand_image, brand_name }, idx) => (
                   <div
                     key={`${id || idx}-${idx}`}
-                    className="about-partners-logo-cell"
+                    className="about-partners-logo-cell edit-host"
                   >
+                    <EditPencil
+                      to={adminRoutes.home.brand(id)}
+                      label={brand_name || "this partner logo"}
+                    />
                     {brand_image && (
                       <Image
                         className="about-partners-logo-img"

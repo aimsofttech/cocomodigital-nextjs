@@ -6,8 +6,8 @@ import { useCart } from "@/src/lib/cart";
 import Slider from "react-slick";
 import Modal from "@/src/components/common/TailwindModal/TailwindModal";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import { Link } from "@/src/lib/navigation";
 
 // react-player ships ~40KB of provider adapters — only ~1 in 10
@@ -178,9 +178,10 @@ const SingleServiceSlider = ({ service }) => {
                           className="absolute top-0 right-0 mr-3 mt-3"
                           style={{ backgroundColor: "white" }}
                         >
-                          <EditLink
-                            path={`${ADMIN_URL}/home/group/service/group_single_service_image/show/${images?.id}/${images?.groupServiceItemId}/${service?.category_id}`}
-                            className="mr-1"
+                          <EditPencil
+                            bare
+                            to={adminRoutes.groupService.images(images?.groupServiceItemId, images?.id)}
+                            label="this gallery image"
                           />
                         </div>
                       </div>
@@ -250,10 +251,12 @@ const SingleServiceSlider = ({ service }) => {
           {/* right side contents */}
           <div className="service-details-banner-content-wrapper">
             <div className="service-details-banner-content-title-subtitle-wrapper">
-              <h3 className="service-details-banner-content-main-title font-primary">
+              <h3 className="service-details-banner-content-main-title font-primary edit-host">
                 {service?.title}
-                <EditLink
-                  path={`${ADMIN_URL}/home/group/service/group_service_item/show/${service?.id}/${service?.category_id}`} />
+                <EditPencil
+                  to={adminRoutes.groupService.item(service?.id)}
+                  label={service?.title || "this service"}
+                />
               </h3>
               <div
                 ref={descRef}

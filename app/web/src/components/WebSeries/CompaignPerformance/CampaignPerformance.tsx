@@ -1,7 +1,7 @@
 // @ts-nocheck
 import Image from "next/image";
-import { ADMIN_URL } from "../../../utils/constant";
-import EditLink from "../../Edit-Link/Edit-Link";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
+import EditPencil from "../../common/EditPencil/EditPencil";
 /* small Star component (SVG) */
 const Star = () => (
     <svg className="star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -11,7 +11,7 @@ const Star = () => (
 
 const dummyImage = "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/1752158570_blanca%20thumbnail.jpeg"
 
-const Item = ({id, title, sub, description, image }) => (
+const Item = ({ id, marketingItemId, title, sub, description, image }) => (
     <div className="cp-row">
         <div className="cp-left-block-wrapper">
             <div className="relative">
@@ -34,12 +34,13 @@ const Item = ({id, title, sub, description, image }) => (
 
         <div className="cp-right-text w-full">
             <p
-                className="w-full"
+                className="w-full edit-host"
                 style={{textAlign: "justify"}}
             >
                 {description}
-                <EditLink
-                    path={`${ADMIN_URL}/marketing_house/marketing_house_performance/show/${id}`}
+                <EditPencil
+                    to={adminRoutes.marketing.performance(marketingItemId, id)}
+                    label={title || "this performance metric"}
                 />
             </p>
         </div>
@@ -54,10 +55,11 @@ const CampaignPerformance = ({ itemData }) => {
         <div className="CampaignPerformance-container-wrapper">
             <div className="campaignPerformance-container">
                 <div className="cp-main-wrapper">
-                    <h1 className="cp-title text-center font-primary">
+                    <h1 className="cp-title text-center font-primary edit-host">
                         Campaign Performance
-                        <EditLink
-                            path={`${ADMIN_URL}/marketing_house/marketing_house_performance`}
+                        <EditPencil
+                            to={adminRoutes.marketing.performance(itemData?.id)}
+                            label="the campaign performance"
                         />
                     </h1>
                     <p className="cp-sub text-center">
@@ -70,6 +72,7 @@ const CampaignPerformance = ({ itemData }) => {
                                 <Item
                                     key={index}
                                     id={item?.id}
+                                    marketingItemId={itemData?.id}
                                     title={item?.title}
                                     sub={item?.sub_title}
                                     description={item?.description}

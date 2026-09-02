@@ -2,8 +2,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "@/src/lib/navigation";
-import { ADMIN_URL } from "../../../utils/constant";
-import EditLink from "../../../components/Edit-Link/Edit-Link";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
+import EditPencil from "../../../components/common/EditPencil/EditPencil";
 import LexicalBody from "../../../components/common/LexicalBody/LexicalBody";
 import {
   FaMapMarkerAlt,
@@ -182,10 +182,11 @@ const JobDetails = () => {
                   </p>
                 )}
 
-                <h1 className="job-details-title">
+                <h1 className="job-details-title edit-host">
                   {jobDetails?.title}
-                  <EditLink
-                    path={`${ADMIN_URL}/job_list/show/${jobDetails?.id}`}
+                  <EditPencil
+                    to={adminRoutes.jobs.job(jobDetails?.id)}
+                    label={jobDetails?.title || "this job"}
                   />
                 </h1>
 

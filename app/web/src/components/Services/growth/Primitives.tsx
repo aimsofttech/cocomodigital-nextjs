@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 import type { CtaLink, HeadingLevel } from "./types";
 import {
   CTA_BASE,
@@ -30,17 +31,26 @@ export function Section({
   labelledBy,
   tone = "page",
   className = "",
+  editTo,
+  editLabel,
 }: {
   children: ReactNode;
   labelledBy?: string;
   tone?: keyof typeof SECTION_TONES;
   className?: string;
+  /** Admin path for this band, when the caller knows one. */
+  editTo?: string;
+  editLabel?: string;
 }) {
   return (
     <section
       aria-labelledby={labelledBy}
-      className={`w-full ${SECTION_TONES[tone]} ${className}`}
+      /* `edit-host` only does anything once the band actually contains a
+         pencil — the :has() rule in globals.css sees to that — so adding it
+         unconditionally changes nothing for a visitor who is not an editor. */
+      className={`w-full ${SECTION_TONES[tone]} ${className} edit-host`}
     >
+      {editTo ? <EditPencil to={editTo} label={editLabel || "this section"} /> : null}
       {/* 1440px matches --content-max-w, the width the rest of the
           site lays out to. */}
       <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 sm:py-14 lg:px-10 lg:py-16">

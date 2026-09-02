@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 import { GoArrowUpRight } from "react-icons/go";
 
@@ -46,9 +46,13 @@ const LatestCaseStudies = ({ ClientData }) => {
         <div className="home-latest-stories-card-wrapper">
           {clientList?.map((client, index) => (
             <div
-              className="home-latest-stories-card"
+              className="home-latest-stories-card edit-host"
               key={client?.id || index}
             >
+              <EditPencil
+                to={adminRoutes.home.client(client?.id)}
+                label={client?.client_title || "this case study"}
+              />
               <Link href={`/case-studies/${client?.slug}`}>
                 {client?.client_img ? (
                   <Image
@@ -63,12 +67,6 @@ const LatestCaseStudies = ({ ClientData }) => {
                 <p className="font-bold">{client?.client_title}</p>
               </Link>
 
-              {/* Edit Link for Admin */}
-              <div className="absolute bottom-0 right-0 mb-2 mr-2">
-                <EditLink
-                  path={`${ADMIN_URL}/home/client/show/${client?.id}`}
-                />
-              </div>
             </div>
           ))}
         </div>

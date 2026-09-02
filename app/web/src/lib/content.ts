@@ -821,7 +821,12 @@ interface MongoHomeSection {
 
 /* Home YouTube rails: /home-page-sections returns sections → items;
    the homepage aggregator expects a FLAT list of cards each carrying
-   its section name in `subtitle` (+ title/link/image). */
+   its section name in `subtitle` (+ title/link/image).
+
+   `sectionId` is carried alongside the name because the flattening throws
+   the section away otherwise, and the homepage regroups the cards by the
+   name string. The rail heading needs the section's own record to point its
+   edit pencil at — a name is not an address. */
 const adaptHomeYoutubeCard = (
   it: MongoHomeSectionItem,
   sec: MongoHomeSection,
@@ -829,6 +834,7 @@ const adaptHomeYoutubeCard = (
   id: it._id,
   title: it.name,
   subtitle: sec.name,
+  sectionId: sec._id,
   link: it.url,
   legacyImageUrl: buildImg(it.image || it.item_image),
   order: it.display_order,

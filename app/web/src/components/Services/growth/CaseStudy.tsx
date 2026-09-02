@@ -1,6 +1,7 @@
 import type { CaseStudyContent, HeadingLevel } from "./types";
 import { Heading } from "./Primitives";
 import { CARD, HIGHLIGHT } from "./theme";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 
 /* Case-study block: media on the left, narrative plus a
    before / after / growth table on the right. The table keeps its
@@ -87,12 +88,13 @@ export default function CaseStudy({
                 </tr>
               </thead>
               <tbody>
-                {content.rows.map(({ label, icon: Icon, before, after, growth }) => (
+                {content.rows.map(({ label, icon: Icon, before, after, growth, editTo }) => (
                   <tr key={label} className="border-b border-strong/12 last:border-0">
                     <th
                       scope="row"
-                      className="py-3.5 pr-3 text-left text-sm font-bold text-body sm:text-[15px]"
+                      className="py-3.5 pr-3 text-left text-sm font-bold text-body sm:text-[15px] edit-host"
                     >
+                      {editTo ? <EditPencil to={editTo} label={label} /> : null}
                       <span className="flex items-center gap-2">
                         {Icon ? (
                           <Icon

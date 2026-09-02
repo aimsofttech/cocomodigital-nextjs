@@ -2,8 +2,8 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Marquee from "react-fast-marquee";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 /**
  * Trusted-brand marquee. Takes `brands` as a prop when the parent
@@ -89,9 +89,9 @@ export default function TrustedBrandsMarquee({
   return (
     <section className="trusted-brand-wrapper">
       <div className="trusted-brand">
-        <h2 className="trusted-brand-heading font-primary">
+        <h2 className="trusted-brand-heading font-primary edit-host">
           Trusted by the brands building audiences at scale.
-          <EditLink path={`${ADMIN_URL}/template/brands`} />
+          <EditPencil to={adminRoutes.home.brands()} label="the trusted brands" />
         </h2>
 
         <Marquee

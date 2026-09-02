@@ -37,6 +37,8 @@ import {
   SITE_NAME,
   SITE_URL,
 } from "@/src/lib/seo";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 
 const DASHBOARDS = {
   channel: ChannelDashboard,
@@ -57,10 +59,14 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
   const Dashboard =
     hero.dashboardKey !== "none" ? DASHBOARDS[hero.dashboardKey] : null;
 
+  /* Every band and card below is addressed at its own admin record. The ids
+     come from the public payload; a row without one falls back to its list,
+     which adminRoutes handles, so a stale API never produces a dead link. */
   const stats: StatItem[] = service.stats.map((stat) => ({
     icon: requiredIcon(stat.icon),
     value: stat.value,
     label: stat.label,
+    editTo: adminRoutes.growth.stat(service.id, stat.id),
   }));
 
   const caseRows: MetricRow[] = service.caseMetrics.map((metric) => ({
@@ -69,6 +75,7 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
     before: metric.before,
     after: metric.after,
     growth: metric.growth,
+    editTo: adminRoutes.growth.caseMetric(service.id, metric.id),
   }));
 
   const heroCtas = service.ctas.hero.map(toCta);
@@ -170,6 +177,14 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
   // Each band gets a stable heading id so its <section> can be labelled by it.
   const headingId = (section: GrowthSection) => `${service.slug}-${section.key}-title`;
 
+  /* Showcase and format-panel cards come straight off the payload, so their
+     admin path is attached here rather than in a mapping step of their own. */
+  const withShowcaseEdit = (items: ReturnType<typeof sectionShowcases>) =>
+    items.map((item) => ({
+      ...item,
+      editTo: adminRoutes.growth.showcase(service.id, item.id),
+    }));
+
   /* Every band's heading is an H2, so the items inside it are H3s and their
      own sub-blocks are H4s. Passing the level down rather than hard-coding it
      keeps the outline intact when the admin reorders or removes a band. */
@@ -182,6 +197,7 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
           icon: requiredIcon(f.icon),
           title: f.title,
           description: f.description,
+          editTo: adminRoutes.growth.feature(service.id, f.id),
         }));
         return (
           <FeatureGrid
@@ -198,25 +214,33 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
         const steps: ProcessStep[] = sectionFeatures(service, section).map((f) => ({
           title: f.title,
           description: f.description,
+          editTo: adminRoutes.growth.feature(service.id, f.id),
         }));
         return <ProcessTimeline steps={steps} headingLevel={ITEM_LEVEL} />;
       }
       case "showcase":
         return (
           <ShowcaseGrid
-            items={sectionShowcases(service, section)}
+            items={withShowcaseEdit(sectionShowcases(service, section))}
             headingLevel={ITEM_LEVEL}
           />
         );
       case "format-panels":
         return (
           <FormatPanels
-            items={sectionShowcases(service, section)}
+            items={withShowcaseEdit(sectionShowcases(service, section))}
             headingLevel={ITEM_LEVEL}
           />
         );
       case "article":
-        return <ArticleContent blocks={sectionContents(service, section)} />;
+        return (
+          <ArticleContent
+            blocks={sectionContents(service, section).map((block) => ({
+              ...block,
+              editTo: adminRoutes.growth.content(service.id, block.id),
+            }))}
+          />
+        );
       case "case-study":
         return (
           <CaseStudy
@@ -234,7 +258,11 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
       case "faq":
         return (
           <FaqAccordion
-            items={service.faqs}
+            items={service.faqs.map((faq) => ({
+              question: faq.question,
+              answer: faq.answer,
+              editTo: adminRoutes.growth.faq(service.id, faq.id),
+            }))}
             variant={section.faqVariant}
             headingLevel={ITEM_LEVEL}
           />
@@ -268,8 +296,16 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
   const sections = service.sections.filter(hasContent);
 
   return (
-    <div className="w-full bg-page text-body">
+    <div className="w-full bg-page text-body edit-host">
       <StructuredData data={schemas} />
+
+      {/* The hero, the stats label and the closing band all live on the
+          service record itself rather than on a child row, so all three
+          pencils open the same form at different points on the page. */}
+      <EditPencil
+        to={adminRoutes.growth.service(service.id)}
+        label={`${service.name} page settings`}
+      />
 
       {hero.headline.length > 0 && (
         <GrowthHero
@@ -293,7 +329,13 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
       )}
 
       {sections.map((section) => (
-        <Section key={section.key} labelledBy={headingId(section)} tone={section.tone}>
+        <Section
+          key={section.key}
+          labelledBy={headingId(section)}
+          tone={section.tone}
+          editTo={adminRoutes.growth.section(service.id, section.id)}
+          editLabel={section.title || section.key}
+        >
           <SectionHeading
             id={headingId(section)}
             eyebrow={section.eyebrow || undefined}

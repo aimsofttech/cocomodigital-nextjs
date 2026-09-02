@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Link } from "@/src/lib/navigation";
 import { GoArrowUpRight } from "react-icons/go";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 
 /**
  * Related-services rail at the bottom of a blog post.
@@ -47,8 +49,13 @@ const BlogRelatedServices = ({ initialServices = [] }) => {
           <Link
             key={service.id}
             to={`/services/${service.slug}`}
-            className="blog-related-service-card"
+            className="blog-related-service-card edit-host"
           >
+            <EditPencil
+              asButton
+              to={adminRoutes.groupService.item(service.id)}
+              label={service.title || "this service"}
+            />
             <div className="blog-related-service-image-wrapper">
               <Image
                 className="blog-related-service-img"

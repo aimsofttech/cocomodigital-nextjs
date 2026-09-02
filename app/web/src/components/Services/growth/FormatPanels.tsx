@@ -3,6 +3,7 @@ import type { GrowthShowcase } from "@/src/lib/growthServices";
 import { optionalIcon } from "./icons";
 import { CheckBullet, Heading } from "./Primitives";
 import type { HeadingLevel } from "./types";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 
 /* Two-up quality panels (audio vs video podcast editing).
 
@@ -93,6 +94,7 @@ export default function FormatPanels({
             key={item.title}
             className={`relative overflow-hidden rounded-sticker border-2 border-strong p-5 shadow-[4px_4px_0_var(--text-strong,#111)] sm:p-6 ${PANEL_TONES[item.tone]}`}
           >
+            {item.editTo ? <EditPencil to={item.editTo} label={item.title} /> : null}
             <Heading level={headingLevel} className="font-satoshi text-xl font-black text-strong sm:text-2xl">
               {item.title}
             </Heading>

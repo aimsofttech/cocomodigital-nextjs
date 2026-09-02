@@ -1,17 +1,19 @@
 // @ts-nocheck
 import ServiceSlider from "../../../components/common/ServiceSlider/ServiceSlider";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 const ServiceCategorySlider = ({ categoryName, serviceData, id, item_id}) => {
 
   return (
     <div className="service-page-youtube-main-wrapper">
       <div className="service-page-youtube-main mb-0">
-        <h2 className="font-bold uppercase service-page-youtube-main-title font-primary">
+        <h2 className="font-bold uppercase service-page-youtube-main-title font-primary edit-host">
           {categoryName}
-          <EditLink
-            path={`${ADMIN_URL}/home/group/service/group_service_category/show/${id}/${item_id}`} />
+          <EditPencil
+            to={adminRoutes.groupService.category(id)}
+            label={categoryName || "this category"}
+          />
         </h2>
         <ServiceSlider data={serviceData} />
       </div>

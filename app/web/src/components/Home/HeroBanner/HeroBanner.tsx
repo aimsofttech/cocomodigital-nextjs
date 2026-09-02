@@ -1,14 +1,18 @@
 "use client";
 import Image from "next/image";
 import SecondaryLink from "../../common/SecondaryLink/SecondaryLink";
-import EditLink from "../../Edit-Link/Edit-Link";
+import EditPencil from "../../common/EditPencil/EditPencil";
 import { lazy, Suspense, useState } from "react";
 import { cleanVideoUrl } from "../../../lib/videoUrl";
 
 const ReactPlayer = lazy(() => import("react-player"));
 
 export default function HeroBanner({ data }) {
-  const { heading, subHeading, image, btnText, adminPath } = data || {};
+  /* `editTo` is an admin path relative to the panel root, built by the
+     caller with adminRoutes — the banner itself is rendered from two
+     different collections (home top banner, group-service top banner) so
+     it cannot know which one it is showing. */
+  const { heading, subHeading, image, btnText, editTo } = data || {};
   const videoUrl = cleanVideoUrl(data?.videoUrl);
 
   // Must start muted for autoplay
@@ -98,9 +102,9 @@ export default function HeroBanner({ data }) {
           stack at 768, a single button inside the text column works
           at every size — duplicate removed. */}
       <div className="home-hero-content-col home-section-content-wrapper">
-        <div className="section-heading-01">
+        <div className="section-heading-01 edit-host">
           {heading}
-          <EditLink path={adminPath} />
+          {editTo && <EditPencil to={editTo} label="this banner" />}
         </div>
 
         <div className="section-title-01">{subHeading}</div>

@@ -1,17 +1,19 @@
 // @ts-nocheck
 import Image from "next/image";
-import { ADMIN_URL } from "../../../utils/constant";
-import EditLink from "../../Edit-Link/Edit-Link";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
+import EditPencil from "../../common/EditPencil/EditPencil";
 export default function BriefAndRequirement({ RequireMentData }) {
   return (
     <div className="brief-and-requirement-main-wrapper">
       <div className="brief-and-requirement-main">
         <div className="brief-and-requirement-content">
           <div className="text-center">
-            <h1 className="single-video-how-to-edit-title font-primary">
+            <h1 className="single-video-how-to-edit-title font-primary edit-host">
               Brief And Requirement
-              <EditLink
-                path={`${ADMIN_URL}/home/creative_house/creative_house_item/show/${RequireMentData?.id}`} />
+              <EditPencil
+                to={adminRoutes.creative.item(RequireMentData?.id)}
+                label="the brief and requirement"
+              />
             </h1>
           </div>
           <div className="brief-and-requirement-img-wrapper text-center">

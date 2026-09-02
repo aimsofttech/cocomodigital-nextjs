@@ -5,8 +5,8 @@ import Image from "next/image";
 import { Link } from "@/src/lib/navigation";
 import { FaArrowRight } from "react-icons/fa";
 import { IoSearchSharp } from "react-icons/io5";
-import EditLink from "../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../utils/constant";
+import EditPencil from "../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../lib/adminEditRoutes";
 
 const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },
@@ -229,9 +229,10 @@ const SuccessStoriesViewAll = ({ initialStories = [] }: SuccessStoriesViewAllPro
                     </span>
                   </div>
                 </Link>
-                <EditLink
-                  path={`${ADMIN_URL}/home/client/show/${s.id}`}
+                <EditPencil
                   className="success-view-all-card-edit"
+                  to={adminRoutes.home.client(s.id)}
+                  label={title}
                 />
               </div>
             );

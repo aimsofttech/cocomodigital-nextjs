@@ -1,5 +1,7 @@
 // @ts-nocheck
 import ServiceSlider from "../../common/ServiceSlider/ServiceSlider";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 
 /**
  * "Related services" cross-sell strip on /service/:slug.
@@ -29,7 +31,11 @@ const VideoEditingServices = ({ otherServices, categoryName }) => {
   return (
     <div className="service-page-video-edit-service-main-wrapper">
       <div className="service-page-video-edit-service-main my-5">
-        <h2 className="font-bold mb-4 service-page-video-edit-service-title font-primary">
+        <h2 className="font-bold mb-4 service-page-video-edit-service-title font-primary edit-host">
+          <EditPencil
+            to={adminRoutes.groupService.item()}
+            label="the related services"
+          />
           {heading}
         </h2>
         <ServiceSlider data={otherServices} />

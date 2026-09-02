@@ -12,7 +12,7 @@ import ExploreOurServices from "../../components/Home/ExploreServices/services";
 import BusinessCareerSection from "../../components/Home/HireJoinCta/HireJoinCta";
 import YouTubeChannelsSkeleton from "../../components/Home/YouTubeChannels/YouTubeChannelsSkeleton";
 
-import { ADMIN_URL } from "../../utils/constant";
+import { adminRoutes } from "../../lib/adminEditRoutes";
 
 import type {
   HomePageServerData,
@@ -65,7 +65,7 @@ export default function Home({ serverData }: HomeProps) {
               subHeading: homeData.topBanner.subHeading,
               videoUrl: homeData.topBanner.videoUrl,
               btnText: homeData.topBanner.buttonText,
-              adminPath: `${ADMIN_URL}/home/top-banner/edit/${homeData.topBanner.id}`,
+              editTo: adminRoutes.home.topBanner(homeData.topBanner.id),
             }}
           />
         ) : (
@@ -113,6 +113,7 @@ export default function Home({ serverData }: HomeProps) {
               <YouTubeChannels
                 key={index}
                 title={item?.category}
+                sectionId={item?.categoryId}
                 data={item?.items}
               />
             ))

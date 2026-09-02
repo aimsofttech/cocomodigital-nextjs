@@ -46303,152 +46303,6 @@
      absolutely inside its section so it never takes part in the layout —
      adding it cannot shift a single pixel of the page for anyone else, and
      for the public it is not in the DOM at all. */
-  .section-edit-slot {
-
-    position: relative;
-
-    height: 0;
-
-  }
-
-  .section-edit-link {
-
-    position: absolute;
-
-    top: 12px;
-
-    right: 12px;
-
-    z-index: 20;
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 6px;
-
-    padding: 6px 12px;
-
-    border-radius: 999px;
-
-    background-color: var(--color-primary, #fff000);
-
-    border: 1px solid rgba(0, 0, 0, 0.12);
-
-    color: #000;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    line-height: 1;
-
-    text-decoration: none;
-
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
-
-    opacity: 0.55;
-
-    transition: opacity 0.2s ease, transform 0.2s ease;
-
-  }
-
-  .section-edit-link:hover,
-  .section-edit-link:focus-visible {
-
-    opacity: 1;
-
-    transform: translateY(-1px);
-
-    color: #000;
-
-    text-decoration: none;
-
-  }
-
-  @media (max-width: 640px) {
-
-    .section-edit-link span {
-
-      display: none;
-
-    }
-
-    .section-edit-link {
-
-      padding: 8px;
-
-    }
-
-  }
-
-  /* The per-item pencil: one card, one row, one question. Icon only and tucked
-     into the corner so it never crowds the content it belongs to.
-
-     The slot is ABSOLUTELY positioned, which is the whole point: many of these
-     cards are flex or grid containers (.pod-stage is a two-column grid, the
-     service and audience cards are flex columns with gaps), and an in-flow slot
-     became a flex/grid item — displacing the real content and adding a gap.
-     Out of flow, it creates no item and occupies no track, so the card lays out
-     exactly as it always did. */
-  .section-edit-slot--item {
-
-    position: absolute;
-
-    top: 0;
-
-    right: 0;
-
-    width: 0;
-
-    height: 0;
-
-  }
-
-  /* …which needs the card to be the positioning context. Applied through :has()
-     so it lands ONLY on a card that actually contains a pencil — that is, only
-     for a signed-in editor. For everyone else the selector never matches and
-     not one property changes, which is what keeps the public rendering of this
-     page identical. Cards that were already positioned are unaffected. */
-  .pod-trust-item:has(> .section-edit-slot--item),
-  .pod-problem-card:has(> .section-edit-slot--item),
-  .pod-stage:has(> .section-edit-slot--item),
-  .pod-service-card:has(> .section-edit-slot--item),
-  .pod-audience-card:has(> .section-edit-slot--item),
-  .pod-us-card:has(> .section-edit-slot--item),
-  .pod-studio-item:has(> .section-edit-slot--item),
-  .pod-scale-item:has(> .section-edit-slot--item),
-  .pod-process-step:has(> .section-edit-slot--item),
-  .pod-faq-item:has(> .section-edit-slot--item),
-  .pod-proof-links:has(> .section-edit-slot--item),
-  .pod-table th:has(> .section-edit-slot--item) {
-
-    position: relative;
-
-  }
-
-  .section-edit-link--item {
-
-    top: 6px;
-
-    right: 6px;
-
-    padding: 5px;
-
-    font-size: 11px;
-
-    opacity: 0.35;
-
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-
-  }
-
-  .section-edit-link--item:hover,
-  .section-edit-link--item:focus-visible {
-
-    opacity: 1;
-
-  }
 
   .login-container {
 
@@ -59988,4 +59842,197 @@ body:has(.editbar-root):has(.floating-call-chip) {
   .scroll-top:active {
     transform: none;
   }
+}
+
+/* ==============================================================
+   THE EDIT PENCIL — one chip, one design, every page.
+
+   DELIBERATELY UNLAYERED, AND DELIBERATELY LAST IN THE FILE.
+
+   Everything above lives inside `@layer components`. Unlayered CSS beats
+   layered CSS outright, whatever the specificity, so nothing in this
+   stylesheet can reach into the chip and reshape it. That is not tidiness,
+   it is the bug fix: the chip drops into arbitrary hosts across the whole
+   site, and a host only has to carry a rule like
+
+       .home-service-card a { display: flex; height: 100%; }
+
+   — specificity (0,1,1), which beats a bare `.section-edit-link` (0,1,0) —
+   to take the chip over. That exact rule, and its twin on
+   `.home-service-platform-card`, forced `height: 100%` on the pencil; its
+   containing block is the ZERO-HEIGHT slot, so 100% resolved to 0 and the
+   chip rendered as a flattened black lens with a squashed glyph in it.
+   Out-specifying that one rule would have fixed those two cards and left the
+   next one to be discovered by eye.
+
+   The class is also doubled below (`.section-edit-link.section-edit-link`)
+   so the geometry still wins against anything else that ends up unlayered —
+   the `.pod-*` block earlier in this file is unlayered too, and there
+   specificity is what decides.
+
+   Nothing here is rendered for the public. EditPencil returns null unless
+   the visitor is signed in AND their role may update the module that owns
+   the target route, so every selector below matches nothing on a normal
+   page view.
+   ============================================================== */
+
+/* The band-level slot: in flow, zero height, and the positioning context for
+   the chip. Done here rather than by making the section itself
+   `position: relative` because several of these sections contain absolutely
+   positioned children — the podcast problem band's full-bleed backdrop, for
+   one — whose containing block would have changed under them. */
+.section-edit-slot {
+  position: relative;
+  height: 0;
+}
+
+/* The per-item slot. ABSOLUTE, which is the whole point: many of these hosts
+   are flex or grid containers, and an in-flow slot became a flex or grid item
+   — displacing the real content and adding a gap. Out of flow it creates no
+   item and occupies no track, so the host lays out exactly as it always did. */
+.section-edit-slot--item {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+}
+
+/* …which needs the host to be the positioning context.
+
+   Two selector families do that. The `.pod-*` list is the podcast page's own
+   cards, named individually because that page predates the shared marker
+   class; `.edit-host` is the marker every page added since carries. Both go
+   through `:has()` so the rule lands ONLY on a host that actually contains a
+   pencil — that is, only for a signed-in editor. For everyone else the
+   selector never matches and not one property changes, which is what keeps
+   the public rendering of these pages byte-for-byte identical. A host that
+   was already positioned just restates what it had.
+
+   `.edit-host` is a marker rather than `*:has(...)` on purpose: a universal
+   :has() makes the browser test every element on the page on every style
+   recalculation, and some of these pages carry thousands. */
+.pod-trust-item:has(> .section-edit-slot--item),
+.pod-problem-card:has(> .section-edit-slot--item),
+.pod-stage:has(> .section-edit-slot--item),
+.pod-service-card:has(> .section-edit-slot--item),
+.pod-audience-card:has(> .section-edit-slot--item),
+.pod-us-card:has(> .section-edit-slot--item),
+.pod-studio-item:has(> .section-edit-slot--item),
+.pod-scale-item:has(> .section-edit-slot--item),
+.pod-process-step:has(> .section-edit-slot--item),
+.pod-faq-item:has(> .section-edit-slot--item),
+.pod-proof-links:has(> .section-edit-slot--item),
+.pod-table th:has(> .section-edit-slot--item),
+.edit-host:has(> .section-edit-slot--item) {
+  position: relative;
+}
+
+/* ── The chip itself ────────────────────────────────────────────
+
+   THE BOX IS SIZED, NOT DERIVED. It used to be padding wrapped around
+   whatever the glyph happened to measure, which made the chip a hostage to
+   its surroundings: this stylesheet carries a global `* { padding: 0 }` and
+   hundreds of descendant rules, and where one reached the icon the box
+   collapsed into an empty oval. A fixed square with the glyph centred in it
+   cannot collapse and cannot come out an ellipse.
+
+   The two rings are what make it readable anywhere. These sit on backgrounds
+   this stylesheet does not control — a white card, a grey band, the dark
+   surfaces on the growth panels, the blue and yellow service cards, and now a
+   photograph. The black edge holds the chip apart from a light ground and the
+   white one holds it apart from a dark one, so neither can swallow it. */
+.section-edit-link.section-edit-link {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+
+  /* Restated defensively — `display` and `flex-direction` are exactly what
+     the card rules that broke this were setting. */
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  /* Both min and max, so neither a `height: 100%` from an ancestor rule nor
+     a flex context can stretch or crush it. */
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  flex: 0 0 auto;
+
+  padding: 0;
+  margin: 0;
+  gap: 0;
+  border-radius: 50%;
+  background-color: var(--color-primary, #fff000);
+  border: 2px solid #111;
+  color: #111;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 2px 6px rgba(0, 0, 0, 0.35);
+
+  /* Full strength. A control only editors can see does not need to apologise
+     for being on the page — and a pencil you have to hunt for is not an
+     affordance. */
+  opacity: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* The button variant, used inside a card whose own root is a link. It has to
+   restate what a <button> resets: browsers give it a UA font, background and
+   border of their own, none of which the anchor rules anticipated. */
+button.section-edit-link.section-edit-link {
+  cursor: pointer;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* The glyph, sized explicitly for the same reason the box is. react-icons
+   emits height="1em" width="1em", which is an ATTRIBUTE — any CSS rule that
+   reaches an svg beats it silently. */
+.section-edit-link.section-edit-link svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  flex: 0 0 auto;
+  fill: currentColor;
+}
+
+.section-edit-link.section-edit-link:hover,
+.section-edit-link.section-edit-link:focus-visible {
+  transform: translateY(-1px) scale(1.06);
+  color: #111;
+  text-decoration: none;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+.section-edit-link.section-edit-link:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+
+/* Tucked a little tighter on a card than on a band — the same chip, just
+   closer to a smaller corner. */
+.section-edit-link--item.section-edit-link--item {
+  top: 8px;
+  right: 8px;
+}
+
+/* The `bare` variant: the host already ships a positioned wrapper for this
+   corner (`.blog-card-edit`, `.career-page-card-edit`), so the chip sits in
+   flow inside it rather than offsetting again from a slot of its own. */
+.section-edit-link--bare.section-edit-link--bare {
+  position: static;
 }

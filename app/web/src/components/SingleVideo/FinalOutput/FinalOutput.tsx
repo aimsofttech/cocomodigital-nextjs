@@ -5,8 +5,8 @@ import Image from "next/image";
 import Slider from "react-slick";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
 import ReactPlayer from "react-player";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 const VideoSlider = ({ FinalOutputData }) => {
   const sliderRef = useRef(null);
@@ -72,7 +72,7 @@ const VideoSlider = ({ FinalOutputData }) => {
   const renderCard = (video) => (
     <>
       <div
-        className="relative"
+        className="relative edit-host"
         onClick={() => {
           const videoSrc = video?.upload_video || video?.video_url;
           handleThumbnailClick(videoSrc, video?.thumbnail);
@@ -96,6 +96,10 @@ const VideoSlider = ({ FinalOutputData }) => {
           />
         )}
         {(video?.upload_video || video?.video_url) && <PlayBtn />}
+        <EditPencil
+          to={adminRoutes.creative.finalOutput(FinalOutputData?.id, video?.id)}
+          label={video?.title || "this media item"}
+        />
       </div>
       <p className="text-center mt-2">{video?.title}</p>
     </>
@@ -104,10 +108,11 @@ const VideoSlider = ({ FinalOutputData }) => {
   return (
     <div className="bg-dark text-white single-video-page-final-output-main-wrapper">
       <div className="single-video-page-final-output-main">
-        <h2 className="text-center single-video-how-to-edit-title font-primary">
+        <h2 className="text-center single-video-how-to-edit-title font-primary edit-host">
           Project Media
-          <EditLink
-            path={`${ADMIN_URL}/home/creative_house/creative_house_final_output`}
+          <EditPencil
+            to={adminRoutes.creative.finalOutput(FinalOutputData?.id)}
+            label="the project media"
           />
         </h2>
         {/* Large Video Section — a fixed 16:9 box in both states so the

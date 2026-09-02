@@ -5,8 +5,8 @@ import { useEffect, useState, useCallback } from "react";
 import SecondaryLink from "../../common/SecondaryLink/SecondaryLink";
 import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import type { BookCallData } from "../../../lib/homeServerFetch";
 
 interface BookCallBannerProps {
@@ -71,7 +71,8 @@ const BookCallBanner = ({ bookCallData: serverData, templateId = 1 }: BookCallBa
   const bookCall = serverData ?? clientData;
 
   return bookCall?.book_button_text ? (
-    <div className="home-book-call-main">
+    <div className="home-book-call-main edit-host">
+      <EditPencil to={adminRoutes.templates.bookCall(bookCall?.id)} label="the book-a-call banner" />
       <div className="home-book-call-img-wrapper">
         {!pathname?.startsWith("/case-studies") && bookCall?.book_image && (
           <Image
@@ -117,9 +118,6 @@ const BookCallBanner = ({ bookCallData: serverData, templateId = 1 }: BookCallBa
         </div>
       </div>
 
-      <div className="absolute top-0 right-0 mt-2 mr-2">
-        <EditLink path={`${ADMIN_URL}/template/book_call/show/${bookCall?.id}`} />
-      </div>
     </div>
   ) : null;
 };

@@ -1,6 +1,7 @@
 import type { GrowthContentBlock } from "@/src/lib/growthServices";
 import { CheckBullet, Heading } from "./Primitives";
 import type { HeadingLevel } from "./types";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 
 /* The long-form supporting copy under a band — the part of the page written
    for someone comparing agencies, and the part a search engine has enough of
@@ -42,7 +43,13 @@ export default function ArticleContent({ blocks }: { blocks: GrowthContentBlock[
       {blocks.map((block, index) => {
         const level = (Math.min(6, Math.max(3, block.level)) || 3) as HeadingLevel;
         return (
-          <section key={`${block.heading}-${index}`} className={BLOCK_SPACING[level]}>
+          <section
+            key={`${block.heading}-${index}`}
+            className={`${BLOCK_SPACING[level]} edit-host`}
+          >
+            {block.editTo ? (
+              <EditPencil to={block.editTo} label={block.heading || "this block"} />
+            ) : null}
             {block.heading ? (
               <Heading level={level} className={HEADING_CLASSES[level]}>
                 {block.heading}

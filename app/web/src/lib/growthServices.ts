@@ -10,6 +10,11 @@ import { apiGet } from "./apiClient";
  * `null`, and the route renders its not-found path rather than failing.
  */
 
+/* `id` on the row types is the record's own admin id, used only to address
+   its edit form from the page. Optional because the site must still render
+   against a payload from an API that predates it — a card without one simply
+   gets no pencil rather than a broken link. */
+
 export interface GrowthHeadlineLine {
   text: string;
   /** Rendered with the brand marker highlight. */
@@ -17,6 +22,7 @@ export interface GrowthHeadlineLine {
 }
 
 export interface GrowthCta {
+  id?: string;
   label: string;
   href: string;
   variant: "solid" | "outline";
@@ -24,12 +30,16 @@ export interface GrowthCta {
 }
 
 export interface GrowthFeature {
+  id?: string;
   title: string;
   description: string;
   icon?: string;
 }
 
 export interface GrowthShowcase {
+  id?: string;
+  /** Admin path for this card, attached by the page renderer. */
+  editTo?: string;
   title: string;
   caption?: string;
   metric?: string;
@@ -41,12 +51,14 @@ export interface GrowthShowcase {
 }
 
 export interface GrowthStat {
+  id?: string;
   icon?: string;
   value: string;
   label: string;
 }
 
 export interface GrowthCaseMetric {
+  id?: string;
   label: string;
   icon?: string;
   before: string;
@@ -55,11 +67,15 @@ export interface GrowthCaseMetric {
 }
 
 export interface GrowthFaq {
+  id?: string;
   question: string;
   answer: string;
 }
 
 export interface GrowthContentBlock {
+  id?: string;
+  /** Admin path for this block, attached by the page renderer. */
+  editTo?: string;
   /** Heading level this block renders at — 3 to 6, nested under the H2. */
   level: 3 | 4 | 5 | 6;
   heading: string;
@@ -77,6 +93,7 @@ export type GrowthRenderer =
   | "article";
 
 export interface GrowthSection {
+  id?: string;
   key: string;
   renderer: GrowthRenderer;
   eyebrow: string;

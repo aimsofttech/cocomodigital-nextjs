@@ -7,8 +7,8 @@ import {
   FaLaptopHouse,
   FaArrowRight,
 } from "react-icons/fa";
-import EditLink from "../../../components/Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../../components/common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 /**
  * <JobCard /> on /career
@@ -103,7 +103,7 @@ const JobCard = ({
         className="career-page-card-edit"
         onClick={(e) => e.stopPropagation()}
       >
-        <EditLink path={`${ADMIN_URL}/job_list/show/${id}`} />
+        <EditPencil bare to={adminRoutes.jobs.job(id)} label={title || "this job"} />
       </div>
     </Link>
   );

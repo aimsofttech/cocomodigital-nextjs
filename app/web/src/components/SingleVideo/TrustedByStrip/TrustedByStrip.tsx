@@ -2,6 +2,8 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 /**
  * <TrustedByStrip />
  *
@@ -26,12 +28,17 @@ export default function TrustedByStrip({ brands = [] } = {}) {
         <p className="trusted-by-eyebrow" id="trusted-by-heading">
           Trusted by
         </p>
-        <div className="trusted-by-grid">
+        <div className="trusted-by-grid edit-host">
+          <EditPencil to={adminRoutes.home.brands()} label="the trusted-by logos" />
           {visible.map((brand, index) => (
             <div
-              className="trusted-by-logo-slot"
+              className="trusted-by-logo-slot edit-host"
               key={brand?.id || index}
             >
+              <EditPencil
+                to={adminRoutes.home.brand(brand?.id)}
+                label={brand?.brand_name || "this logo"}
+              />
               {brand?.brand_image && (
                 <Image
                   className="trusted-by-logo"

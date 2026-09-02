@@ -1,7 +1,7 @@
 // @ts-nocheck
 import Slider from "react-slick";
 import HeroBanner from "../../Home/HeroBanner/HeroBanner";
-import { ADMIN_URL } from "../../../utils/constant";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 const ServiceCategoryHero = ({ bannerData }) => {
 
@@ -60,7 +60,7 @@ const ServiceCategoryHero = ({ bannerData }) => {
                   subHeading: banner?.subheading,
                   videoUrl: banner?.video || banner?.video_url,
                   btnText: banner?.button_text,
-                  adminPath: `${ADMIN_URL}/home/group/service/group_service_top_banner/show/${banner?.id}/${banner?.item_id}`,
+                  editTo: adminRoutes.groupService.topBanner(banner?.id),
                 }}
               />
             )}

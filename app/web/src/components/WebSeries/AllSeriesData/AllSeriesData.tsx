@@ -5,8 +5,8 @@ import Image from "next/image";
 import { Link } from "@/src/lib/navigation";
 import Pagination from "../../common/Pagination/Pagination";
 import ScrollToTop from "../../scrollToTop";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import StickerSelect from "../../common/StickerSelect/StickerSelect";
 
 const AllSeriesData = ({
@@ -126,7 +126,11 @@ const AllSeriesData = ({
           with 10+ categories / years. StickerSelect gives us full
           design control AND scales to many options. */}
       <div className="all-series-data-filter-search-wrapper">
-        <div className="all-series-data-filter-wrapper">
+        <div className="all-series-data-filter-wrapper edit-host">
+          <EditPencil
+            to={adminRoutes.marketing.categories()}
+            label="the campaign categories"
+          />
           <StickerSelect
             label="Category"
             value={category}
@@ -180,8 +184,10 @@ const AllSeriesData = ({
               />
             </Link>
             <div className="absolute bottom-0 right-0 mb-2 mr-3">
-              <EditLink
-                path={`${ADMIN_URL}/home/marketing/marketing_house_item/show/${item?.id}`}
+              <EditPencil
+                bare
+                to={adminRoutes.marketing.item(item?.id)}
+                label={item?.title || "this campaign"}
               />
             </div>
           </div>

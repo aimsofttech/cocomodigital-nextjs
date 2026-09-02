@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { GoArrowUpRight } from "react-icons/go";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import type { ServiceItem, ServiceCategory } from "../../../lib/homeServerFetch";
 
 const CATEGORY_TAGLINES = {
@@ -115,10 +115,11 @@ export default function ExploreOurServices({
             ref={titleRef}
           >
             <div className="service-marketing-creative-title-subtitle-wrapper">
-              <h2 className="font-bold service-marketing-creative-subtitle font-primary">
+              <h2 className="font-bold service-marketing-creative-subtitle font-primary edit-host">
                 YouTube Growth Services
-                <EditLink
-                  path={`${ADMIN_URL}/home/service/service_category`}
+                <EditPencil
+                  to={adminRoutes.home.serviceDepartment()}
+                  label="the service departments"
                 />
               </h2>
             </div>
@@ -162,8 +163,12 @@ export default function ExploreOurServices({
                     {services.map((service) => (
                       <div
                         key={service.id}
-                        className="home-service-card text-center"
+                        className="home-service-card text-center edit-host"
                       >
+                        <EditPencil
+                          to={adminRoutes.home.serviceCategory(service?.id)}
+                          label={service?.title || "this service"}
+                        />
                         <Link
                           href={`/services/${service?.slug}`}
                           style={{ width: "100%" }}
@@ -185,11 +190,6 @@ export default function ExploreOurServices({
                           </div>
                         </Link>
 
-                        <div className="absolute bottom-0 right-0 mb-2 mr-2">
-                          <EditLink
-                            path={`${ADMIN_URL}/home/service/service_item/show/${service?.id}`}
-                          />
-                        </div>
                       </div>
                     ))}
                   </div>

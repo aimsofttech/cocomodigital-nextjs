@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Slider from "react-slick";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
 import VideoPlayModal from "../../common/videoPlayModal/videoPlayModal";
 import { cachedFetch, buildCacheKey } from "../../../utils/sessionCache";
@@ -120,10 +120,11 @@ const OtherActivities = ({ itemData }) => {
     <div className="other-activity-main-wrapper">
       <div className="other-activity-main">
         {/* Header */}
-        <h2 className="text-center single-web-series-main-title font-primary font-bold">
+        <h2 className="text-center single-web-series-main-title font-primary font-bold edit-host">
           Add-on Activities
-          <EditLink
-            path={`${ADMIN_URL}/marketing_house/marketing_house_other_activity_category/${itemData?.id}/`}
+          <EditPencil
+            to={adminRoutes.marketing.otherActivityCategory(itemData?.id)}
+            label="the add-on activity categories"
           />
         </h2>
 
@@ -145,10 +146,11 @@ const OtherActivities = ({ itemData }) => {
         }
 
 
-        <h3 className="other-activity-content-title other-activity-content-title-mobile mb-3">
+        <h3 className="other-activity-content-title other-activity-content-title-mobile mb-3 edit-host">
           {otherActivity?.title}
-          <EditLink
-            path={`${ADMIN_URL}/marketing_house/marketing_house_other_activity_item/show/${otherActivity?.id}/${otherActivity?.marketing_house_item_id}`}
+          <EditPencil
+            to={adminRoutes.marketing.otherActivityItem(otherActivity?.marketing_house_item_id, otherActivity?.id)}
+            label={otherActivity?.title || "this activity"}
           />
         </h3>
 
@@ -159,10 +161,11 @@ const OtherActivities = ({ itemData }) => {
           <div className="other-activity-content-wrapper">
             {otherActivity && (
               <div>
-                <h3 className="other-activity-content-title other-activity-content-title-desktop">
+                <h3 className="other-activity-content-title other-activity-content-title-desktop edit-host">
                   {otherActivity?.title}
-                  <EditLink
-                    path={`${ADMIN_URL}/marketing_house/marketing_house_other_activity_item/show/${otherActivity?.id}/${otherActivity?.marketing_house_item_id}`}
+                  <EditPencil
+                    to={adminRoutes.marketing.otherActivityItem(otherActivity?.marketing_house_item_id, otherActivity?.id)}
+                    label={otherActivity?.title || "this activity"}
                   />
                 </h3>
                 <p className="other-activity-content-discription">

@@ -5,6 +5,8 @@ import {
   type BlogAuthor,
 } from "@/src/lib/adminServerApi";
 import { FaArrowRight } from "react-icons/fa";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 
 const BlogAuthorCard = ({
   author = fallbackBlogAuthor,
@@ -14,9 +16,17 @@ const BlogAuthorCard = ({
 }) => {
   return (
     <section
-      className="blog-author-card"
+      className="blog-author-card edit-host"
       aria-labelledby="blog-author-card-name"
     >
+      {/* Only a real author template is addressable; fallbackBlogAuthor is
+          the shipped copy and carries no id. */}
+      {author.id ? (
+        <EditPencil
+          to={adminRoutes.templates.author(author.id)}
+          label={author.author_name || "this author"}
+        />
+      ) : null}
       <div className="blog-author-card-avatar">
         {author.author_image && (
           <Image

@@ -1,76 +1,43 @@
 "use client";
 
-import { FaPencilAlt } from "react-icons/fa";
-import { ADMIN_BASE_URL, useAdminSession } from "@/src/lib/adminSession";
-import { useDemoSession } from "@/src/lib/demoAuth";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 
 /**
- * The little "Edit" pencil beside a section, for editors only.
+ * The podcast page's edit affordance — now a thin adapter over EditPencil.
  *
- * Renders NOTHING at all unless the visitor holds update permission on the
- * module — so for the public, and for a role without it, the page's markup is
- * byte-for-byte what it was before this existed. That is deliberate: the page
- * is the site's ranking target and its output should not change shape based on
- * a feature only staff can see.
+ * This used to be the implementation, and it was the only one: it predates
+ * the rollout of edit pencils to the rest of the site. Two things about it
+ * had since drifted out of line with everywhere else.
  *
- * The link opens the section's own step of the admin editor in a new tab, so
- * the page being edited stays open beside it. Nothing new was built to receive
- * it: `step` addresses the existing Podcast page wizard, whose steps already
- * map one-to-one onto the bands of this page.
+ * It rendered the WORD "Edit" beside the pencil whenever `compact` was not
+ * set, as a rounded pill — so the podcast page's band-level controls looked
+ * like a different feature from the round icon every other page carries.
+ * There is now one chip, one shape and one size across the whole site, and
+ * no text on any of them.
  *
- * TWO CONDITIONS, BOTH REQUIRED: the visitor is signed in to this site, and
- * their role may update the module. The second alone was not enough. The
- * permission check keys off the admin token in storage, while the header's
- * Logout keys off the site's own session — so a token that outlived the
- * session (signed in at the admin panel, or storage cleared unevenly) put
- * pencils on a page that was otherwise telling the visitor they were signed
- * out. Reading the same session the header reads keeps the page telling one
- * story.
+ * It also took `module` as a prop. EditPencil derives the owning module from
+ * the admin path instead, which is strictly safer: a caller that names its
+ * own module can name the wrong one and draw a pencil for a role that cannot
+ * use it. Every path this component is handed begins `podcast/`, so the
+ * derivation lands on the same answer the prop was passing — the prop is
+ * accepted and ignored rather than removed, to leave the podcast page's call
+ * sites untouched.
  *
- * The cost of that is deliberate: someone signed in only at /admin, and not
- * here, no longer gets the pencils until they sign in on the site as well.
- *
- * Hiding the pencil is a convenience, not a control. The admin route checks the
- * role again, and every write is checked a third time by the API.
+ * New call sites should use EditPencil directly.
  */
 
 export interface SectionEditLinkProps {
-  /** Permission module that owns this section, e.g. "podcast". */
-  module: string;
-  /** Admin path to open, relative to the panel root (no leading slash). */
+  /** Ignored — the module is derived from `to`. Kept for call-site
+   *  compatibility with the podcast page. */
+  module?: string;
+  /** Admin path to open, relative to the panel root. */
   to: string;
   /** Names the section or item in the tooltip and for screen readers. */
   label: string;
-  /* Icon only, and smaller — for a single card or row, where the word "Edit"
-     would crowd the content it sits on. */
+  /** Ignored — there is one size now. Kept for call-site compatibility. */
   compact?: boolean;
 }
 
-export default function SectionEditLink({ module, to, label, compact = false }: SectionEditLinkProps) {
-  const signedIn = useDemoSession();
-  const { can } = useAdminSession();
-
-  if (!signedIn) return null;
-  if (!can(module, "update")) return null;
-
-  /* The slot is a zero-height block that establishes the positioning context
-     for the pencil. Doing it here rather than by making the section itself
-     `position: relative` matters: several of these sections contain absolutely
-     positioned children (the problem band's full-bleed backdrop, for one) whose
-     containing block would have changed underneath them. */
-  return (
-    <div className={`section-edit-slot${compact ? " section-edit-slot--item" : ""}`}>
-    <a
-      className={`section-edit-link${compact ? " section-edit-link--item" : ""}`}
-      href={`${ADMIN_BASE_URL}/${to.replace(/^\/+/, "")}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={`Edit ${label} in the admin panel`}
-      aria-label={`Edit ${label} in the admin panel`}
-    >
-      <FaPencilAlt aria-hidden="true" />
-      {!compact && <span>Edit</span>}
-    </a>
-    </div>
-  );
+export default function SectionEditLink({ to, label }: SectionEditLinkProps) {
+  return <EditPencil to={to} label={label} />;
 }

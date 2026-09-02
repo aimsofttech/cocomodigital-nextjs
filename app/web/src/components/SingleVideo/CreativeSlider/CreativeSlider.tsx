@@ -7,8 +7,8 @@ import { FaArrowRight } from "react-icons/fa";
 import ReactPlayer from "react-player";
 import { FaArrowLeft } from "react-icons/fa";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 const CreativeSlider = ({ CreativeSliderData }) => {
   const sliderRef = useRef(null);
@@ -130,10 +130,11 @@ const CreativeSlider = ({ CreativeSliderData }) => {
                       <h1 className="single-video-creative-approach-counter">
                         {index + 1}
                       </h1>
-                      <h4 className="single-video-creative-approach-title">
+                      <h4 className="single-video-creative-approach-title edit-host">
                         {item?.heading}
-                        <EditLink
-                          path={`${ADMIN_URL}/home/creative_house/creative_house_approach/show/${item?.creativeHouseItemId}/${item?.id}`}
+                        <EditPencil
+                          to={adminRoutes.creative.approach(item?.creativeHouseItemId, item?.id)}
+                          label={item?.heading || "this approach step"}
                         />
                       </h4>
                     </div>

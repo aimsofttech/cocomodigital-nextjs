@@ -1,8 +1,8 @@
 // @ts-nocheck
 // import { IoMdArrowBack, IoMdArrowForward } from "react-icons/io";
 import Image from "next/image";
-import EditLink from "../../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../../utils/constant";
+import EditPencil from "../../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../../lib/adminEditRoutes";
 
 const StrategyExecutionSection = ({ data, index }) => {
   // const [currentIndex, setCurrentIndex] = useState(0);
@@ -29,11 +29,12 @@ const StrategyExecutionSection = ({ data, index }) => {
 
 
         <div className="pre-launched-activity-content-wrapper">
-          <h2 className="font-bold desktop-section-title">
+          <h2 className="font-bold desktop-section-title edit-host">
             {/* <span className="title-counter">{index + 1}.</span> */}
             {data?.title}
-            {data?.type === "ideas" && <EditLink
-              path={`${ADMIN_URL}/marketing_house/marketing_house_idea_strategy_planning/show/${data?.id}`}
+            {data?.type === "ideas" && <EditPencil
+              to={adminRoutes.marketing.ideaStrategy(data?.marketing_house_item_id, data?.id)}
+              label={data?.title || "this strategy step"}
             />}
           </h2>
           {isHTML(data?.description) ? (
@@ -52,11 +53,12 @@ const StrategyExecutionSection = ({ data, index }) => {
           )}
         </div>
         <div className="pre-launched-activity-img-wrapper">
-          <h2 className="font-bold mobile-section-title">
+          <h2 className="font-bold mobile-section-title edit-host">
             {/* <span className="title-counter">{index + 1}.</span> */}
             {data?.title}
-            {data?.type === "ideas" && <EditLink
-              path={`${ADMIN_URL}/marketing_house/marketing_house_idea_strategy_planning/show/${data?.id}`}
+            {data?.type === "ideas" && <EditPencil
+              to={adminRoutes.marketing.ideaStrategy(data?.marketing_house_item_id, data?.id)}
+              label={data?.title || "this strategy step"}
             />}
           </h2>
           <div

@@ -366,9 +366,10 @@ export default function SingleService({
               empty array (no FAQs configured for this service). */}
           {(service?.faqs?.length > 0 || !service) && (
             <ServiceFAQ
+              serviceId={service?.id}
               questions={
                 service?.faqs?.length > 0
-                  ? service.faqs.map((f: any) => ({ q: f.question, a: f.answer }))
+                  ? service.faqs.map((f: any) => ({ q: f.question, a: f.answer, id: f.id }))
                   : undefined
               }
             />

@@ -5,8 +5,8 @@ import Image from "next/image";
 import Slider from "react-slick";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 // react-player only loads when the user actually clicks a thumbnail
 // to play. Lazy chunk keeps the recent-work strip lightweight on
@@ -102,8 +102,11 @@ const RecentlyWorkedWith = ({ RecentWorkData }) => {
                     </div>
                   )}
                   <div className="absolute top-0 right-0 mr-2 mt-2">
-                    <EditLink
-                      path={`${ADMIN_URL}/home/group/service/group_single_service_recent_work/show/${item?.id}/${item?.groupServiceItemId}`} />
+                    <EditPencil
+                      bare
+                      to={adminRoutes.groupService.recentWork(item?.groupServiceItemId, item?.id)}
+                      label={item?.title || "this recent work"}
+                    />
                   </div>
                 </div>
               </div>

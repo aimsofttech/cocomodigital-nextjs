@@ -2,8 +2,8 @@
 import { Link } from "@/src/lib/navigation";
 import { IoArrowBack } from "react-icons/io5";
 import DOMPurify from "dompurify";
-import EditLink from "../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../utils/constant";
+import EditPencil from "../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../lib/adminEditRoutes";
 
 /**
  * <StoryHeroBody /> — sticker-language case-study article view.
@@ -81,10 +81,11 @@ const StoryHeroBody = ({ data }) => {
               {category.toUpperCase()}
             </p>
 
-            <h1 className="client-story-title font-primary">
+            <h1 className="client-story-title font-primary edit-host">
               {data?.title}
-              <EditLink
-                path={`${ADMIN_URL}/home/client/show/${data?.id}`}
+              <EditPencil
+                to={adminRoutes.home.client(data?.id)}
+                label={data?.title || "this case study"}
               />
             </h1>
 

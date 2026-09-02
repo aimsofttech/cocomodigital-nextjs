@@ -6,8 +6,8 @@ import { Link } from "@/src/lib/navigation";
 import { useParams as useNextParams } from "next/navigation";
 import Pagination from "../common/Pagination/Pagination";
 import PlayBtn from "../common/PlayBtn/PlayBtn";
-import EditLink from "../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../utils/constant";
+import EditPencil from "../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../lib/adminEditRoutes";
 
 const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItemCount = 0, inPageFilter = false }) => {
   const topScrollToCards = useRef(null);
@@ -179,8 +179,10 @@ const FilterBar = ({
   return (
     <div className="mb-3">
       <div className="w-full flex justify-start content-start mb-1">
-        <EditLink
-          path={`${ADMIN_URL}/home/creative_house/creative_house_category`}
+        <EditPencil
+          bare
+          to={adminRoutes.creative.categories()}
+          label="the creative categories"
         />
       </div>
       <div className="creative-house-filter-search-wrapper">
@@ -268,8 +270,11 @@ const VideoGrid = ({ videos }) => {
                   item?.youtubeId) && <PlayBtn />}
               </Link>
               <div className="absolute top-0 right-0 mr-1">
-                <EditLink
-                  path={`${ADMIN_URL}/home/creative_house/creative_house_item/show/${item?.id}`} />
+                <EditPencil
+                  bare
+                  to={adminRoutes.creative.item(item?.id)}
+                  label={item?.title || "this creative item"}
+                />
               </div>
               {/* Hover Content */}
               {/* <div className="card-CreativeHouse-show-afterImage-Hover">

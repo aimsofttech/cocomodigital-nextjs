@@ -3,8 +3,8 @@
 import { lazy, Suspense, useState, useMemo } from "react";
 import Image from "next/image";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 const ReactPlayer = lazy(() => import("react-player"));
 
@@ -108,10 +108,11 @@ const Portfolio = ({
 
           {/* Section heading */}
           <div style={{ marginBottom: "24px" }}>
-            <h2 className="font-bold service-page-video-edit-service-title font-primary">
+            <h2 className="font-bold service-page-video-edit-service-title font-primary edit-host">
               {heading}
-              <EditLink
-                path={`${ADMIN_URL}/home/group/service/portfolio/group_single_service_portfolio_category`}
+              <EditPencil
+                to={adminRoutes.groupService.portfolioCategory()}
+                label="the portfolio categories"
               />
             </h2>
           </div>
@@ -207,8 +208,10 @@ const Portfolio = ({
                     )}
 
                     <div style={{ position: "absolute", top: 4, right: 8, zIndex: 10 }}>
-                      <EditLink
-                        path={`${ADMIN_URL}/home/roup/service/portfolio/group_single_service_portfolio_item/show/${video?.id}/${video?.category_id}`}
+                      <EditPencil
+                        bare
+                        to={adminRoutes.groupService.portfolioItem(video?.id)}
+                        label={video?.title || "this portfolio item"}
                       />
                     </div>
                   </div>

@@ -6,9 +6,9 @@ import moment from "moment/moment";
 import { IoArrowBack } from "react-icons/io5";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
-import EditLink from "../Edit-Link/Edit-Link";
+import EditPencil from "../common/EditPencil/EditPencil";
 import LexicalBody from "../common/LexicalBody/LexicalBody";
-import { ADMIN_URL } from "../../utils/constant";
+import { adminRoutes } from "../../lib/adminEditRoutes";
 
 /* Phase 1.0 Studio 2026-05-24: when the post was authored via
    /studio, the body lives in `body_markdown` (plain markdown).
@@ -80,9 +80,12 @@ const BlogDetailsContent = ({ data }) => {
                 {moment(data.date).format("MMMM Do, YYYY")}
               </p>
             )}
-            <h1 className="blog-details-title font-primary">
+            <h1 className="blog-details-title font-primary edit-host">
               {data?.title}
-              <EditLink path={`${ADMIN_URL}/blog_items/show/${data?.id}`} />
+              <EditPencil
+                to={adminRoutes.blog.post(data?.id)}
+                label={data?.title || "this post"}
+              />
             </h1>
           </header>
 

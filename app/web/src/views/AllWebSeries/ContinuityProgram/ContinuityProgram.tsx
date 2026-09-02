@@ -7,8 +7,8 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Modal from "@/src/components/common/TailwindModal/TailwindModal";
 import ReactPlayer from "react-player";
 import PlayBtn from "../../../components/common/PlayBtn/PlayBtn";
-import { ADMIN_URL } from "../../../utils/constant";
-import EditLink from "../../../components/Edit-Link/Edit-Link";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
+import EditPencil from "../../../components/common/EditPencil/EditPencil";
 
 const ContinuityProgram = ({ itemData }) => {
   const [activeCategory, setActiveCategory] = useState(
@@ -116,9 +116,12 @@ const ContinuityProgram = ({ itemData }) => {
   return (
     <div className="web-series-continuity-program-main-wrapper">
       <div className="web-series-continuity-program-main">
-        <h1 className="single-web-series-main-title font-primary text-center">
+        <h1 className="single-web-series-main-title font-primary text-center edit-host">
           Continuity Program
-          <EditLink path={`${ADMIN_URL}/marketing_house/community_program_category/${itemData?.id}`} />
+          <EditPencil
+            to={adminRoutes.marketing.communityProgram(itemData?.id)}
+            label="the continuity programme"
+          />
         </h1>
         {itemData?.continuity_category?.length > 1 &&
           <div className="web-series-continuity-program-category-wrapper">
@@ -204,7 +207,10 @@ const ContinuityProgram = ({ itemData }) => {
                     <p className="font-semibold leading-snug mt-2">
                       {item?.community_program_item_description}
                     </p>
-                    <EditLink path={`${ADMIN_URL}/marketing_house/community_program_item/show/${item?.id}/${item?.marketing_house_item_id}`} />
+                    <EditPencil
+                      to={adminRoutes.marketing.communityProgramItem(item?.marketing_house_item_id, item?.id)}
+                      label={item?.community_program_item_description || "this programme item"}
+                    />
                   </div>
                 );
               })}

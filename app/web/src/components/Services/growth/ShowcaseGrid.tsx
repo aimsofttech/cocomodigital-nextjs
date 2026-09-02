@@ -4,6 +4,7 @@ import { requiredIcon } from "./icons";
 import { CheckBullet, Heading } from "./Primitives";
 import type { HeadingLevel } from "./types";
 import { CARD, ICON_CHIP } from "./theme";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 
 /* Vertical-format showcase — one card per platform, each with a 9:16 mock and
    a bullet list. Three across on desktop; the grid drops to one column on
@@ -31,7 +32,8 @@ export default function ShowcaseGrid({
         const Icon = requiredIcon(item.icon);
         return (
           <li key={item.title}>
-            <article className={`${CARD} h-full p-5`}>
+            <article className={`${CARD} h-full p-5 edit-host`}>
+              {item.editTo ? <EditPencil to={item.editTo} label={item.title} /> : null}
               <Heading
                 level={headingLevel}
                 className="flex items-center gap-2.5 font-satoshi text-lg font-black text-strong"

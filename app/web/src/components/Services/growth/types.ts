@@ -23,21 +23,29 @@ export interface CtaLink {
   icon?: IconType;
 }
 
+/* `editTo` is the admin path this card's own record is edited at, and it is
+   the only reason these shapes know anything about the admin. It is optional
+   throughout: a card without one simply renders no pencil, which is what the
+   public sees and what a payload with no record id produces. */
+
 export interface FeatureItem {
   icon: IconType;
   title: string;
   description: string;
+  editTo?: string;
 }
 
 export interface StatItem {
   icon: IconType;
   value: string;
   label: string;
+  editTo?: string;
 }
 
 export interface ProcessStep {
   title: string;
   description: string;
+  editTo?: string;
 }
 
 export interface MetricRow {
@@ -46,11 +54,13 @@ export interface MetricRow {
   before: string;
   after: string;
   growth: string;
+  editTo?: string;
 }
 
 export interface FaqItem {
   question: string;
   answer: string;
+  editTo?: string;
 }
 
 export interface HeroBadge {

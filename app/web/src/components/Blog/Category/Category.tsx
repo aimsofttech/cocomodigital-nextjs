@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import SearchInput from "../../common/SearchInput/SearchInput";
 import { GrFormDown } from "react-icons/gr";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 const Category = ({
   categories,
@@ -13,7 +13,7 @@ const Category = ({
 }) => {
   return (
     <header className="blog-header">
-      <nav className="blog-navigation">
+      <nav className="blog-navigation edit-host">
         <div
           style={{ marginRight: "10px" }}
           className={`blog-nav-link ${!activeCategory && "blog-category-active"
@@ -31,8 +31,9 @@ const Category = ({
             setActiveCategory={setActiveCategory}
           />
         ))}
-        <EditLink
-          path={`${ADMIN_URL}/blog`} className="mb-2"
+        <EditPencil
+          to={adminRoutes.blog.categories()}
+          label="the blog categories"
         />
       </nav>
       <SearchInput setSearchInput={setSearchInput} />
@@ -69,7 +70,7 @@ const NavItem = ({ title, items, activeCategory, setActiveCategory }) => {
       </div>
       {hasDropdown && isOpen && (
         <div className="blog-dropdown">
-          <div className="blog-dropdown-content">
+          <div className="blog-dropdown-content edit-host">
             {safeItems.map((item, index) => (
               <button
                 key={index}
@@ -82,8 +83,9 @@ const NavItem = ({ title, items, activeCategory, setActiveCategory }) => {
                 {item?.blog_sub_category_name}
               </button>
             ))}
-              <EditLink
-                path={`${ADMIN_URL}/blog_sub_category`}
+              <EditPencil
+                to={adminRoutes.blog.subCategories()}
+                label="the blog sub-categories"
               />
           </div>
         </div>

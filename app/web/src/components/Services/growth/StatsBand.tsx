@@ -1,6 +1,7 @@
 import type { HeadingLevel, StatItem } from "./types";
 import { Heading } from "./Primitives";
 import { CARD, ICON_CHIP } from "./theme";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 
 /* The four-up KPI row that sits directly under every hero.
 
@@ -26,8 +27,9 @@ export default function StatsBand({
           {label}
         </Heading>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map(({ icon: Icon, value, label: statLabel }) => (
-            <div key={statLabel} className={`${CARD} flex items-center gap-4 p-5`}>
+          {items.map(({ icon: Icon, value, label: statLabel, editTo }) => (
+            <div key={statLabel} className={`${CARD} flex items-center gap-4 p-5 edit-host`}>
+              {editTo ? <EditPencil to={editTo} label={statLabel} /> : null}
               <span className={`${ICON_CHIP} h-12 w-12`}>
                 <Icon className="h-6 w-6" aria-hidden="true" />
               </span>

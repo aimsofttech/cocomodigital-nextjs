@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
 import ReactPlayer from "react-player";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 export default function HowWeEdit({ data }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,10 +17,12 @@ export default function HowWeEdit({ data }) {
 
   return (
     <div className="single-video-how-to-edit-main edit-bg">
-      <h1 className="single-video-how-to-edit-title font-primary">
+      <h1 className="single-video-how-to-edit-title font-primary edit-host">
         {data?.title}
-        <EditLink
-          path={`${ADMIN_URL}/home/creative_house/creative_house_item/show/${data?.id}`} />
+        <EditPencil
+          to={adminRoutes.creative.item(data?.id)}
+          label={data?.title || "this creative item"}
+        />
       </h1>
       <div className="single-video-image-container">
         {!isPlaying && (

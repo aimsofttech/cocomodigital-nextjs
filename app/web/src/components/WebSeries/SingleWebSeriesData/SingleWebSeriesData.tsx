@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Link, useParams } from "@/src/lib/navigation";
 import Carousel from "@/src/components/common/TailwindCarousel/TailwindCarousel";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
 import VideoPlayModal from "../../common/videoPlayModal/videoPlayModal";
 import Counter from "../../common/counter/counter";
@@ -103,10 +103,11 @@ const sliderImage = [
         {/* ================== HIGHLIGHTS / STATS SECTION ================== */}
         {(highlights_title || highlights_description || highlights?.length > 0) &&
           <div className="w-full">
-            <h1 className="single-web-series-heading font-primary">
+            <h1 className="single-web-series-heading font-primary edit-host">
               {highlights_title}
-              <EditLink
-                path={`${ADMIN_URL}/home/marketing/marketing_house_item/show/${itemData?.id}`}
+              <EditPencil
+                to={adminRoutes.marketing.item(itemData?.id)}
+                label="the highlights heading"
               />
             </h1>
 
@@ -142,8 +143,9 @@ const sliderImage = [
                       <StatBadge key={i} {...stat} slug={slug} />
                     ))}
 
-                    <EditLink
-                      path={`${ADMIN_URL}/marketing_house/marketing_house_statics/${itemData?.id}`}
+                    <EditPencil
+                      to={adminRoutes.marketing.statics(itemData?.id)}
+                      label="the highlight stats"
                     />
                   </div>
                 </div>
@@ -211,8 +213,9 @@ const sliderImage = [
                   ))}
                 </Carousel>
 
-                <EditLink
-                  path={`${ADMIN_URL}/marketing_house/marketing_house_image/${itemData?.id}`}
+                <EditPencil
+                  to={adminRoutes.marketing.images(itemData?.id)}
+                  label="the campaign images"
                 />
               </>
             ) : (
@@ -231,10 +234,11 @@ const sliderImage = [
             <p><strong>Directors :</strong> {itemData?.directors || "N/A"}</p>
             <p><strong>Language :</strong> {itemData?.language || "N/A"}</p>
 
-            <p className="description">
+            <p className="description edit-host">
               {itemData?.description}
-              <EditLink
-                path={`${ADMIN_URL}/home/marketing/marketing_house_item/show/${itemData?.id}`}
+              <EditPencil
+                to={adminRoutes.marketing.item(itemData?.id)}
+                label="this campaign"
               />
             </p>
           </div>

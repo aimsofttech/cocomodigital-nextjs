@@ -1,3 +1,4 @@
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
 import type { FeatureItem, HeadingLevel } from "./types";
 import { Heading } from "./Primitives";
 import { CARD_FLAT, ICON_CHIP } from "./theme";
@@ -38,13 +39,14 @@ export default function FeatureGrid({
 }) {
   return (
     <ul className={`${COLUMN_CLASSES[columns]} ${className}`}>
-      {items.map(({ icon: Icon, title, description }) => (
+      {items.map(({ icon: Icon, title, description, editTo }) => (
         <li key={title} className="h-full">
           <article
             className={`flex h-full ${CARD_BASE} ${compact ? "px-3 py-4" : "p-5"} ${
               layout === "row" ? "items-start gap-3.5" : "flex-col items-center text-center"
-            }`}
+            } edit-host`}
           >
+            {editTo ? <EditPencil to={editTo} label={title} /> : null}
             {/* Brand chip behind a near-black glyph. Yellow can't carry a
                 thin icon on white (~1.1:1), so it becomes the surface and
                 the glyph stays near-black. */}

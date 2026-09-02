@@ -5,8 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { useMediaQuery } from "@/src/hooks/useMediaQuery";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 
 interface YoutubeChannelItem {
+  /** The home-page-section-item record behind this card. */
+  id?: string;
   image?: string;
   name?: string;
   path?: string;
@@ -14,12 +18,18 @@ interface YoutubeChannelItem {
 
 interface YouTubeChannelsProps {
   title?: string;
+  /** The home-page-section record this rail is grouped from. Each rail on
+   *  the homepage — "60+ YouTube Channels Transformed & Counting", "150+
+   *  Web-Series promoted & counting", "Talents we're working with" and the
+   *  rest — is one such record, with its cards as that record's items. */
+  sectionId?: string;
   data?: YoutubeChannelItem[];
   viewAllLink?: string;
 }
 
 const YouTubeChannels = ({
   title = "",
+  sectionId,
   data = [],
   viewAllLink = "#",
 }: YouTubeChannelsProps) => {
@@ -49,8 +59,14 @@ const YouTubeChannels = ({
   return (
     <div className="home-youtube-channels-main-wrapper">
       <div className="home-youtube-channels-main">
-        <h3 className="home-youtube-channels-main-title font-primary text-center">
+        <h3 className="home-youtube-channels-main-title font-primary text-center edit-host">
           {title}
+          {sectionId ? (
+            <EditPencil
+              to={adminRoutes.home.section(sectionId)}
+              label={title || "this rail"}
+            />
+          ) : null}
         </h3>
 
         <div className="youtube-channels-grid">
@@ -69,8 +85,15 @@ const YouTubeChannels = ({
                   href={channelPath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="youtube-channel-card"
+                  className="youtube-channel-card edit-host"
                 >
+                  {channel?.id ? (
+                    <EditPencil
+                      asButton
+                      to={adminRoutes.home.sectionItem(channel.id)}
+                      label={channelName}
+                    />
+                  ) : null}
                   <div className="youtube-channel-image-wrapper">
                     {imageSrc && <Image
                       src={imageSrc}
@@ -88,8 +111,14 @@ const YouTubeChannels = ({
             return (
               <div
                 key={index}
-                className="youtube-channel-card"
+                className="youtube-channel-card edit-host"
               >
+                {channel?.id ? (
+                  <EditPencil
+                    to={adminRoutes.home.sectionItem(channel.id)}
+                    label={channelName}
+                  />
+                ) : null}
                 <div className="youtube-channel-image-wrapper">
                   {imageSrc && <Image
                     src={imageSrc}

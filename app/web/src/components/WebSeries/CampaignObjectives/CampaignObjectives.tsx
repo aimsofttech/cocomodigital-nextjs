@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from "react";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 
 export default function CampaignObjectives({ itemData }) {
   const [campaign, setCampaign] = useState([]);
@@ -28,10 +28,11 @@ export default function CampaignObjectives({ itemData }) {
   return (
     <section className="campaign-section">
       <div className="campaign-container">
-        <h2 className="campaign-title font-primary">
+        <h2 className="campaign-title font-primary edit-host">
           Client Goals
-          <EditLink
-            path={`${ADMIN_URL}/home/marketing/marketing_house_item/show/${itemData?.id}`}
+          <EditPencil
+            to={adminRoutes.marketing.item(itemData?.id)}
+            label="the client goals"
           />
         </h2>
         <p className="campaign-description">

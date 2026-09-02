@@ -9,6 +9,8 @@ import Pagination from "../../../components/common/Pagination/Pagination";
 import JobCard from "./JobCard";
 import JobCardSkeleton from "./JobCardSkeleton";
 import CareerTrustStrip from "../../../components/Jobs/CareerTrustStrip/CareerTrustStrip";
+import EditPencil from "@/src/components/common/EditPencil/EditPencil";
+import { adminRoutes } from "@/src/lib/adminEditRoutes";
 
 // Cocoma HR contact — used for "don't see your role?" speculative
 // applicants. Single constant so any future swap is one line.
@@ -329,7 +331,7 @@ const Career = ({
             </div>
 
             {/* Category Buttons */}
-            <div className="career-page-btn-wrapper">
+            <div className="career-page-btn-wrapper edit-host">
               {categories?.map((category, index) =>
                 category?.category === "All" ? (
                   <button
@@ -350,6 +352,10 @@ const Career = ({
                   />
                 )
               )}
+              <EditPencil
+                to={adminRoutes.jobs.categories()}
+                label="the job categories"
+              />
             </div>
 
             {/* Job Listings */}

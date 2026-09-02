@@ -8,8 +8,8 @@ import Carousel from "@/src/components/common/TailwindCarousel/TailwindCarousel"
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
 import VideoPlayModal from "../../common/videoPlayModal/videoPlayModal";
 import SecondaryButton from "../../common/buttons/SecondaryButton";
-import EditLink from "../../Edit-Link/Edit-Link";
-import { ADMIN_URL } from "../../../utils/constant";
+import EditPencil from "../../common/EditPencil/EditPencil";
+import { adminRoutes } from "../../../lib/adminEditRoutes";
 import { useLocation } from "@/src/lib/navigation";
 import { cachedFetch, buildCacheKey } from "../../../utils/sessionCache";
 
@@ -225,10 +225,11 @@ const ContentCreateByTeam = ({ itemData }) => {
     <div className="w-full" id="videos">
       <div id="shorts" className="marketing-details-content-creator-main-wrapper">
         <div className="marketing-details-content-creator-main">
-          <h2 className="text-center single-web-series-main-title font-primary">
+          <h2 className="text-center single-web-series-main-title font-primary edit-host">
             Content Created By Our Team Cocoma
-            <EditLink
-              path={`${ADMIN_URL}/marketing_house/marketing_house_content_created_category/${itemData?.id}`}
+            <EditPencil
+              to={adminRoutes.marketing.contentCategory(itemData?.id)}
+              label="the content categories"
             />
           </h2>
 
@@ -258,7 +259,7 @@ const ContentCreateByTeam = ({ itemData }) => {
             <div className="flex flex-wrap -mx-3">
               {activeCategory?.category_name !== "Carousels" &&
                 contentCreated.map((item) => (
-                  <div className="w-1/2 px-3 md:w-1/3 md:px-3 lg:w-1/4 lg:px-3 marketing-details-content-created-by-cards" key={item.id}>
+                  <div className="w-1/2 px-3 md:w-1/3 md:px-3 lg:w-1/4 lg:px-3 marketing-details-content-created-by-cards edit-host" key={item.id}>
                     <div className="relative video-wrapper">
                       <div
                         className="play-overlay"
@@ -279,8 +280,9 @@ const ContentCreateByTeam = ({ itemData }) => {
                       </div>
                     </div>
 
-                    <EditLink
-                      path={`${ADMIN_URL}/marketing_house/marketing_house_content_created_item/show/${item.id}/${item.marketing_house_item_id}`}
+                    <EditPencil
+                      to={adminRoutes.marketing.contentItem(item.marketing_house_item_id, item.id)}
+                      label={item?.title || "this content item"}
                     />
                   </div>
                 ))}
@@ -321,8 +323,9 @@ const ContentCreateByTeam = ({ itemData }) => {
                       </div>
                     </div>
 
-                    <EditLink
-                      path={`${ADMIN_URL}/marketing_house/carousels/show/${item.id}/${item.marketing_house_item_id}`}
+                    <EditPencil
+                      to={adminRoutes.marketing.contentCarousel(item.marketing_house_item_id, item.id)}
+                      label={item?.title || "this carousel"}
                     />
                   </div>
                 ))}
