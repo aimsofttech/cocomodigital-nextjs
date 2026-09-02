@@ -321,11 +321,22 @@ function MarkCheck() {
 export function ProblemContrast() {
   return (
     <div className="pod-contrast">
+      {/* The hours are the pivot, not a decoration: they are the reason
+          one recording only ever becomes one episode without a system.
+          This fact used to sit in a card below and was the only one of
+          those three the diagram did not already state. */}
       <p className="pod-contrast-source">
         <span className="pod-contrast-source-mark" aria-hidden="true">
           <Icon name="mic" />
         </span>
-        One 60-minute recording
+        <span>One 60-minute recording</span>
+        <span className="pod-contrast-cost">
+          <b>4–8 hrs</b> of post-production behind it
+        </span>
+      </p>
+      <p className="pod-contrast-note">
+        Cutting, cleaning, color, captions, clip selection, thumbnails, notes,
+        uploads. Our own measured range.
       </p>
 
       <div className="pod-contrast-tracks">

@@ -59772,8 +59772,9 @@ html {
 .pod-contrast-source {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin: 0 0 var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-small);
   font-weight: var(--fw-bold);
@@ -59796,6 +59797,46 @@ html {
 .pod-contrast-source-mark svg {
   width: 1em;
   height: 1em;
+}
+
+/* The cost sits on the same line as the source, separated by a rule
+   rather than a bullet: it is a second fact about the same recording,
+   not a second item in a list. */
+.pod-contrast-cost {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  padding-left: var(--space-3);
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: var(--fw-regular, 400);
+}
+
+.pod-contrast-cost b {
+  font-family: var(--font-display);
+  font-size: 1.35em;
+  font-weight: var(--fw-bold);
+  color: var(--brand);
+}
+
+/* Keeps "our own measured range" attached to the number it qualifies.
+   That caveat is load-bearing — it is what makes the figure ours to
+   claim rather than an industry statistic we cannot source. */
+.pod-contrast-note {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-small);
+  line-height: var(--leading-snug);
+  color: rgba(255, 255, 255, 0.55);
+  max-width: 62ch;
+}
+
+@media (max-width: 560px) {
+  .pod-contrast-cost {
+    padding-left: 0;
+    border-left: none;
+    width: 100%;
+  }
 }
 
 /* The fork between the two tracks IS the graphic, so the divider is

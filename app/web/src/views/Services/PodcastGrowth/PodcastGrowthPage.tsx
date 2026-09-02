@@ -275,18 +275,17 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               the numbers below as evidence for it. */}
           <ProblemContrast />
 
-          {data.problemStats.length > 0 && (
-            <div className="pod-problem-grid">
-              {data.problemStats.map((p) => (
-                <article key={p.label} className="pod-problem-card">
-                  <EditItem pageId={data.id} kind="problem" id={p.id} label={p.label} />
-                  <p className="pod-problem-value">{p.value}</p>
-                  <p className="pod-problem-label">{p.label}</p>
-                  <p className="pod-problem-body">{p.description}</p>
-                </article>
-              ))}
-            </div>
-          )}
+          {/* The three stat cards (4–8 hrs / 60+ / 1 editor) stood here.
+              Removed on Anil's call once the contrast block landed: two of
+              them had become restatements of it — the diagram says "60+
+              pieces, every week" verbatim, and "Without a system / Run as a
+              system" IS "one editor can't carry that load". The 4–8 hrs
+              figure was the only fact they carried that the diagram did not,
+              so it moved up into the diagram itself where it explains why
+              the fork happens at all.
+
+              `data.problemStats` still arrives from the API and is simply not
+              rendered, so nothing needs deleting in the admin panel. */}
         </div>
       </section>
 
