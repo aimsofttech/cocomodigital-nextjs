@@ -2,7 +2,6 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Link, useLocation } from "@/src/lib/navigation";
 import { signOutDemo, useDemoSession } from "@/src/lib/demoAuth";
 import { RiMenuFill } from "react-icons/ri";
@@ -44,7 +43,6 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
      later — signing in or out anywhere updates this without a reload. */
   const demoUser = useDemoSession();
 
-  const router = useRouter();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -139,7 +137,10 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
   const logoutHandler = (): void => {
     signOutDemo();
     setExpanded(false);          // close the mobile menu if it was open
-    router.push("/login");       // clear confirmation that the session ended
+    /* Stay where you are. Signing out announces itself, so this header swaps
+       Logout back for the signed-out state and any Edit affordances on the page
+       disappear on the spot — the session visibly ends without taking the
+       reader off whatever they were reading. */
   };
 
   const isCareerArea =

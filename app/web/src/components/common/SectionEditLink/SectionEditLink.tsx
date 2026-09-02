@@ -2,6 +2,7 @@
 
 import { FaPencilAlt } from "react-icons/fa";
 import { ADMIN_BASE_URL, useAdminSession } from "@/src/lib/adminSession";
+import { useDemoSession } from "@/src/lib/demoAuth";
 
 /**
  * The little "Edit" pencil beside a section, for editors only.
@@ -16,6 +17,18 @@ import { ADMIN_BASE_URL, useAdminSession } from "@/src/lib/adminSession";
  * the page being edited stays open beside it. Nothing new was built to receive
  * it: `step` addresses the existing Podcast page wizard, whose steps already
  * map one-to-one onto the bands of this page.
+ *
+ * TWO CONDITIONS, BOTH REQUIRED: the visitor is signed in to this site, and
+ * their role may update the module. The second alone was not enough. The
+ * permission check keys off the admin token in storage, while the header's
+ * Logout keys off the site's own session — so a token that outlived the
+ * session (signed in at the admin panel, or storage cleared unevenly) put
+ * pencils on a page that was otherwise telling the visitor they were signed
+ * out. Reading the same session the header reads keeps the page telling one
+ * story.
+ *
+ * The cost of that is deliberate: someone signed in only at /admin, and not
+ * here, no longer gets the pencils until they sign in on the site as well.
  *
  * Hiding the pencil is a convenience, not a control. The admin route checks the
  * role again, and every write is checked a third time by the API.
@@ -34,8 +47,10 @@ export interface SectionEditLinkProps {
 }
 
 export default function SectionEditLink({ module, to, label, compact = false }: SectionEditLinkProps) {
+  const signedIn = useDemoSession();
   const { can } = useAdminSession();
 
+  if (!signedIn) return null;
   if (!can(module, "update")) return null;
 
   /* The slot is a zero-height block that establishes the positioning context
