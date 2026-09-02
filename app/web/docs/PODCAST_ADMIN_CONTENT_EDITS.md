@@ -110,3 +110,30 @@ the top already carries the studio's scale.
 **Do not delete these rows in the admin.** They still arrive from the API
 and are simply not rendered, so the strip can be restored by uncommenting
 one block. Deleting them would throw the content away.
+
+---
+
+## 6. Before reviewing this page, check your OS accessibility settings
+
+Three separate times during this work, the page looked broken to Anil and
+was in fact behaving correctly — his machine has **Reduce Motion** and
+**Reduce Transparency** switched on, and both change what this page shows:
+
+| Setting | What it suppresses | Correct? |
+|---|---|---|
+| `prefers-reduced-motion` | The wrong-call video's autoplay | **Yes.** Controls now appear only when autoplay can't happen, so it's never a dead frame. |
+| `prefers-reduced-motion` | Service card hover and scroll reveals | **Yes.** Motion is opt-out by design. |
+| `prefers-reduced-transparency` | **All 8 service-card photographs** | **Yes** — but it means that band renders with no imagery at all on his screen. |
+
+There was also one genuine bug of this shape, now fixed: a stray
+`@media (prefers-reduced-motion: reduce)` rule pinned the Problem band's
+backdrop to `opacity: 0.16`, which is why it read as almost black no
+matter what the base rule said. Motion preferences should never control a
+static image's opacity.
+
+**So:** when judging how this page looks, either turn both settings off
+temporarily, or check on a second machine. Otherwise the version being
+reviewed is not the version most visitors get.
+
+macOS: System Settings → Accessibility → Display → Reduce motion /
+Reduce transparency.
