@@ -58119,6 +58119,24 @@ html {
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
+
+  /* A slight blur, and it is doing the heavy lifting here — more than the
+     scrim is.
+
+     Contrast ratios assume a FLAT background. Over a photograph the number
+     can pass and the text still be unreadable, because what actually breaks
+     small type is high-frequency detail behind it: edges, faces, and on
+     several of these cards literal text (editing timelines, UI screenshots).
+     Two pixels of blur removes that detail while leaving the composition,
+     colour and subject perfectly legible as an image — which is what a
+     backdrop is for.
+
+     The 1.04 scale goes with it. A blur samples beyond the element's own
+     edges, where there is nothing, so an unscaled blurred image feathers out
+     to transparent at the card's border. Growing it slightly pushes that soft
+     edge outside the crop. */
+  filter: blur(2px);
+  transform: scale(1.04);
   /* Behind the card's content, by painting order rather than by touching the
      content at all. An earlier attempt lifted every sibling with
      `position: relative`, which also overrode the Edit pencil's slot and threw
@@ -58134,23 +58152,26 @@ html {
   user-select: none;
 }
 
-/* The scrim that buys the copy its contrast back — and the only thing now
-   standing between you and the photograph, so it is set to the lightest veil
-   the text can survive rather than to a comfortable one.
+/* The scrim that buys the copy its contrast back.
 
-   These three stops are a floor, not a preference. The card is near-black text
-   on a light surface, so a photograph behind it can only be as present as the
-   words allow: measured against a worst-case black region, #111 needs a 48.5%
-   white veil to clear 4.5:1 and #1f1f1f needs 52.5%. The stops sit just above
-   each, at the point in the card where that text actually appears —
+   It was tuned to the bare AA minimum at first — 0.50/0.55/0.58, which
+   measures 4.1:1 on the body copy against a worst-case black region. That is
+   a passing number and it was not enough: 4.5:1 is a floor for text on a FLAT
+   colour, and none of these backgrounds are flat. Over a photograph the
+   threshold needs real headroom, so these stops target 7:1 and above.
 
-     0%    0.50  the icon and title zone           title  4.8:1
-     35%   0.55  where the body paragraph starts   body   4.9:1
-     100%  0.58  the tag rule at the foot          body   5.4:1
+   Measured against a worst-case black region of the photograph, at the point
+   in the card where each piece of text actually sits —
 
-   Lowering any of them further to show more of the picture fails AA. Going
-   meaningfully brighter than this needs the other direction instead: a dark
-   scrim with light text, which is what the problem band above already does. */
+     0%    0.62  the icon and title zone           title  7.1:1
+     55%   0.70  the body paragraph                body   7.8:1
+     100%  0.74  the tag rule at the foot          body   8.8:1
+
+   Still weighted rather than flat: the photograph is most itself at the top
+   of the card, which carries only an icon and a short title, and recedes
+   through the paragraph. Between this and the blur above, the copy is
+   readable over any image an editor uploads — including the ones on this page
+   that have text of their own in them. */
 .pod-service-card--art::before {
   content: "";
   position: absolute;
@@ -58158,9 +58179,9 @@ html {
   border-radius: inherit;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.55) 35%,
-    rgba(255, 255, 255, 0.58) 100%
+    rgba(255, 255, 255, 0.62) 0%,
+    rgba(255, 255, 255, 0.7) 55%,
+    rgba(255, 255, 255, 0.74) 100%
   );
   z-index: -1;
   pointer-events: none;
