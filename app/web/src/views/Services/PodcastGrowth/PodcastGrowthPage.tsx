@@ -553,7 +553,9 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
       </section>
 
       {/* --------------------------------------- who this is not for */}
-      {/* Two columns: the disqualifiers on the left, a video on the right.
+      {/* Heading across the top, then two columns: the disqualifiers on the
+          left, a video on the right, so the frame sits level with the list
+          rather than floating beside the heading with the items below it.
           The media is optional and admin-controlled — with no poster set,
           `hasNotForMedia` is false, the shell narrows back to its original
           900px and the copy renders exactly as it did before this column
@@ -567,12 +569,15 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               : "pod-shell pod-shell--narrow"
           }
         >
-          <div className="pod-notfor-copy">
+          <div className="pod-notfor-head">
             {notFor.eyebrow && <p className="pod-eyebrow">{notFor.eyebrow}</p>}
             <h2 id="pod-notfor-title" className="pod-section-title">
               {notFor.heading}
             </h2>
             {notFor.lead && <p className="pod-section-lead">{notFor.lead}</p>}
+          </div>
+
+          <div className="pod-notfor-copy">
             <ul className="pod-notfor-list">
               {notFor.items.map((i) => (
                 <li key={i.slice(0, 24)}>

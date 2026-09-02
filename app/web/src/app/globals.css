@@ -59427,9 +59427,14 @@ html {
   background: var(--bg-page);
 }
 
-/* Two columns: the disqualifiers, then the video.
+/* Heading across the top, then two columns: the disqualifiers, then the video.
 
-   An even split: half the row for the copy, half for the video.
+   The heading spans both tracks so the split starts at the list. The video
+   then sits level with the first disqualifier instead of alongside the
+   heading, which is what leaves the frame stranded above four items of copy.
+
+   An even split for that second row: half the row for the list, half for the
+   video.
 
    Both tracks are `minmax(0, 1fr)`, not `1fr`. A bare `1fr` is really
    `minmax(auto, 1fr)`, so a long unbroken string in a disqualifier — a URL, a
@@ -59453,18 +59458,38 @@ html {
 .pod-notfor-inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--space-7, 2.5rem);
+  grid-template-areas:
+    "head head"
+    "list media";
+  column-gap: var(--space-7, 2.5rem);
+  row-gap: var(--space-6, 2rem);
   align-items: start;
+}
+
+/* Full-bleed track, but the prose keeps a measure of its own — a lead run
+   across the whole shell reads as a banner, not as an argument. */
+.pod-notfor-head {
+  grid-area: head;
+  min-width: 0;
+  max-width: 62ch;
+}
+
+/* The lead's own bottom margin would stack on top of the grid's row gap. The
+   gap is the spacing here. */
+.pod-notfor-head > :last-child {
+  margin-bottom: 0;
 }
 
 /* minmax(0, …) above stops a long unbroken string in a disqualifier from
    forcing the track wider than its share; this is the matching guard on the
    item itself. */
 .pod-notfor-copy {
+  grid-area: list;
   min-width: 0;
 }
 
 .pod-notfor-media {
+  grid-area: media;
   min-width: 0;
   /* The media column sticks while the list scrolls past it on a tall screen.
      Bounded by the header offset the rest of this page already uses. */
@@ -59480,6 +59505,10 @@ html {
 @media (max-width: 900px) {
   .pod-notfor-inner {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "head"
+      "list"
+      "media";
     gap: var(--space-6, 2rem);
   }
 
