@@ -599,6 +599,17 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             {notFor.lead && <p className="pod-section-lead">{notFor.lead}</p>}
           </div>
 
+          {hasNotForMedia && (
+            <div className="pod-notfor-media">
+              {/* Sits directly after the heading and its opening line, on
+                  Anil's call — it is the human face of a band that is
+                  otherwise a list of reasons to walk away, so it should
+                  arrive before the list, not beside or below it.
+                  Plays itself, muted, with no chrome at all. */}
+              <PodcastAutoVideo media={notFor.media} />
+            </div>
+          )}
+
           <div className="pod-notfor-copy">
             <ul className="pod-notfor-list">
               {notFor.items.map((i) => (
@@ -611,15 +622,6 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             <p className="pod-notfor-foot">{notFor.footnote}</p>
           </div>
 
-          {hasNotForMedia && (
-            <div className="pod-notfor-media">
-              {/* Not the hero's click-to-play facade: this one starts itself
-                  once the band scrolls into view, muted, with a toggle for
-                  sound. See PodcastAutoVideo for why each of those three
-                  things is the way it is. */}
-              <PodcastAutoVideo media={notFor.media} />
-            </div>
-          )}
         </div>
       </section>
 

@@ -59259,6 +59259,23 @@ html {
 
 .pod-studio-item--wide {
   grid-column: span 2;
+  /* Two columns wide, still ONE row tall. It inherited 16/9 from
+     .pod-studio-item, so spanning two columns made it twice as wide AND
+     twice as tall — four times the area of its neighbours. That forced a
+     tall grid row, and the single-column tiles then floated in it with
+     large voids above and below. This is the "images distorting the
+     overall look" on desktop: not a stretched picture, a broken grid.
+     32/9 is 16/9 doubled horizontally, so its height lands within a few
+     pixels of a normal tile and every row aligns.
+
+     Tried aspect-ratio: auto with align-self: stretch to get the last 4px
+     exact — it went straight back to 368px, because with no height
+     constraint the image's own 16/9 drives the box instead of the row.
+     CSS cannot reference a sibling's computed width, so 32/9 lands 4px
+     proud (183 vs 179) and that is as close as this gets without JS or a
+     hard-coded row height. A 2% difference reads as aligned; 368 vs 179
+     did not. */
+  aspect-ratio: 32 / 9;
 }
 
 .pod-studio-caption {
@@ -59345,6 +59362,9 @@ html {
 
   .pod-studio-item--wide {
     grid-column: span 1;
+    /* Back to a normal tile once it no longer spans two columns —
+       without this it keeps 32/9 and renders as a letterbox slit. */
+    aspect-ratio: 16 / 9;
   }
 }
 
@@ -59505,7 +59525,7 @@ html {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-areas:
     "head head"
-    "list media";
+    "media list";
   column-gap: var(--space-7, 2.5rem);
   row-gap: var(--space-6, 2rem);
   align-items: start;
@@ -59552,8 +59572,8 @@ html {
     grid-template-columns: 1fr;
     grid-template-areas:
       "head"
-      "list"
-      "media";
+      "media"
+      "list";
     gap: var(--space-6, 2rem);
   }
 
@@ -59772,6 +59792,13 @@ html {
 .pod-problem-card {
   background: rgba(10, 10, 10, 0.92);
   backdrop-filter: blur(2px);
+}
+
+/* An ambient clip: it plays, but it is not a player. No chrome, and
+   inert to the pointer so a click cannot pause it or surface native
+   controls — it should behave like a photograph that happens to move. */
+.pod-media-frame--ambient {
+  pointer-events: none;
 }
 
 /* ------------------------- problem: one recording, two outcomes */

@@ -146,25 +146,25 @@ export default function PodcastAutoVideo({
       >
         <video
           ref={videoRef}
-          className="pod-media-frame"
+          className="pod-media-frame pod-media-frame--ambient"
           src={videoSrc}
           poster={poster || undefined}
-          /* Controls only when this will NOT autoplay. When it plays by
-             itself a chrome bar reads as "click me" on something already
-             running; when it cannot (reduced motion, or the browser
-             refusing autoplay) controls are the only way in, so removing
-             them outright would leave a dead frame. */
-          controls={reduced}
-          autoPlay={!reduced}
-          muted={muted}
+          /* No controls, no mute button, no chrome of any kind. Anil's
+             call: this should behave like a GIF or a photograph that
+             happens to move, not like something you operate.
+
+             Under prefers-reduced-motion it simply does not start, and
+             the poster frame stands in as a still. For decoration that
+             is the correct fallback rather than a dead player — there is
+             nothing here a visitor needs to reach, so there is nothing
+             to give them a control for. */
+          autoPlay
+          muted
           loop
           playsInline
-          /* "none" until it is worth loading: the observer flips this, and the
-             browser then fetches only what it needs to start. */
           preload={inView ? "auto" : "none"}
           aria-label="Video"
         />
-        {muteButton}
       </div>
     );
   }
