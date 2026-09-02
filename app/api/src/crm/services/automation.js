@@ -251,6 +251,18 @@ const pickAssignee = async (strategy) => {
   return users[idx]._id;
 };
 
+/**
+ * Which settings flag each outbound channel is gated behind.
+ *
+ * A channel absent from this map is ungated — SMS is, because it was never
+ * switched off and quietly disabling it here would be an unrelated change
+ * riding along on this one.
+ */
+const AUTOMATED_SEND_SWITCH = {
+  whatsapp: 'automatedWhatsappEnabled',
+  email: 'automatedEmailEnabled',
+};
+
 const runAction = async (action, ctx, meta, run) => {
   const cfg = action.config || {};
   const messaging = require('./messaging');
@@ -266,12 +278,15 @@ const runAction = async (action, ctx, meta, run) => {
     case 'send_whatsapp':
     case 'send_sms': {
       const channel = action.type.replace('send_', '');
-      // WhatsApp is agent-initiated only unless explicitly re-enabled: a rule
-      // must never message a customer's WhatsApp without someone pressing Send.
-      if (channel === 'whatsapp') {
+      // Channels a rule may not use on its own unless explicitly re-enabled.
+      // A rule must never reach a customer without a person deciding to: not
+      // on WhatsApp, and not by email. Both are opt-in, and the rule is
+      // skipped (recorded in the run, not failed) while the switch is off.
+      const gate = AUTOMATED_SEND_SWITCH[channel];
+      if (gate) {
         const s = await require('./settings').getSettings();
-        if (!s.automatedWhatsappEnabled) {
-          return { skipped: 'automated WhatsApp disabled (settings.automatedWhatsappEnabled)' };
+        if (!s[gate]) {
+          return { skipped: `automated ${channel} disabled (settings.${gate})` };
         }
       }
       const msg = await messaging.sendMessage({

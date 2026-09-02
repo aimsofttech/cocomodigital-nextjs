@@ -33,8 +33,10 @@ router.put('/', requirePermission('settings:manage'), async (req, res) => {
   const ALLOWED = ['timezone', 'quietHoursStart', 'quietHoursEnd', 'assignmentStrategy',
     'emailTracking', 'idleLeadDays', 'followupEscalateHours',
     'automationDailyCapPerEntity', 'defaultCountryCode',
-    // WhatsApp compliance switches — without these here the defaults in
-    // services/settings.js could never be changed from the UI.
+    // Outbound-automation switches — without these here the defaults in
+    // services/settings.js could never be changed from the UI, and turning
+    // automated mail back on would mean editing the database by hand.
+    'automatedEmailEnabled',
     'automatedWhatsappEnabled', 'requireExplicitWhatsappOptIn'];
   const patch = {};
   for (const k of ALLOWED) if (req.body[k] !== undefined) patch[k] = req.body[k];

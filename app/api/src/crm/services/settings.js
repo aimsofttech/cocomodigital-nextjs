@@ -23,8 +23,18 @@ const DEFAULTS = {
   // is regulated in most jurisdictions and should be a deliberate opt-in.
   automatedCallingEnabled: false,
   // WhatsApp goes out only when an agent presses Send. Automation rules with a
-  // send_whatsapp action are skipped while this is false. Email/SMS unaffected.
+  // send_whatsapp action are skipped while this is false. SMS unaffected.
   automatedWhatsappEnabled: false,
+  // Email is the same: no rule may mail a lead on its own. Automation rules
+  // with a send_email action are skipped while this is false, and an agent
+  // pressing Send on a message is unaffected — the point is that nobody is
+  // mailed without a person deciding to mail them.
+  //
+  // Off by default, and deliberately so. Every other switch here that can
+  // reach a customer unattended (automatedCallingEnabled, the WhatsApp pair)
+  // defaults off for the same reason: the failure mode is mail going to real
+  // collected leads, which cannot be recalled.
+  automatedEmailEnabled: false,
   // Meta policy requires recorded opt-in before you message anyone. Turn this on
   // once you leave the sandbox: it blocks WhatsApp to any contact without a
   // whatsappOptInAt stamp, rather than trusting the default-true flag.
