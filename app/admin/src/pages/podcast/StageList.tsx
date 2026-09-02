@@ -63,7 +63,7 @@ export function StageForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
           />
           <ImageUpload
             name="image"
-            label="Illustration"
+            label="Stage Image"
             uploadType="image"
             folder="podcast/stages"
             accept="image/*,.svg"
@@ -75,9 +75,9 @@ export function StageForm({ editId, lockedPageId, onSuccess, onCancel }: any) {
           <TextAreaField
             register={register}
             name="imageAlt"
-            label="Illustration Alt Text"
+            label="Stage Image Alt Text"
             rows={2}
-            hint="Describe what the illustration shows. Leave it empty and the picture is treated as decorative, which is right for a diagram that only restates the copy beside it."
+            hint="Describe what the picture shows. Leave it empty and it is treated as decorative, which is right for a diagram that only restates the copy beside it — but a photograph with a subject should be described."
           />
           <SelectField
             register={register}

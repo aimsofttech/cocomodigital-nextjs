@@ -104,15 +104,25 @@ export const PORTRAIT_SPEC = {
   note: 'the founder portrait — a vertical crop, head and shoulders',
 };
 
-/* The Signal-to-Scale illustrations. Wide and short, drawn as line art — an
-   SVG keeps the strokes crisp at any size, which a screenshot would not. */
+/* The Signal-to-Scale stage panel.
+ *
+ * An uploaded picture now fills the panel edge to edge and is cropped to fill
+ * it (object-fit: cover), so these numbers describe the panel, not the old
+ * 320x132 line drawing that floated inside it. The panel is ~520px wide and
+ * ~300px tall on a desktop card and locks to a full-width 16:9 on a phone, so
+ * 16:9 is the shape that survives both crops — 1200x675 gives it enough
+ * pixels for a retina screen without a heavy file.
+ *
+ * Because it crops rather than letterboxes, whatever must stay visible has to
+ * sit near the middle: the sides go first on a phone, the top and bottom go
+ * first on a tall desktop card. */
 export const STAGE_ART_SPEC = {
-  width: 320,
-  height: 132,
-  ratio: '~2.4:1',
-  formats: 'SVG, PNG, WebP',
+  width: 1200,
+  height: 675,
+  ratio: '16:9',
+  formats: 'JPG, WebP, PNG, SVG',
   maxSizeMB: 1,
-  note: 'line art on a transparent background; it sits on a tinted panel',
+  note: 'fills the whole stage panel and is cropped to fit, so keep the subject centred and leave room at the edges',
 };
 
 /* Artwork behind a service card. It sits under the card's own text at low

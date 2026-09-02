@@ -59675,6 +59675,39 @@ html {
   color: var(--text-strong);
 }
 
+/* An uploaded photograph is not a diagram: it fills the panel edge to
+   edge instead of floating at 320px in the middle of a tinted box.
+   The panel is a grid cell, so it already stretches to the row's
+   height — the image is absolutely positioned inside it and cropped
+   with object-fit rather than letterboxed. The gradient/padding
+   treatment only ever existed to frame the line drawings, so the photo
+   variant drops both. */
+.pod-stage-figure--photo {
+  padding: 0;
+  background: var(--bg-page-soft);
+  overflow: hidden;
+}
+
+.pod-stage-figure--photo .pod-stage-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Over a photograph the ghosted numeral at 10% would simply vanish, so
+   the photo variant swaps it for a light one with a shadow — legible on
+   a dark or a bright crop without a chip behind it — and lifts it above
+   the image. */
+.pod-stage-figure--photo .pod-stage-ordinal {
+  z-index: 1;
+  color: #fff;
+  opacity: 0.75;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+}
+
 .pod-art-fill {
   fill: var(--brand);
   stroke: var(--text-strong);
@@ -59734,6 +59767,15 @@ html {
     border-bottom: 2px solid var(--text-strong);
     min-height: 0;
     padding: var(--space-5);
+  }
+
+  /* min-height goes to 0 above, and an absolutely positioned image has
+     no intrinsic height to hold the cell open, so the photo variant
+     needs a ratio of its own or the panel collapses. */
+  .pod-stage-figure--photo,
+  .pod-stage:nth-child(even) .pod-stage-figure--photo {
+    padding: 0;
+    aspect-ratio: 16 / 9;
   }
 
   .pod-stage-ordinal {

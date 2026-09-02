@@ -296,25 +296,36 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                         exists. Draws the stage's argument rather than
                         filling space, and imitates nothing — no fake
                         screenshot, no implied number. */}
-                    <div className="pod-stage-figure">
+                    <div
+                      className={
+                        stage.image
+                          ? "pod-stage-figure pod-stage-figure--photo"
+                          : "pod-stage-figure"
+                      }
+                    >
                       <span className="pod-stage-ordinal" aria-hidden="true">
                         {stage.step}
                       </span>
                       {/* The illustration now comes from the API, so an editor
                           can replace it. A plain <img> rather than next/image:
-                          these are SVGs, which the image optimiser refuses
-                          unless SVG handling is enabled site-wide, and that is
-                          not a trade worth making for four line drawings.
+                          the field accepts SVGs, which the image optimiser
+                          refuses unless SVG handling is enabled site-wide, and
+                          that is not a trade worth making for four figures.
                           With no image stored, the diagram the page shipped
                           with is still drawn inline — so a stage is never
-                          left blank. */}
+                          left blank.
+
+                          The dimensions are the admin panel's recommended
+                          upload (STAGE_ART_SPEC), which is the 16:9 the panel
+                          crops to. CSS sizes the picture either way; these
+                          only tell the browser what shape to reserve. */}
                       {stage.image ? (
                         <img
                           className="pod-stage-art"
                           src={stage.image}
                           alt={stage.imageAlt || ""}
-                          width={320}
-                          height={132}
+                          width={1200}
+                          height={675}
                           loading="lazy"
                           decoding="async"
                           {...(stage.imageAlt ? {} : { role: "presentation" })}
