@@ -58088,8 +58088,24 @@ html {
   padding: var(--space-5);
   background: var(--bg-page);
   border: 2px solid var(--text-strong);
-  border-radius: var(--radius-md);
-  box-shadow: 4px 4px 0 var(--text-strong);
+
+  /* Matched to the audience cards below: the 16px radius and the yellow
+     offset shadow, rather than the 10px radius and black shadow this band
+     used to carry. Two card treatments a screen apart read as two different
+     components; the sticker language on this page is the black rule with a
+     BRAND-coloured offset, and this band was the odd one out. */
+  border-radius: var(--radius-lg);
+  box-shadow: 6px 6px 0 var(--brand);
+
+  /* Clips the backdrop to the rounded rect.
+
+     Not cosmetic — this is what keeps the border crisp. The backdrop image is
+     blurred and scaled slightly past its own box (see .pod-service-card-bg
+     for why), and with nothing clipping it that blur spilled straight over
+     the 2px rule and left every card with a soft, washed-out edge. The offset
+     shadow is unaffected: box-shadow paints outside the border box and
+     overflow does not touch it. */
+  overflow: hidden;
   /* Contains the backdrop below. The card holds nothing else that is
      positioned, so this changes no layout — and the backdrop is out of flow,
      so it never becomes a flex item. `isolate` makes the card its own stacking
@@ -58206,7 +58222,7 @@ html {
 
 .pod-service-card:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--text-strong);
+  box-shadow: 8px 8px 0 var(--brand);
 }
 
 .pod-service-icon,
