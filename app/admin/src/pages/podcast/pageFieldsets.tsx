@@ -2,8 +2,10 @@ import type { ReactNode } from 'react';
 import type { UseFormRegister, UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
 import SlugField from '@/components/ui/SlugField';
 import ImageUpload from '@/components/ui/ImageUpload';
+import VideoSourceField from '@/components/ui/VideoSourceField';
 import {
-  HERO_POSTER_SPEC, OG_TYPE_OPTIONS, PORTRAIT_SPEC, PROBLEM_BG_SPEC,
+  HERO_POSTER_SPEC, NOT_FOR_VIDEO_SPEC, OG_TYPE_OPTIONS,
+  PORTRAIT_SPEC, PROBLEM_BG_SPEC,
   TWITTER_CARD_OPTIONS, previewUrl,
 } from './constants';
 import { PodcastIconSelect, SelectField, TextAreaField, TextField } from './FormFields';
@@ -371,11 +373,11 @@ export const PAGE_FIELD_GROUPS: PageFieldGroup[] = [
     key: 'notFor',
     fields: [
       'notForEyebrow', 'notForHeading', 'notForLead', 'notForItems',
-      'notForFootnote',
+      'notForFootnote', 'notForVideoUrl', 'notForVideoFile',
     ],
     title: 'When We’re the Wrong Call',
     hint: 'Saying plainly who this is not for raises conversion among the people it is for. It is load-bearing, not filler.',
-    Fields: ({ register }) => (
+    Fields: ({ register, watch, setValue }) => (
       <>
         <TextField register={register} name="notForEyebrow" label="Eyebrow" placeholder="e.g. Straight talk" />
         <TextField register={register} name="notForHeading" label="Heading" />
@@ -388,6 +390,21 @@ export const PAGE_FIELD_GROUPS: PageFieldGroup[] = [
           hint="One per line. Each renders with a cross."
         />
         <TextAreaField register={register} name="notForFootnote" label="Footnote" rows={2} />
+
+        {/* One video, chosen one way. The tabs clear each other, so a record
+            never carries both a link and an upload. Leave both empty and the
+            still stays a plain photograph with no play button. */}
+        <VideoSourceField
+          register={register}
+          watch={watch}
+          setValue={setValue}
+          urlName="notForVideoUrl"
+          fileName="notForVideoFile"
+          label="Video"
+          folder="podcast/not-for"
+          recommended={NOT_FOR_VIDEO_SPEC}
+          urlPlaceholder="e.g. https://youtu.be/… , a Vimeo link, or a direct .mp4"
+        />
       </>
     ),
   },

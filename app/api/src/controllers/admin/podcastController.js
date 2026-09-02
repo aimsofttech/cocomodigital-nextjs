@@ -80,10 +80,25 @@ const PAGE_LOOKUP = [{
  * page named "… Video Editing & Marketing Services" would be saved under a slug
  * no route asks for. Leaving slugSource off means `pickSlugSource` honours the
  * slug field, and only falls back to the name when it is left blank. */
-const PAGE_MEDIA_FIELDS = ['heroPoster', 'problemBgImage', 'founderPortrait'];
+/* Every field on the parent record that holds an S3 reference. crudFactory
+ * uses this to normalise a stored URL back to its key on write and to clean
+ * the object up on delete — a poster left off this list uploads fine and then
+ * leaks when the page is deleted. */
+const PAGE_MEDIA_FIELDS = [
+  'heroPoster',
+  'problemBgImage',
+  'founderPortrait',
+];
+
+/* Uploaded video on the parent record. Listed separately from the images
+ * because crudFactory takes the two lists apart for its own reasons, but both
+ * end up in the same `mediaFields` set — which is what normalises a stored URL
+ * back to its key on write and cleans the object up on delete. */
+const PAGE_VIDEO_FIELDS = ['notForVideoFile'];
 
 const page = createCrudController(PodcastPage, {
   imageFields: PAGE_MEDIA_FIELDS,
+  videoFields: PAGE_VIDEO_FIELDS,
   searchFields: ['name', 'slug', 'metaTitle', 'heroTitle'],
   defaultSort: { displayOrder: 1, createdAt: -1 },
 });

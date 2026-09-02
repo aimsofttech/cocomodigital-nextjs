@@ -39,6 +39,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     hoursBadgeIcon: "clock",
     media: {
       videoId: null,
+      videoSrc: null,
       poster: "/Images/podcast/podcast-recording-cocoma-studio.jpg",
       alt: "Two hosts recording a podcast episode on set at Cocoma Digital’s Mumbai studio, each on a boom-mounted microphone.",
       playLabel: "Play the pitch video",
@@ -123,6 +124,11 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     ],
     footnote:
       "Still reading and none of these fit? Then the audit will probably be worth your time.",
+    /* Empty on purpose. The shipped copy is what renders when the API is
+       unreachable, and this page had no video in this band before — inventing
+       a poster path here would draw a broken image on exactly the occasion
+       the page is already degraded. An editor sets it in the admin. */
+    media: { videoId: null, videoSrc: null, poster: "", alt: "", playLabel: "" },
   },
 
   founder: {

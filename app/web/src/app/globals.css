@@ -59025,6 +59025,81 @@ html {
   display: block;
 }
 
+/* The mute toggle on the self-starting video.
+
+   Flush into the bottom-right corner, matching its 12px inset from the right.
+   It sat higher at first to clear the player's own control bar — YouTube puts
+   its fullscreen button in this exact corner, and a native <video> puts its
+   own there too — but a toggle floating in the middle of the frame reads as
+   an overlay rather than a control, so the corner wins and the crowding is
+   the accepted cost. Our button is above the player either way (z-index), so
+   its own hit area is never the one that loses.
+
+   Both players auto-hide their controls during playback, so most of the time
+   this sits alone in the corner as intended.
+
+   The page's sticker language — brand yellow, hard black rule and offset
+   shadow — so it reads as part of the design rather than as a second browser
+   affordance. */
+.pod-media-mute {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+  background: var(--brand);
+  color: var(--brand-on);
+  border: 2px solid var(--text-strong);
+  border-radius: var(--radius-full, 999px);
+  box-shadow: 3px 3px 0 var(--text-strong);
+  cursor: pointer;
+
+  transition:
+    transform var(--motion-fast),
+    box-shadow var(--motion-fast);
+}
+
+.pod-media-mute svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+@media (hover: hover) {
+  .pod-media-mute:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--text-strong);
+  }
+}
+
+.pod-media-mute:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--text-strong);
+}
+
+.pod-media-mute:focus-visible {
+  outline: 3px solid var(--text-strong);
+  outline-offset: 3px;
+}
+
+/* Tighter gutters on a phone, and a slightly smaller target — still over the
+   44px floor once the border is counted. */
+@media (max-width: 640px) {
+  .pod-media-mute {
+    bottom: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
 .pod-media-play {
   position: absolute;
   inset: 0;
@@ -59313,6 +59388,68 @@ html {
 
 .pod-notfor {
   background: var(--bg-page);
+}
+
+/* Two columns: the disqualifiers, then the video.
+
+   An even split: half the row for the copy, half for the video.
+
+   Both tracks are `minmax(0, 1fr)`, not `1fr`. A bare `1fr` is really
+   `minmax(auto, 1fr)`, so a long unbroken string in a disqualifier — a URL, a
+   hyphenless compound — sets a minimum wider than its share and pushes the
+   two columns out of true. The explicit zero minimum is what actually keeps
+   them equal.
+
+   The video fills its track; there is no max-width. One was tried and
+   removed: it made the frame noticeably smaller than the track it sits in and
+   left a dead gap between the columns, which read as a layout fault rather
+   than a deliberate size. The track is the size.
+
+   `align-items: start` keeps the video at the top of its track instead of
+   stretching to the full height of the list beside it, which on a four-item
+   band would leave a tall letterboxed frame.
+
+   This grid is only ever applied when the band actually has media —
+   PodcastGrowthPage swaps back to .pod-shell--narrow otherwise — so the
+   single-column case is the original layout untouched, not a grid with one
+   empty track. */
+.pod-notfor-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-7, 2.5rem);
+  align-items: start;
+}
+
+/* minmax(0, …) above stops a long unbroken string in a disqualifier from
+   forcing the track wider than its share; this is the matching guard on the
+   item itself. */
+.pod-notfor-copy {
+  min-width: 0;
+}
+
+.pod-notfor-media {
+  min-width: 0;
+  /* The media column sticks while the list scrolls past it on a tall screen.
+     Bounded by the header offset the rest of this page already uses. */
+  position: sticky;
+  top: 5.5rem;
+}
+
+/* Below the desktop grid the two tracks stop earning their split: the video
+   gets too narrow to read and the prose measure drops under ~40 characters.
+   Stack, and put the video AFTER the copy — the argument still leads, and on
+   a phone a video above four blocks of text would push the actual content
+   below the fold. */
+@media (max-width: 900px) {
+  .pod-notfor-inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-6, 2rem);
+  }
+
+  .pod-notfor-media {
+    /* Nothing to stick to once the columns are stacked. */
+    position: static;
+  }
 }
 
 .pod-notfor-list {

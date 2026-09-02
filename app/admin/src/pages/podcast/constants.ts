@@ -143,6 +143,15 @@ export const CARD_BG_SPEC = {
   note: 'fills the card behind its text and is cropped to fit; the lower half sits under the copy, so keep detail toward the top',
 };
 
+export const NOT_FOR_VIDEO_SPEC = {
+  width: 1200,
+  height: 643,
+  ratio: '16:9 or 1.87:1',
+  formats: 'MP4 (H.264), WebM, MOV',
+  maxSizeMB: 25,
+  note: 'streamed straight from S3 to the visitor, so keep it short and well compressed',
+};
+
 export const STUDIO_SHOT_SPEC = {
   width: 1200,
   height: 675,

@@ -91,6 +91,26 @@ const podcastPageSchema = new mongoose.Schema({
   /** One disqualifier per row. */
   notForItems: { type: String, default: '' },
   notForFootnote: { type: String, default: '' },
+  /* Media for the band's right-hand column.
+   *
+   * The video can arrive two ways and an editor picks whichever suits:
+   *   notForVideoUrl  — anything pasted: a YouTube or Vimeo link, or a
+   *                     direct file URL on someone else's CDN.
+   *   notForVideoFile — an S3 key, for a file uploaded through the panel.
+   *
+   * The uploaded file wins when both are set; see the resolver in
+   * controllers/api/podcastController.js, which is the only place that
+   * decides what the website actually plays.
+   *
+   * There is NO separate still to manage. A poster is derived: a YouTube
+   * video already has a thumbnail, and a file plays its own first frame. One
+   * video, entered one way, is the whole of it.
+   *
+   * With no video at all the column is not drawn and the copy takes the full
+   * width — so the band degrades to exactly what it was before this column
+   * existed until someone fills it in. */
+  notForVideoUrl: { type: String, trim: true, default: '' },
+  notForVideoFile: { type: String, trim: true, default: '' },
 
   // ── Founder note ────────────────────────────────────────────────────────
   founderEyebrow: { type: String, trim: true, default: '' },

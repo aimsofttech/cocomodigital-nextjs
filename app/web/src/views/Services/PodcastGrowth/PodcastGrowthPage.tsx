@@ -4,6 +4,7 @@ import { FaArrowRight, FaCheck } from "react-icons/fa";
 import type { PodcastCta, PodcastPageData } from "@/src/lib/podcast";
 import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
+import PodcastAutoVideo from "./PodcastAutoVideo";
 import PodcastHeroMedia from "./PodcastHeroMedia";
 import { Icon, StageDiagram } from "./PodcastVisuals";
 import SectionEditLink from "@/src/components/common/SectionEditLink/SectionEditLink";
@@ -144,6 +145,13 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
   const heroCta = data.ctas.hero[0];
   const pricingCta = data.ctas.pricing[0];
   const founderCta = data.ctas.founder[0];
+
+  /* The wrong-call band splits into two columns only when there is something
+     to put in the second one — which is now simply "is there a video?". The
+     band has no still of its own to manage: a YouTube video brings its own
+     thumbnail and a file plays its own first frame, so the video is the whole
+     of the media and the only thing worth testing. */
+  const hasNotForMedia = Boolean(notFor.media?.videoId || notFor.media?.videoSrc);
 
   return (
     <div className="pod-page">
@@ -545,23 +553,46 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
       </section>
 
       {/* --------------------------------------- who this is not for */}
+      {/* Two columns: the disqualifiers on the left, a video on the right.
+          The media is optional and admin-controlled — with no poster set,
+          `hasNotForMedia` is false, the shell narrows back to its original
+          900px and the copy renders exactly as it did before this column
+          existed. So the band is never half-empty waiting for an asset. */}
       <section className="pod-notfor" aria-labelledby="pod-notfor-title">
         <EditSection pageId={data.id} section="notFor" label="the wrong-call band" />
-        <div className="pod-shell pod-shell--narrow">
-          {notFor.eyebrow && <p className="pod-eyebrow">{notFor.eyebrow}</p>}
-          <h2 id="pod-notfor-title" className="pod-section-title">
-            {notFor.heading}
-          </h2>
-          {notFor.lead && <p className="pod-section-lead">{notFor.lead}</p>}
-          <ul className="pod-notfor-list">
-            {notFor.items.map((i) => (
-              <li key={i.slice(0, 24)}>
-                <span className="pod-cross" aria-hidden="true">&times;</span>
-                <span>{i}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="pod-notfor-foot">{notFor.footnote}</p>
+        <div
+          className={
+            hasNotForMedia
+              ? "pod-shell pod-notfor-inner"
+              : "pod-shell pod-shell--narrow"
+          }
+        >
+          <div className="pod-notfor-copy">
+            {notFor.eyebrow && <p className="pod-eyebrow">{notFor.eyebrow}</p>}
+            <h2 id="pod-notfor-title" className="pod-section-title">
+              {notFor.heading}
+            </h2>
+            {notFor.lead && <p className="pod-section-lead">{notFor.lead}</p>}
+            <ul className="pod-notfor-list">
+              {notFor.items.map((i) => (
+                <li key={i.slice(0, 24)}>
+                  <span className="pod-cross" aria-hidden="true">&times;</span>
+                  <span>{i}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="pod-notfor-foot">{notFor.footnote}</p>
+          </div>
+
+          {hasNotForMedia && (
+            <div className="pod-notfor-media">
+              {/* Not the hero's click-to-play facade: this one starts itself
+                  once the band scrolls into view, muted, with a toggle for
+                  sound. See PodcastAutoVideo for why each of those three
+                  things is the way it is. */}
+              <PodcastAutoVideo media={notFor.media} />
+            </div>
+          )}
         </div>
       </section>
 

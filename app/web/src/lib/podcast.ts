@@ -83,8 +83,19 @@ export interface PodcastCta {
 }
 
 export interface PodcastHeroMediaData {
-  /** Null renders the poster as a plain photograph, with no play button. */
+  /**
+   * A YouTube id, played through the click-to-play iframe facade.
+   *
+   * Never set at the same time as `videoSrc` — the API resolves the editor's
+   * upload and URL into exactly one of the two. Both null renders the poster
+   * as a plain photograph, with no play button.
+   */
   videoId: string | null;
+  /**
+   * A direct file the browser can play itself: an upload the admin put on
+   * S3, or any non-YouTube URL an editor pasted (Vimeo, a CDN .mp4).
+   */
+  videoSrc: string | null;
   poster: string;
   alt: string;
   playLabel: string;
@@ -196,6 +207,10 @@ export interface PodcastPageData {
     lead: string;
     items: string[];
     footnote: string;
+    /* The band's right-hand column. Same shape as the hero's media so both
+       render through PodcastHeroMedia; with no poster the column is not
+       drawn at all and the copy takes the full width. */
+    media: PodcastHeroMediaData;
   };
   founder: {
     eyebrow: string;

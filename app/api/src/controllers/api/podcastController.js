@@ -37,6 +37,56 @@ const toLines = (value) =>
  * website's own /public folder and is passed through untouched. */
 const mediaUrl = (value) => buildS3Url(value || '');
 
+/* A YouTube id inside any of the shapes a link can be copied in — watch,
+ * embed, shorts, live, youtu.be, with or without -nocookie. Kept in step with
+ * app/web/src/lib/videoUrl.ts, which does the same job for react-player. */
+const YOUTUBE_ID = /(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+/**
+ * Decide what the website plays, from an uploaded file and/or a pasted URL.
+ *
+ * Returns { videoId, videoSrc, poster } with at most one of the first two
+ * set: `videoId` is a YouTube id the page renders through its lightweight
+ * click-to-play facade, `videoSrc` is a file the page hands to a <video>.
+ *
+ * ORDER: an uploaded file beats a pasted URL. Uploading is the more
+ * deliberate act — someone who has just put a file on S3 means to use it —
+ * and leaving a stale URL in the other box should not silently win. The admin
+ * form clears one when you switch to the other, so this is a safety net for
+ * records written before that existed or through the API directly.
+ *
+ * A YouTube link becomes an ID rather than a source, on purpose: the facade
+ * loads a still and mounts the iframe on click, where a <video> pointed at a
+ * YouTube watch page would simply fail. Everything else — Vimeo, a direct
+ * .mp4, a CDN link — passes through as a source.
+ *
+ * THE POSTER IS DERIVED, NEVER UPLOADED. Asking an editor for a still as well
+ * as a video is asking for the same thing twice, and the two drift: someone
+ * swaps the video and the old frame stays. YouTube already publishes a
+ * thumbnail per id, and a file plays its own first frame, so neither case
+ * needs one. `hqdefault` rather than `maxresdefault` because hqdefault exists
+ * for every video ever uploaded while maxresdefault 404s on anything that was
+ * never available in HD — a broken image is a worse trade than a softer one,
+ * and at this frame size the difference is barely visible.
+ */
+const youtubeStill = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+
+const resolveVideo = (uploadedKey, url) => {
+  if (uploadedKey) {
+    return { videoId: null, videoSrc: mediaUrl(uploadedKey), poster: '' };
+  }
+
+  const trimmed = String(url || '').trim();
+  if (!trimmed) return { videoId: null, videoSrc: null, poster: '' };
+
+  const match = trimmed.match(YOUTUBE_ID);
+  if (match) {
+    return { videoId: match[1], videoSrc: null, poster: youtubeStill(match[1]) };
+  }
+
+  return { videoId: null, videoSrc: trimmed, poster: '' };
+};
+
 /** Split a comma-separated field into a trimmed, non-empty list. */
 const toCsvList = (value) =>
   String(value ?? '')
@@ -100,6 +150,9 @@ const buildPage = (doc) => {
            stays a plain truthiness test, matching what it did when the id
            was a hand-edited constant. */
         videoId: doc.heroVideoId || null,
+        /* The hero is still YouTube-id only; the key is present so one type
+           describes both bands and the renderer needs no special case. */
+        videoSrc: null,
         poster: mediaUrl(doc.heroPoster),
         alt: doc.heroPosterAlt || '',
         playLabel: doc.heroPlayLabel || '',
@@ -158,6 +211,16 @@ const buildPage = (doc) => {
       lead: doc.notForLead || '',
       items: toLines(doc.notForItems),
       footnote: doc.notForFootnote || '',
+      /* Same shape the hero's media uses, so the page can hand it to the
+         very same component rather than growing a second player. */
+      media: {
+        ...resolveVideo(doc.notForVideoFile, doc.notForVideoUrl),
+        /* No alt and no play label. The still sits inside a button the
+           renderer names for itself, and one video entered one way is the
+           whole of what this band asks an editor for. */
+        alt: '',
+        playLabel: '',
+      },
     },
     founder: {
       eyebrow: doc.founderEyebrow || '',
