@@ -125,16 +125,22 @@ export const STAGE_ART_SPEC = {
   note: 'fills the whole stage panel and is cropped to fit, so keep the subject centred and leave room at the edges',
 };
 
-/* Artwork behind a service card. It sits under the card's own text at low
-   opacity, so what reads well here is a soft texture rather than a photograph
-   with a subject someone will try to look at. */
+/* Artwork behind a service card.
+ *
+ * It is a real backdrop now, not the near-invisible tint it used to be, so it
+ * wants enough pixels to stand being looked at — the card is ~305px wide on a
+ * desktop grid of four, and 900x600 covers that on a retina screen.
+ *
+ * It still sits under the card's own words behind a white scrim that is
+ * heaviest at the bottom, so a busy subject low in the frame fights the body
+ * copy and a calm one high in the frame reads best. */
 export const CARD_BG_SPEC = {
-  width: 640,
-  height: 420,
-  ratio: '~3:2',
-  formats: 'SVG, PNG, WebP, JPG',
+  width: 900,
+  height: 600,
+  ratio: '3:2',
+  formats: 'JPG, WebP, PNG, SVG',
   maxSizeMB: 1,
-  note: 'soft background texture; it sits behind the text at low opacity',
+  note: 'fills the card behind its text and is cropped to fit; the lower half sits under the copy, so keep detail toward the top',
 };
 
 export const STUDIO_SHOT_SPEC = {

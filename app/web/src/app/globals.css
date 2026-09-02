@@ -58251,10 +58251,13 @@ html {
 }
 
 /* Artwork behind a service card.
-   Kept faint on purpose: the card is text on a light surface with a 2px rule
-   and a hard shadow, and anything more assertive here costs the words their
-   contrast. Editors set it per card from the admin; a card with none renders
-   exactly as it always did. */
+   It used to sit at 0.09, which was right for the flat brand-yellow textures
+   the band shipped with and wrong for everything else: a photograph at that
+   strength is not a faint backdrop, it is an invisible one. The picture is now
+   drawn at full strength and the copy is protected by the scrim below instead
+   of by starving the image — one control for how much photograph you see,
+   rather than two that multiply. Editors set it per card from the admin; a
+   card with none renders exactly as it always did. */
 .pod-service-card-bg {
   position: absolute;
   inset: 0;
@@ -58262,23 +58265,66 @@ html {
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
-  /* Low enough that the card's own words stay the thing you read: brand yellow
-     on white at this strength registers as a tint, not as highlighter drawn
-     through the text. */
-  opacity: 0.09;
   /* Behind the card's content, by painting order rather than by touching the
      content at all. An earlier attempt lifted every sibling with
      `position: relative`, which also overrode the Edit pencil's slot and threw
      it out of its corner — the backdrop should not be reaching into the card's
-     other children to get itself out of the way. */
-  z-index: -1;
+     other children to get itself out of the way.
+
+     -2 rather than -1 to leave a layer free for the scrim below. Both stay
+     above the card's own white background: a negative z-index child paints
+     over its parent's background, and `isolation: isolate` on the card keeps
+     the pair from escaping to an outer stacking context. */
+  z-index: -2;
   pointer-events: none;
   user-select: none;
 }
 
+/* The scrim that buys the copy its contrast back — and the only thing now
+   standing between you and the photograph, so it is set to the lightest veil
+   the text can survive rather than to a comfortable one.
+
+   These three stops are a floor, not a preference. The card is near-black text
+   on a light surface, so a photograph behind it can only be as present as the
+   words allow: measured against a worst-case black region, #111 needs a 48.5%
+   white veil to clear 4.5:1 and #1f1f1f needs 52.5%. The stops sit just above
+   each, at the point in the card where that text actually appears —
+
+     0%    0.50  the icon and title zone           title  4.8:1
+     35%   0.55  where the body paragraph starts   body   4.9:1
+     100%  0.58  the tag rule at the foot          body   5.4:1
+
+   Lowering any of them further to show more of the picture fails AA. Going
+   meaningfully brighter than this needs the other direction instead: a dark
+   scrim with light text, which is what the problem band above already does. */
+.pod-service-card--art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.55) 35%,
+    rgba(255, 255, 255, 0.58) 100%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* --text-muted is 60% black, which survives a white card and not a
+   photograph. It is also what sets the floor above: the veil is calculated for
+   solid --text-body, and muted grey would need a veil ~15 points heavier to
+   reach the same threshold — which is to say, a visibly duller picture. The
+   body copy goes solid on a card with artwork; nothing else about it changes. */
+.pod-service-card--art .pod-service-body {
+  color: var(--text-body);
+}
+
 @media (prefers-reduced-transparency: reduce) {
   /* Someone who has asked for less visual noise gets the plain card. */
-  .pod-service-card-bg {
+  .pod-service-card-bg,
+  .pod-service-card--art::before {
     display: none;
   }
 }

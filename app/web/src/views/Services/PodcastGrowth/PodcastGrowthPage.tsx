@@ -371,7 +371,14 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
           {data.serviceCards.length > 0 && (
             <div className="pod-service-grid">
               {data.serviceCards.map((s) => (
-                <article key={s.title} className="pod-service-card">
+                <article
+                  key={s.title}
+                  className={
+                    s.image
+                      ? "pod-service-card pod-service-card--art"
+                      : "pod-service-card"
+                  }
+                >
                   {/* Backdrop, not an illustration. It sits under the card's
                       own words at low opacity and is hidden from assistive
                       tech unless someone gives it a description, because a
