@@ -58051,9 +58051,29 @@ html {
 }
 
 .pod-stage-detail {
-  font-size: var(--fs-small);
-  line-height: var(--leading-body);
-  color: var(--text-muted);
+  /* Smaller than --fs-small, and deliberately NOT just smaller. At 14px
+     this sat at 4.94:1 — a whisker over the 4.5 minimum — and shrinking
+     faint text is how body copy becomes unreadable. So the size drops to
+     13px and the ink darkens from 0.6 to 0.68 alpha, which takes it to
+     ~6.6:1. Less visual weight, easier to read.
+
+     It also stops competing with the capability bullets below it, which
+     are the same 14px: the paragraph had equal weight to the list while
+     being four times as long, which is why it dominated the card. Line
+     height goes up a little to keep the smaller size comfortable. */
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: rgba(17, 17, 17, 0.68);
+  /* On desktop this ran 101 characters a line, well past the 45-75 that
+     reads comfortably — the paragraph was set to the full stage column
+     while the bullets under it are short. Capping the measure also takes
+     another bite out of the visual weight Anil was pointing at.
+
+     48ch, not 68ch: the `ch` unit is the width of "0", which in this face
+     is 8.9px against a ~6px average character, so a ch value reads about
+     45% wider than the character count it looks like. Measured rather
+     than assumed — 48ch lands at ~72 characters. */
+  max-width: 48ch;
   margin: 0 0 var(--space-4);
 }
 
