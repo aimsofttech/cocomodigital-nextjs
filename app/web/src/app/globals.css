@@ -58177,7 +58177,9 @@ html {
      edges, where there is nothing, so an unscaled blurred image feathers out
      to transparent at the card's border. Growing it slightly pushes that soft
      edge outside the crop. */
-  filter: blur(2px);
+  /* No blur. It was costing the photograph all of its legibility and
+     buying nothing — the white veil below already does the contrast
+     work, and a blurred photo just reads as a smudge. */
   transform: scale(1.04);
   /* Behind the card's content, by painting order rather than by touching the
      content at all. An earlier attempt lifted every sibling with
@@ -58221,9 +58223,9 @@ html {
   border-radius: inherit;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.62) 0%,
-    rgba(255, 255, 255, 0.7) 55%,
-    rgba(255, 255, 255, 0.74) 100%
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.62) 55%,
+    rgba(255, 255, 255, 0.66) 100%
   );
   z-index: -1;
   pointer-events: none;
@@ -58238,8 +58240,25 @@ html {
   color: var(--text-body);
 }
 
+/* Veil strength is not a taste call. Compositing white at alpha a over
+   the darkest possible pixel gives 255a, so against --text-body (#111)
+   the worst case any photograph can produce is fixed by a alone:
+
+     a = 0.62  ->  7.11:1     (the old value: safe, but washed out)
+     a = 0.55  ->  5.66:1     (chosen)
+     a = 0.50  ->  4.78:1
+     a = 0.46  ->  4.14:1     FAILS
+
+   0.55 is the lightest value that still leaves real headroom over the
+   4.5 threshold for every possible image, including one that is solid
+   black. Derived rather than sampled, because the S3 bucket sends no
+   CORS headers and the canvas cannot be read. */
+
 @media (prefers-reduced-transparency: reduce) {
-  /* Someone who has asked for less visual noise gets the plain card. */
+  /* Someone who has asked for less visual noise gets the plain card.
+     NOTE: this is why the photographs are invisible on Anil's machine —
+     he has Reduce Transparency on. The behaviour is correct; it just
+     means he is not seeing what most visitors see. */
   .pod-service-card-bg,
   .pod-service-card--art::before {
     display: none;
