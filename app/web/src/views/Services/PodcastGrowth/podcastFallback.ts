@@ -33,7 +33,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
        — two Cocoma pages with the same h1 would compete for the same query. */
     title: "Podcast Video Editing & Marketing Services",
     sub: "One recording becomes a week of content — produced, packaged and published as one system.",
-    priceBadge: "Engagements start at $2,000/month",
+    priceBadge: "Engagements start at $2,500/month",
     priceBadgeIcon: "dollar",
     hoursBadge: "US, Canada & UK hours overlap",
     hoursBadgeIcon: "clock",
@@ -80,7 +80,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     eyebrow: "Straight answer on price",
     heading: "Priced like a product, not a project",
     prefix: "From",
-    floor: "$2,000",
+    floor: "$2,500",
     unit: "/month",
     lead: "You’re not buying editing hours. You’re buying a production line with a named producer on it, a documented process behind it, and an SLA you can build a publishing calendar around. That’s what it costs to run properly, and it’s why the number is on this page instead of behind a discovery call.",
     includedTitle: "What every engagement includes",
@@ -270,7 +270,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     title: "Podcast Video Editing & Marketing Services",
     description:
       "One recording becomes a multi-platform growth engine — episodes, clips, packaging, publishing and analytics, run as one system.",
-    badgeOne: "From $2,000/month",
+    badgeOne: "From $2,500/month",
     badgeTwo: "US · Canada · UK hours",
   },
 
@@ -711,7 +711,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     {
       question: "What do podcast editing and growth services cost?",
       answer:
-        "Engagements start at $2,000 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately. Below $2,000 a month a freelance editor will serve you better than a production system, and we’d rather say so than sell you something that doesn’t fit. The free audit comes back with the scope and the number together.",
+        "Engagements start at $2,500 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately. Below $2,500 a month a freelance editor will serve you better than a production system, and we’d rather say so than sell you something that doesn’t fit. The free audit comes back with the scope and the number together.",
     },
     {
       question: "Why is there a minimum at all?",

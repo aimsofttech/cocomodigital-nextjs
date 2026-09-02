@@ -149,7 +149,13 @@ export default function PodcastAutoVideo({
           className="pod-media-frame"
           src={videoSrc}
           poster={poster || undefined}
-          controls
+          /* Controls only when this will NOT autoplay. When it plays by
+             itself a chrome bar reads as "click me" on something already
+             running; when it cannot (reduced motion, or the browser
+             refusing autoplay) controls are the only way in, so removing
+             them outright would leave a dead frame. */
+          controls={reduced}
+          autoPlay={!reduced}
           muted={muted}
           loop
           playsInline

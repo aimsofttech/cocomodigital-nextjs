@@ -610,6 +610,14 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
       {/* -------------------------------------------- founder note */}
       <section className="pod-founder" aria-labelledby="pod-founder-title">
         <EditSection pageId={data.id} section="founder" label="the founder note" />
+        <div className="pod-shell">
+          {/* "Who you are actually dealing with" leads, then the face, then
+              the words. Anil's call: the portrait was arriving before the
+              line that frames it. */}
+          {founder.eyebrow && (
+            <p className="pod-eyebrow pod-founder-eyebrow">{founder.eyebrow}</p>
+          )}
+        </div>
         <div className="pod-shell pod-founder-inner">
           {founder.portrait && (
             <div className="pod-founder-portrait">
@@ -625,7 +633,6 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             </div>
           )}
           <div className="pod-founder-copy">
-            {founder.eyebrow && <p className="pod-eyebrow">{founder.eyebrow}</p>}
             <h2 id="pod-founder-title" className="pod-section-title">
               {founder.name}
             </h2>
@@ -698,7 +705,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                       width={1200}
                       height={675}
                       loading="lazy"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 46vw"
                       className="pod-studio-img"
                     />
                     <span className="pod-studio-caption">{shot.caption}</span>
@@ -707,19 +714,12 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
             </ul>
           )}
 
-          {data.scaleStats.length > 0 && (
-            <ul className="pod-scale">
-              {data.scaleStats.map((m) => (
-                <li key={m.label} className="pod-scale-item">
-                  <EditItem pageId={data.id} kind="scale" id={m.id} label={m.label} />
-                  <span className="pod-scale-value">{m.value}</span>
-                  <span className="pod-scale-label">{m.label}</span>
-                  <span className="pod-scale-sub">{m.description}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="pod-scale-note">{studio.scaleNote}</p>
+          {/* The 60 people / 60+ partner channels / $600K+ / 20+ languages
+              strip lived here, plus its footnote. Removed on Anil's call: the
+              credentials band near the top already carries the studio's scale,
+              and restating it this far down was the same argument twice.
+              `data.scaleStats` still arrives from the API and is simply not
+              rendered, so nothing needs deleting in the admin panel. */}
         </div>
       </section>
 
