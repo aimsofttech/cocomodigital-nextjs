@@ -152,6 +152,10 @@ export default function EditBar() {
     <div
       role="region"
       aria-label="Editor toolbar"
+      /* Styling stays inline; this class exists purely so the
+         back-to-top button can tell the corner is taken (see
+         `body:has(.editbar-root)` in globals.css). */
+      className="editbar-root"
       style={{
         position: "fixed",
         bottom: 18,

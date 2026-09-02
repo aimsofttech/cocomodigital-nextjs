@@ -59829,3 +59829,163 @@ html {
   }
 }
 
+
+/* ============================================================
+   <ScrollTopButton /> — back-to-top arrow, bottom-right.
+   ============================================================ */
+
+/* The site's sticker language: brand yellow, a 2px black rule and a hard
+   offset shadow — the same treatment as the header CTA, the editor pill and
+   the cards on the service pages. A circle rather than a pill because there
+   is no label to hold; 48px keeps it over the 44px touch-target floor.
+
+   `bottom` comes from a custom property so the corner can be shared. That
+   corner is not empty: FloatingCallChip has owned it on a dozen page types
+   since long before this button existed, and the editor toolbar sits there
+   too for anyone logged in. Rather than fight either for the spot, the
+   button reads a lane off the body and stacks above whatever is already
+   parked there — see the lane rules below. */
+.scroll-top {
+  position: fixed;
+  right: 24px;
+  bottom: var(--scroll-top-bottom, 24px);
+  /* Above page content and above the call chip's 30, below --z-modal (100)
+     so an open dialog is never arrowed through, and below --z-toast (150). */
+  z-index: 40;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+
+  background: var(--brand);
+  color: var(--brand-on);
+  border: 2px solid var(--text-strong);
+  border-radius: 50%;
+  box-shadow: 4px 4px 0 var(--text-strong);
+  cursor: pointer;
+
+  /* Hidden state. Not `display: none` — a display swap cannot be
+     transitioned, so the button would pop rather than fade. visibility is
+     what takes it out of the tab order and out of the way of clicks; the
+     delay below is what lets it stay visible long enough to fade out. */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(0.85);
+  transition:
+    opacity var(--motion-base),
+    transform var(--motion-base),
+    box-shadow var(--motion-tap),
+    bottom var(--motion-base),
+    /* 0s at the END of the fade, so hiding waits for the animation.
+       Entering overrides this with 0s and no delay. */
+    visibility 0s linear 250ms;
+}
+
+.scroll-top svg {
+  width: 22px;
+  height: 22px;
+}
+
+.scroll-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity var(--motion-base),
+    /* The overshoot the chip in the same corner uses, so the two read as
+       one family when they animate in together. */
+    transform var(--motion-pop),
+    box-shadow var(--motion-tap),
+    bottom var(--motion-base),
+    visibility 0s;
+}
+
+/* Press states only where a pointer can actually hover — on a touch screen
+   :hover sticks after the tap and the button would sit lifted. */
+@media (hover: hover) {
+  .scroll-top:hover {
+    transform: translate(-2px, -2px) scale(1);
+    box-shadow: 6px 6px 0 var(--text-strong);
+  }
+}
+
+.scroll-top:active {
+  transform: translate(1px, 1px) scale(1);
+  box-shadow: 2px 2px 0 var(--text-strong);
+}
+
+.scroll-top:focus-visible {
+  outline: 3px solid var(--text-strong);
+  outline-offset: 3px;
+}
+
+/* ---- lanes: what else is already in this corner ---- */
+
+/* The call chip is ~58px tall (40px avatar + padding + rules) and sits at
+   24px, so it occupies 24-82px. The button takes the next slot up. */
+body:has(.floating-call-chip) {
+  --scroll-top-bottom: 94px;
+}
+
+/* The Services page lifts the chip to 88px to clear its mobile cart bar;
+   the button lifts with it. `bottom` is in the transition list above, so
+   this glides as items enter and leave the cart instead of jumping. */
+body.services-cart-bar-visible:has(.floating-call-chip) {
+  --scroll-top-bottom: 158px;
+}
+
+/* The editor toolbar is ~100px tall at 18px, and carries z-index 99999 —
+   it would simply paint over the button rather than share the corner. Only
+   editors ever see this, which is exactly who will be looking. */
+body:has(.editbar-root) {
+  --scroll-top-bottom: 132px;
+}
+
+body:has(.editbar-root):has(.floating-call-chip) {
+  --scroll-top-bottom: 200px;
+}
+
+@media (max-width: 640px) {
+  .scroll-top {
+    right: 16px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .scroll-top svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Someone who has asked for less motion still gets the button, and still
+   gets told when it arrives — it just fades instead of springing, and the
+   scroll itself is a jump (handled in the component). */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-top,
+  .scroll-top.is-visible {
+    transform: none;
+    transition:
+      opacity var(--motion-fast),
+      visibility 0s linear 150ms;
+  }
+
+  .scroll-top.is-visible {
+    transition:
+      opacity var(--motion-fast),
+      visibility 0s;
+  }
+
+  @media (hover: hover) {
+    .scroll-top:hover {
+      transform: none;
+    }
+  }
+
+  .scroll-top:active {
+    transform: none;
+  }
+}
