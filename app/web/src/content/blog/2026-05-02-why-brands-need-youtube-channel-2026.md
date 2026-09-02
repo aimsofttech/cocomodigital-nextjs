@@ -4,7 +4,7 @@ slug: "why-brands-need-youtube-channel-2026"
 date: "2026-05-02"
 author: "Anil Mahato"
 image: "/Images/home/coming-soon.png"
-excerpt: "Most why-YouTube articles are written by people who don't run channels. This one's from a 60-person Mumbai studio that's shipped 35,000+ videos and generated $600K+ for partners on YouTube in 2025 alone."
+excerpt: "Most why-YouTube articles are written by people who don't run channels. This one's from a 60-person Mumbai studio that's shipped 50,000+ videos and generated $600K+ for partners on YouTube in 2025 alone."
 tags: ["seo", "youtube", "brand-strategy", "monetization"]
 published: true
 ---
@@ -210,5 +210,5 @@ Or read more about our work:
 
 - [How we monetize content IP →](/work/ip-monetization)
 - [How we run social end-to-end →](/work/smm-management)
-- [The 35,000+ videos we've shipped →](/work/content-created)
+- [The 50,000+ videos we've shipped →](/work/content-created)
 - [Podcast editing & growth services →](/podcast-video-editing-marketing-services)

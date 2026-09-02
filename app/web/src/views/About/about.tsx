@@ -488,7 +488,7 @@ const AboutUs = ({ brands: brandsProp }: AboutUsProps = {}) => {
             <header className="about-section-header">
               <p className="about-section-eyebrow">By the numbers</p>
               <h2 className="about-section-heading font-primary">
-                Six years. 60 people. 35,000+ videos.
+                Six years. 60 people. 50,000+ videos.
               </h2>
               <p className="about-section-sub">
                 The numbers compound the same way our channels do.

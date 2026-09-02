@@ -254,3 +254,116 @@ export function StageDiagram({ id }: { id: string }) {
   const D = STAGE_DIAGRAMS[id];
   return D ? <D /> : null;
 }
+
+/* ------------------------------------------------------------------
+   Problem section: one recording, two outcomes.
+
+   The lead paragraph above this already names the four failure modes
+   (episodes late, clips when someone has a spare afternoon, thumbnails
+   by whoever is nearest, back catalog untouched). Prose makes a reader
+   work to hold four parallel facts in their head; a side-by-side makes
+   the same point in one glance, which is the whole reason this exists.
+
+   Deliberately built from real elements rather than one flat SVG: the
+   labels stay selectable, translatable and readable by a screen reader,
+   and the layout can reflow to a single column on a phone. Only the
+   tile grids are decorative, and those are aria-hidden.
+
+   Every claim here is already made elsewhere on the page. The tiles are
+   a texture for "a week of output", not a literal count — the numbers
+   are carried by the labels. Note these strings are in code rather than
+   the API, because they are part of the illustration; if they need to
+   be editable, they want their own admin fields. */
+
+const USUAL = [
+  "Clips, if there is an afternoon spare",
+  "Thumbnail by whoever is nearest the file",
+  "Back catalog untouched",
+];
+
+const SYSTEM = [
+  "Clips cut the same week, every week",
+  "Thumbnail and title tested as a pair",
+  "Back catalog re-cut and re-packaged",
+];
+
+function Tiles({ filled, total }: { filled: number; total: number }) {
+  return (
+    <div className="pod-contrast-tiles" aria-hidden="true">
+      {Array.from({ length: total }, (_, i) => (
+        <span
+          key={i}
+          className={
+            i < filled ? "pod-contrast-tile is-on" : "pod-contrast-tile"
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+function MarkCross() {
+  return (
+    <svg viewBox="0 0 16 16" className="pod-contrast-mark" aria-hidden="true">
+      <path d="M4 4l8 8M12 4l-8 8" />
+    </svg>
+  );
+}
+
+function MarkCheck() {
+  return (
+    <svg viewBox="0 0 16 16" className="pod-contrast-mark" aria-hidden="true">
+      <path d="M3.5 8.5l3 3 6-7" />
+    </svg>
+  );
+}
+
+export function ProblemContrast() {
+  return (
+    <div className="pod-contrast">
+      <p className="pod-contrast-source">
+        <span className="pod-contrast-source-mark" aria-hidden="true">
+          <Icon name="mic" />
+        </span>
+        One 60-minute recording
+      </p>
+
+      <div className="pod-contrast-tracks">
+        <section className="pod-contrast-track" aria-label="Without a system">
+          <p className="pod-contrast-kicker">Without a system</p>
+          <Tiles filled={1} total={18} />
+          <p className="pod-contrast-out">
+            <strong>1 episode</strong>, often late
+          </p>
+          <ul className="pod-contrast-list">
+            {USUAL.map((t) => (
+              <li key={t}>
+                <MarkCross />
+                {t}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section
+          className="pod-contrast-track pod-contrast-track--system"
+          aria-label="Run as a system"
+        >
+          <p className="pod-contrast-kicker">Run as a system</p>
+          <Tiles filled={18} total={18} />
+          <p className="pod-contrast-out">
+            <strong>60+ pieces</strong>, every week
+          </p>
+          <ul className="pod-contrast-list">
+            {SYSTEM.map((t) => (
+              <li key={t}>
+                <MarkCheck />
+                {t}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}

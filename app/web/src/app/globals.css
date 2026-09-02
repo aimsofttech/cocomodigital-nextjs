@@ -59729,6 +59729,159 @@ html {
   backdrop-filter: blur(2px);
 }
 
+/* ------------------------- problem: one recording, two outcomes */
+
+/* Sits on the photographic backdrop, so it needs its own ground the way
+   .pod-problem-card does — small text over a photo is unreadable at the
+   wrong crop. */
+.pod-contrast {
+  margin: var(--space-6) 0 var(--space-7);
+  padding: var(--space-5);
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  backdrop-filter: blur(2px);
+}
+
+.pod-contrast-source {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-on-dark-soft);
+}
+
+.pod-contrast-source-mark {
+  display: inline-flex;
+  width: 1.7em;
+  height: 1.7em;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #000;
+}
+
+.pod-contrast-source-mark svg {
+  width: 1em;
+  height: 1em;
+}
+
+/* The fork between the two tracks IS the graphic, so the divider is
+   load-bearing rather than decoration. */
+.pod-contrast-tracks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+.pod-contrast-track {
+  padding-left: var(--space-5);
+  border-left: 2px solid rgba(255, 255, 255, 0.18);
+}
+
+.pod-contrast-track--system {
+  border-left-color: var(--brand);
+}
+
+.pod-contrast-kicker {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-on-dark-soft);
+}
+
+.pod-contrast-track--system .pod-contrast-kicker {
+  color: var(--brand);
+}
+
+/* A texture for "a week of output", not a literal count — the numbers
+   are carried by the labels. One lit tile against seventeen dark ones
+   lands the argument before a word is read, which is the job. */
+.pod-contrast-tiles {
+  display: grid;
+  /* Fixed tile size, not fractions. On a 1fr grid the tiles scaled with
+     the column and turned into 70px blocks that shouted louder than the
+     labels — this is meant to read as texture at a glance. */
+  grid-template-columns: repeat(9, 14px);
+  gap: 4px;
+  margin-bottom: var(--space-4);
+}
+
+.pod-contrast-tile {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pod-contrast-tile.is-on {
+  background: var(--brand);
+}
+
+.pod-contrast-out {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-body);
+  color: var(--text-on-dark);
+}
+
+.pod-contrast-out strong {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+}
+
+.pod-contrast-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.pod-contrast-list li {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  gap: var(--space-2);
+  align-items: start;
+  font-size: var(--fs-small);
+  line-height: var(--leading-snug);
+  color: var(--text-on-dark-soft);
+}
+
+.pod-contrast-mark {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15em;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pod-contrast-track--system .pod-contrast-mark {
+  stroke: var(--brand);
+}
+
+/* Held side by side as far down as it will go: the comparison IS the
+   graphic, and stacking turns it into two unrelated lists. */
+@media (max-width: 720px) {
+  .pod-contrast-tracks {
+    grid-template-columns: 1fr;
+  }
+
+  .pod-contrast {
+    padding: var(--space-4);
+  }
+}
+
 /* ------------------------------------- stage placeholder diagrams */
 
 /* Sits above the stage heading as a banded illustration. Reads as a

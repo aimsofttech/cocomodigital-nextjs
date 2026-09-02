@@ -56,7 +56,7 @@ const GROWTH_SERVICE_LINKS: { href: string; label: string }[] = [
 const FOOTER_COPY = {
   tagline: "India's leading YouTube & social media growth studio.",
   columns: {
-    services: "The creative engine behind 45M+ subscribers.",
+    services: "The creative engine behind 40M+ subscribers.",
     platforms: "Native strategy for every social channel.",
     work: "Seven years of receipts.",
     solutions: "Pick your shape — we've built it before.",

@@ -25,7 +25,7 @@ export const contentCreatedData = {
   meta: {
     title: "Content Created — Our Work · Cocoma Digital",
     description:
-      "How Cocoma turns briefs into shipped content at scale. 60-person Mumbai studio. 35,000+ videos delivered. Editors, designers, motion artists, scriptwriters — all in-house, all under one roof.",
+      "How Cocoma turns briefs into shipped content at scale. 60-person Mumbai studio. 50,000+ videos delivered. Editors, designers, motion artists, scriptwriters — all in-house, all under one roof.",
     path: "/work/content-created",
   },
 
@@ -51,7 +51,7 @@ export const contentCreatedData = {
       suffix: "",
     },
     subtitle:
-      "60-person Mumbai studio shipping 35,000+ videos for entertainment brands. Editors, designers, motion artists, scriptwriters, sound — all in-house, all on the same project. From script to delivered cut, every step under one roof.",
+      "60-person Mumbai studio shipping 50,000+ videos for entertainment brands. Editors, designers, motion artists, scriptwriters, sound — all in-house, all on the same project. From script to delivered cut, every step under one roof.",
     stats: [
       { value: "35K+", label: "videos delivered" },
       { value: "60", label: "specialists in-house" },
@@ -82,7 +82,7 @@ export const contentCreatedData = {
       {
         title: "You need creative volume, not one-offs",
         description:
-          "35,000+ videos shipped. Proof we can run an engine at sustained pace, not just hit a single great creative and miss the next ten.",
+          "50,000+ videos shipped. Proof we can run an engine at sustained pace, not just hit a single great creative and miss the next ten.",
       },
       {
         title: "You need pace AND polish",
@@ -131,7 +131,7 @@ export const contentCreatedData = {
   credentials: {
     heading: "Why brands send us their next brief",
     stats: [
-      { number: 35000, suffix: "+", label: "Videos Delivered" },
+      { number: 50000, suffix: "+", label: "Videos Delivered" },
       { number: 60, suffix: "", label: "Specialists In-House" },
       { number: 70, suffix: "%", label: "Recurring Partnerships" },
       { number: 7, suffix: "+", label: "Years Shipping Content" },

@@ -6,7 +6,7 @@ import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastAutoVideo from "./PodcastAutoVideo";
 import PodcastHeroMedia from "./PodcastHeroMedia";
-import { Icon, StageDiagram } from "./PodcastVisuals";
+import { Icon, ProblemContrast, StageDiagram } from "./PodcastVisuals";
 import SectionEditLink from "@/src/components/common/SectionEditLink/SectionEditLink";
 
 /**
@@ -265,6 +265,12 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
           {problem.lead && (
             <p className="pod-section-lead pod-problem-lead">{problem.lead}</p>
           )}
+
+          {/* Draws the argument the lead paragraph makes in prose. Sits
+              between the two because it explains the problem and frames
+              the numbers below as evidence for it. */}
+          <ProblemContrast />
+
           {data.problemStats.length > 0 && (
             <div className="pod-problem-grid">
               {data.problemStats.map((p) => (

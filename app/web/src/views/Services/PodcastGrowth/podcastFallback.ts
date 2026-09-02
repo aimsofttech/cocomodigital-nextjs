@@ -138,7 +138,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     portrait: "/Images/podcast/anil-mahato-founder-cocoma.jpg",
     portraitAlt: "Anil Mahato, founder of Cocoma Digital.",
     lines: [
-      "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio has produced 35,000+ videos and built 45M+ subscribers across the channels it runs.",
+      "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio has produced 50,000+ videos and built 40M+ subscribers across the channels it runs.",
       "Podcasts are where that same machinery is now most useful outside India, because a show isn’t an editing job, it’s an operation, and operations are the thing we have actually built.",
       "Your show won’t be run by me. It will be run by a producer whose name you’ll know, against a documented process, to an SLA you agreed. That’s deliberate: a studio that only works when the founder is in the room isn’t a studio, it’s a bottleneck.",
     ],
@@ -167,7 +167,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     title: "The capability, and what it isn’t",
     paragraphs: [
       "We don’t publish podcast case studies yet. Saying otherwise would be the easiest sentence on this page to write and the fastest one to get caught on.",
-      "What we can show you is the work the studio does publish, and we’ll be precise about how it transfers. The figures at the top of this page — 12B+ organic views, 35,000+ videos, 45M+ subscribers — are channel and catalog numbers built across seven years. They are not podcast metrics and we will not dress them up as podcast metrics. What carries across is the operating capability behind them: high-volume editing, packaging tested against click-through, multi-platform publishing, and localization across 20+ languages.",
+      "What we can show you is the work the studio does publish, and we’ll be precise about how it transfers. The figures at the top of this page — 12B+ organic views, 50,000+ videos, 40M+ subscribers — are channel and catalog numbers built across seven years. They are not podcast metrics and we will not dress them up as podcast metrics. What carries across is the operating capability behind them: high-volume editing, packaging tested against click-through, multi-platform publishing, and localization across 20+ languages.",
       "On a call we’ll walk you through that work and the exact process we’d run on your show.",
     ],
   },
@@ -278,8 +278,8 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   trustStats: [
     { value: "12B+", label: "Organic views driven", description: "" },
-    { value: "35,000+", label: "Videos produced", description: "" },
-    { value: "45M+", label: "Subscribers built", description: "" },
+    { value: "50,000+", label: "Videos produced", description: "" },
+    { value: "40M+", label: "Subscribers built", description: "" },
     { value: "7 yrs", label: "Studio operating", description: "" },
   ],
 
@@ -455,7 +455,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       icon: "network",
       step: "",
       title: "Networks & media companies",
-      body: "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest: the studio’s channel and catalog operations were built at exactly this scale — 35,000+ videos produced and 12B+ organic views driven.",
+      body: "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest: the studio’s channel and catalog operations were built at exactly this scale — 50,000+ videos produced and 12B+ organic views driven.",
       meta: "Multiple shows, shared production standard",
       points: [],
     },

@@ -45,7 +45,7 @@ const DEFAULT_HEADING = "Why teams keep coming back";
 const DEFAULT_STATS = [
   { number: 6, suffix: "", label: "Years in business" },
   { number: 60, suffix: "+", label: "In-house team" },
-  { number: 35000, suffix: "+", label: "Videos shipped" },
+  { number: 50000, suffix: "+", label: "Videos shipped" },
   { number: 1000, suffix: "+", label: "Every month" },
 ];
 

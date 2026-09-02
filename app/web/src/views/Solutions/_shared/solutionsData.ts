@@ -26,7 +26,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         pain: "Editors quit. Thumbnails are mid. Schedules slip.",
         pillar: "Creative",
         fix:
-          "A trained editing + design team that's already shipped 35,000+ videos for entertainment brands. No hiring, no quality drift.",
+          "A trained editing + design team that's already shipped 50,000+ videos for entertainment brands. No hiring, no quality drift.",
       },
       {
         pain:
@@ -257,7 +257,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
           "Show launches need 50+ creative assets shipped on a tight cycle. Internal teams burn out.",
         pillar: "Creative",
         fix:
-          "Cocoma's edit + design pods scale to your slate's launch calendar. 35,000+ assets shipped across 250+ titles to date.",
+          "Cocoma's edit + design pods scale to your slate's launch calendar. 50,000+ assets shipped across 250+ titles to date.",
       },
       {
         pain:
@@ -1940,7 +1940,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     headline: "Wake up to delivered work.",
     highlight: "delivered work",
     sub:
-      "Cocoma's India-based production team handles your overflow — edits, motion, thumbnails, design, social cuts — overnight in IST. White-label, retained team, 35,000+ assets shipped across entertainment, OTT and brand campaigns.",
+      "Cocoma's India-based production team handles your overflow — edits, motion, thumbnails, design, social cuts — overnight in IST. White-label, retained team, 50,000+ assets shipped across entertainment, OTT and brand campaigns.",
     primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
@@ -1954,7 +1954,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
           "Production capacity caps how much retainer work you can take. Hiring senior editors in NY / London is expensive and slow.",
         pillar: "Creative",
         fix:
-          "A fully-trained editing + motion team that's already shipped 35,000+ assets for entertainment, OTT and brand clients. Plug in instantly, scale your retainer book without the hire.",
+          "A fully-trained editing + motion team that's already shipped 50,000+ assets for entertainment, OTT and brand clients. Plug in instantly, scale your retainer book without the hire.",
       },
       {
         pain:
