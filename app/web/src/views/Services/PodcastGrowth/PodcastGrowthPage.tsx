@@ -198,6 +198,10 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
 
   return (
     <div className="pod-page">
+      {/* Yellow scroll rule under the header. Decorative and driven purely
+          by a scroll() timeline, so it is hidden from assistive tech and
+          costs no JavaScript. */}
+      <div className="pod-scrollbar" aria-hidden="true" />
       {/* ---------------------------------------------------- hero */}
       <section className="pod-hero" aria-labelledby="pod-hero-title">
         <EditSection pageId={data.id} section="hero" label="the hero" />

@@ -60138,6 +60138,78 @@ html {
   font-style: italic;
 }
 
+/* ============================ the yellow interaction layer ==========
+
+   Anil: "when someone touches or scrolls, there should be some kind of
+   yellow stuff." He is right, and it is worth more than any single
+   animation — it makes EVERY element on the page respond in the brand
+   colour, for almost no code, rather than making three of them dance.
+
+   Scoped to .pod-page rather than applied globally. Every one of these
+   would be worth promoting site-wide, but that is a decision about the
+   whole site and belongs in its own change. */
+
+/* 1. Selecting text. People select copy far more than anyone expects —
+      quoting it, sending it to a colleague, reading with the cursor. */
+.pod-page ::selection {
+  background: var(--brand);
+  color: #000;
+}
+
+/* 2. Touching anything. The default is a grey box on Android and nothing
+      on iOS; this makes a tap land in the brand colour. */
+.pod-page a,
+.pod-page button,
+.pod-page summary,
+.pod-page [role="button"] {
+  -webkit-tap-highlight-color: rgba(255, 240, 0, 0.35);
+}
+
+/* 3. Keyboard focus. Yellow on a dark ring so it reads on both the light
+      and the black bands — the browser default disappears entirely
+      against black. */
+.pod-page :focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* 4. Scrolling. A yellow rule under the fixed header that tracks how far
+      through the page you are. On a 13,000px page that is genuinely
+      useful, not decoration — it answers "how much more is there".
+      Pure CSS on a scroll() timeline: no JS, no listener, no jank. */
+.pod-scrollbar {
+  position: fixed;
+  top: 68px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--brand);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  z-index: 60;
+  pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .pod-scrollbar {
+    animation: pod-scrollbar linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes pod-scrollbar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Without scroll-timeline support the bar would sit permanently at zero
+   width, which is just an invisible element — but hide it explicitly so
+   nothing paints a stray 3px line. */
+@supports not (animation-timeline: scroll()) {
+  .pod-scrollbar { display: none; }
+}
+
 /* ---------------------------------- services: motion and stickiness */
 
 /* The photograph drifts as its card travels through the viewport. Driven
