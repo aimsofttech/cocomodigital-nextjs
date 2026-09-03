@@ -119,10 +119,30 @@ function Thumb({ asset }: { asset: CaspianAsset }) {
     if (el && el.complete && el.naturalWidth === 0) setFailed(true);
   }, []);
 
+  /* Video plays in place, with controls and metadata-only preload.
+   *
+   * No autoplay: a grid of forty tiles all deciding to play at once is
+   * both unusable and, on a phone plan, expensive. `preload="metadata"`
+   * fetches the header — enough for a duration and a first frame — and
+   * the rest only when someone presses play. S3 answers range requests
+   * (206), so scrubbing works without downloading the whole file. */
+  if (asset.kind === "video" && asset.url && !failed) {
+    return (
+      <video
+        className={styles.thumbImg}
+        src={asset.url}
+        controls
+        preload="metadata"
+        playsInline
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
   if (asset.kind === "video" || failed || !asset.url) {
     return (
       <div className={styles.thumbFallback}>
-        <span>{asset.kind === "video" ? "video" : "no preview"}</span>
+        <span>{asset.kind === "video" ? "video unavailable" : "no preview"}</span>
       </div>
     );
   }

@@ -29,11 +29,50 @@ if (!/(127\.0\.0\.1|localhost)/.test(URI)) {
 const FIXTURE = 'caspian-local-fixture';
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
 
-/* A stable fake object key, so nothing here can be mistaken for a real S3
- * object and no live URL is ever produced. */
+/* Real, already-public Cocoma objects, so the grid shows actual pictures
+ * instead of a wall of "no preview" — you cannot tell whether a media
+ * library works from placeholder tiles.
+ *
+ * READ-ONLY BORROWING. These are objects the live marketing site already
+ * serves; the fixture points at them and never writes, uploads, deletes
+ * or re-ACLs anything. The `key` stays under caspian/_fixture/ so nothing
+ * here can be mistaken for a row this system created, and every fixture
+ * is scoped to the FIXTURE folder so --reset removes it cleanly.
+ *
+ * That they load at all is defect D4 restated: an unlisted URL in this
+ * bucket is readable by anyone who has it, from anywhere, signed in or
+ * not. Convenient here, and the exact reason the caspian/ prefix has to
+ * go private before real uploading starts. */
+const REAL_IMAGES = [
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/author-image/1743532251_anil%20mahato.jpeg",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922799_revised.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922859_tata%20EV.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922872_imdb.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922897_resized.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923034_mini-tv.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923264_Vshow-Cards.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923629_t-series.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923833_Trailer-prak-Group.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923943_Progetto-Happiness.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773924313_Amazon-mx-player.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773925154_Ivy-Music.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773925687_Madfad-Media.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773926082_Unpolished.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1774096883_Langistan-resized.png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/1752158570_blanca%20thumbnail.jpeg",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-carousels/1736418369_e5a02a6ea286762390ef8566bac1e249.jpg",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361902_Rectangle%201253%20(1).png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361951_image%20(20).png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361985_Rectangle%201253%20(1).png",
+  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-pre-launch-activities/1762139981_Four%20More%20Shots%20Please%20Season%201%20Official%20Trailer.jpg",
+];
+const REAL_VIDEO = "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/podcast/not-for/1788442028445_67982_WhatsApp_Video_2026-09-03_at_6.48.12_PM.mp4";
+
+let pick = 0;
 const obj = (name, kind) => ({
   key: `caspian/_fixture/${name}`,
-  url: `http://localhost:5000/local-media/caspian/_fixture/${name}`,
+  url: kind === 'video' ? REAL_VIDEO : REAL_IMAGES[pick++ % REAL_IMAGES.length],
   originalName: name,
   checksum: sha(name),
   kind,
@@ -132,6 +171,14 @@ const run = async () => {
       job: ndaJob._id, rights: 'client-ip', consent: 'not-required', usable: false, sensitive: true,
       describeStatus: 'pending',
       review: { state: 'proposed', byName: '', at: null, note: '' }, setBy: { rights: 'human' },
+    },
+    {
+      _case: 'An ordinary video: streams in place, seekable, nothing to hide.',
+      ...obj('podcast-set-broll.mp4', 'video'),
+      ...described('B-roll from the podcast set — wide, lights up, no talent.',
+        ['b-roll', 'podcast', 'set'], ['shoot-floor', 'lighting', 'mic-audio']),
+      job: openJob._id, rights: 'own', consent: 'not-required', usable: true, sensitive: false,
+      review: approved, setBy: { rights: 'human', consent: 'human' },
     },
     {
       _case: 'Consent: minors. Legal exposure if this ever leaves the building.',
