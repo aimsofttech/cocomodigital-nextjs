@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const MediaAsset = require('../../models/MediaAsset');
 const MediaJob = require('../../models/MediaJob');
-const { buildS3Url, deleteFromS3 } = require('../../utils/s3Upload');
+const { buildS3Url } = require('../../utils/s3Upload');
+const { removeObject } = require('../../services/mediaStorage');
 const { enqueue, describeNow, budgetStatus } = require('../../services/mediaDescriber');
 const { ingestBatch } = require('../../services/mediaIngest');
 const {
@@ -204,7 +205,7 @@ const destroy = async (req, res) => {
   const others = await MediaAsset.countDocuments({
     checksum: doc.checksum, _id: { $ne: doc._id },
   });
-  if (!others && doc.key) await deleteFromS3(doc.key);
+  if (!others && doc.key) await removeObject(doc.key);
   await doc.deleteOne();
   res.json({ status: 'success', message: 'Deleted successfully' });
 };

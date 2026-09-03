@@ -159,7 +159,10 @@ const MODULES = [
      * session, so the admin router has no matching route today. */
     actions: CRUD,
     routePrefixes: ['/caspian'],
-    apiPrefixes: ['/media'],
+    /* Both, explicitly. underPrefix() matches on segment boundaries, so
+     * '/media-jobs' is NOT under '/media' — without this row the job
+     * router would be an unclaimed mount and denied for everyone. */
+    apiPrefixes: ['/media', '/media-jobs'],
   },
 ];
 
@@ -167,11 +170,9 @@ const MODULES = [
  * not modules in their own right:
  *   /auth     logging in and out, and reading your own session
  *   /profile  your own name, picture and password
- *   /uploads  the shared media uploader, used by every module's forms
- *   /media    the shared media library behind those forms
- * The uploader is additionally gated on the caller holding create or update
- * somewhere — see `authorizeAdmin` — so a read-only role cannot use it as a
- * way to push files into the bucket. */
+ * Note this list does NOT include the uploader — see UPLOAD_PREFIXES below,
+ * which is separately gated on the caller holding create or update somewhere,
+ * so a read-only role cannot use it to push files into the bucket. */
 const ALWAYS_ALLOWED_PREFIXES = ['/auth', '/profile'];
 /* The shared uploader behind every other module's forms. A user who may
  * create or update anything may put a file behind it, which is why this

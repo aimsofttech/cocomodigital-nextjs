@@ -1,5 +1,10 @@
 const MediaAsset = require('../models/MediaAsset');
-const { MEDIA_CONFIG, putBufferToS3 } = require('../utils/s3Upload');
+const { MEDIA_CONFIG } = require('../utils/s3Upload');
+/* Storage goes through the driver, not straight at S3. It is the same
+ * call either way; what changes is that a machine with no AWS credentials
+ * can still ingest, which is the only way the upload half of this system
+ * is buildable without writing test files into the production bucket. */
+const { putBuffer } = require('./mediaStorage');
 const { probe } = require('../utils/mediaProbe');
 const { checksumOf } = require('./mediaDescriber');
 const logger = require('../utils/logger');
@@ -205,7 +210,7 @@ const rowFromTwin = async (entry, twin, ctx) => {
 const rowFromUpload = async (entry, ctx) => {
   const { buffer, mimetype } = entry;
   const meta = await probe({ buffer, kind: entry.kind, originalName: entry.originalName });
-  const { key, url } = await putBufferToS3(buffer, {
+  const { key, url } = await putBuffer(buffer, {
     folder: MEDIA_CONFIG[entry.kind].folder,
     originalName: entry.originalName,
     contentType: mimetype,

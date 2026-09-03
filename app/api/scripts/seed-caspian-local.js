@@ -112,22 +112,22 @@ const run = async () => {
     people.push(await MediaPerson.findOneAndUpdate(
       { name },
       { name, note: FIXTURE },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
     ));
   }
 
   // ── jobs: one ordinary, one under NDA ────────────────────────────────────
   const openJob = await MediaJob.findOneAndUpdate(
     { name: '[fixture] Podcast set — in-house' },
-    { name: '[fixture] Podcast set — in-house', client: 'Cocoma', clientType: 'internal',
-      industry: 'media', genre: 'podcast', nda: false },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { name: '[fixture] Podcast set — in-house', client: 'Cocoma', clientType: 'in-house',
+      industry: 'podcasting', genre: 'none', nda: false },
+    { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
   );
   const ndaJob = await MediaJob.findOneAndUpdate(
     { name: '[fixture] Unreleased series — NDA' },
-    { name: '[fixture] Unreleased series — NDA', client: 'A streaming platform', clientType: 'ott',
-      industry: 'entertainment', genre: 'drama', nda: true },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { name: '[fixture] Unreleased series — NDA', client: 'A streaming platform', clientType: 'platform',
+      industry: 'ott', genre: 'drama', nda: true },
+    { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
   );
 
   const approved = { state: 'approved', byName: 'Anil', at: new Date(), note: '' };
@@ -228,7 +228,7 @@ const run = async () => {
     const res = await MediaAsset.findOneAndUpdate(
       { key: doc.key },
       { ...doc, folder: FIXTURE, note: _case },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
     );
     made += 1;
     console.log(`  ${res.key.padEnd(42)} ${_case.slice(0, 74)}`);

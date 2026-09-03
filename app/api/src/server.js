@@ -91,6 +91,7 @@ const adminRolesRoutes = require('./routes/admin/adminRoles');
 const adminProfileRoutes = require('./routes/admin/profile');
 const adminUploadRoutes = require('./routes/admin/uploads');
 const adminMediaAssetRoutes = require('./routes/admin/mediaAssets');
+const adminMediaJobRoutes = require('./routes/admin/mediaJobs');
 
 // Route imports - Public API
 const apiHomeRoutes = require('./routes/api/home');
@@ -142,6 +143,29 @@ const limiter = rateLimit({
     ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.ip),
 });
 app.use('/api/', limiter);
+
+/* The local media store, when that driver is active.
+ *
+ * express.static answers range requests, which is what makes a video in
+ * the library scrub rather than download whole. Mounted before auth on
+ * purpose: it is the same reachability the S3 bucket has today, and the
+ * driver refuses to run in production, so this serves a developer's own
+ * machine and nothing else.
+ *
+ * `initMediaStorage` throws rather than warns if that ever stops being
+ * true — a local store behind a load balancer 404s on every server but
+ * the one that received the upload, and that reads as data loss. */
+const { initMediaStorage, localRoot, LOCAL_ROUTE, driverName } = require('./services/mediaStorage');
+initMediaStorage();
+if (driverName() === 'local') {
+  app.use(LOCAL_ROUTE, express.static(localRoot(), {
+    fallthrough: false,
+    index: false,
+    // No directory listing, and nothing dotted.
+    dotfiles: 'deny',
+    maxAge: 0,
+  }));
+}
 
 // CORS
 const allowedOrigins = (process.env.CORS_ORIGINS ||
@@ -293,6 +317,11 @@ app.use(`${adminBase}/growth-service`, adminGrowthServiceRoutes);
 app.use(`${adminBase}/podcast`, adminPodcastRoutes);
 app.use(`${adminBase}/uploads`, adminUploadRoutes);
 app.use(`${adminBase}/media`, adminMediaAssetRoutes);
+/* Before nothing in particular, but note it is NOT under /media: that
+ * prefix is the asset router, and '/media-jobs' does not match it —
+ * underPrefix requires an exact segment boundary. The media module
+ * claims both prefixes explicitly. */
+app.use(`${adminBase}/media-jobs`, adminMediaJobRoutes);
 
 // Public API routes
 app.use('/api/home', apiHomeRoutes);

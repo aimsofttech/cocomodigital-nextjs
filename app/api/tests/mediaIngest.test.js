@@ -13,6 +13,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const modelPath = path.join(root, 'src/models/MediaAsset.js');
 const s3Path = path.join(root, 'src/utils/s3Upload.js');
+const storagePath = require.resolve('../src/services/mediaStorage');
 const loggerPath = path.join(root, 'src/utils/logger.js');
 const describerPath = path.join(root, 'src/services/mediaDescriber.js');
 
@@ -51,14 +52,21 @@ const MEDIA_CONFIG = {
   },
 };
 
-const FakeS3 = {
-  MEDIA_CONFIG,
-  async putBufferToS3(buffer, { folder, originalName }) {
-    if (failFor === originalName) throw new Error('bucket refused the put');
+const FakeS3 = { MEDIA_CONFIG };
+
+/* Ingest stores through the storage driver now, so that is the seam this
+ * test replaces. Same contract as the real one — { key, url, driver } —
+ * so a change to the driver's return shape breaks here rather than in
+ * production. */
+const FakeStorage = {
+  async putBuffer(buffer, { folder, originalName }) {
+    if (failFor === originalName) throw new Error('the store refused the write');
     const key = `${folder}/${puts.length}_${originalName}`;
     puts.push({ key, bytes: buffer.length });
-    return { key, url: `https://bucket.test/${key}` };
+    return { key, url: `https://bucket.test/${key}`, driver: 'test' };
   },
+  async removeObject() {},
+  urlFor: (key) => `https://bucket.test/${key}`,
 };
 
 const stub = (file, exports) => {
@@ -66,6 +74,7 @@ const stub = (file, exports) => {
 };
 stub(modelPath, FakeModel);
 stub(s3Path, FakeS3);
+stub(storagePath, FakeStorage);
 stub(loggerPath, { warn() {}, error() {}, info() {} });
 // Same hash the real describer uses. Stubbed only so this test does not
 // load the vision provider stack to reach a one-line sha256.
