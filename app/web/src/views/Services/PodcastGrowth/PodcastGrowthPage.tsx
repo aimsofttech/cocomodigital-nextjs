@@ -6,7 +6,7 @@ import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastAutoVideo from "./PodcastAutoVideo";
 import PodcastHeroMedia from "./PodcastHeroMedia";
-import { AudienceArt, Icon, ProblemContrast, StageDiagram } from "./PodcastVisuals";
+import { AudienceArt, Icon, OperationSketch, ProblemContrast, StageDiagram } from "./PodcastVisuals";
 import SectionEditLink from "@/src/components/common/SectionEditLink/SectionEditLink";
 
 /**
@@ -101,6 +101,10 @@ function EditSection({ pageId, section, label }: { pageId: string; section: stri
 /** The page's one button treatment, rendered from a CTA record. */
 function Cta({ cta }: { cta: PodcastCta }) {
   const className = `pod-cta pod-cta--${cta.variant}`;
+  /* Every CTA carries the arrow now, not just the primary one. Anil on
+     the proof band's links: "this doesn't look like I can go and look" —
+     a secondary button with no arrow reads as a label rather than a way
+     through. */
 
   /* Internal routes go through next/link for client-side navigation; in-page
      anchors and external links stay plain <a>, exactly as before. */
@@ -108,7 +112,7 @@ function Cta({ cta }: { cta: PodcastCta }) {
     return (
       <Link href={cta.href} className={className}>
         {cta.label}
-        {cta.variant === "primary" && <FaArrowRight aria-hidden="true" />}
+        <FaArrowRight aria-hidden="true" />
       </Link>
     );
   }
@@ -116,14 +120,48 @@ function Cta({ cta }: { cta: PodcastCta }) {
   return (
     <a href={cta.href} className={className}>
       {cta.label}
-      {cta.variant === "primary" && <FaArrowRight aria-hidden="true" />}
+      <FaArrowRight aria-hidden="true" />
     </a>
   );
 }
 
+/* Eight separate service cards asked a podcaster to hold eight things in
+   their head and work out which ones they needed. Anil's call: club them
+   so the page offers three obvious answers instead.
+
+   The grouping is by WHEN the work happens to a recording — make it,
+   multiply it, get it seen — because that is the order a show owner
+   already thinks in. Grouped by icon rather than by title so an editor
+   can rewrite any card's wording in the admin without silently dropping
+   it out of its group. Anything with an unrecognised icon falls into the
+   last group rather than disappearing. */
+const SERVICE_GROUPS: { key: string; title: string; blurb: string; icons: string[] }[] = [
+  {
+    key: "make",
+    title: "Make the episode",
+    blurb: "Everything between the raw recording and a finished show.",
+    icons: ["video", "audio"],
+  },
+  {
+    key: "multiply",
+    title: "Multiply it",
+    blurb: "One recording turned into a week of content.",
+    icons: ["clip", "thumb", "notes"],
+  },
+  {
+    key: "reach",
+    title: "Get it seen",
+    blurb: "Published, translated and measured — every week.",
+    icons: ["publish", "globe", "chart"],
+  },
+];
+
 /* Icons we have drawn an audience scene for. Kept beside the component
    so adding a scene is one edit in PodcastVisuals plus one entry here. */
 const AUDIENCE_HAS_ART = new Set(["mic", "brand", "network"]);
+
+/* Icons with a hand-drawn sketch in the operations band. */
+const OPS_HAS_SKETCH = new Set(["clock", "dollar", "lock"]);
 
 export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
   const {
@@ -386,8 +424,25 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
           </h2>
           {services.lead && <p className="pod-section-lead">{services.lead}</p>}
           {data.serviceCards.length > 0 && (
-            <div className="pod-service-grid pod-reveal-group">
-              {data.serviceCards.map((s, i) => (
+            <div className="pod-service-groups">
+              {SERVICE_GROUPS.map((g, gi) => {
+                const used = new Set(
+                  SERVICE_GROUPS.flatMap((x) => x.icons),
+                );
+                const cards = data.serviceCards.filter((c) =>
+                  gi === SERVICE_GROUPS.length - 1
+                    ? g.icons.includes(c.icon) || !used.has(c.icon)
+                    : g.icons.includes(c.icon),
+                );
+                if (!cards.length) return null;
+                return (
+                  <section key={g.key} className="pod-service-group">
+                    <header className="pod-service-group-head">
+                      <h3 className="pod-service-group-title">{g.title}</h3>
+                      <p className="pod-service-group-blurb">{g.blurb}</p>
+                    </header>
+                    <div className="pod-service-grid pod-reveal-group">
+                      {cards.map((s, i) => (
                 <article
                   key={s.title}
                   /* Staggered purely in CSS off an index custom property —
@@ -426,7 +481,11 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                     ))}
                   </ul>
                 </article>
-              ))}
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
           )}
         </div>
@@ -678,9 +737,15 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
               {data.operationCards.map((o) => (
                 <article key={o.title} className="pod-us-card">
                   <EditItem pageId={data.id} kind="operations" id={o.id} label={o.title} />
-                  <span className="pod-us-icon">
-                    <Icon name={o.icon} />
-                  </span>
+                  {OPS_HAS_SKETCH.has(o.icon) ? (
+                    <span className="pod-us-figure">
+                      <OperationSketch id={o.icon} />
+                    </span>
+                  ) : (
+                    <span className="pod-us-icon">
+                      <Icon name={o.icon} />
+                    </span>
+                  )}
                   <div>
                     <h3 className="pod-us-title">{o.title}</h3>
                     <p className="pod-us-body">{o.body}</p>
@@ -731,6 +796,16 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                 ))}
             </ul>
           )}
+
+          {/* Anil will add more studio photographs, and a fixed grid of six
+              gives them nowhere to go. This is the door: it points at the
+              gallery that already exists rather than growing this band. */}
+          <p className="pod-studio-more">
+            <a href="/gallery" className="pod-textlink">
+              See more of the studio
+              <FaArrowRight aria-hidden="true" />
+            </a>
+          </p>
 
           {/* The 60 people / 60+ partner channels / $600K+ / 20+ languages
               strip lived here, plus its footnote. Removed on Anil's call: the
@@ -813,7 +888,14 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
       {data.faqs.length > 0 && (
         <section className="pod-faq" aria-labelledby="pod-faq-title">
         <EditSection pageId={data.id} section="faq" label="the FAQ band" />
-          <div className="pod-shell pod-shell--narrow">
+          {/* Full-width shell, not --narrow. The 900px cap left this band
+              inset from every other one on a landscape iPad (900 against
+              1017 at 1024px, 900 against 1173 at 1180px) which read as a
+              mistake. The cap was there to protect the reading measure, so
+              that job moves to the answer text itself — the accordion now
+              lines up with the page, the prose still stops at a sensible
+              line length. */}
+          <div className="pod-shell">
             {faq.eyebrow && <p className="pod-eyebrow">{faq.eyebrow}</p>}
             <h2 id="pod-faq-title" className="pod-section-title">
               {faq.title}
@@ -832,6 +914,31 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
         <EditSection pageId={data.id} section="closing" label="the closing band" />
         <div className="pod-shell pod-final-inner">
           <div className="pod-final-copy">
+            {/* A face on the last thing they read before the form. Anil:
+                "it's people behind it, not just some website." The name
+                and role come from the founder band so there is one place
+                to change them, and the whole thing is skipped if no
+                portrait has been set. */}
+            {founder.portrait && (
+              <div className="pod-final-signoff">
+                <Image
+                  src={founder.portrait}
+                  alt={founder.portraitAlt}
+                  width={112}
+                  height={112}
+                  loading="lazy"
+                  sizes="72px"
+                  className="pod-final-face"
+                />
+                <p className="pod-final-signoff-copy">
+                  <span className="pod-final-signoff-name">{founder.name}</span>
+                  <span className="pod-final-signoff-role">{founder.role}</span>
+                  <span className="pod-final-signoff-note">
+                    Reads every audit request himself.
+                  </span>
+                </p>
+              </div>
+            )}
             <h2 id="pod-final-title" className="pod-section-title pod-final-title">
               {final.title}
             </h2>

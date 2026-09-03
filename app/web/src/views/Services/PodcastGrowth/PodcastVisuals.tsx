@@ -495,3 +495,75 @@ export function AudienceArt({ id }: { id: string }) {
   const Art = AUDIENCE_ART[id];
   return Art ? <Art /> : null;
 }
+
+/* ------------------------------------------------------------------
+   Operations sketches.
+
+   Anil asked for "carry-on style, just sketches" here — the three
+   practical answers an overseas buyer wants (when do we talk, what does
+   it cost, who owns it) were three icons and three paragraphs, and read
+   as fine print rather than reassurance.
+
+   Loose on purpose: hand-drawn stroke weights, no fills, nothing
+   measured. They are meant to look sketched on the back of something,
+   which is a friendlier register than the schematic diagrams elsewhere
+   and suits a section whose whole job is to feel straightforward.
+   Decorative, so aria-hidden — the card's words carry the meaning. */
+
+const sketchBox = {
+  viewBox: "0 0 120 72",
+  role: "presentation" as const,
+  "aria-hidden": true as const,
+  focusable: "false" as const,
+  className: "pod-us-sketch",
+};
+
+/* Two clocks, one arc: their day and ours, overlapping. */
+function ClockSketch() {
+  return (
+    <svg {...sketchBox}>
+      <circle cx="30" cy="34" r="17" />
+      <path d="M30 24v10l7 5" />
+      <circle cx="90" cy="34" r="17" />
+      <path d="M90 24v10l-7 5" />
+      <path d="M49 46q11 12 22 0" strokeDasharray="3 4" />
+      <path d="M56 62h8M66 62h8" opacity="0.5" />
+    </svg>
+  );
+}
+
+/* A note with a fixed figure on it — same number every month. */
+function DollarSketch() {
+  return (
+    <svg {...sketchBox}>
+      <rect x="18" y="20" width="84" height="38" rx="5" />
+      <circle cx="60" cy="39" r="12" />
+      <path d="M60 31v16M56 35h8M56 43h8" />
+      <path d="M28 28h6M86 50h6" opacity="0.6" />
+      <path d="M24 64h72" strokeDasharray="2 5" opacity="0.5" />
+    </svg>
+  );
+}
+
+/* A key handed over, not held back. */
+function KeySketch() {
+  return (
+    <svg {...sketchBox}>
+      <circle cx="34" cy="36" r="13" />
+      <circle cx="34" cy="36" r="4.5" />
+      <path d="M47 36h44M79 36v9M89 36v12" />
+      <path d="M20 58q20 8 40 0" strokeDasharray="3 4" opacity="0.6" />
+    </svg>
+  );
+}
+
+export const OPERATION_SKETCHES: Record<string, () => React.ReactElement> = {
+  clock: ClockSketch,
+  dollar: DollarSketch,
+  lock: KeySketch,
+};
+
+export function OperationSketch({ id }: { id: string }) {
+  const Art = OPERATION_SKETCHES[id];
+  return Art ? <Art /> : null;
+}

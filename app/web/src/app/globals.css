@@ -58804,6 +58804,9 @@ html {
 }
 
 .pod-faq-answer {
+  /* Carries the measure the shell used to. 62ch keeps an answer inside
+     the comfortable band even when the accordion is 1,173px wide. */
+  max-width: 62ch;
   margin: 0;
   font-size: var(--fs-small);
   line-height: var(--leading-body);
@@ -59808,7 +59811,7 @@ html {
    wrong crop. */
 .pod-contrast {
   margin: var(--space-6) 0 var(--space-7);
-  padding: var(--space-5);
+  padding: clamp(1.25rem, 2.4vw, 2.25rem);
   background: rgba(10, 10, 10, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 14px;
@@ -59923,14 +59926,18 @@ html {
   /* Fixed tile size, not fractions. On a 1fr grid the tiles scaled with
      the column and turned into 70px blocks that shouted louder than the
      labels — this is meant to read as texture at a glance. */
-  grid-template-columns: repeat(9, 14px);
-  gap: 4px;
+  /* Bigger, on Anil's call — this graphic carries the section's whole
+     argument, so it should not read as a footnote. Tiles scale with the
+     viewport instead of being fixed, which is what keeps them legible on
+     a phone as well as a wide screen. */
+  grid-template-columns: repeat(9, clamp(16px, 2.2vw, 26px));
+  gap: clamp(4px, 0.6vw, 7px);
   margin-bottom: var(--space-4);
 }
 
 .pod-contrast-tile {
-  width: 14px;
-  height: 14px;
+  width: clamp(16px, 2.2vw, 26px);
+  height: clamp(16px, 2.2vw, 26px);
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.1);
 }
@@ -59941,7 +59948,7 @@ html {
 
 .pod-contrast-out {
   margin: 0 0 var(--space-3);
-  font-size: var(--fs-body);
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
   color: var(--text-on-dark);
 }
 
@@ -59984,8 +59991,11 @@ html {
 }
 
 /* Held side by side as far down as it will go: the comparison IS the
-   graphic, and stacking turns it into two unrelated lists. */
-@media (max-width: 720px) {
+   graphic, and stacking turns it into two unrelated lists. Only below
+   620px does a column get too narrow for the labels to sit on one or two
+   lines, and at that point stacking is the readable choice rather than
+   the lazy one. */
+@media (max-width: 620px) {
   .pod-contrast-tracks {
     grid-template-columns: 1fr;
   }
@@ -59993,6 +60003,121 @@ html {
   .pod-contrast {
     padding: var(--space-4);
   }
+}
+
+/* ------------------------------------ operations sketches */
+
+/* Loose, hand-drawn, no fills — a friendlier register than the schematic
+   diagrams elsewhere, for a band whose whole job is to feel plain. */
+.pod-us-figure {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.pod-us-sketch {
+  display: block;
+  width: clamp(96px, 12vw, 130px);
+  height: auto;
+  fill: none;
+  stroke: var(--text-strong);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pod-us-card:nth-child(2) .pod-us-sketch { stroke: var(--text-strong); }
+
+/* ------------------------------------ studio: the way to more photos */
+
+.pod-studio-more {
+  margin: calc(var(--space-6) * -1) 0 var(--space-6);
+}
+
+.pod-textlink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-small);
+  color: var(--brand);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 180ms ease;
+}
+
+.pod-textlink:hover {
+  border-bottom-color: var(--brand);
+}
+
+/* ------------------------------------ closing: a face, not a form */
+
+.pod-final-signoff {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.pod-final-face {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid var(--brand);
+  flex: none;
+}
+
+.pod-final-signoff-copy {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.pod-final-signoff-name {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  color: var(--text-on-dark);
+}
+
+.pod-final-signoff-role,
+.pod-final-signoff-note {
+  font-size: var(--fs-small);
+  color: var(--text-on-dark-soft);
+}
+
+.pod-final-signoff-note {
+  font-style: italic;
+}
+
+/* ------------------------------- services, clubbed into three */
+
+.pod-service-groups {
+  display: grid;
+  gap: var(--space-7);
+}
+
+/* The group heading is the thing a reader scans; the cards under it are
+   the detail they only read if that group is the one they need. */
+.pod-service-group-head {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--text-strong);
+}
+
+.pod-service-group-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+  font-weight: var(--fw-bold);
+  line-height: var(--leading-snug);
+}
+
+.pod-service-group-blurb {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  max-width: 52ch;
 }
 
 /* ------------------------------------------- audience scenes */
