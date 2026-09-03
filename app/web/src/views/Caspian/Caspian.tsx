@@ -3,9 +3,17 @@
 /**
  * /caspian — the media library.
  *
- * Phase 1: find things, and decide on them. No uploading yet, because the
- * bytes are still world-readable (the S3 objects carry public-read) and
- * adding to a library you cannot yet protect is the wrong order.
+ * Find things, decide on them, and add to them.
+ *
+ * Adding is behind media:create and is genuinely live locally, because
+ * ingest now writes through a storage driver rather than straight at S3 —
+ * so a drop on a developer's machine lands on that machine's disk and can
+ * never reach the production bucket.
+ *
+ * That is still not the same as being safe to open to the studio. The S3
+ * objects carry public-read (defect D4), so anything uploaded against the
+ * real bucket is world-readable by URL. The caspian/ prefix has to go
+ * private before this tab is put in front of anyone.
  *
  * Signed in with the SAME token as /admin — key `cocoma_token`. Anyone
  * already in the panel is already in here, which is the whole reason this
@@ -32,6 +40,7 @@ import {
   type CaspianAsset,
   type SavedSearch,
 } from "@/src/lib/caspian";
+import Upload from "./Upload";
 import styles from "./Caspian.module.css";
 
 const RIGHTS_LABEL: Record<string, string> = {
@@ -177,9 +186,11 @@ export default function Caspian() {
   const [reviewState, setReviewState] = useState("");
   const [publishableOnly, setPublishableOnly] = useState(false);
   const [acting, setActing] = useState<string | null>(null);
+  const [tab, setTab] = useState<"library" | "upload">("library");
 
   const mayView = can("media", "view");
   const mayDecide = can("media", "update");
+  const mayAdd = can("media", "create");
 
   const load = useCallback(async () => {
     if (!mayView) return;
@@ -297,6 +308,34 @@ export default function Caspian() {
         </div>
       </header>
 
+      {mayAdd && (
+        <div className={styles.tabs} role="tablist">
+          {(["library", "upload"] as const).map((t) => (
+            <button
+              key={t}
+              role="tab"
+              aria-selected={tab === t}
+              className={`${styles.tab} ${tab === t ? styles.tabOn : ""}`}
+              onClick={() => setTab(t)}
+            >
+              {t === "library" ? "Library" : "Add files"}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {tab === "upload" && mayAdd && (
+        <Upload
+          onDone={() => {
+            /* Bump the same nonce the library reads, so a finished drop
+               shows up behind the tab rather than after a manual refresh. */
+            setNonce((n) => n + 1);
+          }}
+        />
+      )}
+
+      {tab === "library" && (
+      <>
       <div className={styles.controls}>
         <input
           className={styles.searchBox}
@@ -412,6 +451,8 @@ export default function Caspian() {
           );
         })}
       </div>
+      </>
+      )}
     </div>
   );
 }

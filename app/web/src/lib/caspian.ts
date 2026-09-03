@@ -131,3 +131,103 @@ export const rejectAsset = (id: string, reason: string) =>
     method: "POST",
     body: JSON.stringify({ reason }),
   });
+
+/* ── jobs ──────────────────────────────────────────────────────────────── */
+
+export interface CaspianJob {
+  id: string;
+  name: string;
+  client: string;
+  clientType: string;
+  industry: string;
+  genre: string;
+  nda: boolean;
+  assetCount: number;
+}
+
+export interface JobOptions {
+  clientType: string[];
+  industry: string[];
+  genre: string[];
+}
+
+export const listJobs = () =>
+  call<{ data: CaspianJob[] }>("/media-jobs").then((r) => r.data);
+
+export const jobOptions = () =>
+  call<{ data: JobOptions }>("/media-jobs/options").then((r) => r.data);
+
+export const createJob = (job: Partial<CaspianJob>) =>
+  call<{ data: CaspianJob }>("/media-jobs", {
+    method: "POST",
+    body: JSON.stringify(job),
+  }).then((r) => r.data);
+
+/* ── upload ────────────────────────────────────────────────────────────── */
+
+export interface UploadResult {
+  originalName: string;
+  status: "uploaded" | "duplicate" | "rejected" | "failed";
+  reason?: string;
+  kind?: string;
+  bytes?: number;
+}
+
+export interface UploadSummary {
+  received: number;
+  uploaded: number;
+  duplicate: number;
+  rejected: number;
+  failed: number;
+  bytesStored: number;
+  bytesSkipped: number;
+}
+
+/** The server's own ceiling. Batches are split to match it, not guessed. */
+export const MAX_PER_BATCH = 20;
+
+/**
+ * One batch. Multipart, so it cannot use `call` — that sets a JSON
+ * content type, and setting Content-Type by hand on a FormData request
+ * omits the multipart boundary the parser needs.
+ */
+export async function uploadBatch(
+  files: File[],
+  meta: { jobId: string; rights: string; consent: string; folder?: string },
+): Promise<{ summary: UploadSummary; results: UploadResult[] }> {
+  const token = readAdminToken();
+  const form = new FormData();
+  files.forEach((f) => form.append("files", f));
+  form.append("jobId", meta.jobId);
+  form.append("rights", meta.rights);
+  form.append("consent", meta.consent);
+  if (meta.folder) form.append("folder", meta.folder);
+
+  const res = await fetch(`${ADMIN_API_BASE}/media/upload`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+
+  let body: { message?: string; data?: { summary: UploadSummary; results: UploadResult[] } } = {};
+  try {
+    body = await res.json();
+  } catch {
+    /* 413 from the batch-size cap arrives as an HTML error page from the
+       proxy, not JSON. Fall through to the status message below. */
+  }
+
+  /* 201 with rejections in it is a success with notes, not a failure —
+     the server says so deliberately, so that a client does not re-upload
+     the nineteen files that worked. Only an all-refused batch is 400. */
+  if (!res.ok && !body.data) {
+    throw new CaspianError(
+      res.status,
+      body.message
+        || (res.status === 413
+          ? "That batch is too large. Try fewer files at once."
+          : `Upload failed (${res.status}).`),
+    );
+  }
+  return body.data as { summary: UploadSummary; results: UploadResult[] };
+}

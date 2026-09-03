@@ -261,3 +261,162 @@
     transition: none !important;
   }
 }
+
+/* ── upload ────────────────────────────────────────────────────────────── */
+.uploadPanel { display: flex; flex-direction: column; gap: 18px; padding: 18px 0 8px; }
+
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  padding: 34px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-align: center;
+  background: var(--panel);
+}
+.drop:hover, .drop:focus-visible { border-color: var(--brand); outline: none; }
+.dropOn { border-color: var(--brand); background: #1f1c11; }
+.drop strong { font-size: 1.02rem; }
+
+.queue {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.queue strong { color: var(--ink); }
+
+/* The three questions sit side by side and in view with the files. Behind
+   a modal they get dismissed; beside the drop zone they get answered. */
+.askRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.ask {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0;
+  min-width: 0;
+}
+.askTitle {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+}
+.req {
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ground);
+  background: var(--brand);
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-weight: 700;
+}
+.askWhy { margin: 0 0 10px; font-size: 0.79rem; color: var(--muted); line-height: 1.48; }
+
+.opts { display: flex; flex-direction: column; gap: 5px; }
+.opt {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 9px;
+  align-items: baseline;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.opt:hover { background: #221f17; }
+.optOn { border-color: var(--brand); background: #221f17; }
+.opt input { accent-color: var(--brand); margin: 0; grid-row: span 2; }
+.optLabel { font-size: 0.87rem; }
+.optHint { grid-column: 2; font-size: 0.74rem; color: var(--muted); }
+
+.ndaWarn {
+  margin: 10px 0 0;
+  font-size: 0.79rem;
+  line-height: 1.5;
+  color: var(--ground);
+  background: var(--warn);
+  border-radius: 8px;
+  padding: 8px 11px;
+}
+
+.newJob {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sendRow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.sendRow .searchBox { flex: 1 1 240px; }
+
+.results {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.resultsHead { margin: 0 0 10px; font-size: 0.9rem; font-weight: 600; }
+.resultList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.resultRow {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 220px) 1fr;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 0.82rem;
+  padding: 4px 0;
+  border-top: 1px solid var(--line);
+}
+.resultRow:first-child { border-top: 0; }
+.rTag {
+  font-size: 0.63rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 2px 7px;
+  text-align: center;
+}
+.rUploaded { color: var(--ok); }
+.rDuplicate { color: var(--muted); }
+.rRejected { color: var(--warn); }
+.rFailed { color: var(--bad); }
+.rName { overflow-wrap: anywhere; }
+.rWhy { color: var(--muted); line-height: 1.45; }
+
+/* Tabs */
+.tabs { display: flex; gap: 6px; padding: 14px 0 0; }
+.tab {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  padding: 7px 15px;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+.tab:hover { color: var(--ink); border-color: var(--muted); }
+.tabOn { background: var(--brand); color: #12100b; border-color: var(--brand); font-weight: 600; }
+
+@media (max-width: 620px) {
+  .resultRow { grid-template-columns: 84px 1fr; }
+  .rWhy { grid-column: 2; }
+}

@@ -5,6 +5,23 @@ const { MEDIA_CONFIG } = require('../utils/s3Upload');
  * can still ingest, which is the only way the upload half of this system
  * is buildable without writing test files into the production bucket. */
 const { putBuffer } = require('./mediaStorage');
+
+/* Caspian writes under its own prefix, not the shared `uploads/` one.
+ *
+ * MEDIA_CONFIG's folders are where every other module's forms put files,
+ * and ingest used them too — so a library asset and a marketing-site
+ * image ended up interleaved inside uploads/images/. That is what makes
+ * defect D4 expensive: you cannot write a prefix-scoped bucket policy
+ * that turns the library private without also turning the live site's
+ * images private, because there is no prefix that separates them.
+ *
+ * Splitting them costs nothing today, at a few hundred assets, and grows
+ * more expensive with every upload. Size limits and accepted extensions
+ * still come from MEDIA_CONFIG — only the destination changes. */
+const CASPIAN_FOLDER = {
+  image: process.env.MEDIA_LIBRARY_IMAGE_FOLDER || 'caspian/images',
+  video: process.env.MEDIA_LIBRARY_VIDEO_FOLDER || 'caspian/videos',
+};
 const { probe } = require('../utils/mediaProbe');
 const { checksumOf } = require('./mediaDescriber');
 const logger = require('../utils/logger');
@@ -211,7 +228,7 @@ const rowFromUpload = async (entry, ctx) => {
   const { buffer, mimetype } = entry;
   const meta = await probe({ buffer, kind: entry.kind, originalName: entry.originalName });
   const { key, url } = await putBuffer(buffer, {
-    folder: MEDIA_CONFIG[entry.kind].folder,
+    folder: CASPIAN_FOLDER[entry.kind],
     originalName: entry.originalName,
     contentType: mimetype,
   });

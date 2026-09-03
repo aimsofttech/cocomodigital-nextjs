@@ -158,6 +158,19 @@ app.use('/api/', limiter);
 const { initMediaStorage, localRoot, LOCAL_ROUTE, driverName } = require('./services/mediaStorage');
 initMediaStorage();
 if (driverName() === 'local') {
+  /* helmet() sets Cross-Origin-Resource-Policy: same-origin on everything,
+   * which the browser enforces on <img> and <video> even though curl never
+   * sees it. The library runs on :3000 and this store answers on :5000, so
+   * without relaxing CORP here every tile fails with
+   * ERR_BLOCKED_BY_RESPONSE.NotSameOrigin while the file itself is fine.
+   *
+   * Relaxed on this prefix ONLY, and only under the local driver — these
+   * are a developer's own test files on their own machine. Nothing else
+   * the API serves loses helmet's default. */
+  app.use(LOCAL_ROUTE, (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  });
   app.use(LOCAL_ROUTE, express.static(localRoot(), {
     fallthrough: false,
     index: false,
