@@ -567,3 +567,77 @@ export function OperationSketch({ id }: { id: string }) {
   const Art = OPERATION_SKETCHES[id];
   return Art ? <Art /> : null;
 }
+
+/* ------------------------------------------------------------------
+   Service group sketches.
+
+   One per group, in the same loose hand as the operations sketches.
+   Each draws its group's idea rather than decorating it: a waveform
+   being cleaned up, one frame fanning into many, a signal being found.
+
+   They draw themselves in as you scroll to them — stroke-dashoffset
+   animated on a view() timeline, so no JS and no library. That is the
+   gentlest kind of motion available: it resolves into a still picture
+   and then stops, rather than looping for attention. Off entirely under
+   prefers-reduced-motion, where they simply appear drawn. */
+
+const groupBox = {
+  viewBox: "0 0 132 56",
+  role: "presentation" as const,
+  "aria-hidden": true as const,
+  focusable: "false" as const,
+  className: "pod-group-sketch",
+};
+
+/* Rough in, clean out. */
+function CraftSketch() {
+  return (
+    <svg {...groupBox}>
+      <path d="M6 28c3-14 5 14 8 2s5 12 8-6 5 16 8-2" />
+      <path d="M42 28h12" strokeDasharray="3 4" />
+      <path d="M60 28c6-9 10 9 16 0s10 9 16 0 10 9 16 0" />
+      <path d="M118 20v16" />
+      <path d="M126 24v8" />
+    </svg>
+  );
+}
+
+/* One frame becomes many. */
+function MultiplySketch() {
+  return (
+    <svg {...groupBox}>
+      <rect x="6" y="16" width="30" height="24" rx="3" />
+      <path d="M40 28h12" strokeDasharray="3 4" />
+      <rect x="58" y="6" width="24" height="16" rx="2.5" />
+      <rect x="58" y="34" width="24" height="16" rx="2.5" />
+      <rect x="92" y="6" width="24" height="16" rx="2.5" />
+      <rect x="92" y="34" width="24" height="16" rx="2.5" />
+      <path d="M124 14v6M124 36v6" opacity="0.6" />
+    </svg>
+  );
+}
+
+/* Looked for, and found. */
+function FindableSketch() {
+  return (
+    <svg {...groupBox}>
+      <circle cx="26" cy="26" r="15" />
+      <path d="M37 37l10 10" />
+      <path d="M58 40l12-10 10 6 14-18 12-6" />
+      <circle cx="70" cy="30" r="2.6" />
+      <circle cx="94" cy="18" r="2.6" />
+      <path d="M56 48h64" strokeDasharray="3 5" opacity="0.5" />
+    </svg>
+  );
+}
+
+export const GROUP_SKETCHES: Record<string, () => React.ReactElement> = {
+  good: CraftSketch,
+  more: MultiplySketch,
+  found: FindableSketch,
+};
+
+export function GroupSketch({ id }: { id: string }) {
+  const Art = GROUP_SKETCHES[id];
+  return Art ? <Art /> : null;
+}

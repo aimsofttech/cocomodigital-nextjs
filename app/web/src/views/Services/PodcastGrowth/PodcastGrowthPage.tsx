@@ -6,7 +6,7 @@ import PodcastAuditForm from "./PodcastAuditForm";
 import PodcastFaq from "./PodcastFaq";
 import PodcastAutoVideo from "./PodcastAutoVideo";
 import PodcastHeroMedia from "./PodcastHeroMedia";
-import { AudienceArt, Icon, OperationSketch, ProblemContrast, StageDiagram } from "./PodcastVisuals";
+import { AudienceArt, GroupSketch, Icon, OperationSketch, ProblemContrast, StageDiagram } from "./PodcastVisuals";
 import SectionEditLink from "@/src/components/common/SectionEditLink/SectionEditLink";
 
 /**
@@ -137,24 +137,25 @@ function Cta({ cta }: { cta: PodcastCta }) {
    last group rather than disappearing. */
 const SERVICE_GROUPS: { key: string; title: string; blurb: string; icons: string[] }[] = [
   {
-    key: "make",
-    title: "Make the episode",
-    blurb: "Everything between the raw recording and a finished show.",
-    icons: ["video", "audio"],
+    key: "good",
+    title: "Make it good",
+    blurb: "The craft that decides whether anyone stays.",
+    icons: ["video", "audio", "thumb"],
   },
   {
-    key: "multiply",
-    title: "Multiply it",
-    blurb: "One recording turned into a week of content.",
-    icons: ["clip", "thumb", "notes"],
+    key: "more",
+    title: "Make more of it",
+    blurb: "One recording, many pieces and many markets.",
+    icons: ["clip", "globe"],
   },
   {
-    key: "reach",
-    title: "Get it seen",
-    blurb: "Published, translated and measured — every week.",
-    icons: ["publish", "globe", "chart"],
+    key: "found",
+    title: "Make it findable",
+    blurb: "Published, searchable and measured every week.",
+    icons: ["notes", "publish", "chart"],
   },
 ];
+
 
 /* Icons we have drawn an audience scene for. Kept beside the component
    so adding a scene is one edit in PodcastVisuals plus one entry here. */
@@ -438,8 +439,11 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                 return (
                   <section key={g.key} className="pod-service-group">
                     <header className="pod-service-group-head">
-                      <h3 className="pod-service-group-title">{g.title}</h3>
-                      <p className="pod-service-group-blurb">{g.blurb}</p>
+                      <div className="pod-service-group-words">
+                        <h3 className="pod-service-group-title">{g.title}</h3>
+                        <p className="pod-service-group-blurb">{g.blurb}</p>
+                      </div>
+                      <GroupSketch id={g.key} />
                     </header>
                     <div className="pod-service-grid pod-reveal-group">
                       {cards.map((s, i) => (
