@@ -177,6 +177,7 @@ const rowFromTwin = async (entry, twin, ctx) => {
     ...inheritFrom(twin),
     ...ctx.governance,
     job: ctx.job,
+    nda: ctx.nda,
     folder: ctx.folder,
     userId: ctx.userId,
     setBy: ctx.setBy,
@@ -223,6 +224,7 @@ const rowFromUpload = async (entry, ctx) => {
     duration: meta.duration,
     ...ctx.governance,
     job: ctx.job,
+    nda: ctx.nda,
     folder: ctx.folder,
     userId: ctx.userId,
     setBy: ctx.setBy,
@@ -235,6 +237,8 @@ const rowFromUpload = async (entry, ctx) => {
  *
  * `files`      multer memory-storage files
  * `job`        MediaJob id every file inherits, or null
+ * `nda`        the job's NDA flag, copied onto every asset so no later
+ *              read has to join to MediaJob to discover it
  * `folder`     free-text grouping for the whole drop
  * `governance` { rights, consent } a person set for the whole drop
  * `dedupe`     'row'  (default) a duplicate still gets its own row, so the
@@ -248,13 +252,14 @@ const rowFromUpload = async (entry, ctx) => {
 const ingestBatch = async ({
   files = [],
   job = null,
+  nda = false,
   folder = '',
   governance = {},
   setBy = {},
   userId = null,
   dedupe = 'row',
 } = {}) => {
-  const ctx = { job, folder, governance: defined(governance), setBy, userId };
+  const ctx = { job, folder, nda: Boolean(nda), governance: defined(governance), setBy, userId };
 
   // 1. Vet everything first. A rejection here is final and cheap, and it
   //    never touches the files around it.

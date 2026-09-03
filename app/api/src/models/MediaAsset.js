@@ -176,6 +176,20 @@ const mediaAssetSchema = new mongoose.Schema({
     index: true,
   },
   sensitive: { type: Boolean, default: false, index: true },
+  /* Copied from the job at ingest, not read through it.
+   *
+   * NDA is a property of the engagement, so it belongs on MediaJob and it
+   * lives there. But every read that filters across jobs — the listing,
+   * the review queue, publishable(), the person pages — would need a join
+   * to see it, and mediaSearches said so in a comment while nothing
+   * actually did it. One un-joined query is a leak, and there is no way
+   * to make forgetting the join loud.
+   *
+   * So the flag is denormalised here, where a plain filter reaches it and
+   * a new query gets the protection by default rather than by diligence.
+   * The cost is that changing a job's NDA status has to fan out to its
+   * assets; that is a rare, deliberate act and a cheap updateMany. */
+  nda: { type: Boolean, default: false, index: true },
   usable: { type: Boolean, default: false }, // fit for public marketing use
   reviewed: { type: Number, enum: [0, 1], default: 0 }, // a human confirmed it
 

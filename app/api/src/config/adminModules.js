@@ -145,6 +145,22 @@ const MODULES = [
     apiPrefixes: ['/roles'],
     superAdminOnly: true,
   },
+  {
+    key: 'media',
+    label: 'Media Library',
+    /* Caspian. This row has to exist before '/media' can leave
+     * UPLOAD_PREFIXES below: moduleForApiPath() returns null for an
+     * unclaimed mount and the guard then denies everything, so removing
+     * the prefix without registering the module would take the library
+     * offline rather than secure it. The two changes are one change.
+     *
+     * `routePrefixes` points at /caspian in app/web, not at the admin
+     * SPA — the library's screens live on the public app behind the same
+     * session, so the admin router has no matching route today. */
+    actions: CRUD,
+    routePrefixes: ['/caspian'],
+    apiPrefixes: ['/media'],
+  },
 ];
 
 /* Mounts every signed-in admin may reach whatever their role, because they are
@@ -157,7 +173,17 @@ const MODULES = [
  * somewhere — see `authorizeAdmin` — so a read-only role cannot use it as a
  * way to push files into the bucket. */
 const ALWAYS_ALLOWED_PREFIXES = ['/auth', '/profile'];
-const UPLOAD_PREFIXES = ['/uploads', '/media'];
+/* The shared uploader behind every other module's forms. A user who may
+ * create or update anything may put a file behind it, which is why this
+ * prefix short-circuits the module matrix in adminAccess.
+ *
+ * '/media' used to sit here too, and that was the whole of defect D1:
+ * the media library is not an upload widget, it is a module with its own
+ * governance, and inheriting the widget's bypass meant anyone holding
+ * create-or-update on ANY module could approve, reject, delete and read
+ * NDA material. It is now the 'media' module above and is graded like
+ * every other mount. */
+const UPLOAD_PREFIXES = ['/uploads'];
 
 const MODULE_KEYS = MODULES.map((m) => m.key);
 const MODULE_BY_KEY = new Map(MODULES.map((m) => [m.key, m]));
@@ -207,11 +233,33 @@ const moduleForRoutePath = (path) => {
  * The CSV routes are checked before the plain verbs because they are a POST
  * and a GET that mean something more specific than "create" and "view".
  */
+/* Media routes where the HTTP verb is the wrong signal.
+ *
+ * Grading by verb alone makes POST mean 'create' everywhere, which in the
+ * media library collapses two different rights into one: uploading a file
+ * and deciding whether that file may be used. Anyone allowed to add to the
+ * library would be allowed to approve their own additions, and an approval
+ * queue whose uploader is also its approver is not a queue.
+ *
+ * So the verdict routes grade as 'update' — the right to change what an
+ * asset means, not to add another one. Re-running the describer is an
+ * update too: it overwrites stored description fields and costs money.
+ *
+ * Scoped to /media deliberately. Every other module keeps plain verb
+ * grading, which is correct for CRUD screens and is what the other
+ * fourteen modules were built against. */
+const MEDIA_ACTION_OVERRIDES = [
+  { test: /^\/media\/(bulk-approve|describe-queue)$/, action: 'update' },
+  { test: /^\/media\/[^/]+\/(approve|reject|describe)$/, action: 'update' },
+];
+
 const actionForRequest = (method, path) => {
   const verb = String(method || '').toUpperCase();
   if (/\/export\/csv$/.test(path)) return 'export';
   if (/\/import\/csv$/.test(path)) return 'import';
   if (/\/bulk-upload(\/|$)/.test(path)) return 'import';
+  const override = MEDIA_ACTION_OVERRIDES.find((o) => o.test.test(path));
+  if (override) return override.action;
   switch (verb) {
     case 'GET':
     case 'HEAD':

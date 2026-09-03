@@ -12,7 +12,6 @@ const logger = require('../../utils/logger');
  * Dishan Puzari" is the first thing somebody tries. */
 const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
 
-
 /**
  * GET /admin/media
  *
@@ -76,10 +75,31 @@ const index = async (req, res) => {
   });
 };
 
+/**
+ * GET /admin/media/:id
+ *
+ * Obeys the same filter as the listing, and returns the same shape.
+ *
+ * It did neither. It fetched by id alone and returned the raw Mongoose
+ * document, which made it the one hole through which a rejected,
+ * sensitive or NDA asset could be read in full — checksum, setBy,
+ * describeMeta.costUsd, review.note and all — by anyone who could guess
+ * or copy an id. A detail view that can see more than the list it was
+ * reached from is a detail view nobody meant to build.
+ *
+ * Not-visible and not-there deliberately answer the same 404: telling a
+ * caller that an id exists but is withheld is itself a disclosure.
+ */
 const show = async (req, res) => {
-  const doc = await MediaAsset.findById(req.params.id);
+  if (!OBJECT_ID_RE.test(String(req.params.id))) {
+    return res.status(404).json({ status: 'error', message: 'Not found' });
+  }
+  const doc = await MediaAsset.findOne({
+    ...buildGovernanceFilter(req.query),
+    _id: req.params.id,
+  });
   if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
-  res.json({ status: 'success', data: doc });
+  res.json({ status: 'success', data: toPublic(doc) });
 };
 
 /**
@@ -347,6 +367,25 @@ const buildGovernanceFilter = (query = {}) => {
     filter.sensitive = false;
   }
 
+  /* NDA is excluded from every read that spans jobs.
+   *
+   * mediaSearches states this contract in a comment and nothing enforced
+   * it, which was defect D3: an unreleased client still sat in the default
+   * listing. The rule here is deliberately not an opt-in flag any caller
+   * can set — it is scoped to intent. Browsing the library is a read
+   * across jobs, so NDA is out. Asking for one named job (`?job=<id>`) is
+   * a read the caller has already had to identify, so NDA is in.
+   *
+   * `$ne: true` rather than `false` because rows written before this field
+   * existed have no value at all, and `nda: false` would not match them —
+   * it would hide the entire pre-existing library instead of the NDA part
+   * of it. */
+  if (query.job) {
+    filter.job = query.job;
+  } else {
+    filter.nda = { $ne: true };
+  }
+
   /* publishable is a single door with one definition, and it lives in
    * lib/mediaSearches so the API, the saved searches and the tests cannot
    * drift apart. Spreading it here rather than restating its conditions
@@ -463,6 +502,7 @@ const upload = async (req, res) => {
   const { summary, results } = await ingestBatch({
     files,
     job: job ? job._id : null,
+    nda: job ? Boolean(job.nda) : false,
     folder: String(req.body.folder || '').trim().slice(0, 120),
     governance,
     setBy,

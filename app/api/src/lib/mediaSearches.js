@@ -122,12 +122,21 @@ const SAVED_SEARCHES = {
  *   sensitive     the describe pass caught a child in an office candid
  *                 that no filename rule would have.
  *   usable        fit for marketing, which is narrower than "ours".
+ *   nda           the engagement was confidential, whatever the frame shows.
  *
- * NDA is the fifth and lives on the job; callers joining to a job must
- * add it, because it cannot be expressed in a filter on this collection
- * alone. Anything querying across jobs has to exclude nda: true itself.
+ * NDA used to be the condition this docblock told callers to add for
+ * themselves, on the grounds that it lived on MediaJob and could not be
+ * expressed here. No caller ever did, and the advice was the defect: a
+ * rule that has to be remembered at every call site is a rule that holds
+ * until the first person who has not read this comment. The flag is now
+ * copied onto the asset at ingest, so it is a plain condition like the
+ * other four and this function can carry it.
  *
- * This function is the single definition. Do not hand-roll the same four
+ * `$ne: true` and not `false`: rows written before the field existed have
+ * no value at all, and an equality test would exclude the entire
+ * pre-existing library rather than the confidential part of it.
+ *
+ * This function is the single definition. Do not hand-roll the same five
  * conditions at a call site — that is how one of them gets forgotten.
  */
 const publishable = () => ({
@@ -135,6 +144,7 @@ const publishable = () => ({
   rights: 'own',
   sensitive: false,
   usable: true,
+  nda: { $ne: true },
 });
 
 /**

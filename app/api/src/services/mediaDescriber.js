@@ -155,6 +155,30 @@ const callProvider = async (assets) =>
 
 /** Describe a single asset now (admin "re-describe this one" button). */
 const describeNow = async (asset) => {
+  /* Confidential material never leaves the building to be captioned.
+   *
+   * Describing means POSTing the actual bytes to Anthropic, OpenAI or
+   * Google. For most of this library that is unremarkable. For an asset
+   * belonging to an NDA engagement it is a disclosure to a third party,
+   * made by a background job, with no person in the loop and nothing in
+   * the response that would reveal it had happened.
+   *
+   * Checked before the checksum reuse below, deliberately: reuse copies a
+   * description that some earlier call already paid a provider to produce,
+   * so allowing it here would launder exactly the leak this prevents when
+   * an NDA frame is byte-identical to one that was described openly.
+   *
+   * These rows stay `pending` rather than `failed`. Nothing is wrong with
+   * them — they are waiting for a human to caption them, which is the
+   * correct handling for confidential work and shows up in the queue as
+   * work rather than as an error. */
+  if (asset.nda) {
+    return {
+      id: asset._id,
+      skipped: true,
+      reason: 'asset belongs to an NDA job — describe it by hand, do not send it to a provider',
+    };
+  }
   if (await reuseByChecksum(asset)) {
     return { id: asset._id, reused: true, costUsd: 0 };
   }
@@ -267,10 +291,19 @@ const enqueue = async (limit = 20) => {
 
   const summary = { considered: 0, reused: 0, described: 0, skipped: 0, failed: 0, costUsd: 0 };
 
+  /* NDA assets are excluded from selection, not just refused later.
+   *
+   * describeNow() turns them away, but this loop calls reuseByChecksum()
+   * directly a few lines down, before describeNow is ever reached — so a
+   * confidential frame that happens to be byte-identical to one described
+   * openly would quietly inherit that description. Keeping them out of
+   * `pending` closes both paths at once, and stops the queue picking up
+   * the same rows on every run only to reject them. */
   const pending = await MediaAsset.find({
     describeStatus: { $in: ['pending', 'failed'] },
     describeAttempts: { $lt: CONFIG.maxAttempts },
     reviewed: 0,
+    nda: { $ne: true },
   }).sort({ createdAt: 1 }).limit(limit);
 
   summary.considered = pending.length;
