@@ -293,6 +293,10 @@ function Tiles({ filled, total }: { filled: number; total: number }) {
       {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
+          /* Index drives the stagger: each lit tile gets its own slice of
+             the scroll range, so they fill in sequence rather than all at
+             once. See .pod-contrast-tile.is-on in globals.css. */
+          style={{ "--i": i } as React.CSSProperties}
           className={
             i < filled ? "pod-contrast-tile is-on" : "pod-contrast-tile"
           }

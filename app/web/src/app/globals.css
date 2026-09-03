@@ -60138,6 +60138,108 @@ html {
   font-style: italic;
 }
 
+/* ==================== scroll-driven: the two that carry meaning =====
+
+   1. THE CONTRAST TILES FILL AS YOU ARRIVE.
+
+   This graphic IS one-against-eighteen, so the most useful thing motion
+   can do here is perform that, not decorate it. Each lit tile takes its
+   own 2% slice of the scroll range via its --i index, so the system side
+   fills left to right while the other side sits at its single tile.
+
+   steps(1) rather than a fade: a tile is either on or it is not, and
+   eighteen simultaneous cross-fades would read as mush. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .pod-contrast-tile.is-on {
+      background: rgba(255, 255, 255, 0.1);
+      animation: pod-tile-on steps(1) both;
+      animation-timeline: view();
+      animation-range: entry calc(18% + var(--i, 0) * 2%)
+        entry calc(20% + var(--i, 0) * 2%);
+    }
+  }
+}
+
+@keyframes pod-tile-on {
+  to {
+    background: var(--brand);
+  }
+}
+
+/* 2. A RAIL DOWN THE FOUR STAGES.
+
+   The page says Align, Engineer, Amplify and Optimize run in order, then
+   presents them as four cards that look like a menu. A rule that fills as
+   you pass each one shows the sequence the words claim. */
+.pod-stage-list {
+  position: relative;
+}
+
+@supports (animation-timeline: view()) {
+  @media (min-width: 861px) and (prefers-reduced-motion: no-preference) {
+    .pod-stage-list::before {
+      content: "";
+      position: absolute;
+      left: -1.25rem;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      border-radius: 3px;
+      background: var(--brand);
+      transform: scaleY(0);
+      transform-origin: 50% 0;
+      animation: pod-rail linear both;
+      animation-timeline: view();
+      animation-range: entry 90% exit 10%;
+    }
+  }
+}
+
+@keyframes pod-rail {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* ==================== consistency: three that were sitting still =====
+
+   The service-group sketches draw themselves in, and the service photos
+   drift. These three did neither, which read as unfinished rather than
+   restrained — a page should look like one hand made it. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Audience scenes and operations sketches draw in, same as the
+       service-group sketches. 420 clears the longest path in either set. */
+    .pod-audience-art > *,
+    .pod-us-sketch > * {
+      stroke-dasharray: 420;
+      animation: pod-draw-long linear both;
+      animation-timeline: view();
+      animation-range: entry 15% entry 85%;
+    }
+
+    /* Studio photographs drift like the service card photographs. */
+    .pod-studio-img {
+      animation: pod-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+
+@keyframes pod-draw-long {
+  from {
+    stroke-dashoffset: 420;
+    opacity: 0.15;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
 /* ============================ the yellow interaction layer ==========
 
    Anil: "when someone touches or scrolls, there should be some kind of
