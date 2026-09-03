@@ -7,6 +7,12 @@ const { ingestBatch } = require('../../services/mediaIngest');
 const { publishable, pendingReview, REVIEW_STATES } = require('../../lib/mediaSearches');
 const logger = require('../../utils/logger');
 
+/* A 24-character hex id. Checked before anything reaches Mongo, because an
+ * unparseable id raises a CastError that surfaces as a 500, and "?personId=
+ * Dishan Puzari" is the first thing somebody tries. */
+const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
+
+
 /**
  * GET /admin/media
  *
@@ -177,7 +183,115 @@ const destroy = async (req, res) => {
  * controller; this file is the union, assembled by hand because none of
  * the three was a superset of the others and whichever landed last would
  * have left the routes file calling handlers that did not exist.
+ *
+ * The helpers below are part of that union. They were referenced by the
+ * merged handlers but their declarations lived in files that did not
+ * survive the merge, so `index`, `approve` and `bulk-approve` all threw
+ * ReferenceError on any call. Caught by running the API rather than by
+ * reading it — nothing here is covered by the four media test files,
+ * which stub the controller out entirely.
  * ------------------------------------------------------------------ */
+
+/* The largest bulk approval accepted in one request. Not a database
+ * limit — a human one. Past this, "I have read every one of these"
+ * stops being true, and an approval that nobody read is worth nothing. */
+const MAX_BULK_APPROVE = 100;
+
+/* The five fields a reviewer puts their name to: the governance fields a
+ * model may propose but only a person may decide. Confirming one is what
+ * stamps setBy to 'human', which is what stops a later describe run
+ * overruling the person who was actually in the room. */
+const CONFIRMABLE_FIELDS = ['rights', 'consent', 'sensitive', 'usable', 'people'];
+
+/* What a reviewer may correct while approving. Wider than the PATCH list
+ * in `update` by exactly `consent` and `people`: fixing governance at the
+ * moment of approval is the point of the review step, whereas PATCH is a
+ * metadata edit and has no business changing consent on its own. The two
+ * lists differ deliberately — do not merge them. */
+const CORRECTABLE_FIELDS = ['caption', 'altText', 'tags', 'category',
+  'rights', 'consent', 'usable', 'sensitive', 'people', 'folder', 'status'];
+
+const pickEditable = (body = {}) => {
+  const patch = {};
+  CORRECTABLE_FIELDS.forEach((f) => {
+    if (Object.prototype.hasOwnProperty.call(body, f)) patch[f] = body[f];
+  });
+  if (Array.isArray(patch.tags)) {
+    patch.tags = patch.tags.map((t) => String(t).trim().toLowerCase()).filter(Boolean);
+  }
+  return patch;
+};
+
+/* What a field will hold once the patch lands. Approval judges the row as
+ * it will be, not as it was: a reviewer who fixes `rights` and approves in
+ * one request means both, and testing the stored value would reject the
+ * correction they just made. */
+const valueAfter = (doc, patch, field) => (
+  Object.prototype.hasOwnProperty.call(patch, field) ? patch[field] : doc[field]
+);
+
+/* Why this row cannot be approved yet, in words the reviewer can act on.
+ * An empty array means nothing stands in the way.
+ *
+ * These are refusals, not warnings. Approval is the gate publishable()
+ * trusts, so anything it cannot answer for must not pass — an approved
+ * row with unknown rights is worse than an unapproved one, because the
+ * unapproved row is still honest about not knowing. */
+const approvalBlockers = (after = {}) => {
+  const out = [];
+  if (!after.rights || after.rights === 'unknown') {
+    out.push('rights are still unknown — record who owns this first');
+  }
+  if (!after.consent || after.consent === 'unknown') {
+    out.push('consent is still unknown');
+  }
+  if (after.consent === 'refused') {
+    out.push('somebody in this frame refused consent');
+  }
+  if (after.consent === 'minors' && after.usable) {
+    out.push('this frame contains minors and is marked usable');
+  }
+  if (after.sensitive && after.usable) {
+    out.push('marked sensitive and usable at once — it cannot be both');
+  }
+  return out;
+};
+
+/** The name recorded against a review, for the reviewer who is not an id. */
+const reviewerName = (req) => (
+  (req && req.user && (req.user.name || req.user.email)) || 'Unknown'
+);
+
+/* The $set an approval writes: the reviewer's corrections, the verdict,
+ * and a setBy stamp on every field they confirmed. */
+const approvalSet = (patch = {}, { confirm = [], note = '', req } = {}) => {
+  const set = { ...patch };
+  set['review.state'] = 'approved';
+  set['review.by'] = (req && req.user && req.user._id) || null;
+  set['review.byName'] = reviewerName(req);
+  set['review.at'] = new Date();
+  set['review.note'] = String(note || '').trim();
+  set['review.fields'] = confirm;
+  /* An approval is a human reading the row, so the row is reviewed —
+   * whether or not any field was corrected in the same request. */
+  set.reviewed = 1;
+  confirm
+    .filter((f) => CONFIRMABLE_FIELDS.includes(f))
+    .forEach((f) => { set[`setBy.${f}`] = 'human'; });
+  return set;
+};
+
+/* A tagged person reduced to what a chip needs. `person` arrives either
+ * as a bare ObjectId or as a populated document, depending on whether the
+ * caller populated it, and both have to render. */
+const personRef = (person) => {
+  if (!person) return null;
+  if (person._id) {
+    return { id: person._id, name: person.name || '', role: person.role || '' };
+  }
+  return { id: person, name: '', role: '' };
+};
+
 const toPublic = (doc) => ({
   id: doc._id,
   url: doc.url || buildS3Url(doc.key),
