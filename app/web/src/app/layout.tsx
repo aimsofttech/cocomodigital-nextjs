@@ -96,10 +96,12 @@ export default async function RootLayout({
         <Providers>
           {/* Phase 0 Studio 2026-05-23: skip the public-site
               chrome (Header / Footer / cart / brand strip) for
-              /studio — Studio renders its own top bar + sidebar.
+              /studio and /caspian — each renders its own top bar.
+              Caspian is the media library: an internal tool on a public
+              domain, so it takes no marketing chrome and is noindexed.
               Keeps <html><body> + fonts + Providers so theme
               variables and Tailwind layers still apply. */}
-          {pathname.startsWith("/studio") ? (
+          {pathname.startsWith("/studio") || pathname.startsWith("/caspian") ? (
             <>{children}</>
           ) : (
             <SiteShell>{children}</SiteShell>

@@ -1,0 +1,252 @@
+/*
+ * Caspian's styles.
+ *
+ * A CSS module rather than a block appended to globals.css, which is this
+ * repo's usual habit. Two reasons: globals.css is already very large and
+ * ships on every marketing page, and Caspian is the first app-like
+ * surface here — a tool, not a page — so its styles have no business
+ * loading for someone reading the podcast page. Prefixed class names in a
+ * shared sheet would also sit one typo away from colliding with the
+ * `pod-*` block.
+ *
+ * Brand yellow (#fff000) is the site's own accent, used here only where
+ * something is selected or actionable, against a dark ground so a grid of
+ * photographs is what carries the colour.
+ */
+
+.shell {
+  --ink: #f4f3ee;
+  --ground: #12100b;
+  --panel: #1b1913;
+  --line: #2e2b22;
+  --muted: #8f8a7c;
+  --brand: #fff000;
+  --ok: #7fc4a2;
+  --warn: #e0a44a;
+  --bad: #f08279;
+
+  min-height: 100vh;
+  background: var(--ground);
+  color: var(--ink);
+  padding: 0 clamp(16px, 4vw, 40px) 80px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ── sign-in / permission gate ─────────────────────────────────────────── */
+.gate {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #12100b;
+  color: #f4f3ee;
+  padding: 24px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.gateCard {
+  width: min(420px, 100%);
+  background: #1b1913;
+  border: 1px solid #2e2b22;
+  border-radius: 14px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.gateTitle { margin: 0; font-size: 1.6rem; letter-spacing: -0.02em; }
+.gateSub { margin: 0; color: #8f8a7c; font-size: 0.92rem; line-height: 1.5; }
+.gateError { margin: 0; color: #f08279; font-size: 0.88rem; }
+
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+.field span { color: #8f8a7c; }
+.field input {
+  background: #12100b;
+  border: 1px solid #2e2b22;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #f4f3ee;
+  font-size: 0.95rem;
+}
+.field input:focus-visible { outline: 2px solid #fff000; outline-offset: 1px; }
+
+.primary {
+  background: #fff000;
+  color: #12100b;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.primary:disabled { opacity: 0.6; cursor: default; }
+
+/* ── top bar ───────────────────────────────────────────────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.mark {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--brand);
+  flex: none;
+}
+.name { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+.tag { color: var(--muted); font-size: 0.82rem; }
+.who { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+
+/* ── controls ──────────────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 18px 0 12px;
+}
+.searchBox {
+  flex: 1 1 260px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+.searchBox:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.toggles { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.check { display: flex; align-items: center; gap: 7px; font-size: 0.88rem; cursor: pointer; }
+.check input { accent-color: var(--brand); width: 15px; height: 15px; }
+.select {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+/* ── saved-search chips ────────────────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 14px; }
+.chip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.chip:hover { border-color: var(--muted); }
+.chipOn { background: var(--brand); color: #12100b; border-color: var(--brand); font-weight: 600; }
+/* An empty facet stays visible and readable. A chip that shows 0 is
+   information — it says the vocabulary exists and nothing matches yet. */
+.chipEmpty { opacity: 0.5; }
+.chipCount {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.76rem;
+  opacity: 0.75;
+}
+
+.note { color: var(--muted); font-size: 0.85rem; margin: 0 0 14px; max-width: 68ch; line-height: 1.5; }
+.error {
+  color: #12100b;
+  background: var(--warn);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  margin: 0 0 14px;
+  max-width: 78ch;
+}
+.muted { color: var(--muted); font-size: 0.9rem; }
+
+/* ── grid ──────────────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.thumb { position: relative; aspect-ratio: 16 / 10; background: #0d0b07; }
+.thumbImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumbFallback {
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  color: var(--muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.state {
+  position: absolute;
+  left: 8px; top: 8px;
+  font-size: 0.66rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(18, 16, 11, 0.82);
+  border: 1px solid currentColor;
+}
+.stateApproved { color: var(--ok); }
+.stateRejected { color: var(--bad); }
+.stateProposed { color: var(--warn); }
+
+.meta { padding: 12px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.caption { margin: 0; font-size: 0.88rem; line-height: 1.42; }
+.facts {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.ok { color: var(--ok); }
+.tags { margin: 0; color: var(--muted); font-size: 0.74rem; }
+.actions {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ghost, .ghostSm {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ghost { padding: 8px 13px; font-size: 0.85rem; }
+.ghostSm { padding: 5px 9px; font-size: 0.76rem; }
+.ghost:hover, .ghostSm:hover { border-color: var(--brand); color: var(--brand); }
+.ghostSm:disabled { opacity: 0.45; cursor: default; }
+.ghost:focus-visible, .ghostSm:focus-visible,
+.chip:focus-visible, .primary:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Scoped to Caspian's own roots: a CSS module rejects a bare `*` because
+   every selector has to carry at least one local class. */
+@media (prefers-reduced-motion: reduce) {
+  .shell, .shell *, .gate, .gate * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

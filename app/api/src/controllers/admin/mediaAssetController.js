@@ -4,7 +4,9 @@ const MediaJob = require('../../models/MediaJob');
 const { buildS3Url, deleteFromS3 } = require('../../utils/s3Upload');
 const { enqueue, describeNow, budgetStatus } = require('../../services/mediaDescriber');
 const { ingestBatch } = require('../../services/mediaIngest');
-const { publishable, pendingReview, REVIEW_STATES } = require('../../lib/mediaSearches');
+const {
+  publishable, pendingReview, REVIEW_STATES, SAVED_SEARCHES,
+} = require('../../lib/mediaSearches');
 const logger = require('../../utils/logger');
 
 /* A 24-character hex id. Checked before anything reaches Mongo, because an
@@ -51,6 +53,17 @@ const index = async (req, res) => {
       });
     }
     filter['taggedPeople.person'] = req.query.personId;
+  }
+
+  if (req.query.search) {
+    if (!SAVED_SEARCHES[req.query.search]) {
+      return res.status(400).json({
+        status: 'error',
+        message: `Unknown saved search "${req.query.search}". `
+               + `Try one of: ${Object.keys(SAVED_SEARCHES).join(', ')}.`,
+      });
+    }
+    Object.assign(filter, await savedSearchFilter(req.query));
   }
 
   let projection = null;
@@ -339,6 +352,19 @@ const toPublic = (doc) => ({
     taggedAt: t.taggedAt,
   })),
   describeStatus: doc.describeStatus,
+  /* The verdict, and who reached it. Without this any review UI has to
+   * guess, and guessing defaults everything to 'proposed' — which is how
+   * an already-rejected asset ends up offered for approval again.
+   *
+   * `review.note` is deliberately NOT here. A rejection reason is written
+   * for the uploader and can name a person or a client; it belongs on the
+   * detail view for someone who may act on it, not on every card in a
+   * grid that a whole studio can see. */
+  review: {
+    state: (doc.review && doc.review.state) || 'proposed',
+    byName: (doc.review && doc.review.byName) || '',
+    at: (doc.review && doc.review.at) || null,
+  },
   createdAt: doc.createdAt,
 });
 
@@ -764,7 +790,77 @@ const bulkApprove = async (req, res) => {
   });
 };
 
+
+/**
+ * GET /admin/media/searches
+ *
+ * The nine ways people actually ask for media, with a live count each.
+ *
+ * These were written in lib/mediaSearches and then referenced by nothing:
+ * no route exposed them, so the vocabulary the taxonomy work produced was
+ * unreachable from any client. This is that route.
+ *
+ * Three of them are marked `requiresJob`: industry, genre and client type
+ * cannot be read off a photograph, so they are answered from the job
+ * record and are empty until jobs exist. They are returned anyway, with
+ * the flag and their available values, because a chip that is visibly
+ * empty is information and a chip that is silently missing is not.
+ */
+const savedSearches = async (req, res) => {
+  const base = buildGovernanceFilter(req.query);
+
+  const rows = await Promise.all(
+    Object.entries(SAVED_SEARCHES).map(async ([key, def]) => {
+      const row = {
+        key,
+        label: def.label,
+        note: def.note || '',
+        requiresJob: Boolean(def.requiresJob),
+        values: [],
+        count: 0,
+      };
+
+      if (def.requiresJob) {
+        /* The distinct values that actually exist, so the UI offers real
+         * options rather than an empty dropdown. NDA jobs are excluded:
+         * a client type nobody may know about is not a facet. */
+        row.values = (await MediaJob.distinct(key, { nda: { $ne: true } }))
+          .filter(Boolean).sort();
+        const jobIds = await MediaJob.find({ nda: { $ne: true } }).distinct('_id');
+        row.count = jobIds.length
+          ? await MediaAsset.countDocuments({ ...base, ...def.filter(jobIds) })
+          : 0;
+      } else {
+        row.count = await MediaAsset.countDocuments({ ...base, ...def.filter() });
+      }
+      return row;
+    }),
+  );
+
+  res.json({ status: 'success', data: rows });
+};
+
+/**
+ * Turn ?search=<key> (+ ?value=) into filter conditions.
+ *
+ * Kept out of buildGovernanceFilter because the job-derived searches need
+ * a database round trip and that function is deliberately synchronous and
+ * pure — it is the guard, and a guard that can await is a guard that can
+ * be forgotten in a branch.
+ */
+const savedSearchFilter = async (query = {}) => {
+  const def = SAVED_SEARCHES[query.search];
+  if (!def) return null;
+  if (!def.requiresJob) return def.filter();
+
+  const jobFilter = { nda: { $ne: true } };
+  if (query.value) jobFilter[query.search] = query.value;
+  const jobIds = await MediaJob.find(jobFilter).distinct('_id');
+  return def.filter(jobIds);
+};
+
 module.exports = {
+  savedSearches,
   // ingest
   upload,
   // browse

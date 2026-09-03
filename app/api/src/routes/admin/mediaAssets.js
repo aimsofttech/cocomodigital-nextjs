@@ -22,6 +22,10 @@ router.get('/stats', protect, ctrl.stats);
 // The queue of things waiting on a person. Literal, so it goes above /:id.
 router.get('/review', protect, ctrl.reviewQueue);
 
+/* The nine saved searches, with live counts. Literal path, so it must
+ * stay above '/:id' or an id of "searches" is what Mongo gets asked for. */
+router.get('/searches', protect, ctrl.savedSearches);
+
 // ---------------------------------------------------------------- people
 // The directory, and the "every photo of Dishan" query. All literal, all
 // above /:id for the same reason.

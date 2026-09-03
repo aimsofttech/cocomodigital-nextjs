@@ -44,10 +44,14 @@ const obj = (name, kind) => ({
   ...(kind === 'video' ? { duration: 42 } : {}),
 });
 
-const described = (caption, tags) => ({
+const described = (caption, tags, shows = []) => ({
   caption,
   altText: caption,
   tags,
+  /* The controlled vocabulary the nine saved searches are built on.
+   * Without it every frame-derived search returns zero and the search
+   * UI cannot be exercised at all — which is most of what Phase 1 is. */
+  shows,
   describeStatus: 'done',
   assetType: 'photograph',
 });
@@ -94,28 +98,31 @@ const run = async () => {
     {
       _case: 'The happy path. Owned, described, approved — the only class publishable() should ever return.',
       ...obj('edit-floor-wide.jpg', 'image'),
-      ...described('Two editors at the grading desk, mid-session.', ['edit', 'team', 'desk']),
+      ...described('Two editors at the grading desk, mid-session.', ['edit', 'team', 'desk'],
+        ['cocoma-people', 'edit-bay', 'screen-timeline']),
       job: openJob._id, rights: 'own', consent: 'staff', usable: true, sensitive: false,
       review: approved, setBy: { rights: 'human', consent: 'human' },
     },
     {
       _case: 'Approved but NOT usable. Must never appear in a publishable view.',
       ...obj('edit-floor-tight.jpg', 'image'),
-      ...described('Close on a colour wheel, screen glare across the panel.', ['edit', 'detail']),
+      ...described('Close on a colour wheel, screen glare across the panel.', ['edit', 'detail'],
+        ['screen-design', 'edit-bay']),
       job: openJob._id, rights: 'own', consent: 'staff', usable: false, sensitive: false,
       review: approved, setBy: { rights: 'human' },
     },
     {
       _case: 'Client IP. Owned by someone else — approval must not make it postable.',
       ...obj('client-key-art.jpg', 'image'),
-      ...described('Key art: a lone figure against a lit skyline.', ['key-art', 'poster']),
+      ...described('Key art: a lone figure against a lit skyline.', ['key-art', 'poster'], []),
       job: openJob._id, rights: 'client-ip', consent: 'not-required', usable: true, sensitive: false,
       review: approved, setBy: { rights: 'human' },
     },
     {
       _case: 'D3 — NDA. Nothing on the asset says NDA; it lives on the job. No read path filters it today.',
       ...obj('nda-set-build.jpg', 'image'),
-      ...described('An unlit set under construction, crew moving flats.', ['set', 'build']),
+      ...described('An unlit set under construction, crew moving flats.', ['set', 'build'],
+        ['shoot-floor', 'lighting']),
       job: ndaJob._id, rights: 'client-ip', consent: 'not-required', usable: true, sensitive: false,
       review: approved, setBy: { rights: 'human' },
     },
@@ -129,14 +136,16 @@ const run = async () => {
     {
       _case: 'Consent: minors. Legal exposure if this ever leaves the building.',
       ...obj('school-workshop.jpg', 'image'),
-      ...described('A workshop session; several attendees are visibly under 18.', ['workshop', 'event']),
+      ...described('A workshop session; several attendees are visibly under 18.', ['workshop', 'event'],
+        ['public-crowd', 'meeting-room']),
       job: openJob._id, rights: 'own', consent: 'minors', usable: false, sensitive: true,
       review: { state: 'proposed', byName: '', at: null, note: '' }, setBy: { consent: 'human' },
     },
     {
       _case: 'Consent: refused. A person said no. Must survive any later re-describe.',
       ...obj('crew-candid.jpg', 'image'),
-      ...described('Candid of a crew member between takes.', ['crew', 'candid']),
+      ...described('Candid of a crew member between takes.', ['crew', 'candid'],
+        ['cocoma-people', 'common-areas']),
       job: openJob._id, rights: 'own', consent: 'refused', usable: false, sensitive: false,
       review: { state: 'proposed', byName: '', at: null, note: '' }, setBy: { consent: 'human' },
       taggedPeople: [{ person: people[1]._id, box: { x: 0.38, y: 0.2, w: 0.22, h: 0.3 } }],
@@ -144,7 +153,7 @@ const run = async () => {
     {
       _case: 'Rejected. Must not reappear in the queue or in any public view.',
       ...obj('blurred-frame.jpg', 'image'),
-      ...described('Motion-blurred frame, unusable.', ['reject']),
+      ...described('Motion-blurred frame, unusable.', ['reject'], ['open-floor']),
       job: openJob._id, rights: 'own', consent: 'staff', usable: false, sensitive: false,
       review: { state: 'rejected', byName: 'Anil', at: new Date(), note: 'Out of focus.' },
       setBy: { rights: 'human' },
@@ -159,7 +168,7 @@ const run = async () => {
     {
       _case: 'Human said own; a later model run must not be able to overrule setBy.rights.',
       ...obj('studio-lockup.png', 'image'),
-      ...described('Cocoma lockup on a dark ground.', ['logo', 'brand']),
+      ...described('Cocoma lockup on a dark ground.', ['logo', 'brand'], []),
       assetType: 'logo-mark',
       job: openJob._id, rights: 'own', consent: 'not-required', usable: true, sensitive: false,
       review: approved, setBy: { rights: 'human', consent: 'human' },

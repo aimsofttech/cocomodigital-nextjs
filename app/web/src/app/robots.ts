@@ -5,6 +5,7 @@ const disallowPaths = [
   "/api/",
   "/admin/",
   "/login",
+  "/caspian",
   "/cart",
   "/ScheduleMeeting",
   "/schedule-meeting",
