@@ -59451,14 +59451,59 @@ html {
   margin-top: var(--space-2);
 }
 
+/* On a phone the portrait was 212px in a 343px column with justify-items:
+   start, so it sat against the left edge with 131px of dead space beside
+   it — an orphaned block rather than a designed one. And the face was
+   separated from the name it belongs to, in a band whose entire point is
+   "who you're actually dealing with".
+
+   So on mobile the photograph and the name become one unit: face on the
+   left, name and role beside it, paragraphs full width underneath. That
+   removes the ragged edge, binds the face to the name, and gives back
+   about 250px of height. display: contents lets the copy block's children
+   place themselves on the parent grid without extra markup. */
 @media (max-width: 900px) {
   .pod-founder-inner {
-    grid-template-columns: 1fr;
-    justify-items: start;
+    grid-template-columns: clamp(96px, 30vw, 132px) minmax(0, 1fr);
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+    align-items: center;
+    justify-items: stretch;
+  }
+
+  .pod-founder-copy {
+    display: contents;
   }
 
   .pod-founder-portrait {
-    max-width: 260px;
+    max-width: none;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    box-shadow: 5px 5px 0 var(--text-strong);
+  }
+
+  .pod-founder-copy > .pod-section-title {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin: 0;
+  }
+
+  .pod-founder-role {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    margin: 0;
+  }
+
+  /* Everything after the name runs the full width underneath. */
+  .pod-founder-line,
+  .pod-founder-copy > .pod-cta {
+    grid-column: 1 / -1;
+  }
+
+  .pod-founder-line:first-of-type {
+    margin-top: var(--space-4);
   }
 }
 
