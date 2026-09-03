@@ -37,6 +37,11 @@
  * rather than quietly empty — see requiresJob below.
  */
 
+/* The three review states, exported so the controller and the tests share
+ * one list. A guard that only exists inside the schema enum is one the
+ * filter tests cannot see. */
+const REVIEW_STATES = ['proposed', 'approved', 'rejected'];
+
 const SHOWS = {
   people: ['cocoma-people', 'on-camera-talent', 'stock-people', 'public-crowd'],
   rooms: ['edit-bay', 'open-floor', 'meeting-room', 'shoot-floor', 'common-areas'],
@@ -108,14 +113,46 @@ const SAVED_SEARCHES = {
 /**
  * Everything safe to put on a public Cocoma page.
  *
- * Four conditions, and each one has cost us something at least once:
- * rights (a stock mixing desk nearly went on a page arguing we have a real
- * sound room), sensitive, usable, and the job's NDA flag.
+ * Five conditions, and each earns its place:
+ *
+ *   review.state  a person looked. The machine finishing is not the same
+ *                 as somebody agreeing, and this is the difference.
+ *   rights        a stock mixing desk nearly went on a page arguing we
+ *                 have a real sound room.
+ *   sensitive     the describe pass caught a child in an office candid
+ *                 that no filename rule would have.
+ *   usable        fit for marketing, which is narrower than "ours".
+ *
+ * NDA is the fifth and lives on the job; callers joining to a job must
+ * add it, because it cannot be expressed in a filter on this collection
+ * alone. Anything querying across jobs has to exclude nda: true itself.
+ *
+ * This function is the single definition. Do not hand-roll the same four
+ * conditions at a call site — that is how one of them gets forgotten.
  */
 const publishable = () => ({
+  'review.state': 'approved',
   rights: 'own',
   sensitive: false,
   usable: true,
 });
 
-module.exports = { SHOWS, SAVED_SEARCHES, publishable };
+/**
+ * What is waiting for a person.
+ *
+ * The `$exists: false` arm matters: every row that predates this field —
+ * which today is all 973 of them — has no review subdocument at all, and
+ * a queue that only matched 'proposed' would report an empty backlog on a
+ * library where nothing has ever been approved.
+ *
+ * Kept beside publishable() so the two can never disagree about what
+ * "not yet approved" means.
+ */
+const pendingReview = () => ({
+  $or: [
+    { 'review.state': 'proposed' },
+    { 'review.state': { $exists: false } },
+  ],
+});
+
+module.exports = { SHOWS, SAVED_SEARCHES, REVIEW_STATES, publishable, pendingReview };

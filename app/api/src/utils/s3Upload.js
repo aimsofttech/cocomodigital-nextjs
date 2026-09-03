@@ -184,8 +184,34 @@ const getYoutubeVideoId = (url) => {
   return match ? match[1] : null;
 };
 
+/**
+ * Put a buffer we already hold into S3.
+ *
+ * The multer-s3 helpers above stream a request straight to the bucket,
+ * which is right for a form post and wrong for everything the media
+ * library does: an ingest has to hash the bytes to find duplicates, probe
+ * them for real dimensions, and decide whether to store them at all —
+ * all before anything is uploaded. By then the buffer is in hand and
+ * there is no stream left to pipe.
+ *
+ * Also used for derived bytes with no request behind them, such as the
+ * poster frame ffmpeg extracts from a video.
+ */
+const putBufferToS3 = async (buffer, { folder, originalName, contentType } = {}) => {
+  const key = buildKey(folder || 'uploads/files', originalName || 'file');
+  await s3.send(new PutObjectCommand({
+    Bucket: process.env.AWS_BUCKET,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType || 'application/octet-stream',
+    ACL: 'public-read',
+  }));
+  return { key, url: buildS3Url(key) };
+};
+
 module.exports = {
   createS3Upload,
+  putBufferToS3,
   createMediaUpload,
   buildS3Url,
   isSitePath,
