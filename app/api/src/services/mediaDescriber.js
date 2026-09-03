@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const MediaAsset = require('../models/MediaAsset');
 const logger = require('../utils/logger');
+const { describe } = require('./visionProviders');
 
 /**
  * The describe worker — the only place in the system that spends money.
@@ -78,16 +79,34 @@ const reuseByChecksum = async (asset) => {
   }).lean();
   if (!twin) return false;
 
-  await MediaAsset.updateOne({ _id: asset._id }, {
+  /* Rule 3 applies here too, and it did not used to.
+   *
+   * This path copied rights, consent, shows and assetType across from the
+   * twin and stamped every one of them 'model' without ever reading the
+   * target's setBy — while applyResult() a hundred lines down guards each
+   * write with humanSet(). So the cheap path silently undid review that
+   * the expensive path was careful to protect.
+   *
+   * The bad case is specific rather than theoretical: someone marks a
+   * frame client-ip and not usable, the same bytes arrive again under a
+   * different filename, the twin says own/usable, and the dedupe promotes
+   * a client's artwork to publishable without anyone touching it.
+   *
+   * Identical bytes still means an identical frame, so anything a human
+   * has NOT ruled on still copies — that is the saving this rests on. */
+  const decidedByHuman = asset.setBy instanceof Map
+    ? Object.fromEntries(asset.setBy)
+    : (asset.setBy || {});
+  const humanOwns = (field) => decidedByHuman[field] === 'human';
+
+  const patch = {
     caption: twin.caption,
     altText: twin.altText,
     tags: twin.tags,
     category: twin.category,
     people: twin.people,
     ocrText: twin.ocrText,
-    rights: twin.rights,
     sensitive: twin.sensitive,
-    usable: twin.usable,
     describeStatus: 'done',
     describeError: null,
     'describeMeta.provider': twin.describeMeta && twin.describeMeta.provider,
@@ -96,26 +115,43 @@ const reuseByChecksum = async (asset) => {
     'describeMeta.costUsd': 0,
     'describeMeta.describedAt': new Date(),
     'describeMeta.copiedFromChecksum': true,
-  });
+  };
+
+  // The four a person is allowed to have ruled on. Each copies only if
+  // nobody has, and only then is it stamped as the model's doing.
+  if (!humanOwns('rights')) { patch.rights = twin.rights; patch['setBy.rights'] = 'model'; }
+  if (!humanOwns('consent')) { patch.consent = twin.consent; patch['setBy.consent'] = 'model'; }
+  if (!humanOwns('shows')) { patch.shows = twin.shows; patch['setBy.shows'] = 'model'; }
+  if (!humanOwns('assetType')) { patch.assetType = twin.assetType; patch['setBy.assetType'] = 'model'; }
+
+  // usable rides with rights: promoting a row to publishable is the whole
+  // risk, so it never moves independently of the rights decision.
+  if (!humanOwns('rights')) patch.usable = twin.usable;
+
+  await MediaAsset.updateOne({ _id: asset._id }, patch);
   return true;
 };
 
 /**
- * The provider call. Deliberately the only vendor-specific function in
- * the file, and deliberately unimplemented until someone chooses a
- * vendor — see docs/MEDIA_ASSET_INDEX.md for the contract it must meet
- * and the recommended cheap-model choice.
+ * The provider call. Still the only vendor-aware line in this file: the
+ * adapters, the prompt and the cost table all live in visionProviders.js
+ * so that swapping vendors cannot reach the budget ceiling, the checksum
+ * dedupe or the review rules.
  *
- * Must return, per asset:
- *   { caption, altText, tags[], category, people, ocrText,
- *     rights, sensitive, usable, inputTokens, outputTokens, costUsd }
+ * Returns, per asset, index-aligned with the input:
+ *   { caption, altText, tags[], category, shows[], assetType, people,
+ *     ocrText, rights, consent, sensitive, usable,
+ *     inputTokens, outputTokens, costUsd }
+ * or null, which means that asset already has its status and a readable
+ * reason written to Mongo — 'failed' for a fault, 'skipped' for a video
+ * waiting on ffmpeg — and the rest of the batch carries on without it.
+ *
+ * provider and model are passed in rather than re-read from env inside
+ * visionProviders, so describeMeta can never record a different model from
+ * the one that was actually billed.
  */
-const callProvider = async (/* assets */) => {
-  throw new Error(
-    `MEDIA_DESCRIBE_PROVIDER="${CONFIG.provider}" has no implementation yet. ` +
-    'Implement callProvider() in src/services/mediaDescriber.js.',
-  );
-};
+const callProvider = async (assets) =>
+  describe(assets, { provider: CONFIG.provider, model: CONFIG.model });
 
 /** Describe a single asset now (admin "re-describe this one" button). */
 const describeNow = async (asset) => {
@@ -125,23 +161,78 @@ const describeNow = async (asset) => {
   if (CONFIG.provider === 'none') {
     return { id: asset._id, skipped: true, reason: 'no provider configured' };
   }
+
+  /* The ceiling applies here too.
+   *
+   * This function is what POST /admin/api/media/:id/describe calls, and it
+   * went straight to the provider without ever reading CONFIG.budgetUsd —
+   * so rule 4 in the header above ("a hard monthly ceiling") was true of
+   * the queue and false of the button beside every asset in the admin.
+   * A person clicking re-describe down a long list is exactly how a
+   * ceiling gets discovered to be missing.
+   *
+   * Re-read from the database rather than trusting the in-process counter,
+   * for the same reason enqueue() does: a restart must not reset it. */
+  if (CONFIG.budgetUsd > 0) {
+    spend.usd = await monthlySpendFromDb();
+    if (spend.usd >= CONFIG.budgetUsd) {
+      return {
+        id: asset._id,
+        skipped: true,
+        budgetReached: true,
+        reason: `monthly budget reached ($${spend.usd.toFixed(2)} of $${CONFIG.budgetUsd})`,
+      };
+    }
+  }
+
   const [result] = await callProvider([asset]);
+  if (!result) {
+    // The provider already wrote a status and a reason onto the row. Read
+    // them back rather than throwing, so the admin's re-describe button
+    // shows "this file is an SVG" instead of a 500 — and so a video parked
+    // for want of ffmpeg does not report itself as a failure.
+    const fresh = await MediaAsset.findById(asset._id)
+      .select('describeStatus describeError').lean();
+    const status = (fresh && fresh.describeStatus) || 'failed';
+    return {
+      id: asset._id,
+      failed: status === 'failed',
+      skipped: status === 'skipped',
+      error: (fresh && fresh.describeError) || 'Describe failed.',
+    };
+  }
   await applyResult(asset, result);
   return { id: asset._id, reused: false, costUsd: result.costUsd || 0 };
 };
 
 const applyResult = async (asset, r) => {
   spend.usd += r.costUsd || 0;
-  await MediaAsset.updateOne({ _id: asset._id }, {
+
+  // A field a person has ruled on is not up for re-litigation. `reviewed`
+  // keeps a whole row out of the queue, but the admin's force=1 path walks
+  // straight past that, and setBy is the only record of which individual
+  // fields were a human's call. Without this check, forcing a re-describe
+  // to fix a bad caption also silently reverts a rights decision.
+  const decided = asset.setBy instanceof Map
+    ? Object.fromEntries(asset.setBy)
+    : (asset.setBy || {});
+  const humanSet = (field) => decided[field] === 'human';
+
+  // usable is derived from the EFFECTIVE rights, not the model's guess:
+  // a human who set rights=own should not have every re-describe hide the
+  // asset again because the model still reads it as unknown.
+  const rights = humanSet('rights') ? asset.rights : (r.rights || 'unknown');
+  const sensitive = Boolean(r.sensitive);
+
+  const patch = {
     caption: r.caption || '',
     altText: r.altText || '',
     tags: (r.tags || []).map((t) => String(t).trim().toLowerCase()).filter(Boolean),
     category: r.category || '',
     people: r.people || 0,
     ocrText: r.ocrText || '',
-    rights: r.rights || 'unknown',
-    sensitive: Boolean(r.sensitive),
-    usable: Boolean(r.usable) && !r.sensitive && r.rights === 'own',
+    sensitive,
+    usable: Boolean(r.usable) && !sensitive && rights === 'own',
     describeStatus: 'done',
     describeError: null,
     'describeMeta.provider': CONFIG.provider,
@@ -152,7 +243,17 @@ const applyResult = async (asset, r) => {
     'describeMeta.costUsd': r.costUsd || 0,
     'describeMeta.describedAt': new Date(),
     'describeMeta.copiedFromChecksum': false,
-  });
+  };
+
+  // The four the taxonomy note assigns to the model. Each is written only
+  // if no human has claimed it, and each stamps its own provenance —
+  // otherwise a guess and a ruling are indistinguishable in the column.
+  if (!humanSet('rights')) { patch.rights = rights; patch['setBy.rights'] = 'model'; }
+  if (!humanSet('consent')) { patch.consent = r.consent || 'unknown'; patch['setBy.consent'] = 'model'; }
+  if (!humanSet('shows')) { patch.shows = r.shows || []; patch['setBy.shows'] = 'model'; }
+  if (!humanSet('assetType')) { patch.assetType = r.assetType || 'unknown'; patch['setBy.assetType'] = 'model'; }
+
+  await MediaAsset.updateOne({ _id: asset._id }, patch);
 };
 
 /**
@@ -203,13 +304,43 @@ const enqueue = async (limit = 20) => {
 
     try {
       const results = await callProvider(batch);
+      const parked = [];
       for (let j = 0; j < batch.length; j += 1) {
-        if (!results[j]) continue;
+        // A null slot is an asset the provider already wrote a status onto
+        // — 'failed' for a bad file, 'skipped' for a video waiting on
+        // ffmpeg. Both must be counted: a run reporting "considered 6,
+        // described 4" and nothing else is a bug hunt waiting to happen.
+        if (!results[j]) { parked.push(batch[j]._id); continue; }
         await applyResult(batch[j], results[j]);
         summary.described += 1;
         summary.costUsd += results[j].costUsd || 0;
       }
+      if (parked.length) {
+        // One query rather than guessing: 'skipped' is a video with no
+        // ffmpeg and is not a fault, 'failed' is. Reporting a missing
+        // binary as five failures sends someone debugging the describer.
+        const rows = await MediaAsset.find({ _id: { $in: parked } })
+          .select('describeStatus').lean();
+        rows.forEach((r) => {
+          if (r.describeStatus === 'skipped') summary.skipped += 1;
+          else summary.failed += 1;
+        });
+      }
     } catch (err) {
+      // A misconfiguration is not the assets' fault and must not eat their
+      // retry budget: put the batch back and stop. Three clicks of the
+      // queue button with an unset API key would otherwise push every
+      // pending row past MEDIA_DESCRIBE_MAX_ATTEMPTS, and nothing in the
+      // admin resets that.
+      if (err.isConfigError) {
+        logger.error(`mediaDescriber: not configured — ${err.message}`);
+        await MediaAsset.updateMany({ _id: { $in: ids } }, {
+          describeStatus: 'pending', $inc: { describeAttempts: -1 },
+        });
+        summary.skipped += remaining.length - i;
+        summary.configError = err.message;
+        break;
+      }
       logger.error(`mediaDescriber batch failed: ${err.message}`);
       await MediaAsset.updateMany({ _id: { $in: ids } }, {
         describeStatus: 'failed', describeError: err.message,
