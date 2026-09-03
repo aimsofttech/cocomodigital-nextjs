@@ -470,9 +470,16 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                     />
                   )}
                   <EditItem pageId={data.id} kind="services" id={s.id} label={s.title} />
-                  <span className="pod-service-icon">
-                    <Icon name={s.icon} />
-                  </span>
+                  {/* The icon only appears when there is no photograph.
+                      With one, the card had two accents competing in a
+                      300px box — the same mistake the distribution band
+                      had. The picture is the visual; the yellow tile was
+                      a second one. */}
+                  {!s.image && (
+                    <span className="pod-service-icon">
+                      <Icon name={s.icon} />
+                    </span>
+                  )}
                   <h3 className="pod-service-title">{s.title}</h3>
                   <p className="pod-service-body">{s.body}</p>
                   <ul className="pod-service-tags">

@@ -58311,27 +58311,30 @@ html {
    a rule so the eye reads the grid as a spec sheet instead of eight
    paragraphs — and so the search terms survive the copy being cut. */
 .pod-service-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  /* Was four bordered pills per card — 32 boxes across the band, which is
+     what made it read as noise. Now one quiet line.
+
+     Deliberately NOT hidden: the keywords stay visible and crawlable.
+     Tucking them into sr-only text would be hidden keyword text, which is
+     a Google guidelines violation and a real ranking risk. Quiet and
+     visible is both safer and better looking than loud and boxed. */
+  display: block;
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid rgba(17, 17, 17, 0.12);
   list-style: none;
-  margin: auto 0 0;
-  padding: var(--space-4) 0 0;
-  border-top: 1px solid var(--border-soft);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--text-muted);
 }
 
 .pod-service-tags li {
-  font-family: var(--font-display);
-  font-size: var(--fs-tiny);
-  font-weight: var(--fw-semibold);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--text-body);
-  background: var(--bg-page-soft);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-sm);
-  padding: 0.22em 0.5em;
-  white-space: nowrap;
+  display: inline;
+}
+
+.pod-service-tags li:not(:last-child)::after {
+  content: " · ";
+  opacity: 0.5;
 }
 
 /* ------------------------------------------------- pricing */
@@ -60090,11 +60093,64 @@ html {
   font-style: italic;
 }
 
+/* ---------------------------------- services: motion and stickiness */
+
+/* The photograph drifts as its card travels through the viewport. Driven
+   by animation-timeline, so no JS, no observer and no library — the same
+   mechanism as the reveal. It makes the band read as a working studio
+   rather than a grid of stills, and costs a scroller nothing, because
+   there is no new information in it to take in.
+
+   Scaled up first so there is something to drift into: without the
+   1.08 the pan would expose the edges of the frame. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .pod-service-card--art .pod-service-card-bg {
+      animation: pod-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+
+@keyframes pod-drift {
+  from {
+    transform: scale(1.08) translate3d(0, -1.6%, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(0, 1.6%, 0);
+  }
+}
+
+/* The group label stays put while you scroll its cards, so a scroller
+   always knows which of the three buckets they are in without reading a
+   single card. This does more for comprehension than any animation.
+   68px clears the fixed site header. */
+@supports (position: sticky) {
+  /* NOT gated on prefers-reduced-motion. Sticky is layout, not motion —
+     it does not scroll independently or parallax, and it is exactly the
+     kind of orientation aid someone who has asked for less motion still
+     benefits from. Gating it was my error: it meant the one change that
+     most helps a scroller was switched off for the people most likely to
+     want it. */
+  @media (min-width: 861px) {
+    .pod-service-group-head {
+      position: sticky;
+      top: 68px;
+      z-index: 2;
+      background: var(--bg-page-soft, #f7f7f7);
+      padding-top: var(--space-4);
+    }
+  }
+}
+
 /* ------------------------------- services, clubbed into three */
 
 .pod-service-groups {
   display: grid;
-  gap: var(--space-7);
+  /* Grouping cost height — three headings where there were none. This
+     claws some back without letting the groups run together. */
+  gap: var(--space-6);
 }
 
 /* The group heading is the thing a reader scans; the cards under it are
@@ -60173,9 +60229,9 @@ html {
       opacity 480ms ease;
   }
 
-  .pod-service-card--art:hover .pod-service-card-bg {
-    transform: scale(1.06);
-  }
+  /* Hover zoom removed: it and the scroll drift below both animate
+     transform on the same element, and the animation wins. The card lift
+     still gives hover feedback. */
 
   .pod-service-card {
     transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
