@@ -35,8 +35,42 @@ export interface CaspianAsset {
   namedPeople: number;
   describeStatus: "pending" | "processing" | "done" | "failed" | "skipped";
   createdAt: string;
-  review?: { state: "proposed" | "approved" | "rejected" };
+  posterUrl: string | null;
+  /* Computed on the server in lib/mediaSearches. Never recomputed here —
+     a second copy of these rules in the browser is a second definition of
+     "safe", and it is the copy that can be edited. */
+  clearance: { level: "clear" | "restricted" | "blocked"; reasons: string[] };
+  review?: { state: "proposed" | "approved" | "rejected"; byName?: string; at?: string | null };
 }
+
+/** One asset in full — what GET /media/:id returns. */
+export interface CaspianAssetDetail extends CaspianAsset {
+  originalName: string;
+  folder: string;
+  bytes: number;
+  mimetype: string;
+  assetType: string;
+  shows: string[];
+  ocrText: string;
+  consent: string;
+  nda: boolean;
+  /* field -> "human" | "model". A field absent from this map has been
+     decided by nobody, which is a third state the UI must be able to say. */
+  setBy: Record<string, "human" | "model">;
+  reviewNote: string;
+  reviewFields: string[];
+  describedBy: { provider: string; model: string; at: string; copiedFromChecksum: boolean } | null;
+  job: {
+    id: string; name: string; client: string; clientType: string;
+    industry: string; genre: string; nda: boolean;
+  } | null;
+  blockers: string[];
+  updatedAt: string;
+}
+
+/** The five fields a reviewer puts their name to. Mirrors CONFIRMABLE_FIELDS. */
+export const CONFIRMABLE = ["rights", "consent", "sensitive", "usable", "people"] as const;
+export type Confirmable = (typeof CONFIRMABLE)[number];
 
 export interface SavedSearch {
   key: string;
@@ -120,11 +154,50 @@ export const listAssets = (params: {
 export const listSearches = () =>
   call<{ data: SavedSearch[] }>("/media/searches").then((r) => r.data);
 
-export const approveAsset = (id: string) =>
+/**
+ * Approve, naming the fields you are putting your name to.
+ *
+ * `confirm` is not optional in practice. The server defaults it to ALL of
+ * CONFIRMABLE_FIELDS when it is absent, and every listed field is stamped
+ * setBy 'human' — so posting an empty body claims a person personally
+ * decided the rights, consent, sensitivity, usability and headcount of an
+ * asset they may have glanced at for a second. That is precisely the claim
+ * setBy exists to make trustworthy, so the caller has to make it on
+ * purpose.
+ */
+export const approveAsset = (
+  id: string,
+  opts: { confirm: string[]; note?: string; corrections?: Record<string, unknown> } = { confirm: [] },
+) =>
   call<{ message: string; data: CaspianAsset }>(`/media/${id}/approve`, {
     method: "POST",
-    body: JSON.stringify({}),
+    body: JSON.stringify({
+      confirm: opts.confirm,
+      note: opts.note || "",
+      ...(opts.corrections || {}),
+    }),
   });
+
+export const getAsset = (id: string) =>
+  call<{ data: CaspianAssetDetail }>(`/media/${id}`).then((r) => r.data);
+
+export const patchAsset = (id: string, patch: Record<string, unknown>) =>
+  call<{ data: CaspianAssetDetail }>(`/media/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  }).then((r) => r.data);
+
+/**
+ * Where the file is, asked for with the session's header.
+ *
+ * The download route is behind auth, so a plain link cannot reach it and
+ * following its 302 in the browser is not possible. Pulling the bytes into
+ * a blob would work for a photograph and is wrong for a 500 MB video. So
+ * we ask where, then navigate there.
+ */
+export const fileLocation = (id: string) =>
+  call<{ data: { url: string; filename: string } }>(`/media/${id}/file?as=url`)
+    .then((r) => r.data);
 
 export const rejectAsset = (id: string, reason: string) =>
   call<{ message: string }>(`/media/${id}/reject`, {

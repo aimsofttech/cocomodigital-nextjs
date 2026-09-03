@@ -420,3 +420,130 @@
   .resultRow { grid-template-columns: 84px 1fr; }
   .rWhy { grid-column: 2; }
 }
+
+/* ── detail overlay ────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(8, 7, 4, 0.86);
+  display: grid; place-items: center;
+  padding: clamp(8px, 2vw, 28px);
+  --ink: #f4f3ee; --ground: #12100b; --panel: #1b1913; --line: #2e2b22;
+  --muted: #8f8a7c; --brand: #fff000; --ok: #7fc4a2; --warn: #e0a44a; --bad: #f08279;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.sheet {
+  position: relative;
+  width: min(1180px, 100%);
+  max-height: 94vh;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  overflow: hidden;
+}
+.frame {
+  position: relative;
+  background: #0d0b07;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px; min-height: 300px; min-width: 0;
+}
+.frameMedia {
+  max-width: 100%;
+  max-height: calc(94vh - 96px);
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
+}
+.tech {
+  margin: 12px 0 0; color: var(--muted); font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+.panel {
+  border-left: 1px solid var(--line);
+  padding: 20px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--ground);
+}
+.detailCaption { margin: 0; font-size: 1.02rem; font-weight: 600; line-height: 1.4; }
+
+.closeX, .step {
+  position: absolute; z-index: 2;
+  background: rgba(18, 16, 11, 0.8);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+}
+.closeX { top: 12px; right: 372px; width: 30px; height: 30px; font-size: 1.15rem; }
+.step { top: 50%; transform: translateY(-50%); width: 34px; height: 44px; font-size: 1.4rem; }
+.stepPrev { left: 10px; }
+.stepNext { right: 10px; }
+.closeX:hover, .step:hover { border-color: var(--brand); color: var(--brand); }
+
+.restricted, .blocked {
+  border-radius: 10px; padding: 11px 13px; font-size: 0.84rem; line-height: 1.5;
+}
+.restricted { background: var(--warn); color: #12100b; }
+.blocked { background: var(--bad); color: #12100b; }
+.restricted strong, .blocked strong { display: block; margin-bottom: 4px; }
+.restricted ul, .blocked ul { margin: 0; padding-left: 1.1rem; }
+
+.facts2 {
+  display: grid; grid-template-columns: auto 1fr; gap: 5px 14px;
+  margin: 0; font-size: 0.82rem;
+}
+.facts2 dt { color: var(--muted); }
+.facts2 dd { margin: 0; overflow-wrap: anywhere; }
+
+.rejectNote {
+  border-left: 3px solid var(--bad);
+  background: var(--panel);
+  padding: 9px 12px; border-radius: 0 8px 8px 0; font-size: 0.84rem;
+}
+.rejectNote strong { color: var(--bad); display: block; margin-bottom: 3px; }
+.rejectNote p { margin: 0 0 4px; line-height: 1.5; }
+
+.reviewBlock {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.fieldRow {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: center;
+  font-size: 0.84rem;
+}
+.fieldRow > span:first-child { color: var(--muted); }
+.fieldRow input[type="checkbox"] { accent-color: var(--brand); width: 16px; height: 16px; justify-self: start; }
+.fieldRow .decider { grid-column: 2; }
+
+/* Three states, and each says which it is in words. An icon here would
+   need a legend, and a legend is a thing nobody reads. */
+.decider { font-size: 0.7rem; color: var(--muted); }
+.deciderHuman { color: var(--ok); font-weight: 600; }
+.deciderModel { color: var(--warn); }
+
+.keys {
+  margin: auto 0 0; padding-top: 10px;
+  color: var(--muted); font-size: 0.72rem;
+}
+
+@media (max-width: 860px) {
+  .sheet { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .panel { border-left: 0; border-top: 1px solid var(--line); }
+  .closeX { right: 12px; }
+  .frameMedia { max-height: 42vh; }
+}
+
+/* Clearance badge sits opposite the review state, so the two never
+   collide and each keeps a fixed corner. */
+.stateRight { left: auto; right: 8px; }
+.thumb[role="button"] { cursor: zoom-in; }
+.thumb[role="button"]:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }

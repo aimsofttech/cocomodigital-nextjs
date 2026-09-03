@@ -41,6 +41,7 @@ import {
   type SavedSearch,
 } from "@/src/lib/caspian";
 import Upload from "./Upload";
+import Detail from "./Detail";
 import styles from "./Caspian.module.css";
 
 const RIGHTS_LABEL: Record<string, string> = {
@@ -187,6 +188,7 @@ export default function Caspian() {
   const [publishableOnly, setPublishableOnly] = useState(false);
   const [acting, setActing] = useState<string | null>(null);
   const [tab, setTab] = useState<"library" | "upload">("library");
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const mayView = can("media", "view");
   const mayDecide = can("media", "update");
@@ -232,7 +234,19 @@ export default function Caspian() {
     setError(null);
     try {
       if (verdict === "approve") {
-        await approveAsset(asset.id);
+        /* confirm: [] on purpose.
+         *
+         * The server defaults an absent `confirm` to all five governance
+         * fields and stamps each setBy 'human'. From a grid tile the
+         * reviewer can see a thumbnail and a caption — not the rights, not
+         * the consent — so claiming they personally decided those would put
+         * a person's name on a judgement they never made, and setBy is only
+         * worth anything if it is never wrong.
+         *
+         * So a tile approval records the verdict and nothing else. Putting
+         * your name to specific fields happens in the detail view, where
+         * those fields are actually on screen. */
+        await approveAsset(asset.id, { confirm: [] });
       } else {
         const reason = window.prompt(
           "Why is this being rejected? The uploader sees this.",
@@ -403,9 +417,23 @@ export default function Caspian() {
           const state = a.review?.state || "proposed";
           return (
             <article key={a.id} className={styles.card}>
-              <div className={styles.thumb}>
+              <div
+                className={styles.thumb}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open ${a.caption || a.kind}`}
+                onClick={() => setOpenId(a.id)}
+                onKeyDown={(e) => { if (e.key === "Enter") setOpenId(a.id); }}
+              >
                 <Thumb asset={a} />
                 <span className={`${styles.state} ${STATE_CLASS[state] || ""}`}>{state}</span>
+                {a.clearance && a.clearance.level !== "clear" && (
+                  <span className={`${styles.state} ${styles.stateRight} ${
+                    a.clearance.level === "blocked" ? styles.stateRejected : styles.stateProposed
+                  }`}>
+                    {a.clearance.level}
+                  </span>
+                )}
               </div>
               <div className={styles.meta}>
                 <p className={styles.caption}>
@@ -453,6 +481,26 @@ export default function Caspian() {
       </div>
       </>
       )}
+
+      {openId && (() => {
+        const i = assets.findIndex((x) => x.id === openId);
+        if (i === -1) return null;
+        return (
+          <Detail
+            seed={assets[i]}
+            mayDecide={mayDecide}
+            onClose={() => setOpenId(null)}
+            onChanged={() => setNonce((n) => n + 1)}
+            /* Wraps at both ends. Running off the end of a filtered set and
+               getting nothing is a dead end; coming back round is at worst
+               a repeat, and it keeps one key doing one predictable thing. */
+            onStep={(dir) => {
+              const next = (i + dir + assets.length) % assets.length;
+              setOpenId(assets[next].id);
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }

@@ -62,4 +62,7 @@ router.delete('/:id/people/:personId', protect, people.untag);
 // The second route that can spend money. Admin-triggered, never on a read path.
 router.post('/:id/describe', protect, ctrl.redescribe);
 
+/* Two segments, so '/:id' cannot swallow it. */
+router.get('/:id/file', protect, ctrl.download);
+
 module.exports = router;

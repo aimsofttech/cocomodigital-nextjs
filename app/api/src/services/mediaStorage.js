@@ -115,10 +115,15 @@ const localDriver = {
     if (/^https?:\/\//i.test(key)) return key;
     return `${localBase()}${LOCAL_ROUTE}/${key}`;
   },
+  /* An absolute path the route can hand to res.download(), which sets
+   * Content-Disposition for us and streams rather than buffering. */
+  localPath: (key) => resolveLocal(key),
 };
 
 const s3Driver = {
   name: 's3',
+  /* No local path exists for an S3 object; the route redirects instead. */
+  localPath: () => null,
   async put(buffer, opts) {
     const { key, url } = await putBufferToS3(buffer, opts);
     return { key, url, driver: 's3' };
@@ -143,6 +148,40 @@ const removeObject = (key) => driver().remove(key);
 
 /** The public URL for a stored key, under whichever driver is active. */
 const urlFor = (key) => driver().url(key);
+
+/**
+ * How a download route should serve one object.
+ *
+ * `{ mode: 'file', path }`      stream it from disk (local driver)
+ * `{ mode: 'redirect', url }`   send the caller to the object (s3 driver)
+ *
+ * The S3 arm redirects to the plain public URL today, which is only
+ * acceptable because those objects ARE public (defect D4). When the
+ * caspian/ prefix goes private this becomes a presigned GET with a short
+ * expiry and ResponseContentDisposition — one function, one change, and
+ * every caller of this route keeps working. Proxying the bytes through
+ * the API is the option NOT taken: a 500 MB video through a shared
+ * aaPanel VPS is a bad trade for a filename. */
+const downloadTarget = (key, storedUrl = '') => {
+  const d = driver();
+  /* Not named `path` — that shadows the required node:path module in this
+   * scope, which works only for as long as nobody adds a line here that
+   * needs it. */
+  const filePath = d.localPath(key);
+
+  /* The local path is an optimisation, not the truth. The truth is the URL
+   * stored on the row: an asset uploaded before this driver existed, or
+   * migrated in, or seeded, has bytes that live somewhere this driver does
+   * not own — and handing res.download a path with no file behind it
+   * produces a bare 404 that reads as "the asset is gone" rather than
+   * "this machine does not have a copy".
+   *
+   * So: serve from disk when the file is actually there, otherwise fall
+   * back to wherever the row says the bytes are. */
+  if (filePath && fs.existsSync(filePath)) return { mode: 'file', path: filePath };
+  const url = (storedUrl && /^https?:\/\//i.test(storedUrl)) ? storedUrl : d.url(key);
+  return url ? { mode: 'redirect', url } : { mode: 'missing' };
+};
 
 /**
  * Called once at boot. Reports the choice, and refuses the combination
@@ -172,6 +211,7 @@ module.exports = {
   putBuffer,
   removeObject,
   urlFor,
+  downloadTarget,
   initMediaStorage,
   driverName,
   localRoot,

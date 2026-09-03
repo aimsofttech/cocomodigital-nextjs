@@ -111,6 +111,47 @@ const SAVED_SEARCHES = {
 };
 
 /**
+ * What a person may do with one asset, decided on the server.
+ *
+ * Not `publishable()` inverted. Every row in the library is unapproved —
+ * review.state predates none of them, which is why pendingReview() carries
+ * an $exists arm — so a warning keyed to publishable() would fire on the
+ * entire collection and be ignored within a day. This asks a narrower
+ * question: is there anything about this asset that makes taking it a
+ * mistake?
+ *
+ *   clear       nothing to say. The common case, and it earns no badge:
+ *               the absence of a warning is the signal.
+ *   restricted  usable internally, wrong on a public Cocoma page.
+ *   blocked     do not take this out of the building.
+ *
+ * Lives here rather than in the browser for the same reason publishable()
+ * does: a second copy of these rules in client code is a second definition
+ * of safe, and it is the copy an attacker can edit.
+ */
+const clearance = (doc = {}) => {
+  const reasons = [];
+  let level = 'clear';
+  const raise = (to, why) => {
+    reasons.push(why);
+    if (to === 'blocked' || level === 'blocked') level = 'blocked';
+    else level = to;
+  };
+
+  if (doc.nda) raise('blocked', 'This job is under NDA. Nothing from it leaves the building.');
+  if (doc.consent === 'refused') raise('blocked', 'Somebody in this frame refused to be photographed.');
+  if (doc.consent === 'minors') raise('blocked', 'There is a minor in this frame.');
+  if (doc.sensitive) raise('blocked', 'Flagged sensitive — a person has to clear this one.');
+
+  if (doc.rights === 'client-ip') raise('restricted', "This is a client's material, not ours to publish.");
+  if (doc.rights === 'stock') raise('restricted', 'Licensed stock — never on a page claiming it is our work.');
+  if (doc.rights === 'unknown') raise('restricted', 'Nobody has recorded who owns this yet.');
+  if (doc.consent === 'unknown') raise('restricted', 'Nobody has recorded whether the people in it agreed.');
+
+  return { level, reasons };
+};
+
+/**
  * Everything safe to put on a public Cocoma page.
  *
  * Five conditions, and each earns its place:
@@ -165,4 +206,6 @@ const pendingReview = () => ({
   ],
 });
 
-module.exports = { SHOWS, SAVED_SEARCHES, REVIEW_STATES, publishable, pendingReview };
+module.exports = {
+  SHOWS, SAVED_SEARCHES, REVIEW_STATES, publishable, pendingReview, clearance,
+};

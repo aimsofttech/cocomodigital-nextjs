@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 const MediaAsset = require('../../models/MediaAsset');
 const MediaJob = require('../../models/MediaJob');
 const { buildS3Url } = require('../../utils/s3Upload');
-const { removeObject } = require('../../services/mediaStorage');
+const { removeObject, downloadTarget, urlFor } = require('../../services/mediaStorage');
 const { enqueue, describeNow, budgetStatus } = require('../../services/mediaDescriber');
 const { ingestBatch } = require('../../services/mediaIngest');
 const {
-  publishable, pendingReview, REVIEW_STATES, SAVED_SEARCHES,
+  publishable, pendingReview, REVIEW_STATES, SAVED_SEARCHES, clearance,
 } = require('../../lib/mediaSearches');
 const logger = require('../../utils/logger');
 
@@ -113,7 +113,12 @@ const show = async (req, res) => {
     _id: req.params.id,
   });
   if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
-  res.json({ status: 'success', data: toPublic(doc) });
+  /* One extra read, on a single-document route only. The grid must never
+   * do this — sixty assets would be sixty job lookups. */
+  const job = doc.job
+    ? await MediaJob.findById(doc.job).select('_id name client clientType industry genre nda')
+    : null;
+  res.json({ status: 'success', data: toDetail(doc, job) });
 };
 
 /**
@@ -124,23 +129,41 @@ const show = async (req, res) => {
  * never let a model overwrite a person's correction.
  */
 const update = async (req, res) => {
-  const allowed = ['caption', 'altText', 'tags', 'category', 'rights',
-                   'usable', 'sensitive', 'folder', 'status'];
-  const patch = {};
-  allowed.forEach((f) => {
-    if (Object.prototype.hasOwnProperty.call(req.body, f)) patch[f] = req.body[f];
-  });
+  /* `consent` was missing from this list, which left "fix the consent on
+   * this asset" with no route at all: only the approve path could set it,
+   * so correcting a mistake meant approving the asset in the same breath.
+   * A correction and a verdict are different acts and each needed its own
+   * door. `pickEditable` is the shared allow-list — CORRECTABLE_FIELDS —
+   * so the two paths cannot drift.
+   *
+   * Everything outside that list is dropped rather than passed through.
+   * MediaAsset is declared `strict: false`, so an unfiltered $set would
+   * persist whatever arbitrary keys arrived in the body. */
+  const patch = pickEditable(req.body);
   if (!Object.keys(patch).length) {
     return res.status(400).json({ status: 'error', message: 'No editable fields provided.' });
   }
-  if (Array.isArray(patch.tags)) {
-    patch.tags = patch.tags.map((t) => String(t).trim().toLowerCase()).filter(Boolean);
-  }
+
+  /* A person changing a governance field IS the human decision setBy
+   * exists to record. Without this stamp a correction made here could be
+   * silently undone by the next describe run, which is the one thing the
+   * whole provenance model promises cannot happen. Only the fields
+   * actually present in the request are stamped — touching the caption
+   * must not claim you also decided the rights. */
+  CONFIRMABLE_FIELDS
+    .filter((f) => Object.prototype.hasOwnProperty.call(patch, f))
+    .forEach((f) => { patch[`setBy.${f}`] = 'human'; });
+
   patch.reviewed = 1;
 
-  const doc = await MediaAsset.findByIdAndUpdate(req.params.id, patch, { new: true });
+  const doc = await MediaAsset.findByIdAndUpdate(req.params.id, patch, {
+    new: true, runValidators: true,
+  });
   if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
-  res.json({ status: 'success', message: 'Updated successfully', data: toPublic(doc) });
+  const job = doc.job
+    ? await MediaJob.findById(doc.job).select('_id name client clientType industry genre nda')
+    : null;
+  res.json({ status: 'success', message: 'Updated', data: toDetail(doc, job) });
 };
 
 /** POST /admin/media/:id/describe — re-run the describer on one asset. */
@@ -353,6 +376,13 @@ const toPublic = (doc) => ({
     taggedAt: t.taggedAt,
   })),
   describeStatus: doc.describeStatus,
+  /* mediaVideo.ensurePoster() extracts a frame and writes posterKey, and
+   * no projection has ever returned it — so work already paid for in CPU
+   * and disk has been invisible to every client. */
+  posterUrl: doc.posterKey ? buildS3Url(doc.posterKey) : null,
+  /* What a person may do with this, decided in lib/mediaSearches so the
+   * browser never restates it. */
+  clearance: clearance(doc),
   /* The verdict, and who reached it. Without this any review UI has to
    * guess, and guessing defaults everything to 'proposed' — which is how
    * an already-rejected asset ends up offered for approval again.
@@ -368,6 +398,191 @@ const toPublic = (doc) => ({
   },
   createdAt: doc.createdAt,
 });
+
+
+/**
+ * One asset, in full, for the detail view.
+ *
+ * toPublic() is the grid projection and is deliberately narrow: it is sent
+ * sixty at a time to everyone who can open the library. This is sent one at
+ * a time, on purpose, to someone who asked for this specific asset — so it
+ * carries the fields that answer "why is this asset the way it is".
+ *
+ * `setBy` is the point of the whole screen. It is a Mongoose Map, which
+ * serialises to {} through res.json without Object.fromEntries — the field
+ * would appear to exist and always be empty, which is worse than absent.
+ *
+ * Still withheld, from everyone:
+ *   checksum, userId          internal plumbing, no reader's business
+ *   describeMeta.costUsd      per-asset spend is an operations number and
+ *   describeMeta.*Tokens      is on /media/stats in aggregate already
+ *   describeError             a provider stack trace helps nobody here
+ *
+ * `review.note` IS included. It is the rejection reason, it was written to
+ * be read by the person who uploaded the asset, and withholding it is what
+ * makes a rejection a dead end — the whole complaint the review flow exists
+ * to answer.
+ */
+const toDetail = (doc, job = null) => ({
+  ...toPublic(doc),
+  originalName: doc.originalName || '',
+  folder: doc.folder || '',
+  bytes: doc.bytes || 0,
+  mimetype: doc.mimetype || '',
+  assetType: doc.assetType || 'unknown',
+  shows: doc.shows || [],
+  ocrText: doc.ocrText || '',
+  consent: doc.consent,
+  nda: Boolean(doc.nda),
+  /* Three states, not two: a field can be decided by a person, proposed by
+   * a model, or never touched at all. Absent-from-the-map is its own answer
+   * and the UI has to be able to say "nobody has decided this yet". */
+  setBy: doc.setBy instanceof Map
+    ? Object.fromEntries(doc.setBy)
+    : (doc.setBy || {}),
+  reviewNote: (doc.review && doc.review.note) || '',
+  reviewFields: (doc.review && doc.review.fields) || [],
+  describedBy: doc.describeMeta && doc.describeMeta.describedAt
+    ? {
+      provider: doc.describeMeta.provider,
+      model: doc.describeMeta.model,
+      at: doc.describeMeta.describedAt,
+      copiedFromChecksum: Boolean(doc.describeMeta.copiedFromChecksum),
+    }
+    : null,
+  job: job
+    ? {
+      id: job._id, name: job.name, client: job.client,
+      clientType: job.clientType, industry: job.industry,
+      genre: job.genre, nda: job.nda,
+    }
+    : null,
+  /* Why this asset is not publishable, in the same words the approve route
+   * would refuse it with — so the screen can say it before the button is
+   * pressed rather than after a 422. */
+  blockers: approvalBlockers({
+    rights: doc.rights, consent: doc.consent,
+    sensitive: doc.sensitive, usable: doc.usable, people: doc.people,
+  }),
+  updatedAt: doc.updatedAt,
+});
+
+
+/**
+ * GET /admin/api/media/:id/file — hand the original to a person.
+ *
+ * Not a plain link to `asset.url`, for three reasons that each on their
+ * own would be enough:
+ *
+ *   - The `download` attribute is inert cross-origin. The library runs on
+ *     one origin and the bytes are served from another, so a
+ *     `<a download>` silently navigates to the image instead of saving it.
+ *     The control would look like it worked and would not.
+ *   - The stored key is `caspian/images/1788467741306_44821_shot.jpg`.
+ *     That is the name that lands in a Premiere bin. Content-Disposition
+ *     is the only thing that fixes it.
+ *   - It survives defect D4. Every control built against `asset.url`
+ *     breaks the week the caspian/ prefix goes private; this one changes
+ *     in a single function in mediaStorage.
+ *
+ * The same governance filter as show(): if you could not have seen it in
+ * the listing you cannot download it, and not-visible answers 404 exactly
+ * as not-found does.
+ */
+const download = async (req, res) => {
+  if (!OBJECT_ID_RE.test(String(req.params.id))) {
+    return res.status(404).json({ status: 'error', message: 'Not found' });
+  }
+  const doc = await MediaAsset.findOne({
+    ...buildGovernanceFilter(req.query),
+    _id: req.params.id,
+  });
+  if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
+
+  /* A pull of somebody else's material is the event you want a record of
+   * after a leak. Logged for every asset the clearance check does not call
+   * clear — the quiet 90% would only bury the ones that matter. */
+  const { level } = clearance(doc);
+  if (level !== 'clear') {
+    logger.info(
+      `media download [${level}] ${doc._id} (${doc.originalName || doc.key}) `
+      + `by ${(req.user && (req.user.name || req.user.email)) || 'unknown'}`,
+    );
+  }
+
+  const name = doc.originalName || String(doc.key).split('/').pop() || 'download';
+  const target = downloadTarget(doc.key, doc.url);
+
+  if (target.mode === 'missing') {
+    /* The row exists and the bytes do not. Say that, rather than 404ing
+     * as though the asset were unknown — one is a broken library and the
+     * other is a permission answer, and they need different reactions. */
+    return res.status(410).json({
+      status: 'error',
+      message: 'This asset\'s file is missing from storage. The record is here; the bytes are not.',
+    });
+  }
+  /* `?as=url` answers with the location instead of the bytes.
+   *
+   * This route sits behind `protect`, so it needs an Authorization header
+   * — and a plain <a href> cannot send one. The browser therefore cannot
+   * follow a 302 from here directly. Fetching the bytes as a blob would
+   * work for a photograph and is a bad idea for a 500 MB video, which
+   * would be pulled entirely into the tab's memory before saving.
+   *
+   * So the client asks, with its header, for WHERE the file is, and then
+   * navigates there itself. Today that is the object's own URL. When the
+   * caspian/ prefix goes private it becomes a short-lived presigned URL
+   * and this contract does not change. */
+  if (String(req.query.as || '') === 'url') {
+    return res.json({
+      status: 'success',
+      data: {
+        url: target.mode === 'file'
+          ? `${urlFor(doc.key)}`
+          : target.url,
+        filename: name,
+        clearance: clearance(doc),
+      },
+    });
+  }
+
+  if (target.mode === 'file') {
+    return res.download(target.path, name, (err) => {
+      if (err && !res.headersSent) {
+        res.status(410).json({ status: 'error', message: 'That file could not be read from storage.' });
+      }
+    });
+  }
+  return res.redirect(302, target.url);
+};
+
+
+/**
+ * Which fields is the reviewer putting their name to?
+ *
+ * An explicitly empty array means "I am claiming nothing about the
+ * governance" and MUST be honoured. The previous test — `Array.isArray(x)
+ * && x.length` — collapsed [] into the same branch as a missing key and
+ * stamped all five fields setBy 'human', so a one-click approval from a
+ * grid tile recorded that a person had personally decided the rights,
+ * consent, sensitivity, usability and headcount of an asset they had seen
+ * only as a thumbnail. setBy is worth something only if it is never wrong.
+ *
+ * A MISSING key still defaults to all five, which is the contract the
+ * approve docblock describes and existing callers were written against.
+ * That default is a footgun pointing the wrong way — forgetting a field
+ * should claim less, not more — and it is worth changing, but changing a
+ * reviewed contract silently is not this commit's job. Flagged for Anshu.
+ *
+ * Unknown names are dropped rather than stored: review.fields feeds a
+ * setBy stamp, and an arbitrary string there would write an arbitrary key
+ * into a collection declared `strict: false`.
+ */
+const readConfirm = (body = {}) => {
+  if (!Array.isArray(body.confirm)) return CONFIRMABLE_FIELDS;
+  return body.confirm.filter((f) => CONFIRMABLE_FIELDS.includes(f));
+};
 
 /**
  * Translate query params into the filter every read must obey.
@@ -652,9 +867,7 @@ const approve = async (req, res) => {
   if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
 
   const patch = pickEditable(req.body);
-  const confirm = Array.isArray(req.body.confirm) && req.body.confirm.length
-    ? req.body.confirm
-    : CONFIRMABLE_FIELDS;
+  const confirm = readConfirm(req.body);
 
   const after = {};
   ['rights', 'consent', 'sensitive', 'usable', 'people']
@@ -744,9 +957,7 @@ const bulkApprove = async (req, res) => {
     });
   }
 
-  const confirm = Array.isArray(req.body.confirm) && req.body.confirm.length
-    ? req.body.confirm
-    : CONFIRMABLE_FIELDS;
+  const confirm = readConfirm(req.body);
 
   const docs = await MediaAsset.find({ _id: { $in: ids } });
   const approved = [];
@@ -862,6 +1073,7 @@ const savedSearchFilter = async (query = {}) => {
 
 module.exports = {
   savedSearches,
+  download,
   // ingest
   upload,
   // browse
