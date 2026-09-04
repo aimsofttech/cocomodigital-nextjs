@@ -40,7 +40,9 @@ import {
   CaspianError,
   type CaspianAsset,
   type CaspianAssetDetail,
+  type FaceBox,
 } from "@/src/lib/caspian";
+import People, { FaceBoxes } from "./People";
 import styles from "./Caspian.module.css";
 
 const RIGHTS = ["own", "client-ip", "stock", "unknown"];
@@ -101,6 +103,8 @@ export default function Detail({
   const [confirm, setConfirm] = useState<string[]>([]);
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const panelRef = useRef<HTMLDivElement>(null);
+  const [drawing, setDrawing] = useState(false);
+  const [pendingBox, setPendingBox] = useState<FaceBox | null>(null);
 
   /* Reset every time the asset changes — a half-typed caption or a ticked
      confirmation must never follow you onto the next asset. */
@@ -188,8 +192,15 @@ export default function Detail({
           {a.kind === "video" && a.url ? (
             <video className={styles.frameMedia} src={a.url} poster={a.posterUrl || undefined} controls preload="metadata" playsInline />
           ) : a.url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className={styles.frameMedia} src={a.url} alt={a.altText || ""} />
+            <div className={styles.framed}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={styles.frameMedia} src={a.url} alt={a.altText || ""} />
+              <FaceBoxes
+                tagged={a.taggedPeople || []}
+                drawing={drawing}
+                onDrawn={(box) => { setPendingBox(box); setDrawing(false); }}
+              />
+            </div>
           ) : (
             <div className={styles.thumbFallback}><span>no preview</span></div>
           )}
@@ -262,6 +273,32 @@ export default function Detail({
           )}
 
           {error && <p className={styles.error} role="alert">{error}</p>}
+
+          {asset && (
+            <>
+              <div className={styles.actions}>
+                <button
+                  className={drawing ? styles.primary : styles.ghostSm}
+                  onClick={() => { setDrawing((d) => !d); setPendingBox(null); }}
+                >
+                  {drawing ? "Drag a box around their face — click to cancel" : "Mark a face"}
+                </button>
+                {pendingBox && <span className={styles.muted}>box ready — pick who it is</span>}
+              </div>
+              <People
+                assetId={seed.id}
+                folder={a.folder || ""}
+                jobId={a.job?.id || null}
+                tagged={a.taggedPeople || []}
+                pendingBox={pendingBox}
+                onBoxUsed={() => setPendingBox(null)}
+                onChanged={() => {
+                  getAsset(seed.id).then(setAsset).catch(() => {});
+                  onChanged();
+                }}
+              />
+            </>
+          )}
 
           {/* ── reviewer half ─────────────────────────────────────────── */}
           {mayDecide && asset && (

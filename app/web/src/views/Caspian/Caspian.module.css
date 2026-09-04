@@ -547,3 +547,66 @@
 .stateRight { left: auto; right: 8px; }
 .thumb[role="button"] { cursor: zoom-in; }
 .thumb[role="button"]:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+
+/* ── people ────────────────────────────────────────────────────────────── */
+.peopleBlock {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.tagList { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tagChip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px 6px 4px 11px; font-size: 0.8rem;
+}
+.tagBoxed { color: var(--brand); font-size: 0.7rem; }
+.tagX {
+  background: none; border: 0; color: var(--muted);
+  cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 3px;
+}
+.tagX:hover { color: var(--bad); }
+
+.suggests { display: flex; flex-direction: column; gap: 6px; }
+.suggestRow {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 8px; align-items: center; font-size: 0.78rem;
+}
+.suggestAccept {
+  background: var(--panel); border: 1px solid var(--brand);
+  color: var(--brand); border-radius: 999px;
+  padding: 5px 11px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+}
+.suggestAccept:hover { background: var(--brand); color: #12100b; }
+.suggestAccept:disabled { opacity: 0.5; cursor: default; }
+/* The confidence word carries no colour of its own beyond high/low. A
+   three-colour scale would imply a precision this ranking does not have. */
+.conf { font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.confHigh { color: var(--ok); }
+.confLow { color: var(--muted); }
+.suggestWhy { color: var(--muted); overflow-wrap: anywhere; }
+
+.batchBox {
+  border: 1px dashed var(--line); border-radius: 10px;
+  padding: 11px 13px; display: flex; flex-direction: column; gap: 7px;
+}
+
+/* Boxes over the frame. Percentages, because the stored coordinates are
+   fractions and the frame is a different size on every screen. */
+.framed { position: relative; display: inline-block; max-width: 100%; }
+.boxLayer { position: absolute; inset: 0; }
+.boxLayerDraw { cursor: crosshair; background: rgba(255, 240, 0, 0.06); }
+.faceBox {
+  position: absolute;
+  border: 2px solid var(--brand);
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+}
+.faceBox span {
+  position: absolute; left: 0; top: 100%;
+  background: var(--brand); color: #12100b;
+  font-size: 0.66rem; padding: 1px 5px; border-radius: 0 0 3px 3px;
+  white-space: nowrap;
+}
+.faceBoxLive { border-style: dashed; }

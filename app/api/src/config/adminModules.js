@@ -250,8 +250,20 @@ const moduleForRoutePath = (path) => {
  * grading, which is correct for CRUD screens and is what the other
  * fourteen modules were built against. */
 const MEDIA_ACTION_OVERRIDES = [
-  { test: /^\/media\/(bulk-approve|describe-queue)$/, action: 'update' },
-  { test: /^\/media\/[^/]+\/(approve|reject|describe)$/, action: 'update' },
+  { verb: 'POST', test: /^\/media\/(bulk-approve|describe-queue)$/, action: 'update' },
+  { verb: 'POST', test: /^\/media\/[^/]+\/(approve|reject|describe)$/, action: 'update' },
+  /* Removing a name is the same capability as adding one, not the same as
+   * deleting an asset. Graded by verb alone, DELETE /media/:id/people/:pid
+   * needs `delete` — which contributors do not have — so somebody who
+   * tagged the wrong person could not take it back, and a wrong name would
+   * sit there until a reviewer happened to notice. The wrong name is the
+   * worse outcome, and it is the one the verb default produces.
+   *
+   * The verb is part of the match. Without it this pattern also catches
+   * GET /media/:id/people/suggestions, and a read starts demanding write
+   * permission — which is how a guard that was meant to loosen one route
+   * quietly tightens another. */
+  { verb: 'DELETE', test: /^\/media\/[^/]+\/people\/[^/]+$/, action: 'create' },
 ];
 
 const actionForRequest = (method, path) => {
@@ -259,7 +271,7 @@ const actionForRequest = (method, path) => {
   if (/\/export\/csv$/.test(path)) return 'export';
   if (/\/import\/csv$/.test(path)) return 'import';
   if (/\/bulk-upload(\/|$)/.test(path)) return 'import';
-  const override = MEDIA_ACTION_OVERRIDES.find((o) => o.test.test(path));
+  const override = MEDIA_ACTION_OVERRIDES.find((o) => o.verb === verb && o.test.test(path));
   if (override) return override.action;
   switch (verb) {
     case 'GET':

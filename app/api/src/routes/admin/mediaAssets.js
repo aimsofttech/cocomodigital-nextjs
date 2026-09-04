@@ -31,6 +31,11 @@ router.get('/searches', protect, ctrl.savedSearches);
 // above /:id for the same reason.
 router.get('/people', protect, people.listPeople);
 router.post('/people', protect, people.createPerson);
+
+/* Name one person across a whole drop or project. Literal segment before
+ * ':personId' cannot collide — 'people/:personId/tag-batch' is three
+ * segments and nothing else claims that shape. */
+router.post('/people/:personId/tag-batch', protect, people.tagBatch);
 router.get('/people/:personId/assets', protect, people.assetsByPerson);
 router.patch('/people/:personId', protect, people.updatePerson);
 
@@ -57,6 +62,7 @@ router.post('/:id/reject', protect, ctrl.reject);
 
 // Naming a face. Always a person, never the model — see taggedPersonSchema.
 router.post('/:id/people', protect, people.tag);
+router.get('/:id/people/suggestions', protect, people.suggestions);
 router.delete('/:id/people/:personId', protect, people.untag);
 
 // The second route that can spend money. Admin-triggered, never on a read path.

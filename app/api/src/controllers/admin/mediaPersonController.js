@@ -4,6 +4,7 @@ const MediaAsset = require('../../models/MediaAsset');
 const { generateSlug } = require('../../utils/helpers');
 const { buildGovernanceFilter, toPublic } = require('./mediaAssetController');
 const logger = require('../../utils/logger');
+const { suggestFor } = require('../../lib/peopleSuggestions');
 
 /**
  * Person tagging — "this is Dishan Puzari".
@@ -453,7 +454,115 @@ const assetsByPerson = async (req, res) => {
   });
 };
 
+
+
+/**
+ * GET /admin/api/media/:id/people/suggestions
+ *
+ * Who is probably in this frame, inferred from who is in the frames
+ * around it. See lib/peopleSuggestions for why this is context and not
+ * face recognition, and why it never applies itself.
+ */
+const suggestions = async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid asset id.');
+  const asset = await MediaAsset.findById(req.params.id)
+    .select('_id folder job taggedPeople');
+  if (!asset) return fail(res, 404, 'Asset not found');
+  const data = await suggestFor(asset);
+  res.json({ status: 'success', data });
+};
+
+/**
+ * POST /admin/api/media/people/:personId/tag-batch
+ *
+ * Name one person across a whole drop or project in one action.
+ *
+ * This is the point of the suggestions, not a convenience on top of them.
+ * Tagging two hundred frames one at a time is work that does not get
+ * done, so the person index stays empty and every search that depends on
+ * it returns nothing. Naming somebody once and saying "and in the rest of
+ * this shoot" is the difference between a feature and a feature people use.
+ *
+ * Scope must be given explicitly as a folder or a job. There is
+ * deliberately no "everything" — a mistake at that scale is not
+ * correctable by hand, and nothing about this operation is worth that.
+ *
+ * No box is written. A box is a position in one particular frame and
+ * cannot be carried to another; assets tagged this way carry the name and
+ * no coordinates, which is exactly as much as is actually known.
+ */
+const tagBatch = async (req, res) => {
+  const { personId } = req.params;
+  if (!mongoose.isValidObjectId(personId)) return fail(res, 400, 'Invalid person id.');
+
+  const folder = String(req.body.folder || '').trim();
+  const jobId = String(req.body.job || '').trim();
+  if (!folder && !jobId) {
+    return fail(res, 400, 'Give a folder or a job. There is no option to tag everything.');
+  }
+  if (jobId && !mongoose.isValidObjectId(jobId)) return fail(res, 400, 'Invalid job id.');
+
+  const person = await MediaPerson.findById(personId);
+  if (!person) return fail(res, 404, 'Person not found. Add them to the directory first.');
+
+  const scope = folder ? { folder } : { job: new mongoose.Types.ObjectId(jobId) };
+  /* Only frames they are not already in — re-tagging would rewrite
+   * taggedAt and taggedBy across the set and destroy the record of who
+   * actually named them first. */
+  const targets = await MediaAsset.find({
+    ...scope,
+    'taggedPeople.person': { $ne: person._id },
+  }).select('_id usable');
+
+  if (!targets.length) {
+    return res.json({
+      status: 'success',
+      message: `${person.name} is already named in every frame in that scope.`,
+      data: { tagged: 0, demoted: 0 },
+    });
+  }
+
+  const taggedBy = (req.user && req.user._id) || null;
+  const entry = { person: person._id, taggedBy, taggedAt: new Date(), box: null, note: '' };
+
+  const ops = targets.map((t) => ({
+    updateOne: {
+      filter: { _id: t._id },
+      update: {
+        $push: { taggedPeople: entry },
+        /* Same rule the single-tag path applies, and for the same reason:
+         * naming somebody who refused a release makes the asset
+         * unpublishable, and that must not depend on anyone noticing a
+         * warning. It can only ever remove publishability, never grant it. */
+        ...(person.release === 'refused' ? { $set: { usable: false } } : {}),
+      },
+    },
+  }));
+
+  await MediaAsset.bulkWrite(ops);
+
+  const demoted = person.release === 'refused'
+    ? targets.filter((t) => t.usable === true).length
+    : 0;
+
+  logger.info(
+    `mediaPerson: ${person.name} tagged across ${targets.length} asset(s) in `
+    + `${folder ? `folder "${folder}"` : `job ${jobId}`}`
+    + (demoted ? ` — ${demoted} demoted to usable=false (release refused)` : ''),
+  );
+
+  res.json({
+    status: 'success',
+    message: demoted
+      ? `${person.name} named in ${targets.length} more. ${demoted} are no longer marked usable — they refused a release.`
+      : `${person.name} named in ${targets.length} more.`,
+    data: { tagged: targets.length, demoted },
+  });
+};
+
 module.exports = {
+  suggestions,
+  tagBatch,
   listPeople,
   createPerson,
   updatePerson,

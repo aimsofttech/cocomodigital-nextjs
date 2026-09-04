@@ -33,6 +33,7 @@ export interface CaspianAsset {
   sensitive: boolean;
   people: number;
   namedPeople: number;
+  taggedPeople: TaggedPerson[];
   describeStatus: "pending" | "processing" | "done" | "failed" | "skipped";
   createdAt: string;
   posterUrl: string | null;
@@ -304,3 +305,79 @@ export async function uploadBatch(
   }
   return body.data as { summary: UploadSummary; results: UploadResult[] };
 }
+
+/* ── people ────────────────────────────────────────────────────────────── */
+
+export interface CaspianPerson {
+  id: string;
+  name: string;
+  kind: string;
+  role?: string;
+  release: string;
+  status: number;
+}
+
+export interface FaceBox { x: number; y: number; w: number; h: number }
+
+export interface TaggedPerson {
+  tagId: string;
+  person: { id: string; name: string; role: string } | null;
+  box: FaceBox | null;
+  note: string;
+  taggedAt: string;
+}
+
+export const listPeople = (q?: string) =>
+  call<{ data: CaspianPerson[] }>(`/media/people${q ? `?q=${encodeURIComponent(q)}` : ""}`)
+    .then((r) => r.data);
+
+export const createPerson = (name: string, kind = "internal") =>
+  call<{ data: CaspianPerson }>("/media/people", {
+    method: "POST",
+    body: JSON.stringify({ name, kind }),
+  }).then((r) => r.data);
+
+/**
+ * Name somebody in a frame.
+ *
+ * `box` is 0-1 fractions of the frame, never pixels — the same photograph
+ * is served at different sizes and a pixel box would be wrong at all but
+ * one of them. The server rejects anything above 1 with that explanation.
+ *
+ * The response can carry `warnings`: tagging someone who has refused a
+ * release drops `usable` on the asset, and that is worth showing rather
+ * than letting a reviewer discover it later.
+ */
+export const tagPerson = (
+  assetId: string,
+  body: { personId: string; box?: FaceBox | null; note?: string },
+) =>
+  call<{ data: unknown; warnings?: string[]; message?: string }>(`/media/${assetId}/people`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+export const untagPerson = (assetId: string, personId: string) =>
+  call<{ message: string }>(`/media/${assetId}/people/${personId}`, { method: "DELETE" });
+
+export interface PersonSuggestion {
+  personId: string;
+  name: string;
+  role: string;
+  release: string;
+  score: number;
+  /* Words rather than a number: "0.82" invites a reader to think it is
+     calibrated, and it is a ranking. */
+  confidence: "likely" | "possible" | "a guess";
+  reasons: string[];
+}
+
+export const suggestPeople = (assetId: string) =>
+  call<{ data: PersonSuggestion[] }>(`/media/${assetId}/people/suggestions`).then((r) => r.data);
+
+/** Name one person across a whole drop or project. Scope is required. */
+export const tagBatch = (personId: string, scope: { folder?: string; job?: string }) =>
+  call<{ message: string; data: { tagged: number; demoted: number } }>(
+    `/media/people/${personId}/tag-batch`,
+    { method: "POST", body: JSON.stringify(scope) },
+  );
