@@ -381,3 +381,24 @@ export const tagBatch = (personId: string, scope: { folder?: string; job?: strin
     `/media/people/${personId}/tag-batch`,
     { method: "POST", body: JSON.stringify(scope) },
   );
+
+/* ── describing ────────────────────────────────────────────────────────── */
+
+export interface MediaStats {
+  describeStatus: Record<string, number>;
+  rights: Record<string, number>;
+  kind: Record<string, number>;
+  cost: { totalUsd: number; described: number; reusedFromChecksum: number; avgUsdPerAsset: number };
+  budget: {
+    provider: string; model: string; budgetUsd: number;
+    spentThisMonthUsd: number; enabled: boolean;
+  };
+}
+
+export const getStats = () => call<{ data: MediaStats }>("/media/stats").then((r) => r.data);
+
+export const runDescribeQueue = (limit = 20) =>
+  call<{ data: { considered: number; reused: number; described: number; skipped: number; failed: number; costUsd: number } }>(
+    "/media/describe-queue",
+    { method: "POST", body: JSON.stringify({ limit }) },
+  ).then((r) => r.data);

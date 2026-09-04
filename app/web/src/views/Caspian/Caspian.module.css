@@ -610,3 +610,12 @@
   white-space: nowrap;
 }
 .faceBoxLive { border-style: dashed; }
+
+.describeBar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 14px; margin-bottom: 12px;
+}
+.describeText { display: flex; flex-direction: column; gap: 3px; flex: 1 1 320px; min-width: 0; }
+.describeText strong { font-size: 0.88rem; }
+.describeText .muted { font-size: 0.76rem; line-height: 1.5; }

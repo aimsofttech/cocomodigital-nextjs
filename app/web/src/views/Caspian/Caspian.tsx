@@ -42,6 +42,7 @@ import {
 } from "@/src/lib/caspian";
 import Upload from "./Upload";
 import Detail from "./Detail";
+import Describe from "./Describe";
 import styles from "./Caspian.module.css";
 
 const RIGHTS_LABEL: Record<string, string> = {
@@ -350,6 +351,7 @@ export default function Caspian() {
 
       {tab === "library" && (
       <>
+      {mayDecide && <Describe onDone={() => setNonce((n) => n + 1)} />}
       <div className={styles.controls}>
         <input
           className={styles.searchBox}
