@@ -144,6 +144,20 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// CORS
+const allowedOrigins = (process.env.CORS_ORIGINS ||
+  'http://localhost:3000,http://localhost:5173,http://localhost:5174').split(',');
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 /* The local media store, when that driver is active.
  *
  * express.static answers range requests, which is what makes a video in
@@ -180,19 +194,6 @@ if (driverName() === 'local') {
   }));
 }
 
-// CORS
-const allowedOrigins = (process.env.CORS_ORIGINS ||
-  'http://localhost:3000,http://localhost:5173,http://localhost:5174').split(',');
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
 
 app.use(express.json({
   limit: '50mb',

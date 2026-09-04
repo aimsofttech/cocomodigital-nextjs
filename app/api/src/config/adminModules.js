@@ -250,7 +250,7 @@ const moduleForRoutePath = (path) => {
  * grading, which is correct for CRUD screens and is what the other
  * fourteen modules were built against. */
 const MEDIA_ACTION_OVERRIDES = [
-  { verb: 'POST', test: /^\/media\/(bulk-approve|describe-queue)$/, action: 'update' },
+  { verb: 'POST', test: /^\/media\/(bulk-approve|describe-queue|rendition-queue)$/, action: 'update' },
   { verb: 'POST', test: /^\/media\/[^/]+\/(approve|reject|describe)$/, action: 'update' },
   /* Removing a name is the same capability as adding one, not the same as
    * deleting an asset. Graded by verb alone, DELETE /media/:id/people/:pid

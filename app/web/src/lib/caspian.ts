@@ -37,6 +37,11 @@ export interface CaspianAsset {
   describeStatus: "pending" | "processing" | "done" | "failed" | "skipped";
   createdAt: string;
   posterUrl: string | null;
+  /* Smaller derived copies. Null until something has asked for one —
+     they are made on first request, not at ingest — so every consumer
+     falls back to `url`. */
+  thumbUrl: string | null;
+  previewUrl: string | null;
   /* Computed on the server in lib/mediaSearches. Never recomputed here —
      a second copy of these rules in the browser is a second definition of
      "safe", and it is the copy that can be edited. */
@@ -396,6 +401,12 @@ export interface MediaStats {
 }
 
 export const getStats = () => call<{ data: MediaStats }>("/media/stats").then((r) => r.data);
+
+export const runRenditionQueue = (limit = 25) =>
+  call<{ message: string; data: { made: number; skipped: number; remaining: number } }>(
+    "/media/rendition-queue",
+    { method: "POST", body: JSON.stringify({ limit }) },
+  );
 
 export const runDescribeQueue = (limit = 20) =>
   call<{ data: { considered: number; reused: number; described: number; skipped: number; failed: number; costUsd: number } }>(

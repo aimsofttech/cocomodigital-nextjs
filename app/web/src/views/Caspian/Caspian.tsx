@@ -162,12 +162,22 @@ function Thumb({ asset }: { asset: CaspianAsset }) {
     <img
       ref={check}
       className={styles.thumbImg}
-      src={asset.url}
+      /* The small copy when one exists. A tile is 216px wide and the
+         original can be 12 MB; sixty of those is the difference between a
+         grid that opens and one that crawls. Falls back to the original,
+         which is always correct and sometimes slow. */
+      src={asset.thumbUrl || asset.url}
       /* Empty alt, not the caption: the caption is already printed under
        * the tile, so announcing it again is duplication, and a thumbnail
        * beside its own description is decorative. */
       alt=""
-      loading="lazy"
+      /* Lazy ONLY when falling back to the original. It was a mitigation
+       * for pulling full-size photographs into a grid, and a rendition is
+       * about 5 KB — sixty of those is a third of a megabyte, less than
+       * the cost of the deferral. It also does not reliably trigger in
+       * every renderer, which turns a working grid into an empty one. */
+      loading={asset.thumbUrl ? "eager" : "lazy"}
+      decoding="async"
       onError={() => setFailed(true)}
     />
   );

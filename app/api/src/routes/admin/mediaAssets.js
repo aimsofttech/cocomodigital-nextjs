@@ -49,6 +49,7 @@ router.post('/bulk-approve', protect, ctrl.bulkApprove);
 
 // Drains the describe queue. One of the two routes here that can spend.
 router.post('/describe-queue', protect, ctrl.runQueue);
+router.post('/rendition-queue', protect, ctrl.runRenditionQueue);
 
 // ------------------------------------------------------------ single asset
 router.get('/:id', protect, ctrl.show);
@@ -70,5 +71,6 @@ router.post('/:id/describe', protect, ctrl.redescribe);
 
 /* Two segments, so '/:id' cannot swallow it. */
 router.get('/:id/file', protect, ctrl.download);
+router.get('/:id/rendition/:variant', protect, ctrl.rendition);
 
 module.exports = router;

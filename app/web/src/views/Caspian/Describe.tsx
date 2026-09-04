@@ -16,7 +16,9 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { getStats, runDescribeQueue, CaspianError, type MediaStats } from "@/src/lib/caspian";
+import {
+  getStats, runDescribeQueue, runRenditionQueue, CaspianError, type MediaStats,
+} from "@/src/lib/caspian";
 import styles from "./Caspian.module.css";
 
 const usd = (n: number) => (n >= 0.01 ? `$${n.toFixed(2)}` : n > 0 ? `$${n.toFixed(4)}` : "$0");
@@ -79,6 +81,25 @@ export default function Describe({ onDone }: { onDone: () => void }) {
           {busy ? "Running…" : overBudget ? "Monthly budget reached" : `Describe ${Math.min(pending, 20)}`}
         </button>
       )}
+      {/* Thumbnails cannot make themselves: an <img src> carries no auth
+          header, so the grid can only use one that already exists. */}
+      <button
+        className={styles.ghost}
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true); setError(null);
+          try {
+            const r = await runRenditionQueue(25);
+            setLast(`${r.data.made} thumbnail${r.data.made === 1 ? "" : "s"} made`
+              + `${r.data.remaining ? `, ${r.data.remaining} still to do` : ""}`);
+            onDone();
+          } catch (e) {
+            setError(e instanceof CaspianError ? e.message : "Thumbnails did not run.");
+          } finally { setBusy(false); }
+        }}
+      >
+        Make thumbnails
+      </button>
       {last && <span className={styles.muted}>{last}</span>}
       {error && <span className={styles.error}>{error}</span>}
     </div>

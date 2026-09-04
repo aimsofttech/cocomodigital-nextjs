@@ -194,7 +194,7 @@ export default function Detail({
           ) : a.url ? (
             <div className={styles.framed}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={styles.frameMedia} src={a.url} alt={a.altText || ""} />
+              <img className={styles.frameMedia} src={a.previewUrl || a.url} alt={a.altText || ""} />
               <FaceBoxes
                 tagged={a.taggedPeople || []}
                 drawing={drawing}

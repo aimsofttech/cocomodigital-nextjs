@@ -3,6 +3,7 @@ const MediaAsset = require('../../models/MediaAsset');
 const MediaJob = require('../../models/MediaJob');
 const { buildS3Url } = require('../../utils/s3Upload');
 const { removeObject, downloadTarget, urlFor } = require('../../services/mediaStorage');
+const { ensureRendition, renditionUrls, isVariant } = require('../../services/mediaRenditions');
 const { enqueue, describeNow, budgetStatus } = require('../../services/mediaDescriber');
 const { ingestBatch } = require('../../services/mediaIngest');
 const {
@@ -380,6 +381,10 @@ const toPublic = (doc) => ({
    * no projection has ever returned it — so work already paid for in CPU
    * and disk has been invisible to every client. */
   posterUrl: doc.posterKey ? buildS3Url(doc.posterKey) : null,
+  /* Smaller copies where they exist. Null is the normal answer until
+   * somebody opens the asset — renditions are made on first request, not
+   * at ingest — and every consumer falls back to `url`. */
+  ...renditionUrls(doc),
   /* What a person may do with this, decided in lib/mediaSearches so the
    * browser never restates it. */
   clearance: clearance(doc),
@@ -582,6 +587,80 @@ const download = async (req, res) => {
 const readConfirm = (body = {}) => {
   if (!Array.isArray(body.confirm)) return CONFIRMABLE_FIELDS;
   return body.confirm.filter((f) => CONFIRMABLE_FIELDS.includes(f));
+};
+
+
+/**
+ * GET /admin/api/media/:id/rendition/:variant
+ *
+ * A smaller copy, made on the spot if this is the first time anyone has
+ * asked for it. Redirects to the file rather than proxying the bytes, so
+ * the API is not in the path of every thumbnail on every grid.
+ *
+ * Falls back to the original when a rendition cannot be made — an image
+ * already smaller than the target, a format sharp cannot decode, a video,
+ * or sharp missing entirely. A slow picture beats a broken one, and this
+ * whole layer is an optimisation rather than a feature anyone asked for
+ * by name.
+ */
+const rendition = async (req, res) => {
+  const { variant } = req.params;
+  if (!OBJECT_ID_RE.test(String(req.params.id)) || !isVariant(variant)) {
+    return res.status(404).json({ status: 'error', message: 'Not found' });
+  }
+  const doc = await MediaAsset.findOne({
+    ...buildGovernanceFilter(req.query),
+    _id: req.params.id,
+  });
+  if (!doc) return res.status(404).json({ status: 'error', message: 'Not found' });
+
+  const url = await ensureRendition(doc, variant) || doc.url;
+  if (!url) return res.status(404).json({ status: 'error', message: 'Not found' });
+  return res.redirect(302, url);
+};
+
+
+/**
+ * POST /admin/api/media/rendition-queue — make the missing thumbnails.
+ *
+ * The grid cannot generate these itself: an <img src> carries no
+ * Authorization header, so it can only ever use a rendition that already
+ * exists. Something has to make the first one, and doing it inside the
+ * listing would mean sixty fetches and sixty resizes on a page load.
+ *
+ * So it is a queue, drained deliberately, exactly like describing. Small
+ * batches by default because each item is a download plus a decode plus
+ * an encode, and this shares a VPS with the website.
+ */
+const runRenditionQueue = async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.body.limit, 10) || 25, 1), 100);
+
+  const pending = await MediaAsset.find({
+    kind: 'image',
+    status: 1,
+    'renditions.thumb': { $exists: false },
+  }).sort({ createdAt: -1 }).limit(limit);
+
+  let made = 0;
+  let skipped = 0;
+  for (const doc of pending) {
+    /* Sequential. Each item is a network fetch and a libvips decode;
+     * running twenty-five at once on a shared host is how the website
+     * next door starts timing out. */
+    // eslint-disable-next-line no-await-in-loop
+    const url = await ensureRendition(doc, 'thumb');
+    if (url) made += 1; else skipped += 1;
+  }
+
+  const remaining = await MediaAsset.countDocuments({
+    kind: 'image', status: 1, 'renditions.thumb': { $exists: false },
+  });
+
+  res.json({
+    status: 'success',
+    message: `${made} made, ${skipped} did not need one.`,
+    data: { considered: pending.length, made, skipped, remaining },
+  });
 };
 
 /**
@@ -1074,6 +1153,8 @@ const savedSearchFilter = async (query = {}) => {
 module.exports = {
   savedSearches,
   download,
+  rendition,
+  runRenditionQueue,
   // ingest
   upload,
   // browse

@@ -75,6 +75,15 @@ const mediaAssetSchema = new mongoose.Schema({
   height: { type: Number, default: null },
   duration: { type: Number, default: null }, // seconds, video only
   posterKey: { type: String, default: null }, // extracted video frame
+  /* Derived copies, keyed by variant name -> storage key. Generated on
+   * first request rather than at ingest, and shared by every row with the
+   * same checksum, so the ~third of this library that is byte-identical
+   * duplicates pays for one set between them. See services/mediaRenditions. */
+  renditions: {
+    type: Map,
+    of: String,
+    default: () => ({}),
+  },
 
   // ----------------------------------------------------------- meaning
   // Written by the describe worker. Never edited by hand except to
