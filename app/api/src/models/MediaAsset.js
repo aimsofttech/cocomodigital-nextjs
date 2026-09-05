@@ -84,6 +84,15 @@ const mediaAssetSchema = new mongoose.Schema({
     of: String,
     default: () => ({}),
   },
+  /* What a derivative had to give up, keyed the same way. A cropped shape
+   * can be physically unable to hold everyone in the frame, and that is
+   * worth saying at the moment somebody picks the crop rather than after
+   * it has gone into a client deck. */
+  renditionWarnings: {
+    type: Map,
+    of: String,
+    default: () => ({}),
+  },
 
   // ----------------------------------------------------------- meaning
   // Written by the describe worker. Never edited by hand except to

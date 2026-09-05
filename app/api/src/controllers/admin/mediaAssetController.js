@@ -516,6 +516,30 @@ const download = async (req, res) => {
   }
 
   const name = doc.originalName || String(doc.key).split('/').pop() || 'download';
+
+  /* ?variant= hands back a shape instead of the original. It is the same
+   * route on purpose: "give me this asset" and "give me this asset as a
+   * vertical" are one intention, and they must obey one governance check.
+   * A separate crop-download route would be a second place to forget it. */
+  const wanted = String(req.query.variant || '').trim();
+  if (wanted) {
+    if (!isVariant(wanted)) {
+      return res.status(404).json({ status: 'error', message: 'Not a shape this library makes.' });
+    }
+    const url = await ensureRendition(doc, wanted);
+    if (!url) {
+      return res.status(422).json({
+        status: 'error',
+        message: 'That shape could not be made from this file.',
+      });
+    }
+    const stem = name.replace(/\.[^.]+$/, '');
+    if (String(req.query.as || '') === 'url') {
+      return res.json({ status: 'success', data: { url, filename: `${stem}-${wanted}.jpg` } });
+    }
+    return res.redirect(302, url);
+  }
+
   const target = downloadTarget(doc.key, doc.url);
 
   if (target.mode === 'missing') {

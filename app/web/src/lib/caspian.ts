@@ -42,6 +42,10 @@ export interface CaspianAsset {
      falls back to `url`. */
   thumbUrl: string | null;
   previewUrl: string | null;
+  /* Shapes that have been made, by name. `warning` is set when the crop
+     could not physically hold every tagged face — a group wider than the
+     shape — so the caller can say so instead of shipping it. */
+  crops: Record<string, { url: string; warning: string | null }>;
   /* Computed on the server in lib/mediaSearches. Never recomputed here —
      a second copy of these rules in the browser is a second definition of
      "safe", and it is the copy that can be edited. */
@@ -401,6 +405,25 @@ export interface MediaStats {
 }
 
 export const getStats = () => call<{ data: MediaStats }>("/media/stats").then((r) => r.data);
+
+/** The three shapes a video studio actually publishes. */
+export const CROPS = [
+  { key: "wide", label: "16:9", hint: "thumbnail, player still" },
+  { key: "square", label: "1:1", hint: "feed post" },
+  { key: "tall", label: "9:16", hint: "Shorts, Reels, Stories" },
+] as const;
+
+/**
+ * Ask for one shape, making it if nobody has yet.
+ *
+ * Returns where the file is rather than the bytes, for the same reason
+ * the download route does: this is behind auth, so a plain link cannot
+ * reach it, and pulling an image into a blob to rename it is a bad trade.
+ */
+export const cropLocation = (assetId: string, variant: string) =>
+  call<{ data: { url: string; filename: string } }>(
+    `/media/${assetId}/file?as=url&variant=${encodeURIComponent(variant)}`,
+  ).then((r) => r.data);
 
 export const runRenditionQueue = (limit = 25) =>
   call<{ message: string; data: { made: number; skipped: number; remaining: number } }>(

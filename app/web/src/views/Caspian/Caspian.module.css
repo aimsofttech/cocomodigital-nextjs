@@ -619,3 +619,6 @@
 .describeText { display: flex; flex-direction: column; gap: 3px; flex: 1 1 320px; min-width: 0; }
 .describeText strong { font-size: 0.88rem; }
 .describeText .muted { font-size: 0.76rem; line-height: 1.5; }
+
+.shapes { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.shapesLabel { color: var(--muted); font-size: 0.78rem; margin-right: 2px; }

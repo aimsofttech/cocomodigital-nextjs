@@ -36,6 +36,8 @@ import {
   approveAsset,
   rejectAsset,
   fileLocation,
+  cropLocation,
+  CROPS,
   CONFIRMABLE,
   CaspianError,
   type CaspianAsset,
@@ -236,6 +238,50 @@ export default function Detail({
             <button className={styles.ghostSm} onClick={() => navigator.clipboard?.writeText(a.url)}>Copy link</button>
             {a.originalName && <span className={styles.muted}>{a.originalName}</span>}
           </div>
+
+          {/* Shapes. Only where a download is allowed at all — a crop of a
+              blocked asset is still that asset. */}
+          {clearance.level !== "blocked" && a.kind === "image" && (
+            <div className={styles.shapes}>
+              <span className={styles.shapesLabel}>Take it as</span>
+              {CROPS.map((c) => {
+                const made = a.crops?.[c.key];
+                return (
+                  <button
+                    key={c.key}
+                    className={styles.ghostSm}
+                    title={made?.warning || c.hint}
+                    disabled={busy}
+                    onClick={async () => {
+                      setError(null);
+                      try {
+                        const { url } = await cropLocation(seed.id, c.key);
+                        /* Refetch so a shape made just now shows its
+                           warning without a reload. */
+                        getAsset(seed.id).then(setAsset).catch(() => {});
+                        window.open(url, "_blank", "noopener,noreferrer");
+                      } catch (e) {
+                        setError(e instanceof CaspianError ? e.message : "That shape could not be made.");
+                      }
+                    }}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* A crop that could not hold everyone says so. This is the
+              whole reason the geometry counts what it lost: a group photo
+              cropped to one person looks deliberate. */}
+          {Object.entries(a.crops || {})
+            .filter(([, v]) => v.warning)
+            .map(([k, v]) => (
+              <p key={k} className={styles.restricted}>
+                <strong>{CROPS.find((c) => c.key === k)?.label || k}</strong> — {v.warning}
+              </p>
+            ))}
 
           <h2 className={styles.detailCaption}>
             {a.caption || <em className={styles.muted}>Not described yet</em>}
