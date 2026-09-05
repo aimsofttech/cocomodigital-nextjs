@@ -355,6 +355,16 @@ const toPublic = (doc) => ({
   url: doc.url || buildS3Url(doc.key),
   key: doc.key,
   kind: doc.kind,
+  /* What the file IS, as distinct from what it depicts.
+   *
+   * The grid needs this to lay itself out: roughly 40% of this library is
+   * logos, key art and vectors, and a tile that fills its cell with a
+   * photograph must not do the same to a wordmark. Without it the grid
+   * can only guess from the aspect ratio, which catches a 3:1 lockup and
+   * misses a square black-on-transparent logo entirely.
+   *
+   * One indexed enum string on a document already being read. */
+  assetType: doc.assetType || 'unknown',
   caption: doc.caption,
   altText: doc.altText,
   tags: doc.tags,

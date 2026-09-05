@@ -20,6 +20,10 @@ export interface CaspianAsset {
   key: string;
   url: string;
   kind: "image" | "video";
+  /* photograph | key-art | logo-mark | illustration | deck-slide |
+     blank-template | screenshot | vector | video | unknown.
+     Drives which tile family the grid uses. */
+  assetType: string;
   caption: string;
   altText: string;
   tags: string[];
@@ -59,7 +63,6 @@ export interface CaspianAssetDetail extends CaspianAsset {
   folder: string;
   bytes: number;
   mimetype: string;
-  assetType: string;
   shows: string[];
   ocrText: string;
   consent: string;

@@ -69,17 +69,38 @@ const REAL_IMAGES = [
 ];
 const REAL_VIDEO = "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/podcast/not-for/1788442028445_67982_WhatsApp_Video_2026-09-03_at_6.48.12_PM.mp4";
 
+/* The real dimensions of what each URL points at.
+ *
+ * The fixture used to claim 1920x1080 for everything, which made the
+ * justified grid classify a 3:1 wordmark as a photograph and crop it. The
+ * stored width and height are not decoration — the layout is computed from
+ * them without loading a single image, so a row that lies about its shape
+ * produces a grid that lies about its content.
+ *
+ * Cocoma's brand-image folder is ~300x100 lockups, which is why this
+ * fixture is mostly logos: the real library is roughly 40% vector art, and
+ * a fixture of nothing but photographs would have hidden the whole
+ * problem. */
+const dimsFor = (url) => {
+  if (/brand-image|marketing-house-content/.test(url)) return { w: 300, h: 100, type: 'logo-mark' };
+  if (/author-image/.test(url)) return { w: 200, h: 200, type: 'photograph' };
+  if (/book-a-call/.test(url)) return { w: 489, h: 510, type: 'photograph' };
+  return { w: 1920, h: 1080, type: 'photograph' };
+};
+
 let pick = 0;
 const obj = (name, kind) => ({
   key: `caspian/_fixture/${name}`,
-  url: kind === 'video' ? REAL_VIDEO : REAL_IMAGES[pick++ % REAL_IMAGES.length],
+  ...(() => {
+    const url = kind === 'video' ? REAL_VIDEO : REAL_IMAGES[pick++ % REAL_IMAGES.length];
+    const d = kind === 'video' ? { w: 1920, h: 1080, type: 'video' } : dimsFor(url);
+    return { url, width: d.w, height: d.h, assetType: d.type };
+  })(),
   originalName: name,
   checksum: sha(name),
   kind,
   mimetype: kind === 'video' ? 'video/mp4' : 'image/jpeg',
   bytes: kind === 'video' ? 8_400_000 : 2_100_000,
-  width: 1920,
-  height: 1080,
   ...(kind === 'video' ? { duration: 42 } : {}),
 });
 
@@ -92,7 +113,6 @@ const described = (caption, tags, shows = []) => ({
    * UI cannot be exercised at all — which is most of what Phase 1 is. */
   shows,
   describeStatus: 'done',
-  assetType: 'photograph',
 });
 
 const run = async () => {

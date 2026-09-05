@@ -24,7 +24,7 @@
  * request whatever this component believes.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   adminLogin,
   storeAdminToken,
@@ -43,6 +43,7 @@ import {
 import Upload from "./Upload";
 import Detail from "./Detail";
 import Describe from "./Describe";
+import { justify, familyOf, ratioOf } from "./justify";
 import styles from "./Caspian.module.css";
 
 const RIGHTS_LABEL: Record<string, string> = {
@@ -200,6 +201,47 @@ export default function Caspian() {
   const [acting, setActing] = useState<string | null>(null);
   const [tab, setTab] = useState<"library" | "upload">("library");
   const [openId, setOpenId] = useState<string | null>(null);
+  /* Row height, not column count — the only knob a justified layout takes. */
+  const [rowH, setRowH] = useState(220);
+  const [containerW, setContainerW] = useState(0);
+  const roRef = useRef<ResizeObserver | null>(null);
+
+  /* A callback ref, not a mount effect.
+   *
+   * This component early-returns while the session resolves, and again if
+   * the user cannot view media — so the grid element does not exist on
+   * first render. A useEffect with [] deps runs once against a null ref,
+   * gives up, and never runs again: the grid measures 0 forever and lays
+   * out no rows. A callback ref fires whenever the node actually appears.
+   *
+   * Measured on the CONTAINER rather than the window, because opening the
+   * detail overlay adds a scrollbar and keying off window width would
+   * reflow every row behind it. */
+  const gridRef = useCallback((el: HTMLDivElement | null) => {
+    roRef.current?.disconnect();
+    roRef.current = null;
+    if (!el) return;
+    setContainerW(el.getBoundingClientRect().width);
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w) setContainerW(w);
+    });
+    ro.observe(el);
+    roRef.current = ro;
+  }, []);
+
+  useEffect(() => () => roRef.current?.disconnect(), []);
+
+  useEffect(() => {
+    try {
+      const saved = Number(window.localStorage.getItem("caspian.rowH"));
+      if (saved >= 120 && saved <= 340) setRowH(saved);
+    } catch { /* private window, or storage blocked — the default is fine */ }
+  }, []);
+  const setDensity = (h: number) => {
+    setRowH(h);
+    try { window.localStorage.setItem("caspian.rowH", String(h)); } catch { /* ignore */ }
+  };
 
   const mayView = can("media", "view");
   const mayDecide = can("media", "update");
@@ -278,6 +320,11 @@ export default function Caspian() {
       setActing(null);
     }
   };
+
+  const rows = useMemo(
+    () => (containerW > 0 ? justify(assets, containerW, rowH, 6) : []),
+    [assets, containerW, rowH],
+  );
 
   const activeSearch = useMemo(
     () => searches.find((s) => s.key === search),
@@ -380,6 +427,17 @@ export default function Caspian() {
             />
             <span>Safe to post</span>
           </label>
+          <div className={styles.density} role="group" aria-label="Tile size">
+            {[[300, "Large"], [220, "Medium"], [150, "Small"]].map(([h, label]) => (
+              <button
+                key={String(h)}
+                className={`${styles.densityBtn} ${rowH === h ? styles.densityOn : ""}`}
+                onClick={() => setDensity(h as number)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <select
             className={styles.select}
             value={reviewState}
@@ -424,72 +482,81 @@ export default function Caspian() {
         </p>
       )}
 
-      <div className={styles.grid}>
-        {assets.map((a) => {
-          const state = a.review?.state || "proposed";
-          return (
-            <article key={a.id} className={styles.card}>
-              <div
-                className={styles.thumb}
-                role="button"
-                tabIndex={0}
-                aria-label={`Open ${a.caption || a.kind}`}
-                onClick={() => setOpenId(a.id)}
-                onKeyDown={(e) => { if (e.key === "Enter") setOpenId(a.id); }}
-              >
-                <Thumb asset={a} />
-                <span className={`${styles.state} ${STATE_CLASS[state] || ""}`}>{state}</span>
-                {a.clearance && a.clearance.level !== "clear" && (
-                  <span className={`${styles.state} ${styles.stateRight} ${
-                    a.clearance.level === "blocked" ? styles.stateRejected : styles.stateProposed
-                  }`}>
-                    {a.clearance.level}
-                  </span>
-                )}
-              </div>
-              <div className={styles.meta}>
-                <p className={styles.caption}>
-                  {a.caption || <em className={styles.muted}>Not described yet</em>}
-                </p>
-                <p className={styles.facts}>
-                  <span>{RIGHTS_LABEL[a.rights] || a.rights}</span>
-                  {a.usable && <span className={styles.ok}>usable</span>}
-                  {a.namedPeople > 0 && <span>{a.namedPeople} named</span>}
-                  {a.describeStatus !== "done" && <span>{a.describeStatus}</span>}
-                </p>
-                {a.tags.length > 0 && (
-                  <p className={styles.tags}>{a.tags.slice(0, 4).join(" · ")}</p>
-                )}
-                <div className={styles.actions}>
-                  <button
-                    className={styles.ghostSm}
-                    onClick={() => navigator.clipboard?.writeText(a.url)}
-                  >
-                    Copy link
-                  </button>
-                  {mayDecide && state !== "approved" && (
-                    <button
-                      className={styles.ghostSm}
-                      disabled={acting === a.id}
-                      onClick={() => decide(a, "approve")}
-                    >
-                      Approve
-                    </button>
-                  )}
-                  {mayDecide && state !== "rejected" && (
-                    <button
-                      className={styles.ghostSm}
-                      disabled={acting === a.id}
-                      onClick={() => decide(a, "reject")}
-                    >
-                      Reject
-                    </button>
-                  )}
-                </div>
-              </div>
-            </article>
-          );
-        })}
+      <div className={styles.grid} ref={gridRef}>
+        {rows.map((row, ri) => (
+          <div
+            key={ri}
+            className={styles.row}
+            style={{
+              height: `${row.height}px`,
+              /* The height is already known, so the browser can skip layout
+                 and paint for rows below the fold without guessing. */
+              contentVisibility: ri > 5 ? "auto" : undefined,
+              containIntrinsicSize: ri > 5 ? `auto ${row.height}px` : undefined,
+            } as React.CSSProperties}
+          >
+            {row.items.map(({ item: a, width, height }) => {
+              const state = a.review?.state || "proposed";
+              const blocked = a.clearance?.level === "blocked";
+              return (
+                <article
+                  key={a.id}
+                  className={`${styles.tile} ${blocked ? styles.tileBlocked : ""}`}
+                  data-family={familyOf(a)}
+                  style={{ width: `${width}px`, height: `${height}px` }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={a.caption || `${a.kind} asset`}
+                  onClick={() => setOpenId(a.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter") setOpenId(a.id); }}
+                >
+                  <Thumb asset={a} />
+
+                  {/* At rest, only BLOCKED gets ink.
+                      "Restricted" is the majority of this library, not the
+                      exception — most rows have rights: unknown — so a
+                      marker on those would fire on nearly every tile and be
+                      ignored within a day. It appears on hover instead. */}
+                  {blocked && <span className={styles.lock} aria-hidden="true">🔒</span>}
+
+                  <div className={styles.veil}>
+                    <p className={styles.veilCaption}>
+                      {a.caption || <em>Not described yet</em>}
+                    </p>
+                    <p className={styles.veilFacts}>
+                      {a.clearance?.level !== "clear" && (
+                        <span className={blocked ? styles.veilBad : styles.veilWarn}>
+                          {blocked ? "do not take" : "internal only"}
+                        </span>
+                      )}
+                      <span>{state}</span>
+                      {a.namedPeople > 0 && <span>{a.namedPeople} named</span>}
+                      {a.kind === "video" && <span>video</span>}
+                    </p>
+                    <div className={styles.veilActions} onClick={(e) => e.stopPropagation()}>
+                      {!blocked && (
+                        <button
+                          className={styles.veilBtn}
+                          onClick={() => navigator.clipboard?.writeText(a.url)}
+                        >
+                          Copy link
+                        </button>
+                      )}
+                      {mayDecide && state !== "approved" && (
+                        <button className={styles.veilBtn} disabled={acting === a.id}
+                          onClick={() => decide(a, "approve")}>Approve</button>
+                      )}
+                      {mayDecide && state !== "rejected" && (
+                        <button className={styles.veilBtn} disabled={acting === a.id}
+                          onClick={() => decide(a, "reject")}>Reject</button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ))}
       </div>
       </>
       )}
