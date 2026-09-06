@@ -37,6 +37,11 @@
  * rather than quietly empty — see requiresJob below.
  */
 
+/* The three review states, exported so the controller and the tests share
+ * one list. A guard that only exists inside the schema enum is one the
+ * filter tests cannot see. */
+const REVIEW_STATES = ['proposed', 'approved', 'rejected'];
+
 const SHOWS = {
   people: ['cocoma-people', 'on-camera-talent', 'stock-people', 'public-crowd'],
   rooms: ['edit-bay', 'open-floor', 'meeting-room', 'shoot-floor', 'common-areas'],
@@ -106,16 +111,101 @@ const SAVED_SEARCHES = {
 };
 
 /**
+ * What a person may do with one asset, decided on the server.
+ *
+ * Not `publishable()` inverted. Every row in the library is unapproved —
+ * review.state predates none of them, which is why pendingReview() carries
+ * an $exists arm — so a warning keyed to publishable() would fire on the
+ * entire collection and be ignored within a day. This asks a narrower
+ * question: is there anything about this asset that makes taking it a
+ * mistake?
+ *
+ *   clear       nothing to say. The common case, and it earns no badge:
+ *               the absence of a warning is the signal.
+ *   restricted  usable internally, wrong on a public Cocoma page.
+ *   blocked     do not take this out of the building.
+ *
+ * Lives here rather than in the browser for the same reason publishable()
+ * does: a second copy of these rules in client code is a second definition
+ * of safe, and it is the copy an attacker can edit.
+ */
+const clearance = (doc = {}) => {
+  const reasons = [];
+  let level = 'clear';
+  const raise = (to, why) => {
+    reasons.push(why);
+    if (to === 'blocked' || level === 'blocked') level = 'blocked';
+    else level = to;
+  };
+
+  if (doc.nda) raise('blocked', 'This job is under NDA. Nothing from it leaves the building.');
+  if (doc.consent === 'refused') raise('blocked', 'Somebody in this frame refused to be photographed.');
+  if (doc.consent === 'minors') raise('blocked', 'There is a minor in this frame.');
+  if (doc.sensitive) raise('blocked', 'Flagged sensitive — a person has to clear this one.');
+
+  if (doc.rights === 'client-ip') raise('restricted', "This is a client's material, not ours to publish.");
+  if (doc.rights === 'stock') raise('restricted', 'Licensed stock — never on a page claiming it is our work.');
+  if (doc.rights === 'unknown') raise('restricted', 'Nobody has recorded who owns this yet.');
+  if (doc.consent === 'unknown') raise('restricted', 'Nobody has recorded whether the people in it agreed.');
+
+  return { level, reasons };
+};
+
+/**
  * Everything safe to put on a public Cocoma page.
  *
- * Four conditions, and each one has cost us something at least once:
- * rights (a stock mixing desk nearly went on a page arguing we have a real
- * sound room), sensitive, usable, and the job's NDA flag.
+ * Five conditions, and each earns its place:
+ *
+ *   review.state  a person looked. The machine finishing is not the same
+ *                 as somebody agreeing, and this is the difference.
+ *   rights        a stock mixing desk nearly went on a page arguing we
+ *                 have a real sound room.
+ *   sensitive     the describe pass caught a child in an office candid
+ *                 that no filename rule would have.
+ *   usable        fit for marketing, which is narrower than "ours".
+ *   nda           the engagement was confidential, whatever the frame shows.
+ *
+ * NDA used to be the condition this docblock told callers to add for
+ * themselves, on the grounds that it lived on MediaJob and could not be
+ * expressed here. No caller ever did, and the advice was the defect: a
+ * rule that has to be remembered at every call site is a rule that holds
+ * until the first person who has not read this comment. The flag is now
+ * copied onto the asset at ingest, so it is a plain condition like the
+ * other four and this function can carry it.
+ *
+ * `$ne: true` and not `false`: rows written before the field existed have
+ * no value at all, and an equality test would exclude the entire
+ * pre-existing library rather than the confidential part of it.
+ *
+ * This function is the single definition. Do not hand-roll the same five
+ * conditions at a call site — that is how one of them gets forgotten.
  */
 const publishable = () => ({
+  'review.state': 'approved',
   rights: 'own',
   sensitive: false,
   usable: true,
+  nda: { $ne: true },
 });
 
-module.exports = { SHOWS, SAVED_SEARCHES, publishable };
+/**
+ * What is waiting for a person.
+ *
+ * The `$exists: false` arm matters: every row that predates this field —
+ * which today is all 973 of them — has no review subdocument at all, and
+ * a queue that only matched 'proposed' would report an empty backlog on a
+ * library where nothing has ever been approved.
+ *
+ * Kept beside publishable() so the two can never disagree about what
+ * "not yet approved" means.
+ */
+const pendingReview = () => ({
+  $or: [
+    { 'review.state': 'proposed' },
+    { 'review.state': { $exists: false } },
+  ],
+});
+
+module.exports = {
+  SHOWS, SAVED_SEARCHES, REVIEW_STATES, publishable, pendingReview, clearance,
+};

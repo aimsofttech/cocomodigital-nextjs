@@ -74,6 +74,18 @@ const editorDefaults = () =>
     if (m.key === 'dashboard') return { module: m.key, view: true };
     // Enquiries and bookings are other people's data, not content.
     if (m.key === 'contact') return allOff(m);
+    /* Media library: an editor contributes, they do not adjudicate.
+     * `create` is the upload; `update` is what approve, reject and
+     * bulk-approve now grade as, so withholding it is what keeps the
+     * uploader and the approver two different people. A studio that
+     * wants a given editor reviewing gives them `update` explicitly
+     * from Roles & Permissions — a decision, not a default. */
+    if (m.key === 'media') {
+      return {
+        module: m.key, view: true, create: true, update: false,
+        delete: false, export: false, import: false,
+      };
+    }
     return {
       module: m.key,
       view: true,

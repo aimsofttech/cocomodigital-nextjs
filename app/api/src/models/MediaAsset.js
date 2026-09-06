@@ -25,6 +25,41 @@ const mongoose = require('mongoose');
  * already exists we copy the existing description across instead of
  * paying a second vision call for identical bytes.
  */
+/* A face, stored as fractions of the frame rather than pixels.
+ *
+ * The whole point of the rendition layer is that pixel dimensions vary —
+ * the same photograph is served at 1920, at 1080, cropped to 9:16 and to
+ * 1:1. A box in pixels is correct for exactly one of those. */
+const faceBoxSchema = new mongoose.Schema({
+  x: { type: Number, required: true, min: 0, max: 1 },
+  y: { type: Number, required: true, min: 0, max: 1 },
+  w: { type: Number, required: true, min: 0, max: 1 },
+  h: { type: Number, required: true, min: 0, max: 1 },
+}, { _id: false });
+
+/**
+ * One named person in one asset. Always human-set, never model-guessed.
+ *
+ * A vision model cannot tell Anil from any other bearded man in a black
+ * t-shirt, and a wrong name on a client's photograph is worse than no
+ * name. `people` above stays the model's count; this is who they are.
+ *
+ * `taggedBy` is not bookkeeping. A name is a claim somebody made, and
+ * when it turns out to be the wrong person this is the only field that
+ * says who to ask.
+ *
+ * `box` is optional deliberately. "Dishan is in this photograph" is a
+ * useful, complete tag on its own, and demanding a rectangle before a
+ * name can be recorded is how a tagging feature goes unused.
+ */
+const taggedPersonSchema = new mongoose.Schema({
+  person: { type: mongoose.Schema.Types.ObjectId, ref: 'MediaPerson', required: true },
+  taggedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  taggedAt: { type: Date, default: Date.now },
+  box: { type: faceBoxSchema, default: null },
+  note: { type: String, trim: true, default: '' },
+});
+
 const mediaAssetSchema = new mongoose.Schema({
   // ---------------------------------------------------------- identity
   key: { type: String, required: true, trim: true, index: true }, // S3 object key
@@ -40,6 +75,24 @@ const mediaAssetSchema = new mongoose.Schema({
   height: { type: Number, default: null },
   duration: { type: Number, default: null }, // seconds, video only
   posterKey: { type: String, default: null }, // extracted video frame
+  /* Derived copies, keyed by variant name -> storage key. Generated on
+   * first request rather than at ingest, and shared by every row with the
+   * same checksum, so the ~third of this library that is byte-identical
+   * duplicates pays for one set between them. See services/mediaRenditions. */
+  renditions: {
+    type: Map,
+    of: String,
+    default: () => ({}),
+  },
+  /* What a derivative had to give up, keyed the same way. A cropped shape
+   * can be physically unable to hold everyone in the frame, and that is
+   * worth saying at the moment somebody picks the crop rather than after
+   * it has gone into a client deck. */
+  renditionWarnings: {
+    type: Map,
+    of: String,
+    default: () => ({}),
+  },
 
   // ----------------------------------------------------------- meaning
   // Written by the describe worker. Never edited by hand except to
@@ -89,6 +142,45 @@ const mediaAssetSchema = new mongoose.Schema({
   // rather than unfortunate.
   job: { type: mongoose.Schema.Types.ObjectId, ref: 'MediaJob', default: null, index: true },
 
+  // ------------------------------------------------------------ review
+  /* The human verdict, which is a different axis from describeStatus.
+   *
+   * describeStatus is the machine's progress — pending, done, failed.
+   * This is whether a person has looked. Conflating them is the bug to
+   * avoid: an asset can be perfectly described and still not fit to
+   * publish, and "the worker finished" must never read as "somebody
+   * approved it". Nothing is publishable until state === 'approved'. */
+  review: {
+    state: {
+      type: String,
+      enum: ['proposed', 'approved', 'rejected'],
+      default: 'proposed',
+      index: true,
+    },
+
+    // Who ruled. byName is denormalised so the queue renders "approved by
+    // Dishan" without a join, and still reads correctly after that account
+    // is deactivated — which users here are, rather than deleted.
+    by: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    byName: { type: String, trim: true, default: '' },
+    at: { type: Date, default: null },
+
+    // Optional on approval, required on rejection. A rejection with no
+    // reason sends the asset back to the queue for the next reviewer to
+    // re-derive the objection from scratch.
+    note: { type: String, trim: true, default: '' },
+
+    // What the approver actually put their name to. Overlaps setBy but
+    // answers a different question: setBy is "may the machine write
+    // here", this is "what did the person agree to". They diverge as soon
+    // as the reviewable field set grows past an old approval.
+    fields: { type: [String], default: [] },
+  },
+
+  // Named people. See taggedPersonSchema above for why this is separate
+  // from the `people` count and why it is never model-written.
+  taggedPeople: { type: [taggedPersonSchema], default: [] },
+
   // -------------------------------------------------------- governance
   // rights decides publishability and is deliberately not a boolean:
   //   own       Cocoma shot or made it — safe to publish as our work
@@ -102,6 +194,20 @@ const mediaAssetSchema = new mongoose.Schema({
     index: true,
   },
   sensitive: { type: Boolean, default: false, index: true },
+  /* Copied from the job at ingest, not read through it.
+   *
+   * NDA is a property of the engagement, so it belongs on MediaJob and it
+   * lives there. But every read that filters across jobs — the listing,
+   * the review queue, publishable(), the person pages — would need a join
+   * to see it, and mediaSearches said so in a comment while nothing
+   * actually did it. One un-joined query is a leak, and there is no way
+   * to make forgetting the join loud.
+   *
+   * So the flag is denormalised here, where a plain filter reaches it and
+   * a new query gets the protection by default rather than by diligence.
+   * The cost is that changing a job's NDA status has to fan out to its
+   * assets; that is a rare, deliberate act and a cheap updateMany. */
+  nda: { type: Boolean, default: false, index: true },
   usable: { type: Boolean, default: false }, // fit for public marketing use
   reviewed: { type: Number, enum: [0, 1], default: 0 }, // a human confirmed it
 
@@ -189,5 +295,16 @@ mediaAssetSchema.index({ shows: 1, assetType: 1, rights: 1 });
 // Industry/genre/client queries resolve through the job, so this is the
 // join key that keeps them from scanning.
 mediaAssetSchema.index({ job: 1, rights: 1 });
+
+// The publishable filter in lib/mediaSearches, in index form. Every public
+// query lands here, so it is the one that must not scan.
+mediaAssetSchema.index({ 'review.state': 1, rights: 1, sensitive: 1, usable: 1 });
+
+// The review queue itself — oldest proposed first.
+mediaAssetSchema.index({ 'review.state': 1, createdAt: 1 });
+
+// "Every photo of Dishan we may publish." Exact where free-text tags are
+// fuzzy, which is the reason named people are a reference and not a tag.
+mediaAssetSchema.index({ 'taggedPeople.person': 1, rights: 1, sensitive: 1 });
 
 module.exports = mongoose.model('MediaAsset', mediaAssetSchema);

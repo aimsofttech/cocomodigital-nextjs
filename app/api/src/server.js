@@ -91,6 +91,7 @@ const adminRolesRoutes = require('./routes/admin/adminRoles');
 const adminProfileRoutes = require('./routes/admin/profile');
 const adminUploadRoutes = require('./routes/admin/uploads');
 const adminMediaAssetRoutes = require('./routes/admin/mediaAssets');
+const adminMediaJobRoutes = require('./routes/admin/mediaJobs');
 
 // Route imports - Public API
 const apiHomeRoutes = require('./routes/api/home');
@@ -156,6 +157,43 @@ app.use(cors({
   },
   credentials: true,
 }));
+
+/* The local media store, when that driver is active.
+ *
+ * express.static answers range requests, which is what makes a video in
+ * the library scrub rather than download whole. Mounted before auth on
+ * purpose: it is the same reachability the S3 bucket has today, and the
+ * driver refuses to run in production, so this serves a developer's own
+ * machine and nothing else.
+ *
+ * `initMediaStorage` throws rather than warns if that ever stops being
+ * true — a local store behind a load balancer 404s on every server but
+ * the one that received the upload, and that reads as data loss. */
+const { initMediaStorage, localRoot, LOCAL_ROUTE, driverName } = require('./services/mediaStorage');
+initMediaStorage();
+if (driverName() === 'local') {
+  /* helmet() sets Cross-Origin-Resource-Policy: same-origin on everything,
+   * which the browser enforces on <img> and <video> even though curl never
+   * sees it. The library runs on :3000 and this store answers on :5000, so
+   * without relaxing CORP here every tile fails with
+   * ERR_BLOCKED_BY_RESPONSE.NotSameOrigin while the file itself is fine.
+   *
+   * Relaxed on this prefix ONLY, and only under the local driver — these
+   * are a developer's own test files on their own machine. Nothing else
+   * the API serves loses helmet's default. */
+  app.use(LOCAL_ROUTE, (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  });
+  app.use(LOCAL_ROUTE, express.static(localRoot(), {
+    fallthrough: false,
+    index: false,
+    // No directory listing, and nothing dotted.
+    dotfiles: 'deny',
+    maxAge: 0,
+  }));
+}
+
 
 app.use(express.json({
   limit: '50mb',
@@ -293,6 +331,11 @@ app.use(`${adminBase}/growth-service`, adminGrowthServiceRoutes);
 app.use(`${adminBase}/podcast`, adminPodcastRoutes);
 app.use(`${adminBase}/uploads`, adminUploadRoutes);
 app.use(`${adminBase}/media`, adminMediaAssetRoutes);
+/* Before nothing in particular, but note it is NOT under /media: that
+ * prefix is the asset router, and '/media-jobs' does not match it —
+ * underPrefix requires an exact segment boundary. The media module
+ * claims both prefixes explicitly. */
+app.use(`${adminBase}/media-jobs`, adminMediaJobRoutes);
 
 // Public API routes
 app.use('/api/home', apiHomeRoutes);

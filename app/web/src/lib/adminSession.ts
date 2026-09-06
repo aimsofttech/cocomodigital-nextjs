@@ -46,8 +46,22 @@ export const ADMIN_BASE_URL = (
   process.env.NEXT_PUBLIC_ADMIN_URL || "/admin"
 ).replace(/\/+$/, "");
 
-/** The admin API root, derived from the content API base (…/api → …). */
-const ADMIN_API_BASE = `${API_BASE_URL.replace(/\/api$/, "")}/admin/api`;
+/**
+ * The admin API root, derived from the content API base (…/api → …).
+ *
+ * `NEXT_PUBLIC_ADMIN_API_URL` overrides it outright, which is what makes
+ * an admin-backed feature runnable locally. Without it the only lever is
+ * NEXT_PUBLIC_API_URL, and repointing that sends the marketing pages at
+ * a local database that has none of their content — so you could either
+ * develop the tool or preview the site, never both. Documented here
+ * rather than in an env file so nothing has to be edited to build.
+ *
+ *   NEXT_PUBLIC_ADMIN_API_URL=http://localhost:5000/admin/api npm run dev
+ */
+export const ADMIN_API_BASE = (
+  process.env.NEXT_PUBLIC_ADMIN_API_URL
+  || `${API_BASE_URL.replace(/\/api$/, "")}/admin/api`
+).replace(/\/+$/, "");
 
 export type AdminAction = "view" | "create" | "update" | "delete" | "export" | "import";
 export type AdminPermissions = Record<string, Partial<Record<AdminAction, boolean>>>;

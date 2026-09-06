@@ -1,0 +1,769 @@
+/*
+ * Caspian's styles.
+ *
+ * A CSS module rather than a block appended to globals.css, which is this
+ * repo's usual habit. Two reasons: globals.css is already very large and
+ * ships on every marketing page, and Caspian is the first app-like
+ * surface here — a tool, not a page — so its styles have no business
+ * loading for someone reading the podcast page. Prefixed class names in a
+ * shared sheet would also sit one typo away from colliding with the
+ * `pod-*` block.
+ *
+ * Brand yellow (#fff000) is the site's own accent, used here only where
+ * something is selected or actionable, against a dark ground so a grid of
+ * photographs is what carries the colour.
+ */
+
+.shell {
+  --ink: #f4f3ee;
+  --ground: #12100b;
+  --panel: #1b1913;
+  --line: #2e2b22;
+  --muted: #8f8a7c;
+  --brand: #fff000;
+  --ok: #7fc4a2;
+  --warn: #e0a44a;
+  --bad: #f08279;
+
+  min-height: 100vh;
+  background: var(--ground);
+  color: var(--ink);
+  padding: 0 clamp(16px, 4vw, 40px) 80px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ── sign-in / permission gate ─────────────────────────────────────────── */
+.gate {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #12100b;
+  color: #f4f3ee;
+  padding: 24px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.gateCard {
+  width: min(420px, 100%);
+  background: #1b1913;
+  border: 1px solid #2e2b22;
+  border-radius: 14px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.gateTitle { margin: 0; font-size: 1.6rem; letter-spacing: -0.02em; }
+.gateSub { margin: 0; color: #8f8a7c; font-size: 0.92rem; line-height: 1.5; }
+.gateError { margin: 0; color: #f08279; font-size: 0.88rem; }
+
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+.field span { color: #8f8a7c; }
+.field input {
+  background: #12100b;
+  border: 1px solid #2e2b22;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #f4f3ee;
+  font-size: 0.95rem;
+}
+.field input:focus-visible { outline: 2px solid #fff000; outline-offset: 1px; }
+
+.primary {
+  background: #fff000;
+  color: #12100b;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.primary:disabled { opacity: 0.6; cursor: default; }
+
+/* ── top bar ───────────────────────────────────────────────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.mark {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--brand);
+  flex: none;
+}
+.name { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+.tag { color: var(--muted); font-size: 0.82rem; }
+.who { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+
+/* ── controls ──────────────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 18px 0 12px;
+}
+.searchBox {
+  flex: 1 1 260px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+.searchBox:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.toggles { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.check { display: flex; align-items: center; gap: 7px; font-size: 0.88rem; cursor: pointer; }
+.check input { accent-color: var(--brand); width: 15px; height: 15px; }
+.select {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+/* ── saved-search chips ────────────────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 14px; }
+.chip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.chip:hover { border-color: var(--muted); }
+.chipOn { background: var(--brand); color: #12100b; border-color: var(--brand); font-weight: 600; }
+/* An empty facet stays visible and readable. A chip that shows 0 is
+   information — it says the vocabulary exists and nothing matches yet. */
+.chipEmpty { opacity: 0.5; }
+.chipCount {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.76rem;
+  opacity: 0.75;
+}
+
+.note { color: var(--muted); font-size: 0.85rem; margin: 0 0 14px; max-width: 68ch; line-height: 1.5; }
+.error {
+  color: #12100b;
+  background: var(--warn);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  margin: 0 0 14px;
+  max-width: 78ch;
+}
+.muted { color: var(--muted); font-size: 0.9rem; }
+
+/* ── grid ──────────────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.thumb { position: relative; aspect-ratio: 16 / 10; background: #0d0b07; }
+/* `contain`, not `cover`. A cropped thumbnail is fine on a marketing page
+   where the picture is decoration, and wrong in a library where the whole
+   point is deciding whether this is the asset you want — and where a good
+   share of the collection is logos, key art and vectors that a crop
+   mutilates. Letterboxing against the tile's own ground costs a little
+   tidiness and never hides what is in the frame. */
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.thumbFallback {
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  color: var(--muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.state {
+  position: absolute;
+  left: 8px; top: 8px;
+  font-size: 0.66rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(18, 16, 11, 0.82);
+  border: 1px solid currentColor;
+}
+.stateApproved { color: var(--ok); }
+.stateRejected { color: var(--bad); }
+.stateProposed { color: var(--warn); }
+
+.meta { padding: 12px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.caption { margin: 0; font-size: 0.88rem; line-height: 1.42; }
+.facts {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.ok { color: var(--ok); }
+.tags { margin: 0; color: var(--muted); font-size: 0.74rem; }
+.actions {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ghost, .ghostSm {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ghost { padding: 8px 13px; font-size: 0.85rem; }
+.ghostSm { padding: 5px 9px; font-size: 0.76rem; }
+.ghost:hover, .ghostSm:hover { border-color: var(--brand); color: var(--brand); }
+.ghostSm:disabled { opacity: 0.45; cursor: default; }
+.ghost:focus-visible, .ghostSm:focus-visible,
+.chip:focus-visible, .primary:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Scoped to Caspian's own roots: a CSS module rejects a bare `*` because
+   every selector has to carry at least one local class. */
+@media (prefers-reduced-motion: reduce) {
+  .shell, .shell *, .gate, .gate * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── upload ────────────────────────────────────────────────────────────── */
+.uploadPanel { display: flex; flex-direction: column; gap: 18px; padding: 18px 0 8px; }
+
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  padding: 34px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-align: center;
+  background: var(--panel);
+}
+.drop:hover, .drop:focus-visible { border-color: var(--brand); outline: none; }
+.dropOn { border-color: var(--brand); background: #1f1c11; }
+.drop strong { font-size: 1.02rem; }
+
+.queue {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.queue strong { color: var(--ink); }
+
+/* The three questions sit side by side and in view with the files. Behind
+   a modal they get dismissed; beside the drop zone they get answered. */
+.askRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.ask {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0;
+  min-width: 0;
+}
+.askTitle {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+}
+.req {
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ground);
+  background: var(--brand);
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-weight: 700;
+}
+.askWhy { margin: 0 0 10px; font-size: 0.79rem; color: var(--muted); line-height: 1.48; }
+
+.opts { display: flex; flex-direction: column; gap: 5px; }
+.opt {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 9px;
+  align-items: baseline;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.opt:hover { background: #221f17; }
+.optOn { border-color: var(--brand); background: #221f17; }
+.opt input { accent-color: var(--brand); margin: 0; grid-row: span 2; }
+.optLabel { font-size: 0.87rem; }
+.optHint { grid-column: 2; font-size: 0.74rem; color: var(--muted); }
+
+.ndaWarn {
+  margin: 10px 0 0;
+  font-size: 0.79rem;
+  line-height: 1.5;
+  color: var(--ground);
+  background: var(--warn);
+  border-radius: 8px;
+  padding: 8px 11px;
+}
+
+.newJob {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sendRow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.sendRow .searchBox { flex: 1 1 240px; }
+
+.results {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.resultsHead { margin: 0 0 10px; font-size: 0.9rem; font-weight: 600; }
+.resultList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.resultRow {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 220px) 1fr;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 0.82rem;
+  padding: 4px 0;
+  border-top: 1px solid var(--line);
+}
+.resultRow:first-child { border-top: 0; }
+.rTag {
+  font-size: 0.63rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 2px 7px;
+  text-align: center;
+}
+.rUploaded { color: var(--ok); }
+.rDuplicate { color: var(--muted); }
+.rRejected { color: var(--warn); }
+.rFailed { color: var(--bad); }
+.rName { overflow-wrap: anywhere; }
+.rWhy { color: var(--muted); line-height: 1.45; }
+
+/* Tabs */
+.tabs { display: flex; gap: 6px; padding: 14px 0 0; }
+.tab {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  padding: 7px 15px;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+.tab:hover { color: var(--ink); border-color: var(--muted); }
+.tabOn { background: var(--brand); color: #12100b; border-color: var(--brand); font-weight: 600; }
+
+@media (max-width: 620px) {
+  .resultRow { grid-template-columns: 84px 1fr; }
+  .rWhy { grid-column: 2; }
+}
+
+/* ── detail overlay ────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(8, 7, 4, 0.86);
+  display: grid; place-items: center;
+  padding: clamp(8px, 2vw, 28px);
+  --ink: #f4f3ee; --ground: #12100b; --panel: #1b1913; --line: #2e2b22;
+  --muted: #8f8a7c; --brand: #fff000; --ok: #7fc4a2; --warn: #e0a44a; --bad: #f08279;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.sheet {
+  position: relative;
+  width: min(1180px, 100%);
+  max-height: 94vh;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  overflow: hidden;
+}
+.frame {
+  position: relative;
+  background: #0d0b07;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px; min-height: 300px; min-width: 0;
+}
+.frameMedia {
+  max-width: 100%;
+  max-height: calc(94vh - 96px);
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
+}
+.tech {
+  margin: 12px 0 0; color: var(--muted); font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+.panel {
+  border-left: 1px solid var(--line);
+  padding: 20px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--ground);
+}
+.detailCaption { margin: 0; font-size: 1.02rem; font-weight: 600; line-height: 1.4; }
+
+.closeX, .step {
+  position: absolute; z-index: 2;
+  background: rgba(18, 16, 11, 0.8);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+}
+.closeX { top: 12px; right: 372px; width: 30px; height: 30px; font-size: 1.15rem; }
+.step { top: 50%; transform: translateY(-50%); width: 34px; height: 44px; font-size: 1.4rem; }
+.stepPrev { left: 10px; }
+.stepNext { right: 10px; }
+.closeX:hover, .step:hover { border-color: var(--brand); color: var(--brand); }
+
+.restricted, .blocked {
+  border-radius: 10px; padding: 11px 13px; font-size: 0.84rem; line-height: 1.5;
+}
+.restricted { background: var(--warn); color: #12100b; }
+.blocked { background: var(--bad); color: #12100b; }
+.restricted strong, .blocked strong { display: block; margin-bottom: 4px; }
+.restricted ul, .blocked ul { margin: 0; padding-left: 1.1rem; }
+
+.facts2 {
+  display: grid; grid-template-columns: auto 1fr; gap: 5px 14px;
+  margin: 0; font-size: 0.82rem;
+}
+.facts2 dt { color: var(--muted); }
+.facts2 dd { margin: 0; overflow-wrap: anywhere; }
+
+.rejectNote {
+  border-left: 3px solid var(--bad);
+  background: var(--panel);
+  padding: 9px 12px; border-radius: 0 8px 8px 0; font-size: 0.84rem;
+}
+.rejectNote strong { color: var(--bad); display: block; margin-bottom: 3px; }
+.rejectNote p { margin: 0 0 4px; line-height: 1.5; }
+
+.reviewBlock {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.fieldRow {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: center;
+  font-size: 0.84rem;
+}
+.fieldRow > span:first-child { color: var(--muted); }
+.fieldRow input[type="checkbox"] { accent-color: var(--brand); width: 16px; height: 16px; justify-self: start; }
+.fieldRow .decider { grid-column: 2; }
+
+/* Three states, and each says which it is in words. An icon here would
+   need a legend, and a legend is a thing nobody reads. */
+.decider { font-size: 0.7rem; color: var(--muted); }
+.deciderHuman { color: var(--ok); font-weight: 600; }
+.deciderModel { color: var(--warn); }
+
+.keys {
+  margin: auto 0 0; padding-top: 10px;
+  color: var(--muted); font-size: 0.72rem;
+}
+
+@media (max-width: 860px) {
+  .sheet { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .panel { border-left: 0; border-top: 1px solid var(--line); }
+  .closeX { right: 12px; }
+  .frameMedia { max-height: 42vh; }
+}
+
+/* Clearance badge sits opposite the review state, so the two never
+   collide and each keeps a fixed corner. */
+.stateRight { left: auto; right: 8px; }
+.thumb[role="button"] { cursor: zoom-in; }
+.thumb[role="button"]:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+
+/* ── people ────────────────────────────────────────────────────────────── */
+.peopleBlock {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.tagList { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tagChip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px 6px 4px 11px; font-size: 0.8rem;
+}
+.tagBoxed { color: var(--brand); font-size: 0.7rem; }
+.tagX {
+  background: none; border: 0; color: var(--muted);
+  cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0 3px;
+}
+.tagX:hover { color: var(--bad); }
+
+.suggests { display: flex; flex-direction: column; gap: 6px; }
+.suggestRow {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 8px; align-items: center; font-size: 0.78rem;
+}
+.suggestAccept {
+  background: var(--panel); border: 1px solid var(--brand);
+  color: var(--brand); border-radius: 999px;
+  padding: 5px 11px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+}
+.suggestAccept:hover { background: var(--brand); color: #12100b; }
+.suggestAccept:disabled { opacity: 0.5; cursor: default; }
+/* The confidence word carries no colour of its own beyond high/low. A
+   three-colour scale would imply a precision this ranking does not have. */
+.conf { font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.confHigh { color: var(--ok); }
+.confLow { color: var(--muted); }
+.suggestWhy { color: var(--muted); overflow-wrap: anywhere; }
+
+.batchBox {
+  border: 1px dashed var(--line); border-radius: 10px;
+  padding: 11px 13px; display: flex; flex-direction: column; gap: 7px;
+}
+
+/* Boxes over the frame. Percentages, because the stored coordinates are
+   fractions and the frame is a different size on every screen. */
+.framed { position: relative; display: inline-block; max-width: 100%; }
+.boxLayer { position: absolute; inset: 0; }
+.boxLayerDraw { cursor: crosshair; background: rgba(255, 240, 0, 0.06); }
+.faceBox {
+  position: absolute;
+  border: 2px solid var(--brand);
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+}
+.faceBox span {
+  position: absolute; left: 0; top: 100%;
+  background: var(--brand); color: #12100b;
+  font-size: 0.66rem; padding: 1px 5px; border-radius: 0 0 3px 3px;
+  white-space: nowrap;
+}
+.faceBoxLive { border-style: dashed; }
+
+.describeBar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 11px 14px; margin-bottom: 12px;
+}
+.describeText { display: flex; flex-direction: column; gap: 3px; flex: 1 1 320px; min-width: 0; }
+.describeText strong { font-size: 0.88rem; }
+.describeText .muted { font-size: 0.76rem; line-height: 1.5; }
+
+.shapes { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.shapesLabel { color: var(--muted); font-size: 0.78rem; margin-right: 2px; }
+
+/* ── justified grid ────────────────────────────────────────────────────── */
+/* Replaces the fixed-column grid. Row heights are computed from each
+   asset's stored dimensions, so nothing is measured in the browser and no
+   image reflows the page as it lands. */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.row { display: flex; gap: 6px; }
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #0d0b07;
+  cursor: zoom-in;
+  flex: none;
+  /* No border, no card chrome. Separation comes from the gap; a border on
+     every tile is what made sixty of these read as a spreadsheet. */
+}
+.tile:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* Photographs fill their cell — the cell IS their aspect ratio, so nothing
+   is cropped. Graphics are letterboxed on a plate they can be seen against. */
+.tile[data-family="photo"] .thumbImg { object-fit: cover; }
+
+/* The checkerboard is load-bearing, not decoration: client logos ship
+   black-on-transparent AND white-on-transparent, so any single flat colour
+   makes one of the two invisible. A mid-tone check has contrast at 16px in
+   both directions — the reason Photoshop uses it, and a pattern a team that
+   uses Figma already reads without being told. */
+.tile[data-family="graphic"] {
+  --plate: #e8e6df;
+  background-color: var(--plate);
+  background-image:
+    conic-gradient(var(--plate) 90deg, #d5d2c8 0 180deg, var(--plate) 0 270deg, #d5d2c8 0);
+  background-size: 16px 16px;
+}
+.tile[data-family="graphic"] .thumbImg {
+  object-fit: contain;
+  padding: clamp(6px, 6%, 20px);
+}
+.tile[data-family="graphic"] .thumbFallback { color: #6b6759; }
+
+/* Blocked reads as unavailable rather than as a warning label. */
+.tileBlocked { filter: grayscale(0.55) brightness(0.62); }
+.tileBlocked:hover { filter: none; }
+.lock {
+  position: absolute; top: 7px; left: 7px; z-index: 2;
+  font-size: 0.8rem; line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+}
+
+/* Everything textual lives here and appears on hover or keyboard focus.
+   A real element at opacity 0 rather than display:none, so the transition
+   runs and screen readers still reach it. */
+.veil {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  gap: 4px; padding: 9px 10px;
+  background: linear-gradient(to top, rgba(9,8,5,0.9) 0%, rgba(9,8,5,0.55) 45%, transparent 78%);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.tile:hover .veil, .tile:focus-within .veil { opacity: 1; }
+@media (hover: none) {
+  /* No hover on a phone: show the caption strip permanently rather than
+     hiding the only text on the screen behind a gesture that does not exist. */
+  .veil { opacity: 1; background: linear-gradient(to top, rgba(9,8,5,0.86) 0%, transparent 62%); }
+  .veilActions { display: none; }
+}
+.veilCaption {
+  margin: 0; font-size: 0.78rem; line-height: 1.35; color: #f4f3ee;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.veilCaption em { color: #b9b4a4; }
+.veilFacts {
+  margin: 0; display: flex; gap: 8px; flex-wrap: wrap;
+  font-size: 0.66rem; letter-spacing: 0.04em; text-transform: uppercase; color: #b9b4a4;
+}
+.veilWarn { color: var(--warn); }
+.veilBad { color: var(--bad); }
+.veilActions { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
+.veilBtn {
+  background: rgba(244,243,238,0.14);
+  border: 1px solid rgba(244,243,238,0.28);
+  color: #f4f3ee;
+  border-radius: 6px; padding: 3px 8px; font-size: 0.7rem; cursor: pointer;
+  backdrop-filter: blur(3px);
+}
+.veilBtn:hover { background: var(--brand); color: #12100b; border-color: var(--brand); }
+.veilBtn:disabled { opacity: 0.5; cursor: default; }
+
+.density { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.densityBtn {
+  background: var(--panel); border: 0; color: var(--muted);
+  padding: 9px 12px; font-size: 0.8rem; cursor: pointer;
+}
+.densityBtn:hover { color: var(--ink); }
+.densityOn { background: var(--brand); color: #12100b; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .veil { transition: none; }
+}
+
+/* ── how much of the library is on screen ─────────────────────────────── */
+
+/* Centred rather than left-aligned under the last row. A justified grid
+   ends on a ragged row, so a left-aligned control sits at a different
+   distance from the last tile every time the set changes and reads as
+   misaligned. The centre is the one position that is stable. */
+.more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 0 40px;
+}
+
+.moreCount {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.moreBtn {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 9px 22px;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.moreBtn:hover:not(:disabled) { border-color: var(--muted); background: #221f18; }
+.moreBtn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.moreBtn:disabled { color: var(--muted); cursor: default; }

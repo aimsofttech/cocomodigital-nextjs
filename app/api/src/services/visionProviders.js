@@ -395,6 +395,10 @@ const buildUserText = (asset, job, loaded = {}) => {
  * a large backfill, or just set the two env vars and ignore the table.
  */
 const PRICES = {
+  /* Free, because nothing is billed. It still needs an entry: priceFor()
+   * throws for an unpriced model on purpose, so that a real model added
+   * to a provider without a price cannot silently record costUsd 0. */
+  stub: { stub: { in: 0, out: 0 } },
   anthropic: {
     'claude-fable-5-1': { in: 10, out: 50 },
     'claude-fable-5': { in: 10, out: 50 },
@@ -883,10 +887,79 @@ const googleAdapter = async ({ model, frames, userText, cfg }) => {
   };
 };
 
+
+/**
+ * A provider that answers without a provider.
+ *
+ * Everything downstream of a description — the setBy stamping, the
+ * checksum twin reuse, the budget accounting, the pending/done/failed
+ * transitions, the review queue filling up — was unreachable without an
+ * API key and a bill. So the one part of this system that decides what
+ * every asset *means* could not be exercised at all while it was being
+ * built, and every claim about it was a claim about unrun code.
+ *
+ * This adapter closes that. It returns a well-formed response of the same
+ * shape a real provider returns, derived deterministically from the
+ * filename and dimensions, at zero cost and zero latency.
+ *
+ * It is NOT a fallback and must never quietly become one. The captions it
+ * writes are guesses from a filename, not observations of a frame, and an
+ * asset described this way is marked as such: describeMeta.model is
+ * 'stub', so any row it touched can be found and re-described later with
+ * one query. It is selected only by setting MEDIA_DESCRIBE_PROVIDER=stub
+ * explicitly, and initMediaStorage's sibling check refuses it in
+ * production for the same reason the local disk driver is refused there.
+ */
+const stubAdapter = async ({ asset, frames, cfg }) => {
+  void cfg; void frames;
+  const name = (asset && (asset.originalName || asset.key)) || 'frame';
+  const base = String(name).replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim();
+  const words = base.split(/\s+/).filter((w) => /^[a-z]/i.test(w)).slice(0, 6);
+
+  /* Deterministic, so re-running the queue does not churn descriptions and
+   * a test can assert on the output. */
+  const pick = (list, seed) => list[Math.abs(hashString(seed)) % list.length];
+  const rooms = ['edit-bay', 'open-floor', 'meeting-room', 'shoot-floor', 'common-areas'];
+
+  const json = {
+    caption: `Placeholder description generated locally from the filename "${name}". `
+      + 'No model looked at this frame.',
+    altText: words.length ? words.join(' ') : 'untitled frame',
+    tags: words.map((w) => w.toLowerCase()).slice(0, 4),
+    category: 'uncategorised',
+    shows: [pick(rooms, name)],
+    assetType: 'photograph',
+    people: 0,
+    ocrText: '',
+    /* Never guesses governance. rights and consent are the two fields only
+     * a person may decide, and a stub inventing them would be the exact
+     * failure the setBy map exists to prevent — the difference is that a
+     * real provider's guess is at least an observation. */
+    rights: 'unknown',
+    consent: 'unknown',
+    sensitive: false,
+    usable: false,
+  };
+
+  return { raw: JSON.stringify(json), inputTokens: 0, outputTokens: 0 };
+};
+
+/** Small stable hash, so the stub is reproducible across runs. */
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i += 1) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return h;
+}
+
 const ADAPTERS = {
   anthropic: anthropicAdapter,
   openai: openaiAdapter,
   google: googleAdapter,
+  /* Local only — see stubAdapter. Costs nothing, observes nothing. */
+  stub: stubAdapter,
 };
 
 // -------------------------------------------------------- normalisation
@@ -959,6 +1032,9 @@ const describeOne = async (asset, { adapter, provider, model, price, job, cfg })
   const loaded = await loadFrames(asset, cfg);
   const { raw, inputTokens, outputTokens } = await adapter({
     model,
+    /* Passed for the stub, which has no frame to look at and names the
+     * file instead. The real adapters ignore it — they read the pixels. */
+    asset,
     frames: loaded.frames,
     userText: buildUserText(asset, job, loaded),
     cfg,
@@ -1014,6 +1090,19 @@ const describe = async (assets, options = {}) => {
 
   // Config problems throw. They are not facts about an asset and they must
   // not be written into five hundred describeError columns as if they were.
+  /* Refused in production for the same reason the local disk driver is:
+   * it produces plausible-looking output that is not an observation, and a
+   * library full of filename guesses presented as descriptions is worse
+   * than a library with none — the second is visibly incomplete and the
+   * first is quietly wrong. */
+  if (provider === 'stub' && process.env.NODE_ENV === 'production') {
+    throw new ConfigError(
+      'MEDIA_DESCRIBE_PROVIDER=stub is a local development provider and will not '
+      + 'run in production. It writes captions guessed from filenames, not from '
+      + 'frames. Set a real provider, or "none" to leave describing switched off.',
+    );
+  }
+
   const adapter = ADAPTERS[provider];
   if (!adapter) {
     throw new ConfigError(

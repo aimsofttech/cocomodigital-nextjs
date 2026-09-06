@@ -145,19 +145,46 @@ const MODULES = [
     apiPrefixes: ['/roles'],
     superAdminOnly: true,
   },
+  {
+    key: 'media',
+    label: 'Media Library',
+    /* Caspian. This row has to exist before '/media' can leave
+     * UPLOAD_PREFIXES below: moduleForApiPath() returns null for an
+     * unclaimed mount and the guard then denies everything, so removing
+     * the prefix without registering the module would take the library
+     * offline rather than secure it. The two changes are one change.
+     *
+     * `routePrefixes` points at /caspian in app/web, not at the admin
+     * SPA — the library's screens live on the public app behind the same
+     * session, so the admin router has no matching route today. */
+    actions: CRUD,
+    routePrefixes: ['/caspian'],
+    /* Both, explicitly. underPrefix() matches on segment boundaries, so
+     * '/media-jobs' is NOT under '/media' — without this row the job
+     * router would be an unclaimed mount and denied for everyone. */
+    apiPrefixes: ['/media', '/media-jobs'],
+  },
 ];
 
 /* Mounts every signed-in admin may reach whatever their role, because they are
  * not modules in their own right:
  *   /auth     logging in and out, and reading your own session
  *   /profile  your own name, picture and password
- *   /uploads  the shared media uploader, used by every module's forms
- *   /media    the shared media library behind those forms
- * The uploader is additionally gated on the caller holding create or update
- * somewhere — see `authorizeAdmin` — so a read-only role cannot use it as a
- * way to push files into the bucket. */
+ * Note this list does NOT include the uploader — see UPLOAD_PREFIXES below,
+ * which is separately gated on the caller holding create or update somewhere,
+ * so a read-only role cannot use it to push files into the bucket. */
 const ALWAYS_ALLOWED_PREFIXES = ['/auth', '/profile'];
-const UPLOAD_PREFIXES = ['/uploads', '/media'];
+/* The shared uploader behind every other module's forms. A user who may
+ * create or update anything may put a file behind it, which is why this
+ * prefix short-circuits the module matrix in adminAccess.
+ *
+ * '/media' used to sit here too, and that was the whole of defect D1:
+ * the media library is not an upload widget, it is a module with its own
+ * governance, and inheriting the widget's bypass meant anyone holding
+ * create-or-update on ANY module could approve, reject, delete and read
+ * NDA material. It is now the 'media' module above and is graded like
+ * every other mount. */
+const UPLOAD_PREFIXES = ['/uploads'];
 
 const MODULE_KEYS = MODULES.map((m) => m.key);
 const MODULE_BY_KEY = new Map(MODULES.map((m) => [m.key, m]));
@@ -207,11 +234,45 @@ const moduleForRoutePath = (path) => {
  * The CSV routes are checked before the plain verbs because they are a POST
  * and a GET that mean something more specific than "create" and "view".
  */
+/* Media routes where the HTTP verb is the wrong signal.
+ *
+ * Grading by verb alone makes POST mean 'create' everywhere, which in the
+ * media library collapses two different rights into one: uploading a file
+ * and deciding whether that file may be used. Anyone allowed to add to the
+ * library would be allowed to approve their own additions, and an approval
+ * queue whose uploader is also its approver is not a queue.
+ *
+ * So the verdict routes grade as 'update' — the right to change what an
+ * asset means, not to add another one. Re-running the describer is an
+ * update too: it overwrites stored description fields and costs money.
+ *
+ * Scoped to /media deliberately. Every other module keeps plain verb
+ * grading, which is correct for CRUD screens and is what the other
+ * fourteen modules were built against. */
+const MEDIA_ACTION_OVERRIDES = [
+  { verb: 'POST', test: /^\/media\/(bulk-approve|describe-queue|rendition-queue)$/, action: 'update' },
+  { verb: 'POST', test: /^\/media\/[^/]+\/(approve|reject|describe)$/, action: 'update' },
+  /* Removing a name is the same capability as adding one, not the same as
+   * deleting an asset. Graded by verb alone, DELETE /media/:id/people/:pid
+   * needs `delete` — which contributors do not have — so somebody who
+   * tagged the wrong person could not take it back, and a wrong name would
+   * sit there until a reviewer happened to notice. The wrong name is the
+   * worse outcome, and it is the one the verb default produces.
+   *
+   * The verb is part of the match. Without it this pattern also catches
+   * GET /media/:id/people/suggestions, and a read starts demanding write
+   * permission — which is how a guard that was meant to loosen one route
+   * quietly tightens another. */
+  { verb: 'DELETE', test: /^\/media\/[^/]+\/people\/[^/]+$/, action: 'create' },
+];
+
 const actionForRequest = (method, path) => {
   const verb = String(method || '').toUpperCase();
   if (/\/export\/csv$/.test(path)) return 'export';
   if (/\/import\/csv$/.test(path)) return 'import';
   if (/\/bulk-upload(\/|$)/.test(path)) return 'import';
+  const override = MEDIA_ACTION_OVERRIDES.find((o) => o.verb === verb && o.test.test(path));
+  if (override) return override.action;
   switch (verb) {
     case 'GET':
     case 'HEAD':

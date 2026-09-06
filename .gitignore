@@ -33,3 +33,6 @@ Thumbs.db
 app/admin/dist/
 app/crm/dist/
 ecosystem.deploy.js
+
+# Local media store (mediaStorage local driver). Never committed.
+app/api/.media-local/
