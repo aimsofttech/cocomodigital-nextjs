@@ -729,3 +729,41 @@
 @media (prefers-reduced-motion: reduce) {
   .veil { transition: none; }
 }
+
+/* ── how much of the library is on screen ─────────────────────────────── */
+
+/* Centred rather than left-aligned under the last row. A justified grid
+   ends on a ragged row, so a left-aligned control sits at a different
+   distance from the last tile every time the set changes and reads as
+   misaligned. The centre is the one position that is stable. */
+.more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 0 40px;
+}
+
+.moreCount {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.moreBtn {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 9px 22px;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.moreBtn:hover:not(:disabled) { border-color: var(--muted); background: #221f18; }
+.moreBtn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.moreBtn:disabled { color: var(--muted); cursor: default; }

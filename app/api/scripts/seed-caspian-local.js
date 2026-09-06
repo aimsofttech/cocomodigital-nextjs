@@ -11,6 +11,7 @@
  *
  *   node scripts/seed-caspian-local.js          # add
  *   node scripts/seed-caspian-local.js --reset  # wipe the fixture first
+ *   node scripts/seed-caspian-local.js --bulk 150  # + 150 rows, to exercise paging
  */
 require('dotenv').config();
 const crypto = require('crypto');
@@ -226,7 +227,7 @@ const run = async () => {
       setBy: { rights: 'human' },
     },
     {
-      _case: 'Undescribed and unreviewed — the state all 428 real rows are in right now.',
+      _case: 'Undescribed and unreviewed — the state essentially every migrated row is in right now.',
       ...obj('IMG_4417.jpg', 'image'),
       job: null, rights: 'unknown', consent: 'unknown', usable: false, sensitive: false,
       describeStatus: 'pending',
@@ -252,6 +253,45 @@ const run = async () => {
     );
     made += 1;
     console.log(`  ${res.key.padEnd(42)} ${_case.slice(0, 74)}`);
+  }
+
+  /* --bulk N: volume, not cases.
+   *
+   * The rows above are one per governance state, which is what the filters
+   * need and is nowhere near enough to exercise paging — nine rows fit in
+   * the first request, so a grid that can only ever fetch page 1 looks
+   * completely correct. That is exactly how the missing pagination
+   * survived. These rows have nothing interesting about them on purpose;
+   * they are there to make the library longer than one page. */
+  const bulkArg = process.argv.indexOf('--bulk');
+  if (bulkArg !== -1) {
+    const n = Math.min(Math.max(parseInt(process.argv[bulkArg + 1], 10) || 150, 1), 2000);
+    const ops = Array.from({ length: n }, (_, i) => {
+      const name = `bulk-${String(i + 1).padStart(4, '0')}.jpg`;
+      const doc = {
+        ...obj(name, 'image'),
+        ...described(`Filler asset ${i + 1} — seeded to make the library longer than one page.`,
+          ['bulk', 'fixture']),
+        folder: FIXTURE,
+        note: 'volume only — exists so paging has something to page through',
+        job: openJob._id,
+        rights: 'own',
+        consent: 'not-required',
+        usable: true,
+        sensitive: false,
+        review: approved,
+      };
+      return {
+        updateOne: {
+          filter: { key: doc.key },
+          update: { $set: doc },
+          upsert: true,
+        },
+      };
+    });
+    const res = await MediaAsset.bulkWrite(ops);
+    made += (res.upsertedCount || 0) + (res.modifiedCount || 0);
+    console.log(`\n  + ${n} volume rows (--bulk)`);
   }
 
   console.log(`\n${made} fixture assets in "${db}" (folder: ${FIXTURE})`);

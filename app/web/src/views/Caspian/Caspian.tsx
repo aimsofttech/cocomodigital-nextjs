@@ -46,6 +46,11 @@ import Describe from "./Describe";
 import { justify, familyOf, ratioOf } from "./justify";
 import styles from "./Caspian.module.css";
 
+/* Rows per request. The API caps `limit` at 100, so this cannot simply be
+   raised to "all of them" — and should not be: the library is nearly a
+   thousand rows and every tile is an image request. */
+const PAGE_SIZE = 60;
+
 const RIGHTS_LABEL: Record<string, string> = {
   own: "Ours",
   "client-ip": "Client IP",
@@ -192,6 +197,7 @@ export default function Caspian() {
   const [assets, setAssets] = useState<CaspianAsset[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [q, setQ] = useState("");
@@ -205,6 +211,17 @@ export default function Caspian() {
   const [rowH, setRowH] = useState(220);
   const [containerW, setContainerW] = useState(0);
   const roRef = useRef<ResizeObserver | null>(null);
+
+  /* How deep into the library we currently are, and a sequence number that
+   * decides which response is still wanted.
+   *
+   * Every fetch takes a ticket. A response whose ticket is no longer the
+   * current one is dropped on the floor — otherwise a slow page-3 request
+   * can land after the user has typed a new search and append three dozen
+   * rows that match the previous query. */
+  const pageRef = useRef(1);
+  const reqRef = useRef(0);
+  const lastNonce = useRef(0);
 
   /* A callback ref, not a mount effect.
    *
@@ -247,40 +264,113 @@ export default function Caspian() {
   const mayDecide = can("media", "update");
   const mayAdd = can("media", "create");
 
-  const load = useCallback(async () => {
+  /* One definition of "what is being asked for", shared by the first page
+     and every page after it. Two copies drift, and the way they drift is
+     that page 2 quietly answers a different question than page 1. */
+  const filters = useMemo(
+    () => ({
+      q: q || undefined,
+      search: search || undefined,
+      reviewState: reviewState || undefined,
+      publishable: publishableOnly ? "1" : undefined,
+    }),
+    [q, search, reviewState, publishableOnly],
+  );
+
+  /**
+   * Load pages 1..depth and replace the list.
+   *
+   * `depth` exists because a refresh must not throw away how far somebody
+   * has already scrolled. Approving one tile refetches at the depth they
+   * are at; it does not snap them back to the first sixty and lose their
+   * place in a library of a thousand.
+   *
+   * The pages are requested together rather than in sequence — they do not
+   * depend on each other, and a refresh at depth 5 should not cost five
+   * round trips end to end.
+   */
+  const load = useCallback(async (depth = 1) => {
     if (!mayView) return;
+    const req = (reqRef.current += 1);
     setLoading(true);
     setError(null);
     try {
-      const res = await listAssets({
-        q: q || undefined,
-        search: search || undefined,
-        reviewState: reviewState || undefined,
-        publishable: publishableOnly ? "1" : undefined,
-        limit: 60,
-      });
-      setAssets(res.data);
-      setTotal(res.pagination.total);
+      const pages = await Promise.all(
+        Array.from({ length: depth }, (_, i) =>
+          listAssets({ ...filters, page: i + 1, limit: PAGE_SIZE })),
+      );
+      if (reqRef.current !== req) return;
+      /* Dedupe across pages. skip/limit is a window onto a collection that
+         can change under it — an upload landing between two requests shifts
+         everything down one, and the same asset arrives twice. React would
+         then throw on the duplicate key. */
+      const seen = new Set<string>();
+      const merged: CaspianAsset[] = [];
+      for (const p of pages) {
+        for (const a of p.data) {
+          if (!seen.has(a.id)) { seen.add(a.id); merged.push(a); }
+        }
+      }
+      pageRef.current = depth;
+      setAssets(merged);
+      setTotal(pages[pages.length - 1].pagination.total);
     } catch (err) {
+      if (reqRef.current !== req) return;
       setError(err instanceof CaspianError ? err.message : "Could not reach the library.");
       setAssets([]);
       setTotal(0);
     } finally {
-      setLoading(false);
+      if (reqRef.current === req) setLoading(false);
     }
-  }, [mayView, q, search, reviewState, publishableOnly]);
+  }, [mayView, filters]);
+
+  /** Fetch the next page and append it. */
+  const loadMore = useCallback(async () => {
+    if (!mayView || loading || loadingMore) return;
+    const next = pageRef.current + 1;
+    const req = (reqRef.current += 1);
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const res = await listAssets({ ...filters, page: next, limit: PAGE_SIZE });
+      if (reqRef.current !== req) return;
+      pageRef.current = next;
+      setAssets((prev) => {
+        const seen = new Set(prev.map((a) => a.id));
+        return prev.concat(res.data.filter((a) => !seen.has(a.id)));
+      });
+      setTotal(res.pagination.total);
+    } catch (err) {
+      if (reqRef.current !== req) return;
+      setError(err instanceof CaspianError ? err.message : "Could not reach the rest of it.");
+    } finally {
+      if (reqRef.current === req) setLoadingMore(false);
+    }
+  }, [mayView, loading, loadingMore, filters]);
 
   useEffect(() => {
     if (!mayView) return;
     listSearches().then(setSearches).catch(() => setSearches([]));
   }, [mayView, nonce]);
 
-  /* Debounced so typing does not fire a request per keystroke. */
+  /* Debounced so typing does not fire a request per keystroke. Changing
+     what you are looking for puts you back at the top of the results —
+     staying at depth 5 of a set you have just replaced is meaningless. */
   useEffect(() => {
     if (!mayView) return undefined;
-    const t = setTimeout(load, q ? 250 : 0);
+    const t = setTimeout(() => load(1), q ? 250 : 0);
     return () => clearTimeout(t);
-  }, [load, mayView, q, nonce]);
+  }, [load, mayView, q]);
+
+  /* A refresh after somebody approves, rejects or edits — held at the depth
+     they had reached. Separate from the effect above because `nonce` must
+     not reset the depth, and the filters must. Guarded on the nonce value
+     itself so that `load` changing identity does not re-run this. */
+  useEffect(() => {
+    if (!mayView || nonce === lastNonce.current) return;
+    lastNonce.current = nonce;
+    load(pageRef.current);
+  }, [nonce, mayView, load]);
 
   const decide = async (asset: CaspianAsset, verdict: "approve" | "reject") => {
     setActing(asset.id);
@@ -558,6 +648,32 @@ export default function Caspian() {
           </div>
         ))}
       </div>
+
+      {/* How much of the library you are actually looking at.
+          The chip above counts the whole set, which is the number worth
+          knowing — but on its own it reads as a promise that all of them
+          are on screen. This is the correction to that. */}
+      {!loading && assets.length > 0 && (
+        <div className={styles.more}>
+          <p className={styles.moreCount}>
+            {assets.length === total
+              ? `All ${total}`
+              : `${assets.length} of ${total}`}
+          </p>
+          {assets.length < total && (
+            <button
+              type="button"
+              className={styles.moreBtn}
+              onClick={loadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore
+                ? "Loading…"
+                : `Show ${Math.min(PAGE_SIZE, total - assets.length)} more`}
+            </button>
+          )}
+        </div>
+      )}
       </>
       )}
 
