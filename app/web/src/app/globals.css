@@ -58153,7 +58153,7 @@ html {
    drawn at full strength and the copy is protected by the scrim below instead
    of by starving the image — one control for how much photograph you see,
    rather than two that multiply. Editors set it per card from the admin; a
-   card with none renders exactly as it always did. */
+   card with none renders as the plain white card it always was. */
 .pod-service-card-bg {
   position: absolute;
   inset: 0;
@@ -58177,9 +58177,10 @@ html {
      edges, where there is nothing, so an unscaled blurred image feathers out
      to transparent at the card's border. Growing it slightly pushes that soft
      edge outside the crop. */
-  /* No blur. It was costing the photograph all of its legibility and
-     buying nothing — the white veil below already does the contrast
-     work, and a blurred photo just reads as a smudge. */
+  /* No blur, and no opacity knob either. Both were ways of spending the
+     photograph in order to make text readable, and the dark scrim below
+     does that job on its own — so the picture is drawn exactly as the
+     editor uploaded it. A blurred or faded photo just reads as a smudge. */
   transform: scale(1.04);
   /* Behind the card's content, by painting order rather than by touching the
      content at all. An earlier attempt lifted every sibling with
@@ -58196,26 +58197,47 @@ html {
   user-select: none;
 }
 
+/* A card with a photograph is a DARK card, not a white one with a picture
+   faintly showing through.
+
+   The white veil this band used to carry was the whole problem: at
+   0.55–0.66 white over the image, a photograph of an editing suite came out
+   as a grey smudge and the card read as though something had failed to load.
+   Washing a picture out is not a way of making text readable — it just
+   spends the picture and buys very little.
+
+   So the polarity flips. The photograph plays at full strength, a black
+   scrim goes over it, and the copy goes yellow and white on top. Same
+   mechanism, opposite direction, and the picture survives it. */
+.pod-service-card--art {
+  /* The floor under the photograph. It matters in three cases the image
+     cannot cover: before it loads, if the S3 fetch fails, and under
+     prefers-reduced-transparency below, where both the image and the scrim
+     are removed. In all three the copy is light-on-dark, so the card itself
+     has to be dark — otherwise a slow image means yellow text on white. */
+  background: #0d0d0d;
+}
+
 /* The scrim that buys the copy its contrast back.
 
-   It was tuned to the bare AA minimum at first — 0.50/0.55/0.58, which
-   measures 4.1:1 on the body copy against a worst-case black region. That is
-   a passing number and it was not enough: 4.5:1 is a floor for text on a FLAT
-   colour, and none of these backgrounds are flat. Over a photograph the
-   threshold needs real headroom, so these stops target 7:1 and above.
+   Compositing black at alpha a over the WORST case the photograph can
+   present — a pure white region — leaves 255(1−a), which fixes the contrast
+   by a alone. No sampling required, which is just as well: the S3 bucket
+   sends no CORS headers, so the canvas cannot read these images.
 
-   Measured against a worst-case black region of the photograph, at the point
-   in the card where each piece of text actually sits —
+     a = 0.66  ->  white 7.3:1, yellow 6.1:1   (title zone)
+     a = 0.72  ->  white 9.0:1, yellow 7.6:1   (body paragraph)
+     a = 0.80  ->  white 13.1:1, yellow 11.0:1 (tag rule at the foot)
 
-     0%    0.62  the icon and title zone           title  7.1:1
-     55%   0.70  the body paragraph                body   7.8:1
-     100%  0.74  the tag rule at the foot          body   8.8:1
+   Yellow is the binding constraint, not white — #fff000 is a light colour
+   (L ≈ 0.836), so it behaves more like off-white than like an accent. The
+   title is 900-weight but only ~1.1rem, which is under the 18.66px bold that
+   would let it claim the 3:1 large-text threshold, so it is held to 4.5:1
+   like body copy. Every stop clears that with room to spare.
 
-   Still weighted rather than flat: the photograph is most itself at the top
-   of the card, which carries only an icon and a short title, and recedes
-   through the paragraph. Between this and the blur above, the copy is
-   readable over any image an editor uploads — including the ones on this page
-   that have text of their own in them. */
+   Weighted rather than flat, and weighted the opposite way round from the
+   old white veil: the photograph is left most itself at the TOP of the card,
+   where only the title sits, and deepens through the paragraph to the tags. */
 .pod-service-card--art::before {
   content: "";
   position: absolute;
@@ -58223,42 +58245,53 @@ html {
   border-radius: inherit;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.62) 55%,
-    rgba(255, 255, 255, 0.66) 100%
+    rgba(0, 0, 0, 0.66) 0%,
+    rgba(0, 0, 0, 0.72) 55%,
+    rgba(0, 0, 0, 0.8) 100%
   );
   z-index: -1;
   pointer-events: none;
 }
 
-/* --text-muted is 60% black, which survives a white card and not a
-   photograph. It is also what sets the floor above: the veil is calculated for
-   solid --text-body, and muted grey would need a veil ~15 points heavier to
-   reach the same threshold — which is to say, a visibly duller picture. The
-   body copy goes solid on a card with artwork; nothing else about it changes. */
-.pod-service-card--art .pod-service-body {
-  color: var(--text-body);
+/* The page's two colours, used the way the rest of the site already uses
+   them on a dark ground: brand yellow for the thing being named, white for
+   the sentence explaining it. Neither is a new colour — --brand is the same
+   #fff000 as the icon tiles, the offset shadows and the scroll rule.
+
+   Uppercase and tracked out, because at this size over a photograph a
+   sentence-case line reads as a caption and the band wants it to read as a
+   label. Scoped to --art so the plain white cards in the same grid keep the
+   title treatment they already had. */
+.pod-service-card--art .pod-service-title {
+  color: var(--brand);
+  font-size: clamp(1.05rem, 0.35vw + 0.95rem, 1.2rem);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
-/* Veil strength is not a taste call. Compositing white at alpha a over
-   the darkest possible pixel gives 255a, so against --text-body (#111)
-   the worst case any photograph can produce is fixed by a alone:
+/* --text-muted is 60% black, which survives a white card and neither a
+   photograph nor a dark scrim. On an art card the body goes white outright —
+   it is the value the scrim above is calculated against. */
+.pod-service-card--art .pod-service-body {
+  color: #ffffff;
+}
 
-     a = 0.62  ->  7.11:1     (the old value: safe, but washed out)
-     a = 0.55  ->  5.66:1     (chosen)
-     a = 0.50  ->  4.78:1
-     a = 0.46  ->  4.14:1     FAILS
-
-   0.55 is the lightest value that still leaves real headroom over the
-   4.5 threshold for every possible image, including one that is solid
-   black. Derived rather than sampled, because the S3 bucket sends no
-   CORS headers and the canvas cannot be read. */
+/* The spec-sheet line at the foot. Held back from full white so it stays
+   secondary to the paragraph, but well clear of the 4.5:1 floor against the
+   0.8 scrim it sits on (9.2:1). The hairline rule flips with it — a black
+   12%-alpha rule is simply invisible down there. */
+.pod-service-card--art .pod-service-tags {
+  color: rgba(255, 255, 255, 0.82);
+  border-top-color: rgba(255, 255, 255, 0.28);
+}
 
 @media (prefers-reduced-transparency: reduce) {
-  /* Someone who has asked for less visual noise gets the plain card.
-     NOTE: this is why the photographs are invisible on Anil's machine —
-     he has Reduce Transparency on. The behaviour is correct; it just
-     means he is not seeing what most visitors see. */
+  /* Someone who has asked for less visual noise gets the card without the
+     photograph — but it stays a dark card, because the copy on it is yellow
+     and white. That is what the #0d0d0d base above is for. This rule used to
+     leave a white card with dark text, which is why the photographs look
+     absent on Anil's machine: he has Reduce Transparency on. */
   .pod-service-card-bg,
   .pod-service-card--art::before {
     display: none;
