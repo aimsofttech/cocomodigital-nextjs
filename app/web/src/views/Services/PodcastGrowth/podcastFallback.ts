@@ -28,9 +28,11 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   hero: {
     eyebrow: "For podcasters in the US, Canada & UK",
-    /* Matches the URL and the <title>. Deliberately NOT the identical string
-       to the admin-driven page at /services/podcast-editing-and-growth-services
-       — two Cocoma pages with the same h1 would compete for the same query. */
+    /* Matches the URL and the <title>. The constraint this used to carry —
+       stay unlike the admin-driven podcast page so the two do not compete —
+       retired on 2026-09-07 when that page was redirected here and this
+       became the only podcast page. Kept aligned to URL and title because
+       that is right on its own, not to dodge a sibling. */
     title: "Podcast Video Editing & Marketing Services",
     sub: "One recording becomes a week of content — produced, packaged and published as one system.",
     priceBadge: "Engagements start at $2,500/month",

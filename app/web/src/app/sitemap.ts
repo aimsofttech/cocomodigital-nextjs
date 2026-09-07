@@ -127,6 +127,22 @@ function addSlugEntry(
  */
 const REDIRECTED_SOLUTION_SLUGS = new Set(["podcasters"]);
 
+/**
+ * Growth-service slugs that now permanently redirect elsewhere (see
+ * next.config.ts `redirects`). Keep this in sync with that list.
+ *
+ * This one is a trap rather than a live problem: `getGrowthServices()`
+ * returns nothing today, so no /services/* URL reaches the sitemap at
+ * all. But the loop that emits them takes whatever the API gives it, so
+ * the day somebody re-publishes the podcast growth-service record, the
+ * sitemap would start advertising a URL that answers 308 — telling
+ * Google to crawl a page whose only job is to send it somewhere else.
+ * Cheaper to exclude it now than to notice it later.
+ */
+const REDIRECTED_GROWTH_SLUGS = new Set([
+  "podcast-editing-and-growth-services",
+]);
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   /**
    * Fetch all SEO-relevant data in parallel from the API.
@@ -389,6 +405,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
    */
   for (const item of growthServices) {
     if (!item.slug) continue;
+    if (REDIRECTED_GROWTH_SLUGS.has(String(item.slug))) continue;
     entries.push(
       createEntry(
         `/services/${item.slug}`,

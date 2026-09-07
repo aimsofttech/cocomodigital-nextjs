@@ -10,15 +10,21 @@ import { SITE_URL, absoluteUrl, breadcrumbJsonLd, buildMetadata } from "@/src/li
  * /podcast-video-editing-marketing-services — canonical money page.
  *
  * This is a STATIC route segment that deliberately sits alongside the
- * dynamic /services/[slug] route. It deliberately sits OUTSIDE
- * /services/ so it cannot collide with the database-driven
- * GrowthServices module, which owns
- * /services/podcast-editing-and-growth-services.
+ * dynamic /services/[slug] route. It sits OUTSIDE /services/ so it
+ * cannot collide with the database-driven GrowthServices module.
  *
- * NOTE ON THE TWO PODCAST PAGES: Anshu's admin-editable page keeps
- * /services/podcast-editing-and-growth-services. This one is the
- * podcast ranking target. Their <title>s are deliberately different so
- * the two do not compete for the same query.
+ * THE ONLY PODCAST PAGE (2026-09-07, Anil's call). There were three
+ * URLs; there is now one. /solutions/podcasters and
+ * /services/podcast-editing-and-growth-services both 308 here.
+ *
+ * The second of those was kept for a year on the theory that two pages
+ * with different <title>s would not compete. That theory was never
+ * tested against the page, which turned out to be empty — HTTP 200, no
+ * <h1>, no <h2>, nav text only, and still `index, follow`. The lesson
+ * worth keeping: a page only earns a URL when there is an offer behind
+ * it. Cocoma sells one podcast engagement, so it gets one page. If
+ * editing-only ever becomes a real product with its own price, that is
+ * the moment a second page is justified — not before.
  *
  * Content, media and SEO all come from the API (admin panel → Podcast).
  * `getPodcastPage` resolves to null when the API is unreachable — including

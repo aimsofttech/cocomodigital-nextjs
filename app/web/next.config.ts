@@ -85,6 +85,28 @@ const nextConfig: NextConfig = {
         destination: "/podcast-video-editing-marketing-services",
         permanent: true,
       },
+      /* 2026-09-07: the last of the podcast duplicates. Anil's call —
+         one podcast page, not three.
+
+         This URL belonged to the admin-driven GrowthServices module and
+         was kept alongside the money page on the theory that their
+         different <title>s would stop them competing. In practice the
+         module page was never filled: it served HTTP 200 with no <h1>,
+         no <h2> and 1,523 characters of visible text, all of it header
+         and footer nav — while carrying `index, follow`, a self
+         canonical, and a title one word away from the real page's.
+
+         An empty indexable near-duplicate of your only ranking target is
+         worth nothing and risks something, so it goes where
+         /solutions/podcasters already goes. Note the redirect is what
+         actually fixes this: deleting the route alone would drop the URL
+         through to /services/[slug], which answers with the same soft-404
+         shell described in the entry above. */
+      {
+        source: "/services/podcast-editing-and-growth-services",
+        destination: "/podcast-video-editing-marketing-services",
+        permanent: true,
+      },
       {
         source: "/service-details/:slug",
         destination: "/service/:slug",

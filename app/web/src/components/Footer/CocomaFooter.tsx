@@ -44,9 +44,10 @@ const GROWTH_SERVICE_LINKS: { href: string; label: string }[] = [
     href: "/services/social-media-video-editing-services",
     label: "Social Media Video Editing Services",
   },
-  /* The canonical podcast ranking target (b70fac9). The older
-     /services/podcast-editing-and-growth-services page still exists but
-     is deliberately not linked from the footer. */
+  /* The canonical podcast ranking target (b70fac9), and since
+     2026-09-07 the only podcast page — the older
+     /services/podcast-editing-and-growth-services now 308s here, so
+     there is no longer a sibling to avoid linking. */
   {
     href: "/podcast-video-editing-marketing-services",
     label: "Podcast Video Editing & Marketing Services",
