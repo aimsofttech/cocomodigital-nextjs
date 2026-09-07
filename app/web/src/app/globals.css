@@ -59658,6 +59658,53 @@ html {
   top: 5.5rem;
 }
 
+/* The clip fills its frame edge to edge, and the frame takes its height from
+   the clip.
+
+   .pod-media pins every frame on the page to 1200/643 so that swapping a
+   poster for an iframe cannot shift the layout — the right call on the hero,
+   where a shift is an LCP cost. Here it was the wrong one: the band's video
+   is not 1200/643, and a <video> defaults to object-fit: contain, so the
+   mismatch came out as the frame's own tint showing down both sides and
+   along the foot. It read as padding around the video. It was letterboxing.
+
+   Neither cropping it (object-fit: cover) nor padding it is what this wants —
+   the frame should simply be the shape of the clip. So the container's fixed
+   ratio comes off and the height comes up from the content.
+
+   `aspect-ratio: auto 16 / 9` on the children is what keeps that free of
+   layout shift, and the `auto` keyword is doing the work: a replaced element
+   that HAS an intrinsic ratio uses its own, and 16/9 applies only until that
+   is known — or permanently, for the YouTube branch, since an iframe has no
+   intrinsic ratio to offer. Written as a bare `16 / 9` it would override the
+   real ratio instead of standing in for it, and letterbox the clip all over
+   again inside a box one ratio wide.
+
+   Scoped to this band. The hero keeps its fixed frame, and keeps its reason
+   for having one. */
+.pod-notfor-media .pod-media {
+  aspect-ratio: auto;
+  /* Was --bg-page-tint, which is what made the letterboxing read as a light
+     margin. Nothing should show through now, but a sub-pixel rounding
+     hairline against black reads as part of the 2px rule rather than as a
+     gap in it. */
+  background: var(--text-strong);
+}
+
+.pod-notfor-media .pod-media-frame,
+.pod-notfor-media .pod-media-img {
+  height: auto;
+  aspect-ratio: auto 16 / 9;
+}
+
+/* Belt and braces against that same rounding: with the box now the shape of
+   the clip, cover and contain crop identically, so this costs nothing and
+   guarantees the fill. */
+.pod-notfor-media .pod-media-frame--ambient,
+.pod-notfor-media .pod-media-img {
+  object-fit: cover;
+}
+
 /* Below the desktop grid the two tracks stop earning their split: the video
    gets too narrow to read and the prose measure drops under ~40 characters.
    Stack, and put the video AFTER the copy — the argument still leads, and on
