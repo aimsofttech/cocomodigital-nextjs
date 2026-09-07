@@ -58231,9 +58231,9 @@ html {
 
    Yellow is the binding constraint, not white — #fff000 is a light colour
    (L ≈ 0.836), so it behaves more like off-white than like an accent. The
-   title is 900-weight but only ~1.1rem, which is under the 18.66px bold that
-   would let it claim the 3:1 large-text threshold, so it is held to 4.5:1
-   like body copy. Every stop clears that with room to spare.
+   title is 900-weight but caps at 1.125rem (18px), still under the 18.66px
+   bold that would let it claim the 3:1 large-text threshold, so it is held
+   to 4.5:1 like body copy. Every stop clears that with room to spare.
 
    Weighted rather than flat, and weighted the opposite way round from the
    old white veil: the photograph is left most itself at the TOP of the card,
@@ -58264,10 +58264,22 @@ html {
    title treatment they already had. */
 .pod-service-card--art .pod-service-title {
   color: var(--brand);
-  font-size: clamp(1.05rem, 0.35vw + 0.95rem, 1.2rem);
+  /* Uppercase already adds weight and width, and in brand yellow it carries
+     further than black does — so this stays close to the body copy in size
+     and lets the colour do the emphasis rather than the scale.
+
+     Every stop is the same +2px above the first pass at this: it read a
+     touch timid against its own paragraph, and 2px is the whole correction.
+     The cap deliberately stops at 1.125rem (18px): one notch further and a
+     900-weight title crosses 18.66px, where WCAG lets it drop to the 3:1
+     large-text threshold — the scrim below is derived assuming it does not,
+     so raise them together or not at all. */
+  font-size: clamp(1.025rem, 0.25vw + 0.945rem, 1.125rem);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 1.2;
+  /* Tracked a little wider as it shrinks: uppercase set tight at small sizes
+     closes up and stops being scannable. */
+  letter-spacing: 0.02em;
+  line-height: 1.25;
 }
 
 /* --text-muted is 60% black, which survives a white card and neither a
