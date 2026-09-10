@@ -1,4 +1,6 @@
+const mongoose = require('mongoose');
 const JobApplicant = require('../../models/JobApplicant');
+const JobList = require('../../models/JobList');
 const { paginateQuery } = require('../../utils/helpers');
 const { buildS3Url } = require('../../utils/s3Upload');
 
@@ -20,11 +22,37 @@ const index = async (req, res) => {
   res.json({ status: 'success', data: result.data.map(withResumeUrl), pagination: result.pagination });
 };
 
+// An applicant carries no category of its own — it points at a JobList, and the
+// listing is what belongs to a category. So a category filter resolves to the
+// set of listing ids in that category, and a job-title filter narrows within it.
+// Returns null when neither filter was supplied (i.e. "don't constrain jobListId").
+const resolveJobListIds = async ({ jobCategoryId, jobListId }) => {
+  let ids = null;
+  if (jobCategoryId && mongoose.Types.ObjectId.isValid(jobCategoryId)) {
+    const listings = await JobList.find({ jobCategoryId }).select('_id').lean();
+    ids = listings.map((l) => String(l._id));
+  }
+  if (jobListId && mongoose.Types.ObjectId.isValid(jobListId)) {
+    // Both set: the title must also sit in the chosen category, otherwise the
+    // combination matches nothing (an empty $in) rather than silently widening.
+    ids = ids && !ids.includes(String(jobListId)) ? [] : [String(jobListId)];
+  }
+  return ids;
+};
+
 const allApplications = async (req, res) => {
-  const { page = 1, limit = 50, search = '' } = req.query;
-  const filter = search
-    ? { $or: SEARCH_FIELDS.map((f) => ({ [f]: { $regex: search, $options: 'i' } })) }
-    : {};
+  const {
+    page = 1, limit = 50, search = '',
+    jobCategoryId = '', jobListId = '', applicationStatus = '',
+  } = req.query;
+
+  const filter = {};
+  if (search) filter.$or = SEARCH_FIELDS.map((f) => ({ [f]: { $regex: search, $options: 'i' } }));
+  if (applicationStatus) filter.applicationStatus = applicationStatus;
+
+  const listIds = await resolveJobListIds({ jobCategoryId, jobListId });
+  if (listIds) filter.jobListId = { $in: listIds.map((id) => new mongoose.Types.ObjectId(id)) };
+
   const result = await paginateQuery(JobApplicant, filter, { page: parseInt(page), limit: parseInt(limit), sort: { createdAt: -1 }, populate: POPULATE });
   res.json({ status: 'success', data: result.data.map(withResumeUrl), pagination: result.pagination });
 };

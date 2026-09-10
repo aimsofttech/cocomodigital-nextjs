@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { jobApplicantApi } from '@/services/adminApi';
+import { jobApplicantApi, jobCategoryApi, jobListApi } from '@/services/adminApi';
 import PageHeader from '@/components/ui/PageHeader';
 import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
@@ -9,12 +9,11 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Tooltip from '@/components/ui/Tooltip';
 import toast from 'react-hot-toast';
 import TableFilter, {
-  FilterField, FilterValues, applyClientFilters, isEmptyValue,
+  FilterField, FilterValues, applyClientFilters, extractServerParams, isEmptyValue,
 } from '@/components/ui/TableFilter';
 
-const FILTER_FIELDS: FilterField[] = [
-  { key: 'createdAt', label: 'Applied Date Range', type: 'date-range', serverSide: false },
-];
+const STATUS_FILTER_OPTIONS = ['pending', 'reviewed', 'shortlisted', 'rejected', 'hired']
+  .map((v) => ({ value: v, label: v.charAt(0).toUpperCase() + v.slice(1) }));
 
 const STATUS_BADGES: Record<string, string> = {
   pending: 'badge-warning',
@@ -42,21 +41,58 @@ export default function ApplicantList() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Dropdown sources for the filters, straight off the job category / job list APIs.
+  const [categories, setCategories] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const selectedCategory = filterValues.jobCategoryId || '';
+
+  useEffect(() => {
+    jobCategoryApi.getAll({ limit: 100 })
+      .then(({ data: res }: any) => setCategories(res.data || []))
+      .catch(() => setCategories([]));
+  }, []);
+
+  // Job titles follow the chosen category, so the two dropdowns stay coherent.
+  useEffect(() => {
+    jobListApi.getAll({ limit: 200, ...(selectedCategory ? { jobCategoryId: selectedCategory } : {}) })
+      .then(({ data: res }: any) => setJobs(res.data || []))
+      .catch(() => setJobs([]));
+  }, [selectedCategory]);
+
+  const filterFields: FilterField[] = useMemo(() => [
+    { key: 'jobCategoryId', label: 'Job Category', type: 'select', serverSide: true,
+      options: categories.map((c: any) => ({ value: c._id, label: c.name })) },
+    { key: 'jobListId', label: 'Job Title', type: 'select', serverSide: true,
+      options: jobs.map((j: any) => ({ value: j._id, label: j.title })) },
+    { key: 'applicationStatus', label: 'Status', type: 'select', serverSide: true,
+      options: STATUS_FILTER_OPTIONS },
+    { key: 'createdAt', label: 'Applied Date Range', type: 'date-range', serverSide: false },
+  ], [categories, jobs]);
+
+  const serverParams = useMemo(
+    () => extractServerParams(filterValues, filterFields),
+    [filterValues, filterFields],
+  );
+  const serverKey = JSON.stringify(serverParams);
+
   const fetchData = () => {
     setLoading(true);
-    (jobApplicantApi as any).getAllApplications({ page, limit, search })
+    (jobApplicantApi as any).getAllApplications({ page, limit, search, ...serverParams })
       .then(({ data: res }: any) => { setData(res.data || []); setPagination(res.pagination); })
       .finally(() => setLoading(false));
   };
 
-  useEffect(fetchData, [page, limit, search]);
+  useEffect(fetchData, [page, limit, search, serverKey]);
 
   const handleFilterChange = (key: string, value: any) => {
     const next = { ...filterValues, [key]: value };
+    // Switching category invalidates a title picked from the previous one.
+    if (key === 'jobCategoryId') next.jobListId = '';
     setFilterValues(next);
+    setPage(1);
     try { sessionStorage.setItem(sk, JSON.stringify(next)); } catch { /* noop */ }
   };
-  const handleFilterReset = () => { setFilterValues({}); try { sessionStorage.removeItem(sk); } catch { /* noop */ } };
+  const handleFilterReset = () => { setFilterValues({}); setPage(1); try { sessionStorage.removeItem(sk); } catch { /* noop */ } };
   const handlePageSizeChange = (s: number) => { setLimit(s); setPage(1); try { sessionStorage.setItem(sk + '_ps', String(s)); } catch { /* noop */ } };
 
   const handleDelete = async () => {
@@ -74,8 +110,8 @@ export default function ApplicantList() {
     }
   };
 
-  const activeCount = FILTER_FIELDS.filter((f) => !isEmptyValue(filterValues[f.key])).length;
-  const filteredData = applyClientFilters(data, filterValues, FILTER_FIELDS);
+  const activeCount = filterFields.filter((f) => !isEmptyValue(filterValues[f.key])).length;
+  const filteredData = applyClientFilters(data, filterValues, filterFields);
 
   const columns = [
     { key: 'name', label: 'Name', sortable: true, render: (row: any) => (
@@ -96,7 +132,7 @@ export default function ApplicantList() {
   return (
     <div>
       <PageHeader title="Job Applicants" breadcrumbs={[{ label: 'Jobs' }, { label: 'Applicants' }]} />
-      <TableFilter fields={FILTER_FIELDS} values={filterValues} onChange={handleFilterChange} onReset={handleFilterReset} activeCount={activeCount} loading={loading} />
+      <TableFilter fields={filterFields} values={filterValues} onChange={handleFilterChange} onReset={handleFilterReset} activeCount={activeCount} loading={loading} />
       <div className="card">
         <DataTable
           columns={columns}
