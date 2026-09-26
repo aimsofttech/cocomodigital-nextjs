@@ -10,6 +10,7 @@ import TableFilter, {
 import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Tooltip from '@/components/ui/Tooltip';
+import { ImageCell } from '@/components/ui/MediaCell';
 import {
   EyeIcon, TrashIcon, CheckCircleIcon, XCircleIcon, ArrowPathIcon,
   CalendarDaysIcon, EnvelopeIcon, PhoneIcon, BuildingOfficeIcon, UserPlusIcon,
@@ -98,6 +99,65 @@ const StatusBadge = ({ status }: { status: string }) => (
     {status}
   </span>
 );
+
+// Service descriptions are stored as HTML; the card preview wants plain text.
+function toPlainText(html?: string | null): string {
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+}
+
+/* The notes carry a trailing "Cart:" block of raw service ids. Once the API
+   has resolved those into `cartItems` they're shown as cards instead, so the
+   id list is dropped from the notes text (display only — the stored notes are
+   untouched). */
+function notesWithoutCart(notes: string, hasCartItems: boolean): string {
+  if (!hasCartItems) return notes;
+  const at = notes.lastIndexOf('Cart:');
+  return at === -1 ? notes : notes.slice(0, at).trim();
+}
+
+// Public website — "View service" opens the card's page there, not in the admin.
+const WEB_URL = ((import.meta as any).env?.VITE_WEB_URL || 'https://cocomadigital.com').replace(/\/+$/, '');
+
+// One service card the visitor added to their call while booking.
+const CartItemCard = ({ item }: { item: any }) => {
+  if (item.missing) {
+    return (
+      <div className="flex items-center gap-3 border border-dashed border-gray-200 rounded-lg p-3 text-gray-400">
+        <span className="text-xs">This service has since been deleted (ID: {item._id})</span>
+      </div>
+    );
+  }
+  const description = toPlainText(item.description);
+  return (
+    <div className="flex gap-3 border border-gray-200 rounded-lg p-3">
+      <div className="shrink-0">
+        <ImageCell src={item.thumbnail} alt={item.title} size="w-24 h-16" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-medium text-gray-900 leading-snug">{item.title}</p>
+          {item.status === 0 && (
+            <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Inactive</span>
+          )}
+        </div>
+        {item.groupCategoryName && <p className="text-xs text-gray-500 mt-0.5">{item.groupCategoryName}</p>}
+        {description && <p className="text-xs text-gray-600 mt-1 line-clamp-2">{description}</p>}
+        {item.slug && (
+          <a
+            href={`${WEB_URL}/service/${encodeURIComponent(item.slug)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-xs text-blue-600 hover:underline mt-1"
+          >
+            View service
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const FILTER_FIELDS: FilterField[] = [
   {
@@ -514,8 +574,16 @@ export default function MeetingList() {
                 </div>
               )}
             </div>
-            {selected.notes && (
-              <div><p className="text-xs text-gray-500 mb-1">Notes / Message</p><p className="bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selected.notes}</p></div>
+            {selected.notes && notesWithoutCart(selected.notes, !!selected.cartItems?.length) && (
+              <div><p className="text-xs text-gray-500 mb-1">Notes / Message</p><p className="bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{notesWithoutCart(selected.notes, !!selected.cartItems?.length)}</p></div>
+            )}
+            {selected.cartItems?.length > 0 && (
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Services Added to Call ({selected.cartItems.length})</p>
+                <div className="space-y-2">
+                  {selected.cartItems.map((item: any) => <CartItemCard key={item._id} item={item} />)}
+                </div>
+              </div>
             )}
             {selected.meetLink && (
               <div>

@@ -1,5 +1,8 @@
+const mongoose = require('mongoose');
 const Meeting = require('../../models/Meeting');
 const MeetingAssignee = require('../../models/MeetingAssignee');
+const GroupServiceItem = require('../../models/GroupServiceItem');
+const GroupServiceCategory = require('../../models/GroupServiceCategory');
 const { createMeetingEvent } = require('../../services/calendarService');
 const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
 const logger = require('../../utils/logger');
@@ -10,6 +13,55 @@ const {
   slotsForViewerDate,
   validateBookingSlot,
 } = require('../../utils/bookingWindow');
+
+/* The public booking page records the services a visitor added to their call
+   as a "Cart:" block at the end of `notes`, one "  - <id>" line per service
+   card (a Group Service Item). Pull those ids back out so the admin can be
+   shown the actual cards rather than raw ids. */
+const CART_LINE = /^\s*-\s*([a-f0-9]{24})\s*$/i;
+function cartIdsFromNotes(notes) {
+  if (!notes) return [];
+  const at = notes.lastIndexOf('Cart:');
+  if (at === -1) return [];
+  return notes.slice(at + 'Cart:'.length).split('\n')
+    .map((line) => (line.match(CART_LINE) || [])[1])
+    .filter(Boolean);
+}
+
+/* Attach `cartItems` (the full service-card details, in the order the visitor
+   added them) to each meeting. One lookup for every card across the page, one
+   for their categories. A card deleted since the booking comes back as
+   { _id, missing: true } so the admin still sees that something was there. */
+async function attachCartItems(meetings) {
+  const idsByMeeting = meetings.map((m) => cartIdsFromNotes(m.notes));
+  const allIds = [...new Set(idsByMeeting.flat())];
+  if (!allIds.length) return meetings;
+
+  try {
+    const items = await GroupServiceItem.find({
+      _id: { $in: allIds.map((id) => new mongoose.Types.ObjectId(id)) },
+    }).select('title slug thumbnail description groupServiceCategoryId status').lean();
+
+    const catIds = [...new Set(items.map((it) => String(it.groupServiceCategoryId)))]
+      .filter((id) => mongoose.Types.ObjectId.isValid(id));
+    const cats = catIds.length
+      ? await GroupServiceCategory.find({ _id: { $in: catIds } }).select('name').lean()
+      : [];
+    const catName = new Map(cats.map((c) => [String(c._id), c.name]));
+    const byId = new Map(items.map((it) => [String(it._id), {
+      ...it,
+      groupCategoryName: catName.get(String(it.groupServiceCategoryId)) || null,
+    }]));
+
+    return meetings.map((m, i) => (idsByMeeting[i].length
+      ? { ...m, cartItems: idsByMeeting[i].map((id) => byId.get(id) || { _id: id, missing: true }) }
+      : m));
+  } catch (err) {
+    // Details are a convenience — never fail the meeting list over them.
+    logger.error(`Failed to resolve meeting cart items: ${err.message}`);
+    return meetings;
+  }
+}
 
 // GET /admin/api/meetings
 const index = async (req, res) => {
@@ -39,7 +91,7 @@ const index = async (req, res) => {
 
   res.json({
     status: 'success',
-    data,
+    data: await attachCartItems(data),
     pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
   });
 };
@@ -60,7 +112,8 @@ const stats = async (req, res) => {
 const show = async (req, res) => {
   const doc = await Meeting.findById(req.params.id).lean();
   if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
-  res.json({ status: 'success', data: doc });
+  const [data] = await attachCartItems([doc]);
+  res.json({ status: 'success', data });
 };
 
 // PUT /admin/api/meetings/:id/confirm
