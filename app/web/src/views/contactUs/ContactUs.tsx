@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "@/src/lib/navigation";
 import { openMailto } from "@/src/lib/email";
+import { teamWhatsappLink } from "@/src/lib/contact";
 import {
   FaCalendarPlus,
   FaWhatsapp,
@@ -12,11 +13,10 @@ import {
 
 
 const DIRECT_EMAIL = "anil@cocomadigital.com";
-const WHATSAPP_NUMBER = "+918800528125";
 
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-  "Hi Anil, I came in via cocomadigital.com — wanted to chat."
-)}`;
+/* WhatsApp opens the team line (src/lib/contact.ts), never a personal
+   number, and no digits are printed on the page. */
+const WHATSAPP_LINK = teamWhatsappLink("contact page");
 
 const MAILTO_LINK = `mailto:${DIRECT_EMAIL}?subject=${encodeURIComponent(
   "Project enquiry"
@@ -114,7 +114,7 @@ export default function ContactUs() {
     if (!formData.email.trim()) e.email = "We'll write back here";
     else if (!/^\S+@\S+\.\S+$/.test(formData.email))
       e.email = "That email looks off";
-    // Count digits only, so "+91 88005 28125" and "8800528125" both pass.
+    // Count digits only, so "+91 98765 43210" and "9876543210" both pass.
     // 10 covers a bare Indian mobile; 15 is the E.164 ceiling.
     const phoneDigits = formData.phone.replace(/\D/g, "");
     if (!formData.phone.trim()) e.phone = "We'll need a number to reach you";
@@ -248,8 +248,8 @@ export default function ContactUs() {
               <FaWhatsapp />
             </span>
             <span className="contactus-channel-body">
-              <strong>WhatsApp Anil</strong>
-              <small>{WHATSAPP_NUMBER}</small>
+              <strong>WhatsApp our team</strong>
+              <small>Messages only · tell us what you need</small>
             </span>
             <span className="contactus-channel-arrow" aria-hidden="true">
               <FaArrowRight />

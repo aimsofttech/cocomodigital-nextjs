@@ -22,17 +22,21 @@ import {
 } from "../../utils/calendarLinks";
 import { openMailto } from "../../lib/email";
 import { s3Url } from "@/src/lib/s3";
+import { teamWhatsappLink } from "@/src/lib/contact";
 
 
 const DIRECT_EMAIL = "anil@cocomadigital.com";
-const WHATSAPP_NUMBER = "+918800528125";
 
 const HOST_PHOTO_URL =
   s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png");
 
+/* Opens the team line (src/lib/contact.ts), never a personal number. */
 function whatsappLink(name, dateLine) {
-  const text = `Hi Anil, this is ${name || "[your name]"}. I just booked our discovery call for ${dateLine}. Looking forward!`;
-  return `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(text)}`;
+  /* This page also opens with no booking details, so the name and the
+     booking sentence appear only when they are known. */
+  const who = name ? `This is ${name}. ` : "";
+  const booked = dateLine ? `I booked a discovery call for ${dateLine}. ` : "";
+  return teamWhatsappLink("booking page", `${who}${booked}Some context before the call: `);
 }
 
 function mailtoLink(name, dateLine) {
@@ -175,9 +179,9 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
             <li>
               <span className="booking-confirmed-step-num">2</span>
               <div>
-                <h3>WhatsApp nudge — 1 hour before</h3>
+                <h3>Reminder email — 1 hour before</h3>
                 <p>
-                  Anil sends a quick WhatsApp ping an hour before the call so
+                  We email you a reminder about an hour before the call so
                   you don't miss it. No spam — just one message.
                 </p>
               </div>
@@ -273,14 +277,14 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
             </Link>
             <Link
               className="booking-confirmed-contact-btn"
-              href={whatsappLink(fullName, dateLine || "our call")}
+              href={whatsappLink(fullName, dateLine)}
               target="_blank"
               rel="noopener noreferrer"
             >
               <FaWhatsapp aria-hidden="true" />
               <span>
-                <strong>WhatsApp Anil</strong>
-                <small>{WHATSAPP_NUMBER}</small>
+                <strong>WhatsApp our team</strong>
+                <small>Messages only</small>
               </span>
             </Link>
           </div>

@@ -122,21 +122,22 @@ const ProspectPage = ({ data }) => {
       {/* WhatsApp sticky chip — second contact-channel option for
           visitors who'd rather message than book a calendar slot.
           Renders only when data.whatsapp.number is set (E.164
-          format, no plus sign). Position offset above the
-          existing Talk-to-Anil floating chip. */}
+          format, no plus sign) — set it to the team line, never a
+          personal number. Position offset above the existing
+          Talk-to-Anil floating chip. */}
       {data.whatsapp?.number && (
         <Link
           href={`https://wa.me/${data.whatsapp.number}?text=${encodeURIComponent(
-            data.whatsapp.text || "Hi Anil, saw the page on cocomadigital.com."
+            data.whatsapp.text || "Hello Cocoma team, I saw the page on cocomadigital.com."
           )}`}
           target="_blank"
           rel="noopener noreferrer"
           className="prospect-whatsapp-chip"
-          aria-label={data.whatsapp.label || "WhatsApp Anil"}
+          aria-label={data.whatsapp.label || "WhatsApp our team"}
         >
           <FaWhatsapp aria-hidden="true" />
           <span className="prospect-whatsapp-chip-label">
-            {data.whatsapp.label || "WhatsApp Anil"}
+            {data.whatsapp.label || "WhatsApp our team"}
           </span>
         </Link>
       )}

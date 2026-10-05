@@ -7,18 +7,18 @@ import PrimaryButton from "../../common/PrimaryButton/PrimaryButton";
 import { useNavigate } from "@/src/lib/navigation";
 import { openMailto } from "@/src/lib/email";
 import { FaWhatsapp, FaArrowRight } from "react-icons/fa";
-import { HiOutlineMail, HiOutlineCalendar } from "react-icons/hi";
+import { HiOutlineMail } from "react-icons/hi";
 import { s3Url } from "@/src/lib/s3";
+import { teamWhatsappLink } from "@/src/lib/contact";
 
-// TODO Anil: confirm Calendly booking URL. Placeholder for now.
-const CALENDLY_URL = "https://calendly.com/cocomadigital/15min";
 const DIRECT_EMAIL = "anil@cocomadigital.com";
-// Anil's personal WhatsApp — these CTAs say "Anil directly" so they
-// should land on him, not the team inbound number (which is Vishal's).
-const WHATSAPP_NUMBER = "+918800528125";
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-    "Hi Anil — I'd like to talk about a campaign."
-)}`;
+/* WhatsApp opens the team line (src/lib/contact.ts), never a personal
+   number. The "Book 15 min" channel that sat beside it pointed at a
+   placeholder Calendly URL that returned 404, so it is gone. */
+const WHATSAPP_LINK = teamWhatsappLink(
+    "case-study page",
+    "I'd like to talk about a campaign for: "
+);
 
 const ContactPromo = () => {
     const navigate = useNavigate();
@@ -135,16 +135,7 @@ const ContactPromo = () => {
                             rel="noopener noreferrer"
                         >
                             <FaWhatsapp size={18} color="#25D366" />
-                            <span>WhatsApp</span>
-                        </Link>
-                        <Link
-                            className="contact-quick-channel"
-                            href={CALENDLY_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <HiOutlineCalendar size={18} />
-                            <span>Book 15 min</span>
+                            <span>WhatsApp our team</span>
                         </Link>
                     </div>
                 </div>
