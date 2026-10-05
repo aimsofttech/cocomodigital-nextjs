@@ -22,6 +22,7 @@ import WhyCocomaDigital from "../../components/WebSeries/WhyCocomaDigital/WhyCoc
 import ContactPromo from "../../components/WebSeries/ContactPromo/ContactPromo";
 import ConsultBanner from "../../components/WebSeries/ConsultBanner/ConsultBanner";
 import FAQ from "../../components/WebSeries/FAQ/FAQ";
+import { S3_BASE_URL } from "@/src/lib/s3";
 
 const WebSeriesIndividual = () => {
   const { slug } = useParams();
@@ -35,8 +36,7 @@ const WebSeriesIndividual = () => {
 
     let cancelled = false;
 
-    const S3_BASE =
-      "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/";
+    const S3_BASE = S3_BASE_URL + "/";
     const absolutize = (v: string): string =>
       !v
         ? ""

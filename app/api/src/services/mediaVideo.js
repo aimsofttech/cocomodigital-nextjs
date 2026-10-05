@@ -358,7 +358,7 @@ const posterKeyFor = (asset) => {
 
 /**
  * Store the poster on S3 using the client the rest of the app uploads
- * with — same bucket, same public-read ACL as uploadYoutubeThumbnailToS3,
+ * with — same bucket and settings as uploadYoutubeThumbnailToS3,
  * which is the only other place we PUT a buffer we built ourselves rather
  * than a stream multer handed us.
  */
@@ -369,7 +369,6 @@ const putPoster = async (buffer, asset) => {
     Key: key,
     Body: buffer,
     ContentType: 'image/jpeg',
-    ACL: 'public-read',
     // The key carries a timestamp and is never rewritten, so the object
     // is safe to cache forever.
     CacheControl: 'public, max-age=31536000, immutable',

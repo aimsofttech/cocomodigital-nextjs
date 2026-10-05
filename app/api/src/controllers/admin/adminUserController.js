@@ -4,6 +4,7 @@ const AdminRole = require('../../models/AdminRole');
 const { paginateQuery } = require('../../utils/helpers');
 const { sendMail, isConfigured } = require('../../services/mailer');
 const logger = require('../../utils/logger');
+const { buildS3Url, toStoredKey } = require('../../utils/s3Upload');
 
 /* User Management — Super Admin only. The route is additionally guarded by
  * `superAdminOnly`, and the module is marked superAdminOnly in the catalog, so
@@ -41,7 +42,7 @@ const present = (user, roleMap) => {
     email: user.email,
     roleKey: user.roleKey,
     roleName: role ? role.name : user.roleKey,
-    profileImage: user.profileImage || '',
+    profileImage: user.profileImage ? buildS3Url(user.profileImage) : '',
     status: user.status ?? 1,
     lastLoginAt: user.lastLoginAt || null,
     mustChangePassword: !!user.mustChangePassword,
@@ -135,7 +136,7 @@ const store = async (req, res) => {
      * reading `role` sees something sensible. */
     role: roleKey === 'editor' ? 'editor' : 'admin',
     mustChangePassword: true,
-    profileImage: req.body.profileImage || '',
+    profileImage: toStoredKey(req.body.profileImage || ''),
     createdByUserId: req.user._id,
   });
 
@@ -224,7 +225,7 @@ const update = async (req, res) => {
     user.status = next;
   }
 
-  if (req.body.profileImage !== undefined) user.profileImage = req.body.profileImage;
+  if (req.body.profileImage !== undefined) user.profileImage = toStoredKey(req.body.profileImage);
 
   await user.save();
   const roles = await roleMap();

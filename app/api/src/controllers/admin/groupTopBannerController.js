@@ -7,6 +7,7 @@ const createCrudController = require('./crudFactory');
 // scopes them to a Department (list filter).
 module.exports = createCrudController(GroupTopBanner, {
   imageFields: ['image'],
+  videoFields: ['video'],
   searchFields: ['heading'],
   defaultSort: { displayOrder: 1 },
   parentField: ['exploreOurServiceItemId', 'exploreOurServiceCategoryId'],

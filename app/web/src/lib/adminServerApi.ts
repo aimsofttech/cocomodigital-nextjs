@@ -1,3 +1,4 @@
+import { s3Url } from "@/src/lib/s3";
 /**
  * Legacy types + author helpers — kept after Phase 5h Laravel-out.
  *
@@ -97,7 +98,7 @@ export interface PortfolioItem {
 
 export const fallbackBlogAuthor: BlogAuthor = {
   author_image:
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   author_name: "From the Cocoma desk",
   role_line: "Notes by the team behind every cut, design & launch.",
   author_description:

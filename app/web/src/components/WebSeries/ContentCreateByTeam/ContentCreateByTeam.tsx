@@ -12,14 +12,15 @@ import EditPencil from "../../common/EditPencil/EditPencil";
 import { adminRoutes } from "../../../lib/adminEditRoutes";
 import { useLocation } from "@/src/lib/navigation";
 import { cachedFetch, buildCacheKey } from "../../../utils/sessionCache";
+import { s3Url } from "@/src/lib/s3";
 
 const LIMIT = 12;
 
 const categoryImages = {
-  Posters: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361902_Rectangle%201253%20(1).png",
-  Videos: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361951_image%20(20).png",
-  Shorts: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361985_Rectangle%201253%20(1).png",
-  Carousels: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-carousels/1736418369_e5a02a6ea286762390ef8566bac1e249.jpg",
+  Posters: s3Url("marketing-house-content-items/1736361902_Rectangle%201253%20(1).png"),
+  Videos: s3Url("marketing-house-content-items/1736361951_image%20(20).png"),
+  Shorts: s3Url("marketing-house-content-items/1736361985_Rectangle%201253%20(1).png"),
+  Carousels: s3Url("marketing-house-content-carousels/1736418369_e5a02a6ea286762390ef8566bac1e249.jpg"),
 };
 
 const ContentCreateByTeam = ({ itemData }) => {

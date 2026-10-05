@@ -43,6 +43,7 @@ const index = async (req, res) => {
   const video = videoRaw ? {
     ...videoRaw.toObject(),
     thumbnail: buildUrl(videoRaw.thumbnail),
+    url: buildUrl(videoRaw.get('url')),
   } : null;
 
   const other_service = serviceItems.map((s) => ({ ...s.toObject(), image: buildUrl(s.image) }));

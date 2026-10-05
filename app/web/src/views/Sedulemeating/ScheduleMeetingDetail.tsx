@@ -7,10 +7,11 @@ import { useCart } from "@/src/lib/cart";
 import { FaRegClock, FaVideo, FaGlobeAsia, FaArrowLeft } from "react-icons/fa";
 import ScheduleMeeting   from "./ScheduleMeeting";
 import BookingConfirmed  from "./BookingConfirmed";
+import { s3Url } from "@/src/lib/s3";
 
 /* ── constants ──────────────────────────────────────────────── */
 const HOST_PHOTO_URL =
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png";
+  s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png");
 
 /* ── helpers ────────────────────────────────────────────────── */
 function formatLongDate(d) {

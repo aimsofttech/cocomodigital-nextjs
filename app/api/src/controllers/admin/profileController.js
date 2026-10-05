@@ -1,6 +1,7 @@
 const User = require('../../models/User');
 const AdminRole = require('../../models/AdminRole');
 const { MODULES, ACTIONS } = require('../../config/adminModules');
+const { buildS3Url, toStoredKey } = require('../../utils/s3Upload');
 
 /* Your own account. Every route here works on `req.user._id` and never on an
  * id from the request, so there is no id to tamper with: a user can only ever
@@ -37,7 +38,7 @@ const buildSession = async (user) => {
       role: user.role,
       roleKey: user.roleKey || 'custom',
       roleName: role ? role.name : 'Unassigned',
-      profileImage: user.profileImage || '',
+      profileImage: user.profileImage ? buildS3Url(user.profileImage) : '',
       status: user.status ?? 1,
       mustChangePassword: !!user.mustChangePassword,
       lastLoginAt: user.lastLoginAt || null,
@@ -68,7 +69,7 @@ const update = async (req, res) => {
     if (!name) return res.status(400).json({ status: 'error', message: 'Name cannot be empty' });
     user.name = name;
   }
-  if (req.body.profileImage !== undefined) user.profileImage = String(req.body.profileImage);
+  if (req.body.profileImage !== undefined) user.profileImage = toStoredKey(String(req.body.profileImage));
 
   await user.save();
   const session = await buildSession(user);

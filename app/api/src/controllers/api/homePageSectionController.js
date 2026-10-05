@@ -10,7 +10,7 @@ const index = async (req, res) => {
     const items = await HomePageSectionItem.find({ home_page_section_id: section._id, status: 1 }).sort({ display_order: 1 });
     result.push({
       ...section.toObject(),
-      items: items.map((i) => ({ ...i.toObject(), item_image: buildUrl(i.item_image) })),
+      items: items.map((i) => ({ ...i.toObject(), item_image: buildUrl(i.item_image), image: buildUrl(i.get('image')) })),
     });
   }
   res.json({ status: 'success', data: result });

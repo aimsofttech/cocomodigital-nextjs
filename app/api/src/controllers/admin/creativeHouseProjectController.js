@@ -2,7 +2,7 @@
 const createCrudController = require('./crudFactory');
 
 module.exports = createCrudController(CreativeHouseProject, {
-  imageFields: [],
+  imageFields: ['image'],
   searchFields: ['title'],
   defaultSort: { displayOrder: 1 },
 });

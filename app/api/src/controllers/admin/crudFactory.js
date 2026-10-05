@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { buildS3Url, deleteManyFromS3 } = require('../../utils/s3Upload');
+const { buildS3Url, deleteManyFromS3, s3KeyFromValue, toStoredKey } = require('../../utils/s3Upload');
 const { paginateQuery, generateSlug } = require('../../utils/helpers');
 const { recordsToCsv, fileToRecords, coerce, OMIT_IMPORT } = require('../../utils/csv');
 
@@ -10,13 +10,25 @@ const toMediaArray = (val) => {
   return [val];
 };
 
+// Media is stored as the bare S3 key ("folder/file.ext"); a URL on our own bucket
+// (e.g. what the admin upload or show() hands the form) is reduced to its key.
+// External URLs (YouTube etc.) are left as they are.
+const storeMediaAsKeys = (body, mediaFields) => {
+  for (const field of mediaFields) {
+    if (Object.prototype.hasOwnProperty.call(body, field)) body[field] = toStoredKey(body[field]);
+  }
+  return body;
+};
+
 // Given the previous and next value of a media field, delete from S3 any file
 // that is present in `oldVal` but no longer referenced in `newVal`.
 const reconcileMedia = async (oldVal, newVal) => {
   const oldArr = toMediaArray(oldVal);
   if (!oldArr.length) return;
-  const nextSet = new Set(toMediaArray(newVal).map(String));
-  const removed = oldArr.filter((v) => !nextSet.has(String(v)));
+  // Compare by S3 key: a stored key and the full URL the admin form sends back
+  // (show() returns built URLs) are the same file and must not be deleted.
+  const nextSet = new Set(toMediaArray(newVal).map(s3KeyFromValue));
+  const removed = oldArr.filter((v) => !nextSet.has(s3KeyFromValue(v)));
   if (removed.length) await deleteManyFromS3(removed);
 };
 
@@ -270,12 +282,13 @@ const createCrudController = (Model, options = {}) => {
       const body = { ...req.body };
       // Media now arrives as S3 URLs in the JSON body. Legacy multipart uploads
       // (req.file/req.files) are still folded in for backward compatibility.
-      if (req.file) body[req.file.fieldname] = req.file.location || req.file.key || req.file.path;
+      if (req.file) body[req.file.fieldname] = req.file.key || req.file.location || req.file.path;
       if (req.files) {
         Object.entries(req.files).forEach(([field, files]) => {
-          if (files[0]) body[field] = files[0].location || files[0].key || files[0].path;
+          if (files[0]) body[field] = files[0].key || files[0].location || files[0].path;
         });
       }
+      storeMediaAsKeys(body, mediaFields);
       body[userField] = req.user._id;
 
       if (slug) await applySlug(Model, body, slugSource, null, slugField);
@@ -290,12 +303,14 @@ const createCrudController = (Model, options = {}) => {
 
       const body = { ...req.body };
       // Fold any legacy multipart uploads into the body as S3 references.
-      if (req.file) body[req.file.fieldname] = req.file.location || req.file.key || req.file.path;
+      if (req.file) body[req.file.fieldname] = req.file.key || req.file.location || req.file.path;
       if (req.files) {
         Object.entries(req.files).forEach(([field, files]) => {
-          if (files[0]) body[field] = files[0].location || files[0].key || files[0].path;
+          if (files[0]) body[field] = files[0].key || files[0].location || files[0].path;
         });
       }
+
+      storeMediaAsKeys(body, mediaFields);
 
       // Delete from S3 any previously-stored media that this update replaces or removes.
       for (const field of mediaFields) {
@@ -393,6 +408,7 @@ const createCrudController = (Model, options = {}) => {
           for (const [k, v] of Object.entries(injected)) {
             if (body[k] === undefined) body[k] = v;
           }
+          storeMediaAsKeys(body, mediaFields);
           body[userField] = req.user._id;
           if (slug) await applySlug(Model, body, slugSource, null, slugField);
           await Model.create(body);

@@ -16,6 +16,7 @@
  */
 
 import { apiGet } from "./apiClient";
+import { S3_BASE_URL } from "./s3";
 
 /* During `next build` the external API may be unreachable; short-
    circuit list fetches to empty so sitemap / generateStaticParams
@@ -444,8 +445,8 @@ const adaptMarketingCategory = (m: MongoMarketingCategory) => ({
 /* ── Image URL builder ───────────────────────────────────────── */
 
 /* Some api endpoints return full S3 URLs, others return raw object
-   keys. Normalise both to an absolute URL. */
-const S3_BASE = "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/";
+   keys. Normalise both to an absolute URL (bucket from NEXT_PUBLIC_S3_BASE_URL). */
+const S3_BASE = S3_BASE_URL + "/";
 const buildImg = (v?: string | null): string =>
   !v ? "" : /^https?:\/\//.test(v) ? v : S3_BASE + v.replace(/^\/+/, "");
 

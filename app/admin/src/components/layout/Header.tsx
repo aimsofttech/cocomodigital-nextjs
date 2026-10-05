@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { logout } from '@/features/auth/authSlice';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 import {
   Bars3Icon, ArrowRightOnRectangleIcon, UserCircleIcon, UserIcon,
   ChevronLeftIcon, ChevronRightIcon,
@@ -61,7 +62,7 @@ export default function Header({ collapsed, onToggleSidebar, onOpenMobileMenu }:
         >
           {user?.profileImage ? (
             <img
-              src={user.profileImage}
+              src={resolveMediaUrl(user.profileImage)}
               alt=""
               className="w-6 h-6 rounded-full object-cover border border-gray-200"
             />

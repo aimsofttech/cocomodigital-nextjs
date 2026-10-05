@@ -4,7 +4,9 @@ const createCrudController = require('./crudFactory');
 const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
 
 const base = createCrudController(GroupSingleServicePortfolioItem, {
-  imageFields: ['videoThumbnail'],
+  imageFields: ['videoThumbnail', 'image'],
+  // Built into a full URL for the form's <video> preview; YouTube links pass through.
+  videoFields: ['videoUrl'],
   searchFields: ['title'],
   defaultSort: { displayOrder: 1 },
   // Scoped by either groupServiceItemId (from the Group Service Items link) or

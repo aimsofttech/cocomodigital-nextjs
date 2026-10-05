@@ -73,7 +73,8 @@ const attachNavigationCounts = async (items) => {
 };
 
 const base = createCrudController(MarketingHouseItem, {
-  imageFields: ['posterImage'],
+  imageFields: ['posterImage', 'thumbnail'],
+  videoFields: ['video', 'videoUrl'],
   searchFields: ['title', 'slug'],
   defaultSort: { displayOrder: 1 },
   parentField: 'marketingHouseCategoryId',

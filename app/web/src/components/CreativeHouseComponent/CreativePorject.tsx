@@ -8,6 +8,7 @@ import Pagination from "../common/Pagination/Pagination";
 import PlayBtn from "../common/PlayBtn/PlayBtn";
 import EditPencil from "../common/EditPencil/EditPencil";
 import { adminRoutes } from "../../lib/adminEditRoutes";
+import { s3Url } from "@/src/lib/s3";
 
 const CreativeHouseProject = ({ creativeCategory, initialItems = [], initialItemCount = 0, inPageFilter = false }) => {
   const topScrollToCards = useRef(null);
@@ -257,7 +258,7 @@ const VideoGrid = ({ videos }) => {
                   src={
                     item?.thumbnail?.startsWith("http")
                       ? item?.thumbnail
-                      : `https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/${item?.thumbnail}`
+                      : s3Url(`creative-house-thumbnail/${item?.thumbnail}`)
                   }
                   className="object-cover"
                   alt={item?.videoTitle || "Creative thumbnail"}

@@ -8,6 +8,7 @@ import { useNavigate } from "@/src/lib/navigation";
 import { openMailto } from "@/src/lib/email";
 import { FaWhatsapp, FaArrowRight } from "react-icons/fa";
 import { HiOutlineMail, HiOutlineCalendar } from "react-icons/hi";
+import { s3Url } from "@/src/lib/s3";
 
 // TODO Anil: confirm Calendly booking URL. Placeholder for now.
 const CALENDLY_URL = "https://calendly.com/cocomadigital/15min";
@@ -302,7 +303,7 @@ const ContactPromo = () => {
                     {/* Right Promo Section */}
                     <div className="promo-section">
                         <Image
-                            src="https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png"
+                            src={s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png")}
                             alt="Anil Mahato — founder, Cocoma Digital"
                             className="promo-image"
                             width={400}

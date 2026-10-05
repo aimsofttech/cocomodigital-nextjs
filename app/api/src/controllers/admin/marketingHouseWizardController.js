@@ -5,7 +5,7 @@ const MarketingHouseStatics = require('../../models/MarketingHouseStatics');
 const MarketingHousePerformance = require('../../models/MarketingHousePerformance');
 const MarketingHouseIdeaStrategyPlanning = require('../../models/MarketingHouseIdeaStrategyPlanning');
 const { generateSlug } = require('../../utils/helpers');
-const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
+const { getYoutubeVideoId, uploadYoutubeThumbnailToS3, withStoredKeys } = require('../../utils/s3Upload');
 
 // Wizard stores state server-side in the session equivalent using a temp store per user
 // In Node.js we use a simple in-memory store per user session (identified by JWT user id)
@@ -81,22 +81,22 @@ const storeStep7 = async (req, res) => {
   if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
 
   const data = wizardStore[userId];
-  const item = await MarketingHouseItem.create({ ...data.step1, userId: req.user._id, status: 0 });
+  const item = await MarketingHouseItem.create({ ...withStoredKeys(data.step1), userId: req.user._id, status: 0 });
 
   // Create related records from other steps
   if (data.step2?.statics) {
     for (const s of data.step2.statics) {
-      await MarketingHouseStatics.create({ ...s, marketingHouseItemId: item._id, userId: req.user._id });
+      await MarketingHouseStatics.create({ ...withStoredKeys(s), marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
   if (data.step3?.performance) {
     for (const p of data.step3.performance) {
-      await MarketingHousePerformance.create({ ...p, marketingHouseItemId: item._id, userId: req.user._id });
+      await MarketingHousePerformance.create({ ...withStoredKeys(p), marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
   if (data.step5?.idea_strategy) {
     for (const idea of data.step5.idea_strategy) {
-      await MarketingHouseIdeaStrategyPlanning.create({ ...idea, marketingHouseItemId: item._id, userId: req.user._id });
+      await MarketingHouseIdeaStrategyPlanning.create({ ...withStoredKeys(idea), marketingHouseItemId: item._id, userId: req.user._id });
     }
   }
 

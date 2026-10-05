@@ -15,7 +15,7 @@ const bad = (res, message, code = 400) => res.status(code).json({ status: 'error
 const notFound = (res, what = 'Record') => bad(res, `${what} not found`, 404);
 
 /** Standard list endpoint: filter + search + paging + sort. */
-const listOf = async (Model, req, res, { filter = {}, searchFields = [], sort = { createdAt: -1 }, populate = [] } = {}) => {
+const listOf = async (Model, req, res, { filter = {}, searchFields = [], sort = { createdAt: -1 }, populate = [], map } = {}) => {
   const { page, limit, skip } = parsePaging(req);
   const q = { ...filter };
   if (req.query.q && searchFields.length) {
@@ -25,7 +25,7 @@ const listOf = async (Model, req, res, { filter = {}, searchFields = [], sort = 
   let query = Model.find(q).sort(sort).skip(skip).limit(limit);
   for (const p of populate) query = query.populate(p.path || p, p.select);
   const [items, total] = await Promise.all([query.lean(), Model.countDocuments(q)]);
-  return ok(res, items, { page, limit, total, pages: Math.ceil(total / limit) });
+  return ok(res, map ? items.map(map) : items, { page, limit, total, pages: Math.ceil(total / limit) });
 };
 
 module.exports = { parsePaging, ok, created, bad, notFound, listOf };

@@ -13,11 +13,12 @@ import {
   localMonthKey,
   viewerTimeZone,
 } from "@/src/lib/bookingWindow";
+import { s3Url } from "@/src/lib/s3";
 
 
 
 const HOST_PHOTO_URL =
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png";
+  s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png");
 
 /* Which days are open and which 15-minute slots each one offers is the admin's
    configuration, fetched from the API — nothing about the window is decided

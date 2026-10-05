@@ -1,6 +1,7 @@
 // @ts-nocheck
 import Image from "next/image";
 import SecondaryLink from "../../common/SecondaryLink/SecondaryLink";
+import { s3Url } from "@/src/lib/s3";
 
 const ConsultBanner = () => {
     return (
@@ -22,7 +23,7 @@ const ConsultBanner = () => {
                 </div>
                 <div className="image-container">
                     <Image
-                        src="https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/author-image/1743532251_anil%20mahato.jpeg"
+                        src={s3Url("author-image/1743532251_anil%20mahato.jpeg")}
                         alt="Consultation Banner"
                         className="consult-img"
                         width={400}

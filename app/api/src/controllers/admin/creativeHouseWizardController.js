@@ -2,7 +2,7 @@ const CreativeHouseItem = require('../../models/CreativeHouseItem');
 const CreativeHouseApproach = require('../../models/CreativeHouseApproach');
 const CreativeHouseFinalOutput = require('../../models/CreativeHouseFinalOutput');
 const { generateSlug } = require('../../utils/helpers');
-const { getYoutubeVideoId, uploadYoutubeThumbnailToS3 } = require('../../utils/s3Upload');
+const { getYoutubeVideoId, uploadYoutubeThumbnailToS3, withStoredKeys } = require('../../utils/s3Upload');
 
 const wizardStore = {};
 
@@ -48,11 +48,11 @@ const storeStep3 = async (req, res) => {
   if (!wizardStore[userId]) return res.status(400).json({ status: 'error', message: 'Start from step 1' });
 
   const data = wizardStore[userId];
-  const item = await CreativeHouseItem.create({ ...data.step1, userId: req.user._id, status: 0 });
+  const item = await CreativeHouseItem.create({ ...withStoredKeys(data.step1), userId: req.user._id, status: 0 });
 
   if (data.step2?.approaches) {
     for (const a of data.step2.approaches) {
-      await CreativeHouseApproach.create({ ...a, creativeHouseItemId: item._id, userId: req.user._id });
+      await CreativeHouseApproach.create({ ...withStoredKeys(a), creativeHouseItemId: item._id, userId: req.user._id });
     }
   }
 
@@ -60,7 +60,7 @@ const storeStep3 = async (req, res) => {
     for (const fo of req.body.final_outputs) {
       const ytId = fo.videoUrl ? getYoutubeVideoId(fo.videoUrl) : null;
       await CreativeHouseFinalOutput.create({
-        ...fo,
+        ...withStoredKeys(fo),
         youtubeId: ytId || '',
         creativeHouseItemId: item._id,
         userId: req.user._id,

@@ -12,6 +12,10 @@ const s3 = new S3Client({
   },
 });
 
+// No per-object ACLs: buckets with Object Ownership "Bucket owner enforced"
+// (the AWS default for new buckets) reject any ACL with AccessControlListNotSupported.
+// Public reads come from the bucket policy (s3:GetObject for *) instead.
+
 // A stored media value that is a site-root-relative path — a file that ships
 // inside the website's own /public folder rather than an uploaded object.
 // S3 keys are stored without a leading slash (multer-s3 produces
@@ -46,6 +50,40 @@ const s3KeyFromValue = (value) => {
   return v.replace(/^\/+/, '');
 };
 
+// Origins that address OUR bucket: AWS_URL plus the standard S3 virtual-host
+// and path-style forms for AWS_BUCKET. Anything else is someone else's URL.
+const ownBucketOrigins = () => {
+  const bucket = process.env.AWS_BUCKET;
+  const region = process.env.AWS_DEFAULT_REGION;
+  return [
+    (process.env.AWS_URL || '').replace(/\/+$/, ''),
+    bucket && region && `https://${bucket}.s3.${region}.amazonaws.com`,
+    bucket && `https://${bucket}.s3.amazonaws.com`,
+    bucket && region && `https://s3.${region}.amazonaws.com/${bucket}`,
+  ].filter(Boolean).map((o) => o.toLowerCase());
+};
+
+// The value to store in the database for a media reference: a URL on our own
+// bucket becomes its bare key ("folder/file.ext"); everything else — keys,
+// YouTube/Vimeo/other external URLs, site paths, empty values — is returned
+// unchanged. Arrays are mapped element-wise.
+const toStoredKey = (value) => {
+  if (Array.isArray(value)) return value.map(toStoredKey);
+  if (typeof value !== 'string') return value;
+  const v = value.trim().replace(/^http:\/\//i, 'https://');
+  const origin = ownBucketOrigins().find((o) => v.toLowerCase().startsWith(`${o}/`));
+  if (!origin) return value;
+  const key = v.slice(origin.length + 1).split(/[?#]/)[0].replace(/^\/+/, '');
+  try { return decodeURIComponent(key); } catch { return key; }
+};
+
+// Shallow copy of a record body with every own-bucket URL value reduced to its
+// key (other values, including HTML and external URLs, are untouched). For
+// writers that create records directly rather than through crudFactory.
+const withStoredKeys = (body = {}) => Object.fromEntries(
+  Object.entries(body).map(([k, v]) => [k, toStoredKey(v)]),
+);
+
 // Media type configuration: allowed extensions/mimetypes and per-type size caps.
 const MEDIA_CONFIG = {
   image: {
@@ -75,7 +113,6 @@ const createS3Upload = (folder) =>
     storage: multerS3({
       s3,
       bucket: process.env.AWS_BUCKET,
-      acl: 'public-read',
       contentType: multerS3.AUTO_CONTENT_TYPE,
       key: (req, file, cb) => cb(null, buildKey(folder, file.originalname)),
     }),
@@ -99,7 +136,6 @@ const createMediaUpload = (type, folder) => {
     storage: multerS3({
       s3,
       bucket: process.env.AWS_BUCKET,
-      acl: 'public-read',
       contentType: multerS3.AUTO_CONTENT_TYPE,
       key: (req, file, cb) => {
         // Optional ?folder= override lets each module organise its own media.
@@ -145,7 +181,6 @@ const uploadYoutubeThumbnailToS3 = async (thumbnailUrl, baseName, folder = 'yout
       Key: key,
       Body: buffer,
       ContentType: 'image/jpeg',
-      ACL: 'public-read',
     }));
 
     return key;
@@ -160,7 +195,11 @@ const deleteFromS3 = async (value) => {
   // Never aim a delete at a file that ships with the website: it is not in the
   // bucket, and a key derived from it could collide with a real object.
   if (isSitePath(value)) return;
-  const key = s3KeyFromValue(value);
+  // An absolute URL that is not on our bucket (YouTube, another CDN) has no
+  // object of ours behind it — deriving a key from its path would be a guess.
+  const stored = toStoredKey(value);
+  if (/^https?:\/\//i.test(String(stored).trim())) return;
+  const key = s3KeyFromValue(stored);
   if (!key) return;
   try {
     await s3.send(new DeleteObjectCommand({ Bucket: process.env.AWS_BUCKET, Key: key }));
@@ -204,7 +243,6 @@ const putBufferToS3 = async (buffer, { folder, originalName, contentType } = {})
     Key: key,
     Body: buffer,
     ContentType: contentType || 'application/octet-stream',
-    ACL: 'public-read',
   }));
   return { key, url: buildS3Url(key) };
 };
@@ -216,6 +254,8 @@ module.exports = {
   buildS3Url,
   isSitePath,
   s3KeyFromValue,
+  toStoredKey,
+  withStoredKeys,
   uploadYoutubeThumbnailToS3,
   deleteFromS3,
   deleteManyFromS3,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { podcastPageApi } from '@/services/adminApi';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 /* Shared option lists for the Podcast module.
  *
@@ -196,9 +197,7 @@ export function usePodcastPageOptions() {
  * the live site instead; the stored value is never rewritten. */
 export const SITE_MEDIA_BASE = 'https://cocomadigital.com';
 
-/** Absolute URL for previewing an image field value in the admin panel. */
-export const previewUrl = (value?: string) => {
-  if (!value) return '';
-  if (/^https?:\/\//i.test(value)) return value;
-  return `${SITE_MEDIA_BASE}${value.startsWith('/') ? '' : '/'}${value}`;
-};
+/** Absolute URL for previewing an image field value in the admin panel:
+ *  S3 keys resolve against the bucket, site paths against the live site. */
+export const previewUrl = (value?: string) =>
+  resolveMediaUrl(value, { sitePathBase: SITE_MEDIA_BASE });

@@ -43,7 +43,7 @@ const MarketingHouseContentCreatedItemCarousel = require('../../models/Marketing
 const MarketingHouseCommunityProgramCategory = require('../../models/MarketingHouseCommunityProgramCategory');
 const MarketingHouseCommunityProgramCategoryItem = require('../../models/MarketingHouseCommunityProgramCategoryItem');
 const { generateSlug } = require('../../utils/helpers');
-const { getYoutubeVideoId } = require('../../utils/s3Upload');
+const { getYoutubeVideoId, toStoredKey } = require('../../utils/s3Upload');
 const { fileToRecords, coerce } = require('../../utils/csv');
 
 // ── Section configuration ───────────────────────────────────────────────────
@@ -509,9 +509,9 @@ const importRow = async (row, validated, ctx) => {
     const videoUrl = !isBlank(row.videoUrl) ? String(row.videoUrl).trim() : '';
     const ytId = videoUrl ? getYoutubeVideoId(videoUrl) : null;
     const slug = await ensureUniqueItemSlug(generateSlug(title));
-    const thumbnail = !isBlank(row.thumbnail)
+    const thumbnail = toStoredKey(!isBlank(row.thumbnail)
       ? String(row.thumbnail).trim()
-      : (ctx.defaultThumbnail || '');
+      : (ctx.defaultThumbnail || ''));
 
     const itemBody = {
       marketingHouseCategoryId: validated.categoryId,

@@ -1,3 +1,4 @@
+import { s3Url } from "@/src/lib/s3";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface HomeTopBanner {
@@ -400,7 +401,7 @@ export async function fetchHomePageData(
     id: 0,
     video_url: "https://youtu.be/PNH0V6bvMEM",
     video_thumbnail:
-      "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/banner-video-thumbnail/1736164372_Rectangle%202195.png",
+      s3Url("banner-video-thumbnail/1736164372_Rectangle%202195.png"),
   };
   const growthVideoGroup: any = (homepageGlobal as any)?.growth_video ?? {};
   const growthVideo: GrowthVideo =

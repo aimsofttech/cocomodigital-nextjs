@@ -10,6 +10,7 @@ const {
 const { crmProtect, requirePermission, scopeFilter, audit } = require('../middleware/crmAuth');
 const timeline = require('../services/timeline');
 const automation = require('../services/automation');
+const { buildS3Url } = require('../../utils/s3Upload');
 const notify = require('../services/notify');
 const { ok, created, bad, notFound, listOf, parsePaging } = require('./_helpers');
 
@@ -125,7 +126,7 @@ router.get('/:id', requirePermission('leads:read'), async (req, res) => {
     CrmMessage.find({ leadId: lead._id }).sort({ createdAt: -1 }).limit(10).lean(),
     CrmDocument.find({ 'entity.kind': 'lead', 'entity.id': lead._id, deletedAt: null }).sort({ createdAt: -1 }).lean(),
   ]);
-  return ok(res, { ...lead, openTasks, pendingFollowUps, upcomingCalls, recentMessages: messages, documents });
+  return ok(res, { ...lead, openTasks, pendingFollowUps, upcomingCalls, recentMessages: messages, documents: documents.map((d) => ({ ...d, url: buildS3Url(d.url || d.s3Key) })) });
 });
 
 // GET /crm/api/leads/:id/timeline

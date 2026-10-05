@@ -25,7 +25,7 @@ const marketingHomePriority = async (req, res) => {
     const items = await MarketingHouseItem.find({ marketingHouseCategoryId: cat._id, status: 1 }).sort({ displayOrder: 1 });
     result.push({
       ...cat.toObject(),
-      items: items.map((i) => ({ ...i.toObject(), thumbnail: buildUrl(i.thumbnail) })),
+      items: items.map((i) => ({ ...i.toObject(), thumbnail: buildUrl(i.thumbnail), video: buildUrl(i.get('video')), videoUrl: buildUrl(i.get('videoUrl')) })),
     });
   }
   res.json({ status: 'success', data: result });
@@ -47,7 +47,7 @@ const marketingHouseItem = async (req, res) => {
     MarketingHouseItem.find(filter).sort({ displayOrder: 1 }).skip(skip).limit(parseInt(limit)),
     MarketingHouseItem.countDocuments(filter),
   ]);
-  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), thumbnail: buildUrl(i.thumbnail) })), pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) } });
+  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), thumbnail: buildUrl(i.thumbnail), video: buildUrl(i.get('video')), videoUrl: buildUrl(i.get('videoUrl')) })), pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) } });
 };
 
 const getSingleMarketingHouse = async (req, res) => {
@@ -120,7 +120,7 @@ const getSingleMarketingHouse = async (req, res) => {
   res.json({
     status: 'success',
     data: {
-      item: { ...item.toObject(), thumbnail: buildUrl(item.thumbnail) },
+      item: { ...item.toObject(), thumbnail: buildUrl(item.thumbnail), video: buildUrl(item.get('video')), videoUrl: buildUrl(item.get('videoUrl')) },
       images: images.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
       statics,
       performances: performances.map((p) => ({ ...p.toObject(), performance_image: buildUrl(p.performance_image) })),

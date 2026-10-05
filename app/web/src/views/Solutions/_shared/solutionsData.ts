@@ -1,3 +1,4 @@
+import { s3Url } from "@/src/lib/s3";
 // @ts-nocheck
 /**
  * Static solution-page content, ported from the original hand-coded
@@ -127,7 +128,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         name: "Anil Mahato",
         niche: "Founder vlog · Entertainment",
-        image: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+        image: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
         handle: "@AnilMahato",
         url: "https://www.youtube.com/@AnilMahato",
         bullet:
@@ -190,7 +191,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "I tried hiring editors twice and burnt out twice. With Cocoma the back office just runs — I get to be the creator again.",
     author: "Anil Mahato",
     meta: "Founder, Cocoma Digital · Creator @AnilMahato",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -234,7 +235,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your goals + the audit plan + send you the deck regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "ott-platforms": {
@@ -428,7 +429,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "When our slate doubled, Cocoma's pods scaled overnight. We didn't have to hire — we just got more output, on the same launch rhythm.",
     author: "Streaming Partner Lead",
     meta: "Top-3 Indian OTT platform · 200+ titles supported",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -472,7 +473,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your slate + the audit plan + send you the deck regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "music-labels": {
@@ -669,7 +670,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Every Friday we drop new music. Cocoma is the reason every drop has a launch behind it now, not just an upload.",
     author: "Music Marketing Lead",
     meta: "Indian music label · 200+ tracks promoted with Cocoma",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -713,7 +714,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your roster + release calendar + send you the audit deck regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "film-studios": {
@@ -910,7 +911,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Our trailer launch hit 50M views in 48 hours. Cocoma cut it, shipped it across 4 languages, and ran the paid promo in parallel — the campaign moved with us, not behind us.",
     author: "Marketing Director",
     meta: "Pan-India studio · 12 theatrical releases shipped with Cocoma",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -959,7 +960,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your release calendar + the asset mix you'd need + send you the playbook regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "podcasters": {
@@ -1088,7 +1089,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         name: "Anil Mahato",
         niche: "Creator · Longform vlog content",
         image:
-          "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+          s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
         handle: "@AnilMahato",
         url: "https://www.youtube.com/@AnilMahato",
         bullet:
@@ -1153,7 +1154,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "My audio numbers were stuck. Cocoma turned every episode into a launch — clips on Reels, full video on YouTube, thumbnails that actually pulled. Subs doubled in 6 months and the sponsor pipeline followed.",
     author: "Podcast Host",
     meta: "Mid-size Indian podcast · 100+ episodes shipped with Cocoma",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -1202,7 +1203,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your show + the per-episode launch plan + send you the audit deck regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "d2c-brands": {
@@ -1395,7 +1396,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Our ROAS plateau finally broke when Cocoma's pods replaced our agency. They ship the variant volume our performance team actually needs to test — and the winners scale.",
     author: "Growth Lead",
     meta: "Mid-stage D2C brand · 50+ ad variants per quarter with Cocoma",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -1444,7 +1445,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your acquisition stack + the variant volume you'd need + send you the rate-card regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "real-estate-brands": {
@@ -1638,7 +1639,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Our pre-launch reels did 10× the engagement of our previous agency's. Cocoma made our project look like a film — buyers were booking site visits before we'd even gone live with paid.",
     author: "Marketing Director",
     meta: "Premium residential developer · 5 cities · 200+ assets shipped",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -1687,7 +1688,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your project pipeline + the asset mix you'd need + send you the rate-card regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "educational-hubs": {
@@ -1882,7 +1883,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "When admissions season hits, we used to scramble — three different agencies, fragmented assets, panic edits at midnight. Cocoma built our content engine — peak-cycle volume without the panic, brand-grade quality every time.",
     author: "Director of Marketing",
     meta: "Tier-1 Indian university · 200+ admissions assets shipped per cycle",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -1931,7 +1932,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your content needs + the admissions cycle calendar + send you the playbook regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "international-agencies": {
@@ -2126,7 +2127,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "We were maxing out editor hires and still missing deadlines. Cocoma's pods gave us 3× the output, and the time-zone was a bonus we didn't see coming — wins land in the inbox before our team's even at their desks.",
     author: "Production Director",
     meta: "Mid-size US creative agency · retained Cocoma pod since 2023",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -2175,7 +2176,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your retainer scope + the pod mix you'd need + send you the rate-card regardless.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
   "independent-artists": {
@@ -2370,7 +2371,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "I was self-funding everything — music videos took months, social was random, brand deals were nonexistent. Cocoma became my label without the deal — every track now ships like a launch and the revenue streams compounded.",
     author: "Independent Artist",
     meta: "Indie singer-songwriter · 20+ tracks shipped with Cocoma",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 
   faqSection: {
@@ -2419,7 +2420,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       "Anil takes the call personally. 15 minutes. We talk through your release calendar + the launch plan you'd need + send you the audit deck regardless. No label deal, no IP claims, ever.",
     ctaLabel: "Book a 15-min call",
     ctaTo: "/ScheduleMeeting",
-    avatar: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
+    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
   },
 },
 };

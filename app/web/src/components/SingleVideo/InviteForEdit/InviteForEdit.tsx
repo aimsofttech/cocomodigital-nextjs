@@ -2,10 +2,11 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { Link } from "@/src/lib/navigation";
 import { FaArrowRight } from "react-icons/fa";
+import { s3Url } from "@/src/lib/s3";
 /** Anil's portrait — same image used by ContactPromo and the
  *  ScheduleMeeting host card, so caches share. */
 const FOUNDER_PORTRAIT_URL =
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png";
+  s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png");
 
 /**
  * Single-video page top strip — Option C "action-only banner"

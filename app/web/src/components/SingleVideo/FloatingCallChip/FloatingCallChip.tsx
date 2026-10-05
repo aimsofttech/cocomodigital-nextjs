@@ -6,10 +6,11 @@ import { Link } from "@/src/lib/navigation";
 import { FaArrowRight } from "react-icons/fa";
 import { useCartCount } from "@/src/lib/cart";
 import { useMediaQuery } from "@/src/hooks/useMediaQuery";
+import { s3Url } from "@/src/lib/s3";
 
 
 const FOUNDER_PORTRAIT_URL =
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png";
+  s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png");
 
 /** CSS selector for the existing mid-page Book Call CTA section.
  *  The chip auto-hides when this section is in/past view. */

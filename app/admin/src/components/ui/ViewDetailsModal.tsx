@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { PhotoIcon } from '@heroicons/react/24/outline';
 import Modal from './Modal';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 export interface DetailField {
   label: string;
@@ -42,7 +43,7 @@ export function DetailImage({ src, alt = 'Preview' }: { src?: string | null; alt
   }
   return (
     <img
-      src={src}
+      src={resolveMediaUrl(src)}
       alt={alt}
       onError={() => setFailed(true)}
       className="max-h-64 w-auto rounded-lg object-contain drop-shadow-md"

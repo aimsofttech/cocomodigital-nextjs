@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { adminRoutes } from "../../../lib/adminEditRoutes";
 import EditPencil from "../../common/EditPencil/EditPencil";
+import { s3Url } from "@/src/lib/s3";
 /* small Star component (SVG) */
 const Star = () => (
     <svg className="star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -9,7 +10,7 @@ const Star = () => (
     </svg>
 );
 
-const dummyImage = "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/1752158570_blanca%20thumbnail.jpeg"
+const dummyImage = s3Url("creative-house-thumbnail/1752158570_blanca%20thumbnail.jpeg")
 
 const Item = ({ id, marketingItemId, title, sub, description, image }) => (
     <div className="cp-row">

@@ -8,7 +8,7 @@ const PodcastFaq = require('../../models/PodcastFaq');
 const PodcastCta = require('../../models/PodcastCta');
 const createCrudController = require('./crudFactory');
 const { cascadeDelete } = require('./cascadeDelete');
-const { s3KeyFromValue } = require('../../utils/s3Upload');
+const { toStoredKey } = require('../../utils/s3Upload');
 
 /* Admin CRUD for the podcast money page
  * (/podcast-video-editing-marketing-services). One parent record per page plus
@@ -43,8 +43,9 @@ const CHILD_SPECS = [
  * A value starting with "/" is a file shipped inside the website's own /public
  * folder rather than an upload, and is left exactly as it is. */
 const asStoredMedia = (value) => {
+  // Only URLs on our own bucket become keys; an external URL is left intact.
   if (!value || typeof value !== 'string') return value;
-  return /^https?:\/\//i.test(value) ? s3KeyFromValue(value) : value;
+  return toStoredKey(value);
 };
 
 /** Wrap a controller so its media fields are normalised before every write. */

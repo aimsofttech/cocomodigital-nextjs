@@ -3,6 +3,7 @@
 import Image from "next/image";
 import EditPencil from "../../../common/EditPencil/EditPencil";
 import { adminRoutes } from "../../../../lib/adminEditRoutes";
+import { s3Url } from "@/src/lib/s3";
 
 const StrategyExecutionSection = ({ data, index }) => {
   // const [currentIndex, setCurrentIndex] = useState(0);
@@ -20,7 +21,7 @@ const StrategyExecutionSection = ({ data, index }) => {
   // };
 
   const isHTML = (str = "") => /<\/?[a-z][\s\S]*>/i.test(data?.description);
-  const dummyImage = "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-pre-launch-activities/1762139981_Four%20More%20Shots%20Please%20Season%201%20Official%20Trailer.jpg"
+  const dummyImage = s3Url("marketing-house-pre-launch-activities/1762139981_Four%20More%20Shots%20Please%20Season%201%20Official%20Trailer.jpg")
 
   return (
 

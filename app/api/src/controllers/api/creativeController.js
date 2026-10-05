@@ -116,10 +116,11 @@ const getSingleCreativeHouse = async (req, res) => {
       item: {
         ...item.toObject(),
         thumbnail: buildUrl(item.thumbnail),
+        videoUrl: buildUrl(item.get('videoUrl')),
         requirement_logo: requirementLogo,
       },
-      approaches: approaches.map((a) => ({ ...a.toObject(), image: buildUrl(a.image), thumbnail: buildUrl(a.thumbnail) })),
-      final_outputs: finalOutputs.map((f) => ({ ...f.toObject(), image: buildUrl(f.image), thumbnail: buildUrl(f.thumbnail) })),
+      approaches: approaches.map((a) => ({ ...a.toObject(), image: buildUrl(a.image), thumbnail: buildUrl(a.thumbnail), videoUrl: buildUrl(a.get('videoUrl')) })),
+      final_outputs: finalOutputs.map((f) => ({ ...f.toObject(), image: buildUrl(f.image), thumbnail: buildUrl(f.thumbnail), videoUrl: buildUrl(f.get('videoUrl')) })),
     },
   });
 };

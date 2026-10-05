@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { FaHandshake } from "react-icons/fa";
+import { s3Url } from "@/src/lib/s3";
 
 /**
  * Partnership / collaboration callout shown below Client Goals on a
@@ -26,37 +27,37 @@ import { FaHandshake } from "react-icons/fa";
 const BRAND_LOGO_MAP = {
   // Streaming / platforms
   "Amazon MX Player":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773924313_Amazon-mx-player.png",
+    s3Url("brand-image/1773924313_Amazon-mx-player.png"),
   "Amazon Prime Video":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922897_resized.png",
+    s3Url("brand-image/1773922897_resized.png"),
   "Amazon Mini TV":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923034_mini-tv.png",
+    s3Url("brand-image/1773923034_mini-tv.png"),
   "Amazon Mini Tv":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923034_mini-tv.png",
-  IMDb: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922872_imdb.png",
+    s3Url("brand-image/1773923034_mini-tv.png"),
+  IMDb: s3Url("brand-image/1773922872_imdb.png"),
   // Music / labels
   "T-Series":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923629_t-series.png",
+    s3Url("brand-image/1773923629_t-series.png"),
   "Ivy Music":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773925154_Ivy-Music.png",
+    s3Url("brand-image/1773925154_Ivy-Music.png"),
   "Sony Music":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923629_t-series.png", // fallback shape — replace when Sony asset ships
+    s3Url("brand-image/1773923629_t-series.png"), // fallback shape — replace when Sony asset ships
   // Other partners surfaced on the homepage logo wall
   "TATA EV":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922859_tata%20EV.png",
-  B4U: "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922799_revised.png",
+    s3Url("brand-image/1773922859_tata%20EV.png"),
+  B4U: s3Url("brand-image/1773922799_revised.png"),
   "Progetto Happiness":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923943_Progetto-Happiness.png",
+    s3Url("brand-image/1773923943_Progetto-Happiness.png"),
   "The Trailer Park Group":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923833_Trailer-prak-Group.png",
+    s3Url("brand-image/1773923833_Trailer-prak-Group.png"),
   vshowcards:
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923264_Vshow-Cards.png",
+    s3Url("brand-image/1773923264_Vshow-Cards.png"),
   "MadFad Media":
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773925687_Madfad-Media.png",
+    s3Url("brand-image/1773925687_Madfad-Media.png"),
   Langistan:
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1774096883_Langistan-resized.png",
+    s3Url("brand-image/1774096883_Langistan-resized.png"),
   Unpolished:
-    "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773926082_Unpolished.png",
+    s3Url("brand-image/1773926082_Unpolished.png"),
 };
 
 /** Loose match: case-insensitive equality first, then substring. */

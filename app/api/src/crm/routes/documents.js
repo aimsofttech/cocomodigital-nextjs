@@ -3,7 +3,10 @@
 const router = require('express').Router();
 const { CrmDocument } = require('../models');
 const { crmProtect, requirePermission, audit } = require('../middleware/crmAuth');
-const { createS3Upload, deleteFromS3 } = require('../../utils/s3Upload');
+const { createS3Upload, deleteFromS3, buildS3Url } = require('../../utils/s3Upload');
+
+// `url` is stored as the S3 key; clients get the full address.
+const withUrl = (d) => ({ ...d, url: buildS3Url(d.url || d.s3Key) });
 const timeline = require('../services/timeline');
 const { ok, created, bad, notFound, listOf } = require('./_helpers');
 
@@ -24,6 +27,7 @@ router.get('/', requirePermission('documents:read'), (req, res) => {
     filter,
     searchFields: ['name'],
     populate: [{ path: 'uploadedBy', select: 'name' }],
+    map: withUrl,
   });
 });
 
@@ -34,7 +38,7 @@ router.post('/', requirePermission('documents:manage'), upload.single('file'), a
   if (!entityKind || !entityId) return bad(res, 'entityKind and entityId are required');
   const doc = await CrmDocument.create({
     name: name || req.file.originalname,
-    url: req.file.location,
+    url: req.file.key,
     s3Key: req.file.key,
     mimeType: req.file.mimetype,
     sizeBytes: req.file.size,
@@ -49,7 +53,7 @@ router.post('/', requirePermission('documents:manage'), upload.single('file'), a
     meta: { documentId: doc._id, url: doc.url },
     actor: { kind: 'user', userId: req.crmUser._id, label: req.crmUser.name },
   });
-  return created(res, doc, 'Document uploaded');
+  return created(res, withUrl(doc.toObject()), 'Document uploaded');
 });
 
 // DELETE /crm/api/documents/:id (soft delete; S3 object removed best-effort)

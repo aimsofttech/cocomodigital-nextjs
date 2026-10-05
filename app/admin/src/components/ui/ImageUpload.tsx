@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { PhotoIcon, VideoCameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import uploadApi from '@/services/uploadApi';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 type MediaType = 'image' | 'video';
 
@@ -131,7 +132,7 @@ export default function ImageUpload({
 
   const hasMedia = Boolean(value);
   // Only the thumbnail uses this; onChange still emits the stored value.
-  const preview = previewSrc || value;
+  const preview = resolveMediaUrl(previewSrc || value);
 
   return (
     <div>

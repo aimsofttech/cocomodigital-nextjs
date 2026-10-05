@@ -91,6 +91,7 @@ const groupService = async (req, res) => {
   const topBanner = banners.map((b) => ({
     ...b.toObject(),
     image: buildUrl(b.image),
+    video: buildUrl(b.get('video')),
   }));
 
   res.json({ status: 'success', data: { service: serviceItem, categories: result, topBanner } });
@@ -114,7 +115,7 @@ const getSingleService = async (req, res) => {
     const items = await GroupSingleServicePortfolioItem.find({ portfolioCategoryId: { $in: fkVariants(cat._id) }, status: 1 }).sort({ displayOrder: 1 });
     portfolioData.push({
       ...cat.toObject(),
-      items: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
+      items: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image), videoUrl: buildUrl(i.get('videoUrl')) })),
     });
   }
 
@@ -122,8 +123,8 @@ const getSingleService = async (req, res) => {
     status: 'success',
     data: {
       service: { ...serviceItem.toObject(), thumbnail: buildUrl(serviceItem.thumbnail) },
-      images: images.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })),
-      recent_work: recentWork.map((r) => ({ ...r.toObject(), image: buildUrl(r.image) })),
+      images: images.map((i) => ({ ...i.toObject(), image: buildUrl(i.image), videoUrl: buildUrl(i.get('videoUrl')) })),
+      recent_work: recentWork.map((r) => ({ ...r.toObject(), image: buildUrl(r.image), video: buildUrl(r.get('video')), videoUrl: buildUrl(r.get('videoUrl')) })),
       portfolio: portfolioData,
       faqs,
     },
@@ -135,7 +136,7 @@ const getPortfolioItem = async (req, res) => {
   const filter = { status: 1 };
   if (portfolioCategoryId) filter.portfolioCategoryId = { $in: fkVariants(portfolioCategoryId) };
   const items = await GroupSingleServicePortfolioItem.find(filter).sort({ displayOrder: 1 });
-  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image) })) });
+  res.json({ status: 'success', data: items.map((i) => ({ ...i.toObject(), image: buildUrl(i.image), videoUrl: buildUrl(i.get('videoUrl')) })) });
 };
 
 module.exports = { serviceHomePriority, groupService, getSingleService, getPortfolioItem };

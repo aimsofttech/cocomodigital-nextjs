@@ -3,17 +3,10 @@ import { PlayCircleIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import Modal from './Modal';
 import Tooltip from './Tooltip';
 
-// S3 bucket base URL — images stored as S3 keys (relative paths) need this prepended
-const S3_URL = (import.meta as any).env?.VITE_AWS_URL || '';
-const API_URL = (import.meta as any).env?.VITE_API_URL || '';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
-function buildUrl(src: string): string {
-  if (!src) return '';
-  if (src.startsWith('http://') || src.startsWith('https://')) return src;
-  // Raw S3 key (e.g. "thumbnails/abc.jpg") → prepend S3 bucket base URL
-  const base = S3_URL || API_URL;
-  return `${base}/${src}`.replace(/([^:]\/)\/+/g, '$1');
-}
+// Raw S3 key (e.g. "thumbnails/abc.jpg") → S3 bucket URL; full URLs pass through.
+const buildUrl = (src: string): string => resolveMediaUrl(src);
 
 function isYouTube(url: string): boolean {
   return /youtube\.com|youtu\.be/.test(url);

@@ -14,6 +14,9 @@
  *   node scripts/seed-caspian-local.js --bulk 150  # + 150 rows, to exercise paging
  */
 require('dotenv').config();
+
+// Seed media lives in the S3 bucket configured by AWS_URL (.env).
+const S3_BASE_URL = (process.env.AWS_URL || '').replace(/\/+$/, '');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
@@ -45,30 +48,30 @@ const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
  * not. Convenient here, and the exact reason the caspian/ prefix has to
  * go private before real uploading starts. */
 const REAL_IMAGES = [
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/author-image/1743532251_anil%20mahato.jpeg",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922799_revised.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922859_tata%20EV.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922872_imdb.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773922897_resized.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923034_mini-tv.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923264_Vshow-Cards.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923629_t-series.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923833_Trailer-prak-Group.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773923943_Progetto-Happiness.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773924313_Amazon-mx-player.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773925154_Ivy-Music.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773925687_Madfad-Media.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1773926082_Unpolished.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/brand-image/1774096883_Langistan-resized.png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/creative-house-thumbnail/1752158570_blanca%20thumbnail.jpeg",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-carousels/1736418369_e5a02a6ea286762390ef8566bac1e249.jpg",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361902_Rectangle%201253%20(1).png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361951_image%20(20).png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-content-items/1736361985_Rectangle%201253%20(1).png",
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/marketing-house-pre-launch-activities/1762139981_Four%20More%20Shots%20Please%20Season%201%20Official%20Trailer.jpg",
+  `${S3_BASE_URL}/author-image/1743532251_anil%20mahato.jpeg`,
+  `${S3_BASE_URL}/book-a-call/1761986854_anil%20mahato%20marketing.png`,
+  `${S3_BASE_URL}/brand-image/1773922799_revised.png`,
+  `${S3_BASE_URL}/brand-image/1773922859_tata%20EV.png`,
+  `${S3_BASE_URL}/brand-image/1773922872_imdb.png`,
+  `${S3_BASE_URL}/brand-image/1773922897_resized.png`,
+  `${S3_BASE_URL}/brand-image/1773923034_mini-tv.png`,
+  `${S3_BASE_URL}/brand-image/1773923264_Vshow-Cards.png`,
+  `${S3_BASE_URL}/brand-image/1773923629_t-series.png`,
+  `${S3_BASE_URL}/brand-image/1773923833_Trailer-prak-Group.png`,
+  `${S3_BASE_URL}/brand-image/1773923943_Progetto-Happiness.png`,
+  `${S3_BASE_URL}/brand-image/1773924313_Amazon-mx-player.png`,
+  `${S3_BASE_URL}/brand-image/1773925154_Ivy-Music.png`,
+  `${S3_BASE_URL}/brand-image/1773925687_Madfad-Media.png`,
+  `${S3_BASE_URL}/brand-image/1773926082_Unpolished.png`,
+  `${S3_BASE_URL}/brand-image/1774096883_Langistan-resized.png`,
+  `${S3_BASE_URL}/creative-house-thumbnail/1752158570_blanca%20thumbnail.jpeg`,
+  `${S3_BASE_URL}/marketing-house-content-carousels/1736418369_e5a02a6ea286762390ef8566bac1e249.jpg`,
+  `${S3_BASE_URL}/marketing-house-content-items/1736361902_Rectangle%201253%20(1).png`,
+  `${S3_BASE_URL}/marketing-house-content-items/1736361951_image%20(20).png`,
+  `${S3_BASE_URL}/marketing-house-content-items/1736361985_Rectangle%201253%20(1).png`,
+  `${S3_BASE_URL}/marketing-house-pre-launch-activities/1762139981_Four%20More%20Shots%20Please%20Season%201%20Official%20Trailer.jpg`,
 ];
-const REAL_VIDEO = "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/podcast/not-for/1788442028445_67982_WhatsApp_Video_2026-09-03_at_6.48.12_PM.mp4";
+const REAL_VIDEO = `${S3_BASE_URL}/podcast/not-for/1788442028445_67982_WhatsApp_Video_2026-09-03_at_6.48.12_PM.mp4`;
 
 /* The real dimensions of what each URL points at.
  *

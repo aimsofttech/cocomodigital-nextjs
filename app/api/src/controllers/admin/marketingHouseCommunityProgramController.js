@@ -4,7 +4,7 @@ const MarketingHouseCategory = require('../../models/MarketingHouseCategory');
 const createCrudController = require('./crudFactory');
 
 module.exports = createCrudController(MarketingHouseCommunityProgramCategory, {
-  imageFields: [],
+  imageFields: ['image'],
   searchFields: ['name', 'name'],
   defaultSort: { displayOrder: 1 },
   parentField: 'marketingHouseItemId',

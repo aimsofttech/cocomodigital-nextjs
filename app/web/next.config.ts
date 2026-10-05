@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+/* Host of the S3 media bucket, from NEXT_PUBLIC_S3_BASE_URL (.env). */
+const S3_HOSTNAME = process.env.NEXT_PUBLIC_S3_BASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_S3_BASE_URL).hostname
+  : "";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -29,10 +34,8 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "site.cocomadigital.com",
       },
-      {
-        protocol: "https",
-        hostname: "cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com",
-      },
+      /* S3 media bucket. */
+      ...(S3_HOSTNAME ? [{ protocol: "https" as const, hostname: S3_HOSTNAME }] : []),
       {
         /* Phase 5o: the API s3Storage with
            `disablePayloadAccessControl: true` returns path-style

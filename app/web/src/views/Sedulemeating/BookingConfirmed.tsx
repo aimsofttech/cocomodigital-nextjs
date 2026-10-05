@@ -21,13 +21,14 @@ import {
   icsDataUri,
 } from "../../utils/calendarLinks";
 import { openMailto } from "../../lib/email";
+import { s3Url } from "@/src/lib/s3";
 
 
 const DIRECT_EMAIL = "anil@cocomadigital.com";
 const WHATSAPP_NUMBER = "+918800528125";
 
 const HOST_PHOTO_URL =
-  "https://cocomadigitalmediabucket.s3.eu-north-1.amazonaws.com/book-a-call/1761986854_anil%20mahato%20marketing.png";
+  s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png");
 
 function whatsappLink(name, dateLine) {
   const text = `Hi Anil, this is ${name || "[your name]"}. I just booked our discovery call for ${dateLine}. Looking forward!`;
