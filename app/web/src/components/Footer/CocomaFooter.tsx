@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FaYoutube, FaInstagram, FaFacebookF, FaWhatsapp, FaLinkedinIn } from "react-icons/fa";
 import { useCartCount } from "@/src/lib/cart";
 import { Link } from "@/src/lib/navigation";
+import { teamWhatsappLink } from "@/src/lib/contact";
 import type { ReactNode } from "react";
 import type {
   ShellFooterItem,
@@ -94,7 +95,7 @@ export default function CocomaFooter({ serviceItems, otherServices, solutions }:
       label: "YouTube",
     },
     {
-      link: "https://wa.me/+918655643377?text=Hello,%20I%20need%20more%20information.",
+      link: teamWhatsappLink("website"),
       icon: <FaWhatsapp />,
       label: "WhatsApp",
     },
