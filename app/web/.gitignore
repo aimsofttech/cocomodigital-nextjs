@@ -25,4 +25,7 @@ yarn-error.log*
 next-dev.log
 next-dev.err.log
 
+# Local-only reference material (screenshots, design refs, notes). Never commit.
+/REFS/
+
 .claude/

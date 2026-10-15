@@ -16,26 +16,39 @@ import { AiOutlinePlayCircle } from "react-icons/ai";
  * "step 1 → 2 → 3 → 4" progression so explicit arrow icons
  * aren't needed.
  */
-const HowItWorksSteps = () => {
+const DEFAULT_TITLES = [
+  "Explore Our Services",
+  "Add Suitable Services",
+  "Schedule Meeting",
+  "Start The Project",
+];
+
+/**
+ * `steps` — optional four titles, in order, for a page whose process is
+ * worded differently (the Design page says "Pick the services"). The
+ * numbers and icons stay; every existing call site passes nothing and
+ * renders exactly as before.
+ */
+const HowItWorksSteps = ({ steps: titles = DEFAULT_TITLES } = {}) => {
   const steps = [
     {
       number: "01",
-      title: "Explore Our Services",
+      title: titles[0] ?? DEFAULT_TITLES[0],
       icon: <FaSearch className="how-step-icon" aria-hidden="true" />,
     },
     {
       number: "02",
-      title: "Add Suitable Services",
+      title: titles[1] ?? DEFAULT_TITLES[1],
       icon: <FiShoppingBag className="how-step-icon" aria-hidden="true" />,
     },
     {
       number: "03",
-      title: "Schedule Meeting",
+      title: titles[2] ?? DEFAULT_TITLES[2],
       icon: <BsPersonVideo2 className="how-step-icon" aria-hidden="true" />,
     },
     {
       number: "04",
-      title: "Start The Project",
+      title: titles[3] ?? DEFAULT_TITLES[3],
       icon: <AiOutlinePlayCircle className="how-step-icon" aria-hidden="true" />,
     },
   ];
