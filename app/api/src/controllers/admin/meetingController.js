@@ -3,7 +3,7 @@ const Meeting = require('../../models/Meeting');
 const MeetingAssignee = require('../../models/MeetingAssignee');
 const GroupServiceItem = require('../../models/GroupServiceItem');
 const GroupServiceCategory = require('../../models/GroupServiceCategory');
-const { createMeetingEvent } = require('../../services/calendarService');
+const { createMeetingEvent, updateMeetingEvent, cancelMeetingEvent } = require('../../services/calendarService');
 const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
 const logger = require('../../utils/logger');
 // The slot grid and open/closed rule are the admin's own configuration, read
@@ -116,47 +116,92 @@ const show = async (req, res) => {
   res.json({ status: 'success', data });
 };
 
+/* Everything the mailer and the calendar need about a meeting, read from the
+   stored document — one mapping, so each action's emails and calendar event
+   describe the meeting the same way (assignee included). */
+const meetingFields = (doc) => ({
+  name: doc.userName,
+  email: doc.email,
+  phone: doc.phone,
+  companyName: doc.companyName,
+  service: doc.service,
+  notes: doc.notes,
+  message: doc.notes,
+  status: doc.status,
+  meetLink: doc.meetLink,
+  meeting_date: doc.meetingDate,
+  meeting_time: doc.meetingTime,
+  meeting_timezone: doc.meetingTimezone,
+  meeting_start_utc: doc.meeting_start_utc,
+  createdAt: doc.createdAt,
+  meetingId: doc._id.toString(),
+  assigneeEmail: doc.assignedTo?.email,
+  assigneeName: doc.assignedTo?.name,
+});
+
+/* Put the meeting on the host calendar as it now stands. A meeting that
+   already has an event is moved/updated in place — its Meet link stays the one
+   everybody was sent, and no orphaned duplicate is left on the calendar. A new
+   event (and link) is only minted when there is none, or it was deleted by
+   hand. */
+const syncCalendarEvent = async (doc) => {
+  const booking = meetingFields(doc);
+  if (doc.google_event_id) {
+    const updated = await updateMeetingEvent(doc.google_event_id, booking);
+    if (!updated.notFound) {
+      return {
+        ...updated,
+        meetLink: updated.meetLink || doc.meetLink || null,
+        eventId: updated.eventId || doc.google_event_id,
+        htmlLink: updated.htmlLink || doc.google_html_link || null,
+      };
+    }
+  }
+  return createMeetingEvent(booking);
+};
+
+const applyCalendarEvent = (doc, event) => {
+  doc.meetLink = event.meetLink || doc.meetLink || null;
+  doc.meetId = event.eventId || doc.meetId || null;
+  doc.google_event_id = event.eventId || doc.google_event_id || null;
+  doc.google_html_link = event.htmlLink || doc.google_html_link || null;
+};
+
+const calendarFailure = (res, event, still) =>
+  res.status(502).json({
+    status: 'error',
+    message: `Could not create the Google Meet link (${event.error}). ${still} — no emails were sent. Please try again.`,
+  });
+
 // PUT /admin/api/meetings/:id/confirm
 // Generates a Google Meet link, updates the meeting to "confirmed", sends emails.
 const confirm = async (req, res) => {
   const doc = await Meeting.findById(req.params.id);
   if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
   if (doc.status === 'confirmed') return res.json({ status: 'success', message: 'Already confirmed', data: doc });
+  if (doc.status !== 'pending') {
+    return res.status(400).json({ status: 'error', message: `This meeting has already been ${doc.status} — reschedule it to book a new slot.` });
+  }
+  if (doc.meeting_start_utc && new Date(doc.meeting_start_utc).getTime() <= Date.now()) {
+    return res.status(400).json({ status: 'error', message: 'This meeting slot has already passed — reschedule it instead.' });
+  }
 
-  const { meetLink, eventId, htmlLink } = await createMeetingEvent({
-    name: doc.userName,
-    email: doc.email,
-    service: doc.service,
-    message: doc.notes,
-    notes: doc.notes,
-    meeting_date: doc.meetingDate,
-    meeting_time: doc.meetingTime,
-    meeting_timezone: doc.meetingTimezone,
-  });
+  /* The link is the point of confirming. If Google is set up but the event
+     can't be created, leave the meeting pending so the admin can retry, rather
+     than confirming it and mailing the visitor a confirmation with no way in.
+     (With Google not configured at all, confirmation proceeds without a link
+     by design — see calendarService.) */
+  const event = await syncCalendarEvent(doc);
+  if (event.error) return calendarFailure(res, event, 'The meeting is still pending');
 
+  applyCalendarEvent(doc, event);
   doc.status = 'confirmed';
-  doc.meetLink = meetLink || null;
-  doc.meetId = eventId || null;
-  doc.google_event_id = eventId || null;
-  doc.google_html_link = htmlLink || null;
   doc.confirmedBy = req.user?._id || req.user?.id || null;
   doc.confirmedAt = new Date();
   await doc.save();
 
-  (async () => {
-    await sendMeetingConfirmedEmails({
-      name: doc.userName,
-      email: doc.email,
-      phone: doc.phone,
-      meetingDate: doc.meetingDate,
-      meetingTime: doc.meetingTime,
-      meeting_timezone: doc.meetingTimezone,
-      meeting_start_utc: doc.meeting_start_utc,
-      createdAt: doc.createdAt,
-      meetLink: doc.meetLink,
-      assigneeEmail: doc.assignedTo?.email,
-    });
-  })().catch((e) => logger.error('confirm email error:', e));
+  sendMeetingConfirmedEmails(meetingFields(doc))
+    .catch((e) => logger.error(`confirm email error for meeting ${doc._id}: ${e.message}`));
 
   res.json({ status: 'success', message: 'Meeting confirmed and emails sent', data: doc });
 };
@@ -235,36 +280,28 @@ const reschedule = async (req, res) => {
     return res.status(409).json({ status: 'error', message: 'That time slot is already booked. Please pick another.' });
   }
 
-  const { meetLink, eventId, htmlLink } = await createMeetingEvent({
-    name: doc.userName,
-    email: doc.email,
-    service: doc.service,
-    message: doc.notes,
-    notes: doc.notes,
-    meeting_date: meetingDate,
-    // The admin typed these in the studio's own zone, so that's the zone the
-    // calendar event has to be created in.
-    meeting_time: meetingTime,
-    meeting_timezone: config.timezone,
-  });
-
   // meetingDate/meetingTime become "the admin's literal IST input" — reference
   // only. meetingTimezone is deliberately left untouched: it still holds the
   // visitor's original zone, which is what their reschedule email is rendered
-  // in. meeting_start_utc (below) is the only field anything displays from.
+  // in. meeting_start_utc is the only field anything displays from, and the
+  // one the calendar event is placed by.
   doc.meetingDate = meetingDate;
   doc.meetingTime = meetingTime;
   doc.meeting_start_utc = startUtc;
   doc.slot_key = slot_key;
+
+  // Moves the existing event (same Meet link) or creates one if there's none.
+  const event = await syncCalendarEvent(doc);
+  if (event.error) return calendarFailure(res, event, 'The meeting was not rescheduled');
+
+  applyCalendarEvent(doc, event);
   doc.status = 'confirmed';
-  doc.meetLink = meetLink || null;
-  doc.meetId = eventId || null;
-  doc.google_event_id = eventId || null;
-  doc.google_html_link = htmlLink || null;
   doc.confirmedBy = req.user?._id || req.user?.id || null;
   doc.confirmedAt = new Date();
   doc.rescheduledBy = req.user?._id || req.user?.id || null;
   doc.rescheduledAt = new Date();
+  // The 1-hour reminder belongs to the old time; the new one needs its own.
+  doc.reminderSentAt = null;
 
   try {
     await doc.save();
@@ -275,48 +312,50 @@ const reschedule = async (req, res) => {
     throw err;
   }
 
-  (async () => {
-    await sendMeetingRescheduledEmails({
-      name: doc.userName,
-      email: doc.email,
-      phone: doc.phone,
-      meetingDate: doc.meetingDate,
-      meetingTime: doc.meetingTime,
-      meeting_timezone: doc.meetingTimezone,
-      meeting_start_utc: doc.meeting_start_utc,
-      createdAt: doc.createdAt,
-      meetLink: doc.meetLink,
-      assigneeEmail: doc.assignedTo?.email,
-    });
-  })().catch((e) => logger.error('reschedule email error:', e));
+  sendMeetingRescheduledEmails(meetingFields(doc))
+    .catch((e) => logger.error(`reschedule email error for meeting ${doc._id}: ${e.message}`));
 
   res.json({ status: 'success', message: 'Meeting rescheduled and emails sent', data: doc });
 };
 
 // PUT /admin/api/meetings/:id/reject
+// Rejects a pending request, or cancels a confirmed meeting.
 const reject = async (req, res) => {
   const doc = await Meeting.findById(req.params.id);
   if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
+  // A repeat click must not mail the visitor a second rejection.
+  if (doc.status === 'rejected') return res.json({ status: 'success', message: 'Already rejected', data: doc });
+
+  const wasConfirmed = doc.status === 'confirmed';
+
+  /* A cancelled meeting must leave the host calendar too — otherwise the slot
+     still shows as busy there and the Meet room stays a live invitation. If
+     Google can't be reached the cancellation still goes ahead (the visitor
+     must be told); the stale event is logged for manual clean-up. */
+  if (doc.google_event_id) {
+    const removed = await cancelMeetingEvent(doc.google_event_id);
+    if (removed.removed) {
+      doc.meetLink = null;
+      doc.meetId = null;
+      doc.google_event_id = null;
+      doc.google_html_link = null;
+    } else if (removed.error) {
+      logger.warn(`reject: calendar event ${doc.google_event_id} for meeting ${doc._id} could not be removed: ${removed.error}`);
+    }
+  }
 
   doc.status = 'rejected';
   doc.rejectedAt = new Date();
   await doc.save();
 
-  (async () => {
-    if (doc.email) {
-      await sendMeetingRejectedEmail({
-        name: doc.userName,
-        email: doc.email,
-        meeting_date: doc.meetingDate,
-        meeting_time: doc.meetingTime,
-        meeting_timezone: doc.meetingTimezone,
-        meeting_start_utc: doc.meeting_start_utc,
-        assigneeEmail: doc.assignedTo?.email,
-      });
-    }
-  })().catch((e) => logger.error('reject email error:', e));
+  sendMeetingRejectedEmail({ ...meetingFields(doc), wasConfirmed })
+    .catch((e) => logger.error(`reject email error for meeting ${doc._id}: ${e.message}`));
 
-  res.json({ status: 'success', message: 'Meeting rejected and user notified', data: doc });
+  res.json({
+    status: 'success',
+    message: wasConfirmed ? 'Meeting cancelled and user notified' : 'Meeting rejected and user notified',
+    data: doc,
+  });
 };
 
 // GET /admin/api/meetings/assignees
@@ -341,31 +380,28 @@ const assign = async (req, res) => {
   const doc = await Meeting.findById(req.params.id);
   if (!doc) return res.status(404).json({ status: 'error', message: 'Meeting not found' });
 
-  doc.assignedTo = { name: String(name).trim(), email: String(email).trim().toLowerCase() };
+  const trimmedEmail = String(email).trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
+    return res.status(400).json({ status: 'error', message: 'Assignee email is not a valid address' });
+  }
+
+  doc.assignedTo = { name: String(name).trim(), email: trimmedEmail };
   doc.assignedBy = req.user?._id || req.user?.id || null;
   doc.assignedAt = new Date();
   await doc.save();
 
-  (async () => {
-    await sendMeetingAssignedEmails(
-      {
-        name: doc.userName,
-        email: doc.email,
-        phone: doc.phone,
-        companyName: doc.companyName,
-        service: doc.service,
-        notes: doc.notes,
-        status: doc.status,
-        meetLink: doc.meetLink,
-        meeting_date: doc.meetingDate,
-        meeting_time: doc.meetingTime,
-        meeting_timezone: doc.meetingTimezone,
-        meeting_start_utc: doc.meeting_start_utc,
-        meetingId: doc._id.toString(),
-      },
-      doc.assignedTo
-    );
-  })().catch((e) => logger.error('assign email error:', e));
+  /* A confirmed meeting already has its event: put the assignee on the guest
+     list (and take a previous assignee off it) so they can open the Meet room
+     without being admitted. A pending meeting picks the assignee up when it is
+     confirmed. Best-effort — the assignment itself is already saved. */
+  if (doc.google_event_id && doc.status === 'confirmed') {
+    updateMeetingEvent(doc.google_event_id, meetingFields(doc))
+      .then((r) => { if (r.error) logger.warn(`assign: could not add assignee to event ${doc.google_event_id}: ${r.error}`); })
+      .catch((e) => logger.error(`assign calendar error for meeting ${doc._id}: ${e.message}`));
+  }
+
+  sendMeetingAssignedEmails(meetingFields(doc), doc.assignedTo)
+    .catch((e) => logger.error(`assign email error for meeting ${doc._id}: ${e.message}`));
 
   res.json({ status: 'success', message: 'Meeting assigned and emails sent', data: doc });
 };

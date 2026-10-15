@@ -24,15 +24,21 @@ const IST_TIMEZONE = 'Asia/Kolkata';
  * the display-side counterpart to `zonedTimeToUtc` — it never mutates the
  * instant, only how it's shown.
  *
- * @returns {{date:string, time:string}|null} null if `date` doesn't parse.
+ * @returns {{date:string, time:string}|null} null if `date` doesn't parse or
+ *   `timeZone` isn't a recognised IANA zone. Never throws: every meeting email
+ *   renders through here, and one throw takes the whole message down with it.
  */
 const formatInTimeZone = (date, timeZone) => {
   const d = date instanceof Date ? date : new Date(date);
   if (Number.isNaN(d.getTime())) return null;
-  return {
-    date: d.toLocaleDateString('en-US', { timeZone, day: '2-digit', month: 'short', year: 'numeric' }),
-    time: d.toLocaleTimeString('en-US', { timeZone, hour: 'numeric', minute: '2-digit', hour12: true }),
-  };
+  try {
+    return {
+      date: d.toLocaleDateString('en-US', { timeZone, day: '2-digit', month: 'short', year: 'numeric' }),
+      time: d.toLocaleTimeString('en-US', { timeZone, hour: 'numeric', minute: '2-digit', hour12: true }),
+    };
+  } catch {
+    return null; // unrecognised timeZone (e.g. '' from a browser that sent none)
+  }
 };
 
 /**

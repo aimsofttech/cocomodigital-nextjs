@@ -469,7 +469,7 @@ const ScheduleMeetingDetails = () => {
               </div>
 
               <p className="schedule-detail-fineprint">
-                Google Meet link arrives by email instantly. No follow-up nags.
+                Your Google Meet link is emailed as soon as we confirm the slot. No follow-up nags.
               </p>
             </form>
           )}

@@ -78,6 +78,19 @@ function formatIST(utcIso?: string | Date | null): string | null {
   return `${date} · ${time} IST`;
 }
 
+// The meeting's start as IST "HH:mm" — the zone the reschedule grid works in.
+function istHHmm(utcIso?: string | Date | null): string {
+  if (!utcIso) return '';
+  const d = new Date(utcIso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString('en-GB', { timeZone: IST_TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+}
+
+// Pending requests are rejected; confirmed (still upcoming) meetings cancelled.
+function canReject(row: any): boolean {
+  return (row.status === 'pending' || row.status === 'confirmed') && !isExpired(row);
+}
+
 // "14:30" -> "2:30 PM" when hour12, otherwise passed through unchanged.
 function formatSlotLabel(slot24: string, hour12: boolean): string {
   if (!hour12) return slot24;
@@ -269,8 +282,8 @@ export default function MeetingList() {
     if (!rejectTarget) return;
     setActionLoading(true);
     try {
-      await meetingApi.reject(rejectTarget._id);
-      toast.success('Meeting rejected and user notified');
+      const { data: res }: any = await meetingApi.reject(rejectTarget._id);
+      toast.success(res?.message || 'Meeting rejected and user notified');
       setRejectTarget(null);
       if (selected?._id === rejectTarget._id) setSelected(null);
       fetchData();
@@ -357,12 +370,14 @@ export default function MeetingList() {
   // the target meeting or the picked date changes — admins usually keep the
   // same time and just move the day. Falls back to no selection if that slot
   // isn't valid (e.g. already past) for the newly-picked date.
+  // The grid is in IST, so the original time is read from the UTC instant in
+  // IST — meetingTime is the visitor's own wall-clock, in their zone.
   useEffect(() => {
     if (!rescheduleTarget) return;
-    const originalTime = (rescheduleTarget.meetingTime || '').slice(0, 5);
+    const originalTime = istHHmm(rescheduleTarget.meeting_start_utc) || (rescheduleTarget.meetingTime || '').slice(0, 5);
     setRescheduleTime(originalTime && visibleRescheduleSlots.includes(originalTime) ? originalTime : '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rescheduleDate, rescheduleTarget]);
+  }, [rescheduleDate, rescheduleTarget, daySlots]);
 
   /* The configured schedule, used to grey out closed days in the calendar. One
      fetch per mount — the per-date slot list below is the authoritative feed,
@@ -609,17 +624,17 @@ export default function MeetingList() {
               </button>
               <button
                 onClick={() => { setSelected(null); setRejectTarget(selected); }}
-                disabled={selected.status !== 'pending' || isExpired(selected)}
+                disabled={!canReject(selected)}
                 title={
-                  selected.status !== 'pending'
+                  selected.status !== 'pending' && selected.status !== 'confirmed'
                     ? `This meeting has already been ${selected.status}`
                     : isExpired(selected)
                     ? 'This meeting slot has already passed — reschedule it instead'
                     : undefined
                 }
-                className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-400 flex-1 whitespace-nowrap"
+                className="btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-400 flex-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Reject Meeting
+                {selected.status === 'confirmed' ? 'Cancel Meeting' : 'Reject Meeting'}
               </button>
               <button
                 onClick={() => { setSelected(null); openReschedule(selected); }}
@@ -700,19 +715,37 @@ export default function MeetingList() {
       </Modal>
 
       {/* ── Reject meeting modal ─────────────────────────────────────────────── */}
-      <Modal isOpen={!!rejectTarget} onClose={() => setRejectTarget(null)} title="Reject Meeting" size="sm">
+      <Modal
+        isOpen={!!rejectTarget}
+        onClose={() => setRejectTarget(null)}
+        title={rejectTarget?.status === 'confirmed' ? 'Cancel Meeting' : 'Reject Meeting'}
+        size="sm"
+      >
         {rejectTarget && (
           <div className="flex flex-col items-center text-center gap-4">
             <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center">
               <XCircleIcon className="w-7 h-7 text-orange-500" />
             </div>
             <div className="space-y-1">
-              <p className="font-semibold text-gray-900">Reject this meeting?</p>
-              <p className="text-sm text-gray-500">
-                A rejection email will be sent to
-                <span className="font-medium text-gray-700"> {rejectTarget.userName}</span> notifying
-                them that their request could not be approved.
-              </p>
+              {rejectTarget.status === 'confirmed' ? (
+                <>
+                  <p className="font-semibold text-gray-900">Cancel this confirmed meeting?</p>
+                  <p className="text-sm text-gray-500">
+                    The calendar event and its Google Meet link will be removed, and a cancellation
+                    email will be sent to
+                    <span className="font-medium text-gray-700"> {rejectTarget.userName}</span> and the owner.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-gray-900">Reject this meeting?</p>
+                  <p className="text-sm text-gray-500">
+                    A rejection email will be sent to
+                    <span className="font-medium text-gray-700"> {rejectTarget.userName}</span> notifying
+                    them that their request could not be approved. The owner is notified too.
+                  </p>
+                </>
+              )}
             </div>
             {/* Meeting summary */}
             <div className="w-full rounded-lg border border-gray-100 bg-gray-50 divide-y divide-gray-100 text-left text-sm">
@@ -742,7 +775,9 @@ export default function MeetingList() {
                 disabled={actionLoading}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white font-medium text-sm hover:bg-orange-600 disabled:opacity-60 transition-colors"
               >
-                {actionLoading ? 'Rejecting…' : 'Yes, Reject'}
+                {rejectTarget.status === 'confirmed'
+                  ? (actionLoading ? 'Cancelling…' : 'Yes, Cancel Meeting')
+                  : (actionLoading ? 'Rejecting…' : 'Yes, Reject')}
               </button>
             </div>
           </div>
@@ -760,7 +795,8 @@ export default function MeetingList() {
               <div>
                 <p className="font-semibold text-gray-900">{rescheduleTarget.userName}</p>
                 <p className="text-sm text-gray-500">
-                  Previously (IST): {formatIST(rescheduleTarget.meeting_start_utc) || `${rescheduleTarget.meetingDate}${rescheduleTarget.meetingTime ? ` · ${rescheduleTarget.meetingTime}` : ''}`} — expired
+                  Currently (IST): {formatIST(rescheduleTarget.meeting_start_utc) || `${rescheduleTarget.meetingDate}${rescheduleTarget.meetingTime ? ` · ${rescheduleTarget.meetingTime}` : ''}`}
+                  {isExpired(rescheduleTarget) ? ' — expired' : ''}
                 </p>
                 {rescheduleTarget.meetingTimezone && (
                   <p className="text-xs text-gray-400">
@@ -853,8 +889,12 @@ export default function MeetingList() {
             </div>
 
             <p className="text-xs text-gray-500">
-              A new Google Meet link will be generated and emails will be sent to both{' '}
-              <span className="font-medium text-gray-700">{rescheduleTarget.userName}</span> and the owner.
+              {rescheduleTarget.meetLink
+                ? 'The calendar event moves to the new time and keeps its existing Google Meet link. '
+                : 'A Google Meet link will be generated. '}
+              The updated details are emailed to{' '}
+              <span className="font-medium text-gray-700">{rescheduleTarget.userName}</span> and the owner
+              {rescheduleTarget.assignedTo?.name ? ` (and ${rescheduleTarget.assignedTo.name})` : ''}.
             </p>
 
             <div className="flex gap-3">
@@ -884,8 +924,9 @@ export default function MeetingList() {
               <div>
                 <p className="font-semibold text-gray-900">Assign {assignTarget.userName}'s meeting</p>
                 <p className="text-sm text-gray-500">
-                  The selected team member will be notified by email and will also receive all
-                  future updates (confirm / reject / reschedule) for this meeting.
+                  The selected team member, the owner and the visitor are notified by email. The
+                  team member also receives all future updates (confirm / reject / reschedule)
+                  for this meeting and is added to its calendar invite.
                 </p>
               </div>
             </div>
