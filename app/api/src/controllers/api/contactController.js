@@ -2,7 +2,7 @@ const ContactUs = require('../../models/ContactUs');
 const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
 const { sendBookingEmails, sendMeetingRequestEmails, sendContactEnquiryEmail } = require('../../services/bookingMailer');
-const { zonedTimeToUtc, isValidTimeZone } = require('../../utils/timezone');
+const { zonedTimeToUtc, wallClockInZone, isValidTimeZone } = require('../../utils/timezone');
 const {
   getAvailabilityConfig,
   slotsForViewerDate,
@@ -145,16 +145,24 @@ const freeConsultation = async (req, res) => {
   const consultationCategoryId = req.body.consultationCategoryId ?? req.body.consultation_category_id;
   if (!name || !email) return res.status(400).json({ status: 'error', message: 'Name and email are required' });
 
+  /* Only a zone this runtime recognises is used. The browser can send '' (or
+     a zone this ICU build doesn't know), and handing that to the date helpers
+     throws — which used to 500 the booking and, once stored, made every email
+     for the meeting fail to render. */
+  const visitorTz = isValidTimeZone(meeting_timezone) ? meeting_timezone : null;
+
   // Recompute the UTC instant server-side from the wall-clock fields rather
   // than trusting the client's meeting_start_utc verbatim — a spoofed or
   // clock-skewed browser could otherwise store a UTC instant inconsistent
   // with the recorded meeting_date/meeting_time/meeting_timezone. Falls back
   // to the client-sent value only if the recompute can't be done (missing or
   // unrecognised timezone), so a booking never hard-fails on this.
-  const recomputedUtc = meeting_date && meeting_time && meeting_timezone
-    ? zonedTimeToUtc(meeting_date, meeting_time, meeting_timezone)
+  const recomputedUtc = meeting_date && meeting_time && visitorTz
+    ? zonedTimeToUtc(meeting_date, meeting_time, visitorTz)
     : null;
-  const resolvedStartUtc = recomputedUtc || (meeting_start_utc ? new Date(meeting_start_utc) : null);
+  const clientUtc = meeting_start_utc ? new Date(meeting_start_utc) : null;
+  const resolvedStartUtc = recomputedUtc
+    || (clientUtc && !Number.isNaN(clientUtc.getTime()) ? clientUtc : null);
 
   const slot_key = slotKeyOf(resolvedStartUtc);
 
@@ -178,6 +186,12 @@ const freeConsultation = async (req, res) => {
       return res.status(409).json({ status: 'error', message: 'That time slot is no longer available. Please pick another.' });
     }
 
+    /* Without a usable visitor zone, the stored wall-clock is re-derived in the
+       studio's zone so date, time and zone always describe the same instant —
+       the visitor's emails then show the slot in studio time, labelled as such. */
+    const storedTz = visitorTz || slotCheck.config.timezone;
+    const wall = visitorTz ? null : wallClockInZone(resolvedStartUtc, storedTz);
+
     let doc;
     try {
       doc = await Meeting.create({
@@ -185,9 +199,9 @@ const freeConsultation = async (req, res) => {
         email,
         phone,
         companyName: company,
-        meetingDate: meeting_date,
-        meetingTime: meeting_time,
-        meetingTimezone: meeting_timezone,
+        meetingDate: wall ? wall.date : meeting_date,
+        meetingTime: wall ? wall.time : meeting_time,
+        meetingTimezone: storedTz,
         meeting_start_utc: resolvedStartUtc,
         slot_key,
         duration: 15,
@@ -203,21 +217,23 @@ const freeConsultation = async (req, res) => {
       throw err;
     }
 
-    (async () => {
-      await sendMeetingRequestEmails({
-        name, email, phone, companyName: company, service, notes: notes || message,
-        meeting_date, meeting_time, meeting_timezone,
-        meeting_start_utc: doc.meeting_start_utc,
-        createdAt: doc.createdAt,
-        meetingId: doc._id.toString(),
-      });
-    })().catch(() => { });
+    // Not awaited — the slot is already reserved; sendMail logs its own
+    // delivery result, this catch only covers a failure building the message.
+    sendMeetingRequestEmails({
+      name, email: doc.email, phone, companyName: company, service, notes: doc.notes,
+      meeting_date: doc.meetingDate,
+      meeting_time: doc.meetingTime,
+      meeting_timezone: doc.meetingTimezone,
+      meeting_start_utc: doc.meeting_start_utc,
+      createdAt: doc.createdAt,
+      meetingId: doc._id.toString(),
+    }).catch((err) => logger.error(`Meeting request emails failed for meeting ${doc._id}: ${err.message}`));
 
     crmIngest({
       channel: 'meeting', externalCollection: 'meetings', externalId: doc._id,
       name, email, phone, company, message: notes || message,
       serviceInterest: service, sourcePage: source_page,
-      meetingStartUtc: meeting_start_utc,
+      meetingStartUtc: doc.meeting_start_utc,
       raw: { meeting_date, meeting_time, meeting_timezone },
     });
 
@@ -230,9 +246,8 @@ const freeConsultation = async (req, res) => {
     service, source_page, notes,
   });
 
-  (async () => {
-    await sendBookingEmails({ name, email, phone, company, message, budget, service, source_page, notes });
-  })().catch(() => { });
+  sendBookingEmails({ name, email, phone, company, message, budget, service, source_page, notes })
+    .catch((err) => logger.error(`Consultation emails failed for ${email}: ${err.message}`));
 
   crmIngest({
     channel: 'consultation', externalCollection: 'free_consultation_item', externalId: doc._id,

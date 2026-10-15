@@ -33,6 +33,10 @@ const ownerRecipients = (assigneeEmail) => {
 const skippedAsOwner = () =>
   Promise.resolve({ sent: false, skipped: true, reason: 'visitor email is the owner address' });
 
+// "Priya (priya@…)" for the owner-side "Assigned To" row; '' when unassigned.
+const assigneeLine = (b) =>
+  b.assigneeEmail ? (b.assigneeName ? `${b.assigneeName} (${b.assigneeEmail})` : b.assigneeEmail) : '';
+
 // Admin panel base URL — used to build the action links in owner emails. The
 // admin SPA is served under the /admin base path (see app/admin/vite.config.ts).
 const adminPanelUrl = () =>
@@ -297,8 +301,12 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
     row('Date', userSlot?.date) +
     row('Time', userSlot?.time) +
     row('Time Zone', booking.meeting_timezone) +
-    row('Duration', '15 Minutes'),
-    `Your meeting request has been approved. Please join the meeting using the link below.`
+    row('Duration', '15 Minutes') +
+    row('Your Host', booking.assigneeName),
+    `Your meeting request has been approved. ` +
+    (meetLink
+      ? `Please join the meeting using the link below.`
+      : `We'll send the joining link separately before the call.`)
   );
 
   const ownerHtml = shell(
@@ -309,7 +317,8 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
     row('Phone', booking.phone) +
     row('Date (IST)', ownerSlot?.date) +
     row('Time (IST)', ownerSlot?.time) +
-    row("Visitor's Local Time", userSlotText),
+    row("Visitor's Local Time", userSlotText) +
+    row('Assigned To', assigneeLine(booking)),
     `A meeting has been confirmed with the following user.`
   );
 
@@ -360,8 +369,12 @@ const sendMeetingRescheduledEmails = async (booking = {}) => {
     row('Date', userSlot?.date) +
     row('Time', userSlot?.time) +
     row('Time Zone', booking.meeting_timezone) +
-    row('Duration', '15 Minutes'),
-    `Your meeting has been rescheduled to a new time. Please join using the link below at the new scheduled time.`
+    row('Duration', '15 Minutes') +
+    row('Your Host', booking.assigneeName),
+    `Your meeting has been rescheduled to a new time. ` +
+    (meetLink
+      ? `Please join using the link below at the new scheduled time.`
+      : `We'll send the joining link separately before the call.`)
   );
 
   const ownerHtml = shell(
@@ -372,7 +385,8 @@ const sendMeetingRescheduledEmails = async (booking = {}) => {
     row('Phone', booking.phone) +
     row('Date (IST)', ownerSlot?.date) +
     row('Time (IST)', ownerSlot?.time) +
-    row("Visitor's Local Time", userSlotText),
+    row("Visitor's Local Time", userSlotText) +
+    row('Assigned To', assigneeLine(booking)),
     `The meeting with the following user has been rescheduled to a new time.`
   );
 
@@ -406,54 +420,76 @@ const sendMeetingRescheduledEmails = async (booking = {}) => {
 };
 
 /**
- * Step 5: Admin rejects the meeting — notify the user. When the meeting is
- * assigned to a team member, the owner and the assignee also get a rejection
- * notice; unassigned meetings keep the original user-only behaviour.
+ * Step 5: Admin rejects a pending request, or cancels a confirmed meeting —
+ * notify the user, and the owner (plus the assignee, if any) so the owner-side
+ * inbox has a record of every status change, not just confirmations.
+ * `wasConfirmed` switches the wording from "request rejected" to "cancelled":
+ * a visitor who already holds a Meet link needs to be told it no longer stands.
  */
 const sendMeetingRejectedEmail = async (booking = {}) => {
   const visitorName = booking.name || booking.userName || 'there';
   const userSlot = userSlotLine(booking, booking.meeting_start_utc);
+  const ownerSlot = ownerSlotLine(booking.meeting_start_utc);
+  const cancelled = Boolean(booking.wasConfirmed);
+
+  const userTitle = cancelled ? 'Meeting Cancelled' : 'Meeting Request Rejected';
+  const userIntro = cancelled
+    ? `We're sorry — your confirmed meeting has had to be cancelled, and the Google Meet link sent earlier will no longer be used. Just reply to this email if you'd like to find another time.`
+    : `We regret to inform you that your meeting request could not be approved at this time.`;
 
   const userHtml = shell(
-    'Meeting Request Rejected',
+    userTitle,
     row('Name', visitorName) +
-    row('Requested Slot', userSlot),
-    `We regret to inform you that your meeting request could not be approved at this time.`
+    row(cancelled ? 'Slot' : 'Requested Slot', userSlot),
+    userIntro
   );
 
-  const result = await sendMail({
-    to: booking.email,
-    replyTo: ownerEmail(),
-    subject: 'Meeting Request Rejected',
-    html: userHtml,
-    text: `We regret to inform you that your meeting request could not be approved at this time.${userSlot ? `\nRequested slot: ${userSlot}` : ''}`,
-  });
+  const ownerHtml = shell(
+    cancelled ? 'Meeting Cancelled' : 'Meeting Rejected',
+    row('User Name', visitorName) +
+    row('Email', booking.email) +
+    row('Phone', booking.phone) +
+    row('Slot (IST)', ownerSlot) +
+    row("Visitor's Local Time", userSlot) +
+    row('Assigned To', assigneeLine(booking)),
+    cancelled
+      ? `The confirmed meeting with <strong>${esc(visitorName)}</strong> has been cancelled and the user has been notified.`
+      : `The meeting request from <strong>${esc(visitorName)}</strong> has been rejected and the user has been notified.`
+  );
 
-  if (booking.assigneeEmail) {
-    const ownerSlot = ownerSlotLine(booking.meeting_start_utc);
-    const ownerHtml = shell(
-      'Meeting Rejected',
-      row('User Name', visitorName) +
-      row('Email', booking.email) +
-      row('Slot (IST)', ownerSlot),
-      `The meeting request from <strong>${esc(visitorName)}</strong> has been rejected.`
-    );
-    await sendMail({
+  const [owner, user] = await Promise.allSettled([
+    sendMail({
       to: ownerRecipients(booking.assigneeEmail),
-      subject: `Meeting Rejected — ${visitorName}`,
+      replyTo: booking.email,
+      fromName: visitorName,
+      subject: `${cancelled ? 'Meeting Cancelled' : 'Meeting Rejected'} — ${visitorName}${ownerSlot ? ` (${ownerSlot})` : ''}`,
       html: ownerHtml,
-      text: `The meeting request from ${visitorName} (${booking.email}) has been rejected.${ownerSlot ? `\nSlot (IST): ${ownerSlot}` : ''}`,
-    });
-  }
+      text: `The ${cancelled ? 'confirmed meeting with' : 'meeting request from'} ${visitorName} (${booking.email}) has been ${cancelled ? 'cancelled' : 'rejected'}.${ownerSlot ? `\nSlot (IST): ${ownerSlot}` : ''}`,
+    }),
+    !booking.email
+      ? Promise.resolve({ sent: false, skipped: true })
+      : isOwnerAddress(booking.email)
+        ? skippedAsOwner()
+        : sendMail({
+          to: booking.email,
+          replyTo: ownerEmail(),
+          subject: userTitle,
+          html: userHtml,
+          text: `${userIntro}${userSlot ? `\n${cancelled ? 'Slot' : 'Requested slot'}: ${userSlot}` : ''}`,
+        }),
+  ]);
 
-  logger.info(`Meeting rejected email: user=${JSON.stringify(result.sent ?? result.skipped)}`);
+  const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
+  const result = { owner: unwrap(owner), user: unwrap(user) };
+  logger.info(`Meeting ${cancelled ? 'cancelled' : 'rejected'} emails: owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)} user=${JSON.stringify(result.user.sent ?? result.user.skipped)}`);
   return result;
 };
 
 /**
  * Owner delegates a meeting to a team member — notify the assignee (with the
- * same action buttons as the owner alert, so they can act directly) and send
- * the owner an assignment receipt.
+ * same action buttons as the owner alert, so they can act directly), send the
+ * owner an assignment receipt, and tell the visitor who will be hosting their
+ * call (with the Meet link, once the meeting is confirmed).
  */
 const sendMeetingAssignedEmails = async (booking = {}, assignee = {}) => {
   // Assignee + owner are both owner-side staff — always IST, never the
@@ -489,7 +525,29 @@ const sendMeetingAssignedEmails = async (booking = {}, assignee = {}) => {
     `You have assigned <strong>${esc(visitorName)}</strong>'s meeting to <strong>${esc(assignee.name)}</strong>.`
   );
 
-  const [toAssignee, toOwner] = await Promise.allSettled([
+  // The visitor's own view — their zone, and the link only once there is one
+  // (a pending meeting gets its link when it's confirmed).
+  const userSlotDisplay = formatInTimeZone(booking.meeting_start_utc, booking.meeting_timezone);
+  const userSlot = userSlotLine(booking, booking.meeting_start_utc);
+  const isConfirmed = booking.status === 'confirmed';
+  const userIntro =
+    `Hi ${esc(String(visitorName).split(' ')[0])}, <strong>${esc(assignee.name)}</strong> from ${esc(brand())} will be hosting your call. ` +
+    (isConfirmed && meetLink
+      ? `Your meeting is confirmed — join using the link below at the scheduled time.`
+      : `Your meeting request is still awaiting confirmation; you'll receive the Google Meet link as soon as it's confirmed.`);
+  const userHtml = shell(
+    'Your Meeting Host',
+    (isConfirmed ? meetRow(meetLink) : '') +
+    row('Host', assignee.name) +
+    row('Date', userSlotDisplay?.date) +
+    row('Time', userSlotDisplay?.time) +
+    row('Time Zone', booking.meeting_timezone) +
+    row('Duration', '15 Minutes') +
+    row('Status', isConfirmed ? 'Confirmed' : 'Awaiting confirmation'),
+    userIntro
+  );
+
+  const [toAssignee, toOwner, toUser] = await Promise.allSettled([
     sendMail({
       to: assignee.email,
       replyTo: booking.email,
@@ -510,11 +568,26 @@ const sendMeetingAssignedEmails = async (booking = {}, assignee = {}) => {
         html: ownerHtml,
         text: `You have assigned ${visitorName}'s meeting to ${assignee.name} (${assignee.email}). Slot (IST): ${ownerSlot || 'n/a'}`,
       }),
+    !booking.email
+      ? Promise.resolve({ sent: false, skipped: true })
+      : isOwnerAddress(booking.email)
+        ? skippedAsOwner()
+        : sendMail({
+          to: booking.email,
+          replyTo: ownerEmail(),
+          subject: `Your call with ${brand()} will be hosted by ${assignee.name}`,
+          html: userHtml,
+          text:
+            `${assignee.name} from ${brand()} will be hosting your call.\nSlot: ${userSlot || 'n/a'}\nDuration: 15 Minutes\n` +
+            (isConfirmed && meetLink
+              ? `Google Meet: ${meetLink}`
+              : `Your meeting is awaiting confirmation; the Google Meet link will follow once it's confirmed.`),
+        }),
   ]);
 
   const unwrap = (r) => (r.status === 'fulfilled' ? r.value : { sent: false, error: r.reason?.message });
-  const result = { assignee: unwrap(toAssignee), owner: unwrap(toOwner) };
-  logger.info(`Meeting assigned emails: assignee=${JSON.stringify(result.assignee.sent ?? result.assignee.skipped)} owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)}`);
+  const result = { assignee: unwrap(toAssignee), owner: unwrap(toOwner), user: unwrap(toUser) };
+  logger.info(`Meeting assigned emails: assignee=${JSON.stringify(result.assignee.sent ?? result.assignee.skipped)} owner=${JSON.stringify(result.owner.sent ?? result.owner.skipped)} user=${JSON.stringify(result.user.sent ?? result.user.skipped)}`);
   return result;
 };
 

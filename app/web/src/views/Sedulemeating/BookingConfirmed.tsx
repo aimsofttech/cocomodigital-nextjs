@@ -106,14 +106,15 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
           <div className="booking-confirmed-tick" aria-hidden="true">
             <FaCheck />
           </div>
-          <p className="booking-confirmed-eyebrow">Booking confirmed</p>
+          <p className="booking-confirmed-eyebrow">Request received</p>
           <h1 className="booking-confirmed-headline">
             You're <span className="bg-highlight-yellow bg-[length:100%_100%] bg-no-repeat px-[0.15em] box-decoration-clone">locked in</span>
             {fullName ? `, ${fullName.split(" ")[0]}` : ""}.
           </h1>
           <p className="booking-confirmed-sub">
-            A Google Meet invite is on its way to{" "}
-            <strong>{email || "your inbox"}</strong>. See you on the call.
+            Your slot is held. We&apos;ve emailed{" "}
+            <strong>{email || "your inbox"}</strong> — your Google Meet link
+            follows as soon as we confirm the call.
           </p>
         </section>
 
@@ -153,7 +154,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
               </li>
               <li>
                 <FaVideo aria-hidden="true" />
-                <span>Google Meet — link in your email invite</span>
+                <span>Google Meet — link emailed once confirmed</span>
               </li>
             </ul>
           </section>
@@ -168,11 +169,11 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
             <li>
               <span className="booking-confirmed-step-num">1</span>
               <div>
-                <h3>Email invite — in the next minute</h3>
+                <h3>Confirmation &amp; Meet link — by email</h3>
                 <p>
-                  Calendar invite with the Google Meet link lands in{" "}
-                  <strong>{email || "your inbox"}</strong>. Accept it to lock the
-                  slot in your calendar.
+                  A note that we&apos;ve received your request lands in{" "}
+                  <strong>{email || "your inbox"}</strong> right away. Once we
+                  confirm the slot, a second email brings your Google Meet link.
                 </p>
               </div>
             </li>
