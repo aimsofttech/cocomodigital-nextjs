@@ -230,8 +230,8 @@ export const smmManagementData = {
   closingCta: {
     heading: "Let's audit your social pipeline.",
     description:
-      "15-minute discovery call with Anil + a senior strategist. We'll map where your pipeline breaks down — ideation, scripting, publishing, analytics, scaling — and show you what end-to-end social looks like.",
-    buttonText: "Book a discovery call",
-    buttonTo: "/ScheduleMeeting",
+      "A 30-minute working session with a senior producer. We'll map where your pipeline breaks down — ideation, scripting, publishing, analytics, scaling — and show you what end-to-end social looks like.",
+    buttonText: "Apply to work with us",
+    buttonTo: "/contact-us",
   },
 };

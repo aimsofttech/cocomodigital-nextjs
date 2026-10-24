@@ -1,4 +1,3 @@
-import { s3Url } from "@/src/lib/s3";
 // @ts-nocheck
 /**
  * Static solution-page content, ported from the original hand-coded
@@ -15,7 +14,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "alone",
     sub:
       "Cocoma's creative + marketing + ops + revenue team becomes your back office. So you focus on what only you can do — being on camera.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -79,7 +78,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         deliverables: [
           "Keyword + topic research",
           "Title / description optimisation",
-          "Paid promotion (YouTube ads, social)",
+          "Paid media (YouTube ads, social)",
           "Cross-platform repurposing",
         ],
       },
@@ -126,15 +125,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     heading: "Real ops, not deck slides.",
     items: [
       {
-        name: "Anil Mahato",
-        niche: "Founder vlog · Entertainment",
-        image: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-        handle: "@AnilMahato",
-        url: "https://www.youtube.com/@AnilMahato",
-        bullet:
-          "Built end-to-end with Cocoma's stack — from zero to a daily-shipping channel.",
-      },
-      {
         name: "Prime Video India",
         niche: "OTT platform · Entertainment",
         image: "/Images/solutions/prime-video-india.jpeg",
@@ -157,13 +147,13 @@ export const SOLUTIONS_DATA: Record<string, any> = {
 
   processSection: {
     eyebrow: "How it works",
-    heading: "From a 15-min call to a running back office.",
+    heading: "From the first conversation to a running operation.",
     items: [
       {
         step: "01",
         title: "Audit",
         body:
-          "7-day audit of your channel — content, analytics, competitive landscape, monetisation gaps. Free. We send the deck regardless of whether we work together.",
+          "A review of your channel — content, analytics, competitive landscape, monetisation gaps.",
       },
       {
         step: "02",
@@ -186,13 +176,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    quote:
-      "I tried hiring editors twice and burnt out twice. With Cocoma the back office just runs — I get to be the creator again.",
-    author: "Anil Mahato",
-    meta: "Founder, Cocoma Digital · Creator @AnilMahato",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -206,7 +189,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "Do you work with my niche?",
         a:
-          "We're heaviest in entertainment / film / web-series / music adjacent. But the four-piece stack is niche-agnostic — we've shipped finance, tech, lifestyle, automotive, EdTech. The 7-day audit will tell you (and us) honestly whether we're the right fit.",
+          "We're heaviest in entertainment / film / web-series / music adjacent. But the four-piece stack is niche-agnostic — we've shipped finance, tech, lifestyle, automotive, EdTech. The working session will tell you (and us) honestly whether we're the right fit.",
       },
       {
         q: "Can you handle multiple channels?",
@@ -216,7 +199,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "What does it cost?",
         a:
-          "Retainer-based, scoped to which pillars you pick. The audit is free and ends with a quote you can take or leave. No long lock-ins.",
+          "Monthly engagements from ₹2.5 lakh in India and USD 3,000 elsewhere, scoped to which pillars you pick. After the working session we send one written scope and price.",
       },
       {
         q: "I have an existing team. Do I have to replace them?",
@@ -227,15 +210,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaUsers",
     heading:
       "Want to see what your channel could look like with the back office on?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your goals + the audit plan + send you the deck regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your goals + the first 90 days and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "ott-platforms": {
@@ -245,7 +227,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "in motion",
     sub:
       "Cocoma is the back office for show launches, episode promos, channel ops and audience growth — running across your entire slate, week after week.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -265,7 +247,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
           "Audience attention is fragmented across platforms. Discovery is harder than ever.",
         pillar: "Marketing",
         fix:
-          "Targeted social + paid promo plans per show, briefed against viewing data and competitor moves. Not a one-size template.",
+          "Targeted social + paid media plans per show, briefed against viewing data and competitor moves. Not a one-size template.",
       },
       {
         pain:
@@ -308,10 +290,10 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         iconKey: "FaSearch",
         title: "Marketing",
         blurb:
-          "Show-launch campaigns, audience targeting, paid promo, partnerships.",
+          "Show-launch campaigns, audience targeting, paid media, partnerships.",
         deliverables: [
           "Per-show launch playbooks",
-          "Paid promotion (YouTube, Meta, X, TikTok)",
+          "Paid media (YouTube, Meta, X, TikTok)",
           "Cross-platform repurposing strategy",
           "Influencer + creator partnership ops",
         ],
@@ -398,13 +380,13 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         step: "01",
         title: "Slate audit",
         body:
-          "7-day audit of your launch calendar, current channel assets, social presence, and competitor activity. We map the gaps and the high-leverage wins.",
+          "A review of your launch calendar, current channel assets, social presence, and competitor activity. We map the gaps and the high-leverage wins.",
       },
       {
         step: "02",
         title: "Launch plan",
         body:
-          "Per-show or per-slate playbook — assets list, paid promo budgets, partner integrations, calendar by week. Aligned to your slate's release dates.",
+          "Per-show or per-slate playbook — assets list, paid media budgets, partner integrations, calendar by week. Aligned to your slate's release dates.",
       },
       {
         step: "03",
@@ -421,16 +403,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in copy until a real quote from one of the OTT
-    // partners is captured. Voiced as a streaming partner
-    // lead so it stays plausible during admin review.
-    quote:
-      "When our slate doubled, Cocoma's pods scaled overnight. We didn't have to hire — we just got more output, on the same launch rhythm.",
-    author: "Streaming Partner Lead",
-    meta: "Top-3 Indian OTT platform · 200+ titles supported",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -454,7 +426,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "What's a typical engagement size?",
         a:
-          "Retainer-based, scoped to slate volume. Smaller engagements run 5–10 titles per quarter; larger cover entire slate ops year-round. We'll quote against your launch calendar after the audit.",
+          "Retainer-based, scoped to slate volume. Smaller engagements run 5–10 titles per quarter; larger cover entire slate ops year-round. We'll quote against your launch calendar after the working session.",
       },
       {
         q: "Do you handle subtitling / dubbing / regional localisation?",
@@ -465,15 +437,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaBuilding",
     heading:
       "Want to see what your slate could look like with Cocoma's pods on?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your slate + the audit plan + send you the deck regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your slate + the first 90 days and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "music-labels": {
@@ -483,7 +454,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "the rest",
     sub:
       "Cocoma's creative + marketing + ops team is your release engine. Single, EP, album — visuals, social cuts, paid push, and the back-catalogue moments that compound. Every drop, same playbook.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -546,10 +517,10 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         iconKey: "FaSearch",
         title: "Marketing",
         blurb:
-          "Per-release campaigns, paid promo, sound-led trends, creator outreach.",
+          "Per-release campaigns, paid media, sound-led trends, creator outreach.",
         deliverables: [
           "Release-week playbooks per track",
-          "Paid promotion (YouTube, Meta, Reels, Shorts)",
+          "Paid media (YouTube, Meta, Reels, Shorts)",
           "Hook-led short-form trend seeding",
           "Influencer + creator partnership ops",
         ],
@@ -639,13 +610,13 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         step: "01",
         title: "Catalogue audit",
         body:
-          "7-day audit of your release calendar, current artist channels, social presence, back-catalogue performance. We map the gaps and the high-leverage wins.",
+          "A review of your release calendar, current artist channels, social presence, back-catalogue performance. We map the gaps and the high-leverage wins.",
       },
       {
         step: "02",
         title: "Release plan",
         body:
-          "Per-drop or per-EP campaign playbook — assets list, paid promo budgets, hook strategy, calendar by week. Aligned to your release rhythm.",
+          "Per-drop or per-EP campaign playbook — assets list, paid media budgets, hook strategy, calendar by week. Aligned to your release rhythm.",
       },
       {
         step: "03",
@@ -662,16 +633,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as a label content lead until a real
-    // quote is captured. Voice it in a way that won't feel
-    // obviously fake during admin review.
-    quote:
-      "Every Friday we drop new music. Cocoma is the reason every drop has a launch behind it now, not just an upload.",
-    author: "Music Marketing Lead",
-    meta: "Indian music label · 200+ tracks promoted with Cocoma",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -690,7 +651,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "What about regional language releases (Hindi, Tamil, Telugu, Punjabi, Bengali)?",
         a:
-          "Hindi is the heaviest language we ship, but we're set up for Tamil, Telugu, Punjabi, Bengali, Marathi end-to-end — both creative and paid promo. International language releases too on request.",
+          "Hindi is the heaviest language we ship, but we're set up for Tamil, Telugu, Punjabi, Bengali, Marathi end-to-end — both creative and paid media. International language releases too on request.",
       },
       {
         q: "Do you handle short-form (Reels, Shorts, TikTok) hook strategy?",
@@ -706,15 +667,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaMusic",
     heading:
       "Want to see what your release calendar could look like with Cocoma's pods on?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your roster + release calendar + send you the audit deck regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your roster + release calendar and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "film-studios": {
@@ -724,7 +684,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "Friday",
     sub:
       "Cocoma's pods run film campaigns the way Bollywood needs them — trailer cuts, song promos, character spots, multi-language kits, social hooks. From first poster to OTT release, every asset built for the box-office moment. 100+ films shipped and counting.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -787,9 +747,9 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         iconKey: "FaSearch",
         title: "Marketing",
         blurb:
-          "Release-window paid promo, multi-language coordination, premiere amplification.",
+          "Release-window paid media, multi-language coordination, premiere amplification.",
         deliverables: [
-          "Release-window paid promo (YouTube, Meta, TikTok)",
+          "Release-window paid media (YouTube, Meta, TikTok)",
           "Multi-language campaign kits (Hindi + Tamil + Telugu + Marathi + dubs)",
           "Partner / brand-collab integrations + creator outreach",
           "Premiere-event amplification + opening-Friday social ops",
@@ -903,16 +863,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as a pan-India studio marketing director.
-    // Avoids dollar figures (would feel inflated). Replace with
-    // a real partner-studio quote when one is captured.
-    quote:
-      "Our trailer launch hit 50M views in 48 hours. Cocoma cut it, shipped it across 4 languages, and ran the paid promo in parallel — the campaign moved with us, not behind us.",
-    author: "Marketing Director",
-    meta: "Pan-India studio · 12 theatrical releases shipped with Cocoma",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -952,15 +902,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaFilm",
     heading:
       "Want to see what your next theatrical release could look like with Cocoma's pods on?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your release calendar + the asset mix you'd need + send you the playbook regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your release calendar + the asset mix you'd need and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "podcasters": {
@@ -969,8 +918,8 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     headline: "Make every episode go further.",
     highlight: "go further",
     sub:
-      "Cocoma's pods turn each recorded episode into a multi-format launch — full video edits, 5-15 vertical clips, thumbnails, sponsor cuts, paid promo. Audio is half the show now; we make sure the other half ships.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+      "Cocoma's pods turn each recorded episode into a multi-format launch — full video edits, 5-15 vertical clips, thumbnails, sponsor cuts, paid media. Audio is half the show now; we make sure the other half ships.",
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -1033,12 +982,12 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         iconKey: "FaSearch",
         title: "Marketing",
         blurb:
-          "YouTube + social distribution, guest cross-promo, paid promo for breakouts.",
+          "YouTube + social distribution, guest cross-promo, paid media for breakouts.",
         deliverables: [
           "Per-episode YouTube + social launch plan",
           "Guest cross-promotion clip packs (their feed + yours)",
           "Episode hook + title + description SEO research",
-          "Paid promotion for breakout / evergreen episodes",
+          "Paid media for breakout / evergreen episodes",
         ],
       },
       {
@@ -1085,16 +1034,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     eyebrow: "Longform creator work we already ship",
     heading: "Real ops, not deck slides.",
     items: [
-      {
-        name: "Anil Mahato",
-        niche: "Creator · Longform vlog content",
-        image:
-          s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-        handle: "@AnilMahato",
-        url: "https://www.youtube.com/@AnilMahato",
-        bullet:
-          "Built end-to-end with Cocoma's stack — daily-shipping channel, longform-friendly format that maps directly onto podcast workflows.",
-      },
       {
         name: "Shenaz Treasury",
         niche: "Creator · Lifestyle + interview-style",
@@ -1147,15 +1086,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as a mid-size podcast host. Replace
-    // with a real partner-podcast quote when one is captured.
-    quote:
-      "My audio numbers were stuck. Cocoma turned every episode into a launch — clips on Reels, full video on YouTube, thumbnails that actually pulled. Subs doubled in 6 months and the sponsor pipeline followed.",
-    author: "Podcast Host",
-    meta: "Mid-size Indian podcast · 100+ episodes shipped with Cocoma",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -1179,7 +1109,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "Do you work with audio-only podcasts or do we need to add video?",
         a:
-          "Both. Audio-only podcasts get audio visualisers + motion timestamps for YouTube discovery. But video-first podcasts grow faster now — if you're considering the switch, the discovery audit will quantify the lift you'd see before you commit.",
+          "Both. Audio-only podcasts get audio visualisers + motion timestamps for YouTube discovery. But video-first podcasts grow faster now — if you're considering the switch, we'll talk the switch through in the working session.",
       },
       {
         q: "How does sponsorship deck creation work?",
@@ -1195,15 +1125,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaMicrophone",
     heading:
       "Want to see what your episode launches could look like with Cocoma's pods on?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your show + the per-episode launch plan + send you the audit deck regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your show + the per-episode launch plan and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "d2c-brands": {
@@ -1213,7 +1142,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "Convert more",
     sub:
       "Cocoma's pods give your performance team 50+ A/B-ready ad creatives per campaign. Full-funnel content from hook to checkout, briefed against your conversion data — so every test moves ROAS, not just CTR.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -1276,7 +1205,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         iconKey: "FaSearch",
         title: "Marketing",
         blurb:
-          "Full-funnel creative briefs, performance-driven variants, paid promo support.",
+          "Full-funnel creative briefs, performance-driven variants, paid media support.",
         deliverables: [
           "TOFU / MOFU / BOFU creative per campaign",
           "50+ A/B variants per ad set, ready to test",
@@ -1389,15 +1318,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as a D2C growth lead. Replace with a
-    // real quote when one is captured from a D2C partner brand.
-    quote:
-      "Our ROAS plateau finally broke when Cocoma's pods replaced our agency. They ship the variant volume our performance team actually needs to test — and the winners scale.",
-    author: "Growth Lead",
-    meta: "Mid-stage D2C brand · 50+ ad variants per quarter with Cocoma",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -1431,21 +1351,20 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "Pricing — per-asset or retainer?",
         a:
-          "Retainer-based, scoped to monthly variant volume. Smaller engagements run 50–100 variants/month; larger run 200+. We'll quote against your campaign cadence after a discovery call.",
+          "Retainer-based, scoped to monthly variant volume. Smaller engagements run 50–100 variants/month; larger run 200+. We'll quote against your campaign cadence after the working session.",
       },
     ],
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaShoppingBag",
     heading:
       "Want to see what your ad performance could look like with 50+ variants per campaign?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your acquisition stack + the variant volume you'd need + send you the rate-card regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your acquisition stack + the variant volume you'd need and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "real-estate-brands": {
@@ -1455,7 +1374,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "the lifestyle",
     sub:
       "Cocoma's production team ships film-grade real estate content — cinematic walkthroughs, aerial reels, area stories, broker enablement assets. Same quality bar as the entertainment IPs your buyers watch on prime-time.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -1521,7 +1440,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
           "Per-city campaigns, geo-targeted leadgen, broker referral creative.",
         deliverables: [
           "Per-city, per-project creative kits",
-          "Geo-targeted paid promo (Meta, YouTube, native)",
+          "Geo-targeted paid media (Meta, YouTube, native)",
           "A/B variant testing on hero hooks",
           "Broker referral campaigns + co-branded assets",
         ],
@@ -1631,16 +1550,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as a marketing director at a premium
-    // residential developer. Replace with a real RE partner
-    // quote when one is captured.
-    quote:
-      "Our pre-launch reels did 10× the engagement of our previous agency's. Cocoma made our project look like a film — buyers were booking site visits before we'd even gone live with paid.",
-    author: "Marketing Director",
-    meta: "Premium residential developer · 5 cities · 200+ assets shipped",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -1680,15 +1589,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaHome",
     heading:
       "Want to see what your next project launch could look like with film-grade content?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your project pipeline + the asset mix you'd need + send you the rate-card regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your project pipeline + the asset mix you'd need and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "educational-hubs": {
@@ -1698,7 +1606,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "students",
     sub:
       "Cocoma's pods build the content engine higher-ed and EdTech brands need — admissions reels, campus stories, faculty + alumni journeys, course previews, performance creative for student acquisition. Same playbook, scale-tuned to your enrolment cycle.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -1874,17 +1782,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as a tier-1 university marketing
-    // director (closest to the largest target segment for
-    // this page). Replace when a real higher-ed / EdTech
-    // partner quote is captured.
-    quote:
-      "When admissions season hits, we used to scramble — three different agencies, fragmented assets, panic edits at midnight. Cocoma built our content engine — peak-cycle volume without the panic, brand-grade quality every time.",
-    author: "Director of Marketing",
-    meta: "Tier-1 Indian university · 200+ admissions assets shipped per cycle",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -1924,15 +1821,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaGraduationCap",
     heading:
       "Want to see what your next admissions cycle could look like with Cocoma's pods on?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your content needs + the admissions cycle calendar + send you the playbook regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your content needs + the admissions cycle calendar and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "international-agencies": {
@@ -1942,7 +1838,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     highlight: "delivered work",
     sub:
       "Cocoma's India-based production team handles your overflow — edits, motion, thumbnails, design, social cuts — overnight in IST. White-label, retained team, 50,000+ assets shipped across entertainment, OTT and brand campaigns.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -2118,17 +2014,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as a Western agency production director.
-    // Avoids specific dollar figures (would feel inflated /
-    // unverifiable). Replace with a real quote when one is
-    // captured from a partner agency.
-    quote:
-      "We were maxing out editor hires and still missing deadlines. Cocoma's pods gave us 3× the output, and the time-zone was a bonus we didn't see coming — wins land in the inbox before our team's even at their desks.",
-    author: "Production Director",
-    meta: "Mid-size US creative agency · retained Cocoma pod since 2023",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -2147,7 +2032,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "What's a typical engagement size?",
         a:
-          "Retainer-based. Smallest: ~40 hrs/week, covering one mid-size client of yours. Largest: 5+ parallel pods covering full agency production overflow. We'll quote against your retainer book after a discovery call.",
+          "Retainer-based. Smallest: ~40 hrs/week, covering one mid-size client of yours. Largest: 5+ parallel pods covering full agency production overflow. We'll quote against your retainer book after the working session.",
       },
       {
         q: "Can you handle multiple agency clients in parallel?",
@@ -2168,15 +2053,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaGlobe",
     heading:
       "Want to see what your retainer book could look like with overnight pods on?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your retainer scope + the pod mix you'd need + send you the rate-card regardless.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your retainer scope + the pod mix you'd need and come back with a written scope and price.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
   "independent-artists": {
@@ -2185,8 +2069,8 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     headline: "Skip the label. Keep the launch.",
     highlight: "Skip the label",
     sub:
-      "Cocoma's pods become your label-equivalent team — music videos, lyric videos, social cuts, paid promo, channel ops, sponsorship outreach. Every drop gets the launch a major release would, without the label deal.",
-    primaryCta: { label: "Book a 15-min call", to: "/ScheduleMeeting" },
+      "Cocoma's pods become your label-equivalent team — music videos, lyric videos, social cuts, paid media, channel ops, sponsorship outreach. Every drop gets the launch a major release would, without the label deal.",
+    primaryCta: { label: "Apply to work with us", to: "/contact-us" },
     secondaryCta: { label: "See the playbook", to: "#prospect-house" },
   },
 
@@ -2206,7 +2090,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
           "Spotify takes 100K monthly listeners to pay rent. Real growth happens on YouTube + Reels + TikTok — and you don't have time to build that engine.",
         pillar: "Marketing",
         fix:
-          "Per-track YouTube + social launch campaigns. Hook-led short-form trends, paid promo on breakout tracks, audience targeting briefed against your streaming data.",
+          "Per-track YouTube + social launch campaigns. Hook-led short-form trends, paid media on breakout tracks, audience targeting briefed against your streaming data.",
       },
       {
         pain:
@@ -2249,10 +2133,10 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         iconKey: "FaSearch",
         title: "Marketing",
         blurb:
-          "Per-track campaigns, paid promo, hook-led trends, fan community.",
+          "Per-track campaigns, paid media, hook-led trends, fan community.",
         deliverables: [
           "Release-week playbooks per track",
-          "Paid promotion (YouTube, Meta, Reels, Shorts)",
+          "Paid media (YouTube, Meta, Reels, Shorts)",
           "Hook-led short-form trend seeding",
           "Fan-community + creator-collab outreach",
         ],
@@ -2309,7 +2193,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         url:
           "https://www.youtube.com/results?search_query=Bandish+Bandits+Songs",
         bullet:
-          "Multi-track campaign — lyric videos + BTS + paid promo + sound-led trend seeding. Production quality solo artists rarely access.",
+          "Multi-track campaign — lyric videos + BTS + paid media + sound-led trend seeding. Production quality solo artists rarely access.",
       },
       {
         name: "Farzi",
@@ -2347,7 +2231,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
         step: "02",
         title: "Release plan",
         body:
-          "Per-track playbook — music video format, lyric video, vertical cuts, paid promo budget, social calendar. Aligned to your release rhythm.",
+          "Per-track playbook — music video format, lyric video, vertical cuts, paid media budget, social calendar. Aligned to your release rhythm.",
       },
       {
         step: "03",
@@ -2364,15 +2248,6 @@ export const SOLUTIONS_DATA: Record<string, any> = {
     ],
   },
 
-  testimonial: {
-    // Stand-in voiced as an indie artist. Replace with a real
-    // partner-artist quote when one is captured.
-    quote:
-      "I was self-funding everything — music videos took months, social was random, brand deals were nonexistent. Cocoma became my label without the deal — every track now ships like a launch and the revenue streams compounded.",
-    author: "Independent Artist",
-    meta: "Indie singer-songwriter · 20+ tracks shipped with Cocoma",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
-  },
 
   faqSection: {
     eyebrow: "Common questions",
@@ -2386,7 +2261,7 @@ export const SOLUTIONS_DATA: Record<string, any> = {
       {
         q: "How does pricing work without a label budget?",
         a:
-          "Tiered retainer based on release cadence + scope. Smallest engagement: monthly retainer covering 1-2 tracks/month with core deliverables (music video, vertical cuts, channel ops). Larger: full-stack ops covering all four pillars across the year. We'll quote against your release calendar after a discovery call.",
+          "Tiered retainer based on release cadence + scope. Smallest engagement: monthly retainer covering 1-2 tracks/month with core deliverables (music video, vertical cuts, channel ops). Larger: full-stack ops covering all four pillars across the year. We'll quote against your release calendar after the working session.",
       },
       {
         q: "Will I keep ownership of all my content?",
@@ -2412,15 +2287,14 @@ export const SOLUTIONS_DATA: Record<string, any> = {
   },
 
   closer: {
-    eyebrow: "One call, no obligation",
+    eyebrow: "Next step",
     eyebrowIconKey: "FaMusic",
     heading:
       "Want to see what your next track drop could look like with a label-equivalent team behind it?",
     pitch:
-      "Anil takes the call personally. 15 minutes. We talk through your release calendar + the launch plan you'd need + send you the audit deck regardless. No label deal, no IP claims, ever.",
-    ctaLabel: "Book a 15-min call",
-    ctaTo: "/ScheduleMeeting",
-    avatar: s3Url("book-a-call/1761986854_anil%20mahato%20marketing.png"),
+      "A 30-minute working session with the producer who would lead it. We talk through your release calendar + the launch plan you'd need and come back with a written scope and price. No label deal, no IP claims, ever.",
+    ctaLabel: "Apply to work with us",
+    ctaTo: "/contact-us",
   },
 },
 };

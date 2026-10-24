@@ -163,8 +163,8 @@ export const marketingCampaignsData = {
   closingCta: {
     heading: "Let's audit your upcoming launch.",
     description:
-      "15-minute discovery call with Anil + a senior strategist. We'll review your launch slate and show you what end-to-end campaign coordination delivers when every lever moves together.",
-    buttonText: "Book a discovery call",
-    buttonTo: "/ScheduleMeeting",
+      "A 30-minute working session with a senior producer. We'll review your launch slate and show you what end-to-end campaign coordination delivers when every lever moves together.",
+    buttonText: "Apply to work with us",
+    buttonTo: "/contact-us",
   },
 };

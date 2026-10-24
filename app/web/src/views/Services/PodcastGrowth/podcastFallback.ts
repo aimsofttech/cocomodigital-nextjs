@@ -35,7 +35,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
        that is right on its own, not to dodge a sibling. */
     title: "Podcast Video Editing & Marketing Services",
     sub: "One recording becomes a week of content — produced, packaged and published as one system.",
-    priceBadge: "Engagements start at $2,500/month",
+    priceBadge: "Engagements from USD 5,000 a month",
     priceBadgeIcon: "dollar",
     hoursBadge: "US, Canada & UK hours overlap",
     hoursBadgeIcon: "clock",
@@ -82,7 +82,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     eyebrow: "Straight answer on price",
     heading: "Priced like a product, not a project",
     prefix: "From",
-    floor: "$2,500",
+    floor: "$5,000",
     unit: "/month",
     lead: "You’re not buying editing hours. You’re buying a production line with a named producer on it, a documented process behind it, and an SLA you can build a publishing calendar around. That’s what it costs to run properly, and it’s why the number is on this page instead of behind a discovery call.",
     includedTitle: "What every engagement includes",
@@ -103,13 +103,13 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       "Back-catalog re-cutting and re-packaging",
       "Distribution and language expansion into new markets",
     ],
-    note: "Quoted and invoiced in USD; GBP and CAD on request. The audit comes back with scope and price together — one document, no gauntlet.",
+    note: "Quoted and invoiced in USD; GBP and CAD on request. The review comes back with scope and price together, in one document.",
   },
 
   month: {
     eyebrow: "Output",
     title: "What a full month looks like",
-    lead: "A weekly show running the complete system. This is deliverable volume at a full engagement. It isn’t a forecast of results, and it isn’t the entry tier. Your audit comes back with the scope that fits your cadence.",
+    lead: "A weekly show running the complete system. This is deliverable volume at a full engagement. It isn’t a forecast of results, and it isn’t the entry tier. Your review comes back with the scope that fits your cadence.",
     tableNote: "Monthly deliverables for a weekly podcast at a full engagement",
     columns: { deliverable: "Deliverable", volume: "Volume", detail: "Detail" },
   },
@@ -117,15 +117,15 @@ export const PODCAST_FALLBACK: PodcastPageData = {
   notFor: {
     eyebrow: "Straight talk",
     heading: "When we’re the wrong call",
-    lead: "We’d rather lose the inquiry than take an engagement that can’t work. If any of these describe you, a freelance editor will serve you better and cost you far less.",
+    lead: "We’d rather lose the inquiry than take an engagement that can’t work. If any of these describe you, we will say so.",
     items: [
-      "You’re looking for the cheapest per-episode rate. We’re not competitive on rate and don’t try to be — you’re buying an operation, not an hour of editing.",
+      "You’re looking for the lowest per-episode rate. We’re not competitive on rate and don’t try to be — you’re buying an operation, not an hour of editing.",
       "You publish occasionally, when there’s time. Systems earn their cost through cadence; without one there’s nothing for the machinery to compound.",
       "You want someone who takes instructions and stops there. Our producers push back on packaging and structure, and if that sounds like friction, it will be.",
       "You need work turned around same-day, unpredictably. We work to an SLA we agree up front, and we’re not an always-on queue.",
     ],
     footnote:
-      "Still reading and none of these fit? Then the audit will probably be worth your time.",
+      "Still reading and none of these fit? Then the review will probably be worth your time.",
     /* Empty on purpose. The shipped copy is what renders when the API is
        unreachable, and this page had no video in this band before — inventing
        a poster path here would draw a broken image on exactly the occasion
@@ -140,7 +140,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     portrait: "/Images/podcast/anil-mahato-founder-cocoma.jpg",
     portraitAlt: "Anil Mahato, founder of Cocoma Digital.",
     lines: [
-      "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio has produced 50,000+ videos and built 40M+ subscribers across the channels it runs.",
+      "I started Cocoma in Mumbai in 2019 after a pitch meeting I was only supposed to sit in on. Seven years later the studio has produced 50,000+ videos and built 35M+ subscribers across the channels it runs.",
       "Podcasts are where that same machinery is now most useful outside India, because a show isn’t an editing job, it’s an operation, and operations are the thing we have actually built.",
       "Your show won’t be run by me. It will be run by a producer whose name you’ll know, against a documented process, to an SLA you agreed. That’s deliberate: a studio that only works when the founder is in the room isn’t a studio, it’s a bottleneck.",
     ],
@@ -161,7 +161,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
 
   process: {
     eyebrow: "How engagements run",
-    title: "From audit to operating system",
+    title: "From review to operating system",
   },
 
   proof: {
@@ -169,7 +169,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     title: "The capability, and what it isn’t",
     paragraphs: [
       "We don’t publish podcast case studies yet. Saying otherwise would be the easiest sentence on this page to write and the fastest one to get caught on.",
-      "What we can show you is the work the studio does publish, and we’ll be precise about how it transfers. The figures at the top of this page — 12B+ organic views, 50,000+ videos, 40M+ subscribers — are channel and catalog numbers built across seven years. They are not podcast metrics and we will not dress them up as podcast metrics. What carries across is the operating capability behind them: high-volume editing, packaging tested against click-through, multi-platform publishing, and localization across 20+ languages.",
+      "What we can show you is the work the studio does publish, and we’ll be precise about how it transfers. The figures at the top of this page — 20B+ organic views, 50,000+ videos, 35M+ subscribers — are channel and catalog numbers built across seven years. They are not podcast metrics and we will not dress them up as podcast metrics. What carries across is the operating capability behind them: high-volume editing, packaging tested against click-through, multi-platform publishing, and localization across 20+ languages.",
       "On a call we’ll walk you through that work and the exact process we’d run on your show.",
     ],
   },
@@ -177,12 +177,12 @@ export const PODCAST_FALLBACK: PodcastPageData = {
   faq: { eyebrow: "Questions", title: "Frequently asked questions" },
 
   final: {
-    title: "Get a free podcast audit",
+    title: "Request a show review",
     lead: "Send the show link. We’ll review packaging, retention, publishing cadence and back catalog, then come back with what we’d change first, and what it would cost.",
     points: [
-      "Findings are yours whether or not we work together",
+      "What we would change first, and in what order",
       "Scope and price come back together, in USD",
-      "No obligation and no discovery-call gauntlet",
+      "A written reply within three working days",
     ],
   },
 
@@ -193,16 +193,16 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     emailPlaceholder: "you@company.com",
     showLabel: "Show link",
     showPlaceholder: "https://youtube.com/@yourshow",
-    submitLabel: "Get a free podcast audit",
+    submitLabel: "Request a show review",
     submittingLabel: "Sending…",
-    note: "No obligation. You get the findings either way.",
+    note: "We review every show and reply within three working days.",
     doneTitle: "Got it.",
     doneBody:
-      "We’ll review the show and come back with the audit findings. If it’s urgent, email",
+      "We’ll review the show and come back with our findings. If it’s urgent, email",
     contactEmail: "anil@cocomadigital.com",
     errorFallback:
       "Something went wrong. Try again, or email anil@cocomadigital.com directly.",
-    leadTag: "Podcast audit request",
+    leadTag: "Podcast show review request",
   },
 
   seo: {
@@ -272,16 +272,16 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     title: "Podcast Video Editing & Marketing Services",
     description:
       "One recording becomes a multi-platform growth engine — episodes, clips, packaging, publishing and analytics, run as one system.",
-    badgeOne: "From $2,500/month",
+    badgeOne: "From USD 5,000 a month",
     badgeTwo: "US · Canada · UK hours",
   },
 
   displayOrder: 1,
 
   trustStats: [
-    { value: "12B+", label: "Organic views driven", description: "" },
+    { value: "20B+", label: "Organic views driven", description: "" },
     { value: "50,000+", label: "Videos produced", description: "" },
-    { value: "40M+", label: "Subscribers built", description: "" },
+    { value: "35M+", label: "Subscribers built", description: "" },
     { value: "7 yrs", label: "Studio operating", description: "" },
   ],
 
@@ -457,7 +457,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       icon: "network",
       step: "",
       title: "Networks & media companies",
-      body: "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest: the studio’s channel and catalog operations were built at exactly this scale — 50,000+ videos produced and 12B+ organic views driven.",
+      body: "Multi-show operations, large back catalogs and localization across markets. This is the work Cocoma has done longest: the studio’s channel and catalog operations were built at exactly this scale — 50,000+ videos produced and 20B+ organic views driven.",
       meta: "Multiple shows, shared production standard",
       points: [],
     },
@@ -502,9 +502,9 @@ export const PODCAST_FALLBACK: PodcastPageData = {
       imageAlt: "",
       icon: "",
       step: "01",
-      title: "Free podcast audit",
-      meta: "No cost",
-      body: "We review the show as it stands — packaging, retention, publishing cadence, back catalog and where attention is being lost. You get the findings whether or not you work with us, along with scope and pricing for the shape that fits.",
+      title: "Show review",
+      meta: "Step one",
+      body: "We review the show as it stands — packaging, retention, publishing cadence, back catalog and where attention is being lost. The review comes back with scope and pricing for the shape that fits.",
       points: [],
     },
     {
@@ -713,7 +713,7 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     {
       question: "What do podcast editing and growth services cost?",
       answer:
-        "Engagements start at $2,500 per month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately. Below $2,500 a month a freelance editor will serve you better than a production system, and we’d rather say so than sell you something that doesn’t fit. The free audit comes back with the scope and the number together.",
+        "Engagements start at USD 5,000 a month, quoted and invoiced in USD (GBP and CAD on request). Where a show lands above that depends on episodes per month, how many camera angles, clip volume per episode, and whether publishing, back-catalog work and localization are included. We publish the floor deliberately: what we sell is an operation, and it has a fixed cost to stand up. The show review comes back with the scope and the number together.",
     },
     {
       question: "Why is there a minimum at all?",
@@ -759,33 +759,33 @@ export const PODCAST_FALLBACK: PodcastPageData = {
     {
       question: "What happens to our back catalog?",
       answer:
-        "It’s usually the fastest win available. Existing episodes already contain clip-worthy moments, and old packaging can be re-tested without recording anything new. The audit flags which back-catalog episodes are worth re-cutting or re-packaging first.",
+        "It’s usually the fastest win available. Existing episodes already contain clip-worthy moments, and old packaging can be re-tested without recording anything new. The review flags which back-catalog episodes are worth re-cutting or re-packaging first.",
     },
     {
       question: "How do we start?",
       answer:
-        "Send the show link through the audit form below. We review it and come back with findings, a recommended shape for the engine, and pricing for the scope that fits. No obligation attached to the audit.",
+        "Send the show link through the review form below. We review it and come back with findings, a recommended shape for the engine, and pricing for the scope that fits.",
     },
   ],
 
   ctas: {
     hero: [
       {
-        label: "Get a free podcast audit",
+        label: "Request a show review",
         href: "#podcast-audit",
         variant: "primary",
       },
     ],
     pricing: [
       {
-        label: "Get a free podcast audit",
+        label: "Request a show review",
         href: "#podcast-audit",
         variant: "primary",
       },
     ],
     founder: [
       {
-        label: "Get a free podcast audit",
+        label: "Request a show review",
         href: "#podcast-audit",
         variant: "primary",
       },

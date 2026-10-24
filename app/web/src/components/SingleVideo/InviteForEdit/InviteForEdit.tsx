@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "@/src/lib/navigation";
 import { FaArrowRight } from "react-icons/fa";
 import { s3Url } from "@/src/lib/s3";
@@ -24,28 +24,9 @@ const FOUNDER_PORTRAIT_URL =
  * treatment.
  */
 
-/**
- * Manual update each month — replace the number with the actual
- * count of videos delivered last month. Update on the 1st.
- *
- * TODO (Anshu): expose this as a `videos_shipped_last_month`
- * field on a `site_stats` singleton via `/common-api`. Frontend
- * swap is one line: replace this constant with a useSelector /
- * fetch, keep the rest of the rendering identical.
- */
-const LAST_MONTH_VIDEO_COUNT = 700;
-
-/** Returns "April 2026"-style label for the previous calendar
- *  month, with correct year rollback in January. */
-function lastMonthLabel(now = new Date()) {
-  const ref = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const monthName = ref.toLocaleString("en-US", { month: "long" });
-  return `${monthName} ${ref.getFullYear()}`;
-}
 
  
 export default function InviteForService({ authorId }) {
-  const monthYear = useMemo(() => lastMonthLabel(), []);
   const sentinelRef = useRef(null);
 
   useEffect(() => {
@@ -103,16 +84,11 @@ export default function InviteForService({ authorId }) {
               />
             </span>
             <p className="invite-banner-copy">
-              Like this? In{" "}
-              <strong className="invite-banner-month">{monthYear}</strong>{" "}
-              alone, we shipped{" "}
-              <span className="invite-banner-stat">
-                {LAST_MONTH_VIDEO_COUNT}+
-              </span>{" "}
-              videos across films, web series, music and brand campaigns.
+              Like this? Every engagement is scoped in writing: a fixed count
+              of videos from a named producer and team.
             </p>
-            <Link to="/ScheduleMeeting" className="invite-banner-cta">
-              <span>Book a 15-min call</span>
+            <Link to="/contact-us" className="invite-banner-cta">
+              <span>Apply to work with us</span>
               <FaArrowRight aria-hidden="true" />
             </Link>
           </div>
