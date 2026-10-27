@@ -193,8 +193,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
                 <h3>The call</h3>
                 <p>
                   15 minutes on Google Meet. We talk about your release. After
-                  the call, a free 7-day mini-strategy lands in your inbox —
-                  no obligation.
+                  the call, a written scope and proposal follow within five working days.
                 </p>
               </div>
             </li>
@@ -326,7 +325,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
         </section>
 
         <p className="booking-confirmed-fineprint">
-          Need to reschedule? Email Anil directly — he replies within a day.
+          Need to reschedule? Reply to your confirmation email.
         </p>
       </div>
     </main>

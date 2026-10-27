@@ -31,7 +31,7 @@ export async function GET() {
     .join("\n");
 
   const importantPages = staticSeoPaths
-    .filter((path) => !["/login", "/cart", "/thank-you", "/booking-confirmed"].includes(path))
+    .filter((path) => !["/login", "/cart", "/solutions", "/thank-you", "/booking-confirmed"].includes(path))
     .map((path) => `- ${SITE_URL}${path}`)
     .join("\n");
 

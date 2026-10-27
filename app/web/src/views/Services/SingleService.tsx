@@ -10,14 +10,11 @@ const titleToSlug = (title: string): string =>
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-import { Link } from "@/src/lib/navigation";
-import { useCartCount } from "@/src/lib/cart";
 import SingleServiceSlider from "../../components/Services/SingleServiceSlider/SingleServiceSlider";
 import VideoEditingServices from "../../components/Services/VideoEditingServices/VideoEditingServices";
-import { FaHandshake, FaUsers, FaArrowRight } from "react-icons/fa";
+import { FaHandshake, FaUsers } from "react-icons/fa";
 import Portfolio from "../../components/Services/ServicePorfolio/ServicePortfolio";
 import RecentlyWorkedWith from "../../components/Services/RecentWork/RecentWork";
-import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 
 // Trust + closing-CTA components reused from the SingleVideo page
 // so the credibility crescendo lands the same on every conversion-
@@ -94,8 +91,6 @@ export default function SingleService({
   const [service, setService] = useState(initialService);
   const [otherServices, setOtherServices] = useState(initialOtherServices);
   const [isError, setIsError] = useState("");
-  const cartItemCount = useCartCount();
-  const isMobile = useMediaQuery("(max-width: 500px)");
 
 
   useEffect(() => {
@@ -217,18 +212,6 @@ export default function SingleService({
     return () => { cancelled = true; };
   }, [slug, initialService, initialOtherServices]);
 
-  // Body class flag → tells the FloatingCallChip CSS to bump its
-  // bottom offset upward when the mobile cart bar is rendered, so
-  // the chip stacks ABOVE the bar instead of behind. Same pattern
-  // as the parent /services/:slug page so chip behaviour is
-  // identical between the two related pages.
-  useEffect(() => {
-    const cartBarVisible = isMobile && cartItemCount > 0;
-    document.body.classList.toggle("services-cart-bar-visible", cartBarVisible);
-    return () => {
-      document.body.classList.remove("services-cart-bar-visible");
-    };
-  }, [isMobile, cartItemCount]);
 
   // Error early-return preserved — if the API itself fails we still
   // short-circuit rather than render a half-empty page. But we no
@@ -385,27 +368,6 @@ export default function SingleService({
         </div>
       </div>
 
-      {/* add to cart for mobile screen */}
-      {/* Mobile cart sheet — slim floating sticker pill (not a
-          full-width band). Mirrors the Services page sheet so
-          both routes share the same cart UI on mobile. */}
-      {cartItemCount > 0 && isMobile && (
-        <div className="mobile-add-to-cart-wrapper">
-          <p className="mobile-add-to-cart-count-icon">
-            <span className="mobile-cart-badge" aria-hidden="true">
-              {cartItemCount}
-            </span>
-            <span className="mobile-cart-label">on your call</span>
-          </p>
-          <Link
-            className="mobile-add-to-cart-link"
-            to="/cart"
-            aria-label={`Your call agenda — ${cartItemCount} ${cartItemCount === 1 ? "topic" : "topics"}, schedule with Anil`}
-          >
-            Schedule <FaArrowRight aria-hidden="true" />
-          </Link>
-        </div>
-      )}
 
       {/* Sticky bottom-right "Talk to Anil" chip. Auto-hides when
           the in-page Section12 enters viewport so the user never

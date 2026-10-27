@@ -154,11 +154,10 @@ export default function Gallery() {
             </h2>
             <p className="gallery-cta-sub">
               International partners do — and most of them ended up
-              working with us. Book a 15-minute call with Anil
-              first, and we'll figure out if the studio's a fit.
+              working with us. Apply to work with us and we'll tell you whether the studio is a fit.
             </p>
-            <Link to="/ScheduleMeeting" className="gallery-cta-button">
-              Book a 15-min call
+            <Link to="/contact-us" className="gallery-cta-button">
+              Apply to work with us
             </Link>
           </div>
         </section>

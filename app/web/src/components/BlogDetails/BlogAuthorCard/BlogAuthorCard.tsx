@@ -52,8 +52,8 @@ const BlogAuthorCard = ({
         {author.author_description && (
           <p className="blog-author-card-bio">{author.author_description}</p>
         )}
-        <Link to="/ScheduleMeeting" className="blog-author-card-cta">
-          Talk to {author.cta_first_name || "us"}
+        <Link to="/contact-us" className="blog-author-card-cta">
+          Apply to work with us
           <FaArrowRight aria-hidden="true" />
         </Link>
       </div>

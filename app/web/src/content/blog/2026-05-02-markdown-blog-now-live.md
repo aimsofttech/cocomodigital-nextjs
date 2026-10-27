@@ -6,7 +6,7 @@ author: "Anil Mahato"
 image: "/Images/home/coming-soon.png"
 excerpt: "From today, blog posts at cocomadigital.com are written as markdown files in the repository — Pearl drafts, Anil refines, ships in minutes."
 tags: ["meta", "engineering"]
-published: true
+published: false
 ---
 
 ## How this post got here

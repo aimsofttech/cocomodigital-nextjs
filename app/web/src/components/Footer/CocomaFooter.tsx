@@ -1,8 +1,7 @@
 // @ts-nocheck
 "use client";
 import Image from "next/image";
-import { FaYoutube, FaInstagram, FaFacebookF, FaWhatsapp, FaLinkedinIn } from "react-icons/fa";
-import { useCartCount } from "@/src/lib/cart";
+import { FaInstagram, FaFacebookF, FaWhatsapp, FaLinkedinIn } from "react-icons/fa";
 import { Link } from "@/src/lib/navigation";
 import { teamWhatsappLink } from "@/src/lib/contact";
 import type { ReactNode } from "react";
@@ -56,27 +55,26 @@ const GROWTH_SERVICE_LINKS: { href: string; label: string }[] = [
 ];
 
 const FOOTER_COPY = {
-  tagline: "India's leading YouTube & social media growth studio.",
+  tagline: "Content, channel operations and launch marketing for streaming platforms, studios, labels and creators. Mumbai, since 2019.",
   columns: {
-    services: "The creative engine behind 40M+ subscribers.",
+    services: "Four operations, one production standard.",
     platforms: "Native strategy for every social channel.",
-    work: "Seven years of receipts.",
-    solutions: "Pick your shape — we've built it before.",
+    work: "Seven years of shipped work.",
+    solutions: "Built for platforms, studios, labels and creators.",
     company: "Agency, partners, and people behind Cocoma.",
-    connect: "Let's build your growth engine.",
+    connect: "Enquiries and applications.",
   },
   office: {
     line1: "25, Maa Sharda Villa, Near St. Blaise Church",
     line2: "Amboli, Andheri West, Mumbai, Maharashtra 400058, India",
   },
   inquiry: {
-    label: "US / International inquiries",
+    label: "Enquiries",
     email: "hello@cocomadigital.com",
   },
 };
 
 export default function CocomaFooter({ serviceItems, otherServices, solutions }: CocomaFooterProps) {
-  const cartItemCount = useCartCount();
 
   const socialLinks: SocialLink[] = [
     {
@@ -90,17 +88,12 @@ export default function CocomaFooter({ serviceItems, otherServices, solutions }:
       label: "Instagram",
     },
     {
-      link: "https://www.youtube.com/channel/UCP3vqjxVD4VlLxDWiKeq1Mg",
-      icon: <FaYoutube />,
-      label: "YouTube",
-    },
-    {
       link: teamWhatsappLink("website"),
       icon: <FaWhatsapp />,
       label: "WhatsApp",
     },
     {
-      link: "https://www.facebook.com/",
+      link: "https://www.facebook.com/cocomadigital/",
       icon: <FaFacebookF />,
       label: "Facebook",
     },
@@ -108,7 +101,7 @@ export default function CocomaFooter({ serviceItems, otherServices, solutions }:
 
   return (
     <footer
-      className={`footer-container pt-5 ${cartItemCount > 0 ? "max-[500px]:pb-[60px]" : ""}`}
+      className="footer-container pt-5"
     >
       <div className="footer-main">
         <div className="footer-top">
