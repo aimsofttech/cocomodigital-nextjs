@@ -7,7 +7,10 @@ const index = async (req, res) => {
   const sections = await HomePageSection.find({ status: 1 }).sort({ displayOrder: 1 });
   const result = [];
   for (const section of sections) {
-    const items = await HomePageSectionItem.find({ home_page_section_id: section._id, status: 1 }).sort({ display_order: 1 });
+    // home_page_section_id is Mixed: migrated items hold an ObjectId, items
+    // saved from the admin hold a string. Match both or admin edits vanish.
+    const idVariants = [section._id, String(section._id)];
+    const items = await HomePageSectionItem.find({ home_page_section_id: { $in: idVariants }, status: 1 }).sort({ display_order: 1 });
     result.push({
       ...section.toObject(),
       items: items.map((i) => ({ ...i.toObject(), item_image: buildUrl(i.item_image), image: buildUrl(i.get('image')) })),
