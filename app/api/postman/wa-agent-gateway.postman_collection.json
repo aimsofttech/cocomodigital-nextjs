@@ -34,6 +34,12 @@
                 "key": "X-Agent-Key",
                 "value": "{{agentKey}}",
                 "type": "text"
+              },
+              {
+                "key": "X-Conversation-Id",
+                "value": "postman-test-conversation",
+                "type": "text",
+                "description": "Optional. Echoed into the [wa-agent] log line only."
               }
             ],
             "url": {
