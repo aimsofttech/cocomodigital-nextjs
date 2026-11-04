@@ -3,11 +3,14 @@
 // Same style as tests/meetingFlow.test.js: plain Node + assert, the real
 // router mounted on a throwaway Express app, no test framework.
 //
-// Steps 1–3 scope: key check, the health endpoint, the per-request log line
-// and the validation layer. No database needed yet; later steps add the
-// booking/enquiry cases against a local MongoDB.
+// What is real: the gateway router, middleware and validation, the shared
+// intake service, the website's contact router, the ContactUs model against a
+// real local MongoDB, bookingMailer's templates. What is faked: the SMTP
+// transport (captured), the CRM ingest (captured), the logger (captured).
 //
+// Needs a disposable LOCAL MongoDB — the script refuses any non-local URI:
 //   node tests/waAgent.test.js
+//   WA_AGENT_TEST_MONGO_URI=mongodb://127.0.0.1:27017/wa_agent_test node tests/waAgent.test.js
 
 const assert = require('assert');
 const http = require('http');
@@ -25,15 +28,57 @@ require.cache[logPath] = {
   exports: { info: (m) => logged.push(m), warn: (m) => logged.push(m), error: (m) => logged.push(m) },
 };
 
+// ── database: a disposable LOCAL MongoDB (same rule as meetingFlow.test.js) ─
+const MONGO_URI = process.env.WA_AGENT_TEST_MONGO_URI || 'mongodb://127.0.0.1:27017/wa_agent_test';
+if (!/^mongodb:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//.test(MONGO_URI)) {
+  console.error(`Refusing to run against a non-local database: ${MONGO_URI}`);
+  process.exit(1);
+}
+
+// ── email: fake credentials so the mailer switches on, and a capturing transport
+Object.assign(process.env, {
+  SMTP_HOST: 'smtp.test.invalid', SMTP_USER: 'bookings@studio.test', SMTP_PASS: 'x',
+  MAIL_FROM: 'Cocoma Digital <bookings@studio.test>', MAIL_BRAND: 'Cocoma Digital',
+  OWNER_EMAIL: 'owner@studio.test', OWNER_NAME: 'Anil',
+});
+const sent = [];
+const nodemailer = require('nodemailer');
+nodemailer.createTransport = () => ({
+  sendMail: async (msg) => { sent.push(msg); return { messageId: `<${sent.length}@test>` }; },
+  verify: async () => true,
+});
+
+// ── CRM mirror: capture every ingest call instead of running the real one ──
+// (the real one would create CRM leads, notifications and automation jobs)
+const crmCalls = [];
+const leadIngestPath = require.resolve(path.join(__dirname, '../src/crm/services/leadIngest'));
+require.cache[leadIngestPath] = {
+  id: leadIngestPath, filename: leadIngestPath, loaded: true,
+  exports: { ingestSafe: (input) => { crmCalls.push(input); }, ingest: async (input) => { crmCalls.push(input); return null; } },
+};
+
 require('express-async-errors');
 const express = require('express');
+const mongoose = require('mongoose');
+const ContactUs = require('../src/models/ContactUs');
 
 const app = express();
 app.use(express.json());
 app.use('/api/wa-agent', require('../src/routes/api/waAgent'));
+// The website's own contact router, mounted too: step 4 moved its enquiry
+// sequence into a shared service, and these tests prove it still behaves
+// exactly as before.
+app.use('/api/contact', require('../src/routes/api/contact'));
 // The real app's shared error handler sits after every router. It must never
 // see a gateway error; mounting it here proves that.
 app.use(require('../src/middleware/errorHandler'));
+
+// Emails and CRM calls happen after the response — wait for them to land.
+const waitFor = async (fn, ms = 1500) => {
+  const until = Date.now() + ms;
+  while (!fn() && Date.now() < until) await new Promise((r) => setTimeout(r, 15));
+  await new Promise((r) => setTimeout(r, 40)); // and make sure no extras follow
+};
 
 let baseUrl;
 const call = async (method, url, { key, body, rawHeaders } = {}) => {
@@ -61,6 +106,14 @@ const test = async (name, fn) => {
 const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing agent key.' };
 
 (async () => {
+  try {
+    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+  } catch (err) {
+    console.error(`Cannot reach the local test MongoDB at ${MONGO_URI}: ${err.message}\nStart it with ~/.cocoma-dev/mongo/start.sh`);
+    process.exit(1);
+  }
+  await mongoose.connection.dropDatabase();
+
   const server = http.createServer(app);
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   baseUrl = `http://127.0.0.1:${server.address().port}`;
@@ -261,9 +314,12 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     assert.strictEqual(r.json.reason, 'not_implemented');
   });
 
-  await test('a valid /enquiry body passes validation (501 stub until step 4)', async () => {
+  await test('a valid /enquiry body passes validation and reaches the handler (201)', async () => {
     const r = await call('POST', '/api/wa-agent/enquiry', { key: 'testkey1', body: ENQUIRY });
-    assert.strictEqual(r.status, 501, JSON.stringify(r.json));
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    await waitFor(() => sent.length >= 1 && crmCalls.length >= 1);
+    sent.length = 0; crmCalls.length = 0;
+    await ContactUs.deleteMany({});
   });
 
   // one per rule in the validation table
@@ -374,11 +430,158 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     assert.strictEqual(r.status, 200);
   });
 
+  // ── step 4: /enquiry, and the website contact form it shares code with ──
+  console.log('\nstep 4: enquiry\n');
+
+  const reset = async () => { sent.length = 0; crmCalls.length = 0; await ContactUs.deleteMany({}); };
+  const toList = (m) => [].concat(m.to).map((x) => String(x).toLowerCase());
+
+  await test('REGRESSION website POST /api/contact: response, record, owner email and CRM call unchanged', async () => {
+    await reset();
+    const body = { name: 'Web Visitor', email: 'Web.Visitor@Example.com', phone: '+91 98765 43210', subject: 'General', message: '[Type: General]\n\nHello from the website' };
+    const r = await call('POST', '/api/contact', { body });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    assert.strictEqual(r.json.status, 'success');
+    assert.strictEqual(r.json.message, 'Message sent successfully');
+    assert.ok(r.json.data && r.json.data._id, 'website response still carries data (the document)');
+
+    const docs = await ContactUs.find({}).lean();
+    assert.strictEqual(docs.length, 1);
+    const d = docs[0];
+    assert.strictEqual(d.name, 'Web Visitor');
+    assert.strictEqual(d.email, 'web.visitor@example.com');
+    assert.strictEqual(d.phone, '+91 98765 43210');
+    assert.strictEqual(d.subject, 'General');
+    assert.strictEqual(d.message, body.message);
+    assert.strictEqual(d.isRead, 0);
+    assert.ok(!('source_page' in d), 'website records must not gain a source_page');
+
+    await waitFor(() => sent.length >= 1 && crmCalls.length >= 1);
+    assert.strictEqual(sent.length, 1, 'exactly one email (owner), none to the visitor');
+    assert.deepStrictEqual(toList(sent[0]), ['owner@studio.test']);
+    assert.strictEqual(sent[0].replyTo, 'Web.Visitor@Example.com');
+    assert.strictEqual(sent[0].subject, 'New enquiry: Web Visitor — General');
+
+    assert.strictEqual(crmCalls.length, 1);
+    const c = crmCalls[0];
+    assert.strictEqual(c.channel, 'contact_form');
+    assert.strictEqual(c.externalCollection, 'contact_us');
+    assert.strictEqual(String(c.externalId), String(d._id));
+    assert.deepStrictEqual(c.raw, { subject: 'General' });
+    assert.ok(!('sourcePage' in c), 'website CRM call must not gain sourcePage');
+    assert.strictEqual(c.serviceInterest, 'General');
+    assert.strictEqual(c.phone, '+91 98765 43210');
+  });
+
+  await test('REGRESSION website POST /api/contact without a message → 400, unchanged wording', async () => {
+    const r = await call('POST', '/api/contact', { body: { name: 'x', email: 'x@example.com' } });
+    assert.strictEqual(r.status, 400);
+    assert.deepStrictEqual(r.json, { status: 'error', message: 'Name, email, and message are required' });
+  });
+
+  let enquiryRef;
+  await test('POST /enquiry → 201 { ok, ref } and nothing else', async () => {
+    await reset();
+    const r = await call('POST', '/api/wa-agent/enquiry', { key: 'testkey1', body: ENQUIRY });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    assert.deepStrictEqual(Object.keys(r.json).sort(), ['ok', 'ref']);
+    assert.strictEqual(r.json.ok, true);
+    assert.match(r.json.ref, /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/);
+    assert.ok(!r.text.includes('_id') && !r.text.includes('$oid'), 'no database id in the response');
+    enquiryRef = r.json.ref;
+  });
+
+  await test('the record is in contact_us with phone = wa_from, subject = service, source_page = whatsapp', async () => {
+    const docs = await ContactUs.find({}).lean();
+    assert.strictEqual(docs.length, 1);
+    const d = docs[0];
+    assert.strictEqual(d.name, 'Test Sender');
+    assert.strictEqual(d.email, 'test.sender@example.com');
+    assert.strictEqual(d.phone, '919000000099');
+    assert.strictEqual(d.subject, 'Podcast Editing');
+    assert.strictEqual(d.source_page, 'whatsapp');
+    assert.strictEqual(d.message, `[via WhatsApp · ref ${enquiryRef}]\n\nNeed a quote`);
+    assert.strictEqual(d.isRead, 0);
+  });
+
+  await test('the record has the same shape as a website enquiry apart from source_page', async () => {
+    const wa = (await ContactUs.find({}).lean())[0];
+    await call('POST', '/api/contact', { body: { name: 'Web Visitor', email: 'w@example.com', phone: '1', subject: 'General', message: 'hi' } });
+    const web = (await ContactUs.find({ email: 'w@example.com' }).lean())[0];
+    const keys = (o) => Object.keys(o).sort();
+    assert.deepStrictEqual(keys(wa).filter((k) => k !== 'source_page'), keys(web));
+    await waitFor(() => sent.length >= 2 && crmCalls.length >= 2);
+    sent.splice(1); crmCalls.splice(1); await ContactUs.deleteOne({ email: 'w@example.com' });
+  });
+
+  await test('exactly one owner email, none to the sender; it names the service and carries the ref', async () => {
+    await waitFor(() => sent.length >= 1);
+    assert.strictEqual(sent.length, 1);
+    assert.deepStrictEqual(toList(sent[0]), ['owner@studio.test']);
+    assert.ok(!toList(sent[0]).includes('test.sender@example.com'));
+    assert.strictEqual(sent[0].replyTo, 'test.sender@example.com');
+    assert.strictEqual(sent[0].subject, 'New enquiry: Test Sender — Podcast Editing');
+    assert.ok(sent[0].text.includes('919000000099'));
+    assert.ok(sent[0].text.includes(`ref ${enquiryRef}`));
+    assert.ok(sent[0].html.includes('via WhatsApp'));
+  });
+
+  await test('the CRM mirror is called once with channel whatsapp_inbound, sourcePage whatsapp and the ref', async () => {
+    await waitFor(() => crmCalls.length >= 1);
+    assert.strictEqual(crmCalls.length, 1);
+    const c = crmCalls[0];
+    const d = (await ContactUs.findOne({}).lean());
+    assert.strictEqual(c.channel, 'whatsapp_inbound');
+    assert.strictEqual(c.externalCollection, 'contact_us');
+    assert.strictEqual(String(c.externalId), String(d._id));
+    assert.strictEqual(c.sourcePage, 'whatsapp');
+    assert.strictEqual(c.phone, '919000000099');
+    assert.strictEqual(c.email, 'test.sender@example.com');
+    assert.strictEqual(c.serviceInterest, 'Podcast Editing');
+    assert.deepStrictEqual(c.raw, { subject: 'Podcast Editing', via: 'whatsapp', wa_ref: enquiryRef });
+  });
+
+  await test('two enquiries get two different refs and two records', async () => {
+    await reset();
+    const a = await call('POST', '/api/wa-agent/enquiry', { key: 'testkey1', body: ENQUIRY });
+    const b = await call('POST', '/api/wa-agent/enquiry', { key: 'testkey1', body: { ...ENQUIRY, message: 'second' } });
+    assert.notStrictEqual(a.json.ref, b.json.ref);
+    assert.strictEqual(await ContactUs.countDocuments({}), 2);
+    await waitFor(() => sent.length >= 2 && crmCalls.length >= 2);
+  });
+
+  await test('a failing database write → 500 in the gateway shape, no internals, logged with the [wa-agent] prefix', async () => {
+    await reset();
+    const original = ContactUs.create;
+    ContactUs.create = async () => { throw new Error('E11000 duplicate key error collection: contact_us index: email_1'); };
+    try {
+      logged.length = 0;
+      const r = await call('POST', '/api/wa-agent/enquiry', { key: 'testkey1', body: ENQUIRY });
+      assert.strictEqual(r.status, 500);
+      assert.deepStrictEqual(r.json, { ok: false, reason: 'server_error', message: 'Something went wrong. Please try again shortly.' });
+      assert.ok(!r.text.includes('E11000') && !r.text.includes('contact_us'));
+      await settle();
+      assert.ok(logged.some((m) => String(m).includes('[wa-agent] unhandled error')));
+    } finally {
+      ContactUs.create = original;
+    }
+  });
+
+  await test('the website route is not affected by a gateway-side failure (sanity)', async () => {
+    await reset();
+    const r = await call('POST', '/api/contact', { body: { name: 'Web', email: 'web@example.com', message: 'ok' } });
+    assert.strictEqual(r.status, 201);
+    await waitFor(() => sent.length >= 1 && crmCalls.length >= 1);
+  });
+
   server.close();
+  await mongoose.connection.dropDatabase();
+  await mongoose.disconnect();
   const failed = results.filter(([ok]) => !ok).length;
   console.log(`\n${results.length - failed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);
-})().catch((err) => {
+})().catch(async (err) => {
   console.error(err);
+  await mongoose.disconnect().catch(() => {});
   process.exit(1);
 });

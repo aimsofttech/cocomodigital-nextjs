@@ -1,7 +1,7 @@
-const ContactUs = require('../../models/ContactUs');
 const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
-const { sendBookingEmails, sendMeetingRequestEmails, sendContactEnquiryEmail } = require('../../services/bookingMailer');
+const { sendBookingEmails, sendMeetingRequestEmails } = require('../../services/bookingMailer');
+const { createContactEnquiry } = require('../../services/leadIntake');
 const { zonedTimeToUtc, wallClockInZone, isValidTimeZone } = require('../../utils/timezone');
 const {
   getAvailabilityConfig,
@@ -16,26 +16,10 @@ const logger = require('../../utils/logger');
 const contact = async (req, res) => {
   const { name, email, phone, subject, message } = req.body;
   if (!name || !email || !message) return res.status(400).json({ status: 'error', message: 'Name, email, and message are required' });
-  const doc = await ContactUs.create({ name, email, phone, subject, message });
 
-  // Notify the owner. Deliberately not awaited: the lead is already saved, so a
-  // slow or failing SMTP must not delay or fail the visitor's submit. sendMail
-  // logs its own success/failure and never throws; the catch here is only for
-  // an unexpected error while building the message.
-  sendContactEnquiryEmail({
-    name, email, phone, subject, message, createdAt: doc.createdAt,
-  }).catch((err) => {
-    logger.error(`Contact enquiry email failed for ${email}: ${err.message}`);
-  });
-
-  // Mirror the enquiry into the CRM as a lead. Fire-and-forget and internally
-  // guarded — the visitor's submit must never fail because the CRM is busy.
-  crmIngest({
-    channel: 'contact_form', externalCollection: 'contact_us', externalId: doc._id,
-    name, email, phone, message,
-    serviceInterest: subject,
-    raw: { subject },
-  });
+  // Save, notify the owner, mirror to the CRM — the shared sequence in
+  // services/leadIntake.js, also used by the WhatsApp agent gateway.
+  const doc = await createContactEnquiry({ name, email, phone, subject, message });
 
   res.status(201).json({ status: 'success', message: 'Message sent successfully', data: doc });
 };
