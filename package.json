@@ -10,6 +10,8 @@
   "scripts": {
     "predev": "node scripts/free-ports.js",
     "dev": "concurrently -n \"API,ADMIN,CRM,WEB\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold,bgGreen.bold\" \"npm run dev -w @cocoma/api\" \"npm run dev -w @cocoma/admin\" \"npm run dev -w @cocoma/crm\" \"npm run dev:web\"",
+    "predev:local": "node scripts/free-ports.js",
+    "dev:local": "concurrently -n \"API,ADMIN,CRM,WEB\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold,bgGreen.bold\" \"npm run dev:local -w @cocoma/api\" \"npm run dev -w @cocoma/admin\" \"npm run dev -w @cocoma/crm\" \"npm run dev:web\"",
     "dev:api": "npm run dev -w @cocoma/api",
     "dev:admin": "npm run dev -w @cocoma/admin",
     "dev:crm": "npm run dev -w @cocoma/crm",

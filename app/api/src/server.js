@@ -354,6 +354,7 @@ app.use('/api/group-service/faqs', apiGroupServiceFaqRoutes);
 app.use('/api/job-categories', apiJobCategoryRoutes);
 app.use('/api/growth-services', apiGrowthServiceRoutes);
 app.use('/api/podcast-pages', apiPodcastRoutes);
+app.use('/api/wa-agent', require('./routes/api/waAgent')); // WhatsApp agent gateway (write-only, key-protected)
 
 // CRM (self-contained module under src/crm — mounted at /crm/api).
 // Also mounted at CRM_PUBLIC_PATH when that differs, because provider webhooks
