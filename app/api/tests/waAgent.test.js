@@ -57,10 +57,27 @@ require.cache[leadIngestPath] = {
   exports: { ingestSafe: (input) => { crmCalls.push(input); }, ingest: async (input) => { crmCalls.push(input); return null; } },
 };
 
+// ── Google Calendar: must never be touched by a booking. Stubbed to count. ──
+const calendarCalls = [];
+const calendarPath = require.resolve(path.join(__dirname, '../src/services/calendarService'));
+require.cache[calendarPath] = {
+  id: calendarPath, filename: calendarPath, loaded: true,
+  exports: {
+    isConfigured: () => true,
+    createMeetingEvent: async () => { calendarCalls.push('create'); return {}; },
+    updateMeetingEvent: async () => { calendarCalls.push('update'); return {}; },
+    cancelMeetingEvent: async () => { calendarCalls.push('cancel'); return {}; },
+  },
+};
+
 require('express-async-errors');
 const express = require('express');
 const mongoose = require('mongoose');
 const ContactUs = require('../src/models/ContactUs');
+const Meeting = require('../src/models/Meeting');
+const MeetingAvailability = require('../src/models/MeetingAvailability');
+const { invalidateAvailabilityCache, weekdayOf, addDays, CLOSED_DAY_MESSAGE, OUT_OF_HOURS_MESSAGE } = require('../src/utils/bookingWindow');
+const { zonedTimeToUtc } = require('../src/utils/timezone');
 
 const app = express();
 app.use(express.json());
@@ -308,10 +325,13 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     if (typeof submitted === 'string' && submitted.length > 3) assert.ok(!r.json.message.includes(submitted), r.json.message);
   });
 
-  await test('a valid /book body passes validation (501 stub until step 5)', async () => {
+  await test('a valid /book body passes validation and reaches the handler (201 or a slot verdict, never 422)', async () => {
     const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: BOOK });
-    assert.strictEqual(r.status, 501, JSON.stringify(r.json));
-    assert.strictEqual(r.json.reason, 'not_implemented');
+    assert.ok([201, 400, 409].includes(r.status), JSON.stringify(r.json));
+    assert.notStrictEqual(r.json.reason, 'invalid_input');
+    await waitFor(() => r.status !== 201 || (sent.length >= 2 && crmCalls.length >= 1));
+    sent.length = 0; crmCalls.length = 0;
+    await Meeting.deleteMany({});
   });
 
   await test('a valid /enquiry body passes validation and reaches the handler (201)', async () => {
@@ -572,6 +592,303 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     const r = await call('POST', '/api/contact', { body: { name: 'Web', email: 'web@example.com', message: 'ok' } });
     assert.strictEqual(r.status, 201);
     await waitFor(() => sent.length >= 1 && crmCalls.length >= 1);
+  });
+
+  // ── step 5: /book, and the website booking it shares code with ──────────
+  console.log('\nstep 5: book\n');
+
+  // Studio schedule like production (and seed-dev.js): Mon–Sat, 10:00–19:45 IST.
+  const slotsFrom = (from, to) => { const out = []; for (let m = from; m <= to; m += 15) out.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`); return out; };
+  await MeetingAvailability.findOneAndUpdate({ key: 'default' }, {
+    $set: {
+      timezone: 'Asia/Kolkata', slotStepMinutes: 15, minNoticeMinutes: 0, blockedDates: [],
+      days: Array.from({ length: 7 }, (_, wd) => ({ weekday: wd, enabled: wd !== 0, slots: wd !== 0 ? slotsFrom(600, 1185) : [] })),
+    },
+  }, { upsert: true });
+  invalidateAvailabilityCache();
+  await Meeting.syncIndexes(); // the slot_hold unique index is what makes the race test real
+
+  // Fixed future dates: a Tuesday and the Sunday before it, in June next year.
+  let tuesday = `${Number(todayIst.slice(0, 4)) + 1}-06-15`;
+  while (weekdayOf(tuesday) !== 2) tuesday = addDays(tuesday, 1);
+  const sunday = addDays(tuesday, -2);
+  const WEB_BOOK = (date, time, tz) => ({
+    name: 'Web Visitor', email: 'Web.Visitor@Example.com', phone: '+91 98765 43210',
+    service: 'Discovery Call', source_page: '/ScheduleMeeting',
+    meeting_date: date, meeting_time: time, meeting_timezone: tz,
+    meeting_start_utc: zonedTimeToUtc(date, time, tz === 'Nowhere/Invalid' ? 'Asia/Kolkata' : tz).toISOString(),
+    notes: `Slot: ${date} ${time} (${tz})\n\nMessage: from the website`,
+  });
+  const resetBookings = async () => { sent.length = 0; crmCalls.length = 0; calendarCalls.length = 0; await Meeting.deleteMany({}); };
+
+  await test('REGRESSION website booking POST /api/contact/free-consultation: response, record, 2 emails, CRM call unchanged', async () => {
+    await resetBookings();
+    const r = await call('POST', '/api/contact/free-consultation', { body: WEB_BOOK(tuesday, '15:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    assert.strictEqual(r.json.status, 'success');
+    assert.strictEqual(r.json.message, 'Meeting request submitted. You will receive a confirmation email once your meeting is approved.');
+    assert.ok(r.json.data && r.json.data._id);
+
+    const d = await Meeting.findOne({}).lean();
+    assert.strictEqual(d.userName, 'Web Visitor');
+    assert.strictEqual(d.email, 'web.visitor@example.com');
+    assert.strictEqual(d.phone, '+91 98765 43210');
+    assert.strictEqual(d.meetingDate, tuesday);
+    assert.strictEqual(d.meetingTime, '15:00:00');
+    assert.strictEqual(d.meetingTimezone, 'Asia/Kolkata');
+    assert.strictEqual(d.meeting_start_utc.toISOString(), `${tuesday}T09:30:00.000Z`);
+    assert.strictEqual(d.slot_key, `${tuesday}T09:30`);
+    assert.strictEqual(d.slot_hold, `${tuesday}T09:30`);
+    assert.strictEqual(d.status, 'pending');
+    assert.strictEqual(d.duration, 15);
+    assert.strictEqual(d.service, 'Discovery Call');
+    assert.strictEqual(d.source_page, '/ScheduleMeeting');
+    assert.ok(d.notes.startsWith('Slot: '));
+    assert.strictEqual(d.meetLink, null);
+
+    await waitFor(() => sent.length >= 2 && crmCalls.length >= 1);
+    assert.strictEqual(sent.length, 2, 'owner + visitor');
+    assert.deepStrictEqual(sent.map((m) => toList(m).join()).sort(), ['owner@studio.test', 'web.visitor@example.com']);
+
+    assert.strictEqual(crmCalls.length, 1);
+    const c = crmCalls[0];
+    assert.strictEqual(c.channel, 'meeting');
+    assert.strictEqual(c.externalCollection, 'meetings');
+    assert.strictEqual(String(c.externalId), String(d._id));
+    assert.strictEqual(c.sourcePage, '/ScheduleMeeting');
+    assert.strictEqual(c.serviceInterest, 'Discovery Call');
+    assert.strictEqual(new Date(c.meetingStartUtc).toISOString(), d.meeting_start_utc.toISOString());
+    assert.deepStrictEqual(c.raw, { meeting_date: tuesday, meeting_time: '15:00:00', meeting_timezone: 'Asia/Kolkata' });
+    assert.strictEqual(calendarCalls.length, 0);
+  });
+
+  await test('REGRESSION website booking on a closed day → 400 with the same message', async () => {
+    const r = await call('POST', '/api/contact/free-consultation', { body: WEB_BOOK(sunday, '15:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 400);
+    assert.deepStrictEqual(r.json, { status: 'error', message: CLOSED_DAY_MESSAGE });
+  });
+
+  await test('REGRESSION website booking of a taken slot → 409 with the same message', async () => {
+    const r = await call('POST', '/api/contact/free-consultation', { body: WEB_BOOK(tuesday, '15:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 409);
+    assert.deepStrictEqual(r.json, { status: 'error', message: 'That time slot is no longer available. Please pick another.' });
+    assert.strictEqual(await Meeting.countDocuments({}), 1);
+  });
+
+  await test('REGRESSION website booking with an unusable timezone still books, stored in studio time', async () => {
+    const r = await call('POST', '/api/contact/free-consultation', { body: WEB_BOOK(tuesday, '16:00:00', 'Nowhere/Invalid') });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    const d = await Meeting.findOne({ meetingTime: '16:00' }).lean();
+    assert.ok(d, 'wall clock re-derived in the studio zone (HH:mm)');
+    assert.strictEqual(d.meetingTimezone, 'Asia/Kolkata');
+    assert.strictEqual(d.meetingDate, tuesday);
+    await waitFor(() => sent.length >= 4 && crmCalls.length >= 2);
+    assert.strictEqual(crmCalls[1].raw.meeting_timezone, 'Nowhere/Invalid', 'raw CRM payload keeps what was sent');
+  });
+
+  const GW_BOOK = (date, time, tz, extra = {}) => ({
+    wa_from: '919000000099', name: 'Test Sender', email: 'Test.Sender@Example.com',
+    meeting_date: date, meeting_time: time, meeting_timezone: tz, message: 'Booked over WhatsApp', ...extra,
+  });
+  const expectedWhen = (date, time, tz, label) => {
+    const d = zonedTimeToUtc(date, time, tz);
+    const p = {}; for (const x of new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(d)) p[x.type] = x.value;
+    return `${p.weekday} ${p.day} ${p.month} ${p.year}, ${p.hour}:${p.minute} ${p.dayPeriod} ${label}`;
+  };
+
+  let bookingRef;
+  await test('POST /book on an open slot (Asia/Kolkata) → 201 { ok, booking_ref, status: pending, when } and nothing else', async () => {
+    await resetBookings();
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '15:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    assert.deepStrictEqual(Object.keys(r.json).sort(), ['booking_ref', 'ok', 'status', 'when']);
+    assert.strictEqual(r.json.ok, true);
+    assert.strictEqual(r.json.status, 'pending');
+    assert.match(r.json.booking_ref, /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/);
+    assert.strictEqual(r.json.when, expectedWhen(tuesday, '15:00:00', 'Asia/Kolkata', 'IST'));
+    assert.match(r.json.when, /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} [A-Z][a-z]{2} \d{4}, \d{1,2}:\d{2} (AM|PM) IST$/);
+    assert.ok(!r.text.includes('_id'));
+    bookingRef = r.json.booking_ref;
+  });
+
+  await test('the meeting record is pending, phone = wa_from, source_page = whatsapp, service = Discovery Call, notes prefixed', async () => {
+    const d = await Meeting.findOne({}).lean();
+    assert.strictEqual(d.userName, 'Test Sender');
+    assert.strictEqual(d.email, 'test.sender@example.com');
+    assert.strictEqual(d.phone, '919000000099');
+    assert.strictEqual(d.meetingDate, tuesday);
+    assert.strictEqual(d.meetingTime, '15:00:00');
+    assert.strictEqual(d.meetingTimezone, 'Asia/Kolkata');
+    assert.strictEqual(d.meeting_start_utc.toISOString(), `${tuesday}T09:30:00.000Z`);
+    assert.strictEqual(d.slot_key, `${tuesday}T09:30`);
+    assert.strictEqual(d.slot_hold, `${tuesday}T09:30`);
+    assert.strictEqual(d.status, 'pending');
+    assert.strictEqual(d.duration, 15);
+    assert.strictEqual(d.service, 'Discovery Call');
+    assert.strictEqual(d.source_page, 'whatsapp');
+    assert.strictEqual(d.notes, `[via WhatsApp · ref ${bookingRef}]\n\nBooked over WhatsApp`);
+    assert.strictEqual(d.meetLink, null);
+    assert.strictEqual(d.google_event_id, null);
+    assert.strictEqual(d.confirmedAt, null);
+  });
+
+  await test('the record has exactly the same fields as a website booking', async () => {
+    const wa = await Meeting.findOne({}).lean();
+    await call('POST', '/api/contact/free-consultation', { body: WEB_BOOK(tuesday, '17:00:00', 'Asia/Kolkata') });
+    const web = await Meeting.findOne({ meetingTime: '17:00:00' }).lean();
+    assert.deepStrictEqual(Object.keys(wa).sort(), Object.keys(web).sort());
+    await waitFor(() => sent.length >= 4 && crmCalls.length >= 2);
+    await Meeting.deleteOne({ _id: web._id }); sent.splice(2); crmCalls.splice(1);
+  });
+
+  await test('owner + visitor emails: two, visitor to the sender, owner copy names WhatsApp and the ref, slot in IST', async () => {
+    await waitFor(() => sent.length >= 2);
+    assert.strictEqual(sent.length, 2);
+    const owner = sent.find((m) => toList(m).includes('owner@studio.test'));
+    const visitor = sent.find((m) => toList(m).includes('test.sender@example.com'));
+    assert.ok(owner && visitor);
+    assert.ok(owner.subject.startsWith('New Meeting Request from Test Sender'), owner.subject);
+    assert.ok(owner.text.includes('3:00 PM'), 'owner sees the slot in IST');
+    assert.ok(owner.html.includes('via WhatsApp') && owner.html.includes(bookingRef));
+    assert.ok(owner.html.includes('919000000099'));
+    assert.strictEqual(visitor.subject, 'Meeting Request Received');
+    assert.ok(visitor.html.includes('3:00 PM'));
+  });
+
+  await test('the CRM mirror is called once with channel meeting (so the CRM schedules the call), sourcePage whatsapp, the ref', async () => {
+    await waitFor(() => crmCalls.length >= 1);
+    assert.strictEqual(crmCalls.length, 1);
+    const c = crmCalls[0];
+    const d = await Meeting.findOne({}).lean();
+    assert.strictEqual(c.channel, 'meeting');
+    assert.strictEqual(c.externalCollection, 'meetings');
+    assert.strictEqual(String(c.externalId), String(d._id));
+    assert.strictEqual(c.sourcePage, 'whatsapp');
+    assert.strictEqual(c.phone, '919000000099');
+    assert.strictEqual(c.serviceInterest, 'Discovery Call');
+    assert.strictEqual(new Date(c.meetingStartUtc).toISOString(), `${tuesday}T09:30:00.000Z`);
+    assert.deepStrictEqual(c.raw, { meeting_date: tuesday, meeting_time: '15:00:00', meeting_timezone: 'Asia/Kolkata', via: 'whatsapp', wa_ref: bookingRef });
+  });
+
+  await test('no calendar call was made (the founder-confirm path is the only one that creates a Meet link)', async () => {
+    assert.strictEqual(calendarCalls.length, 0);
+  });
+
+  await test('same slot again from another sender → 409 slot_taken, one record', async () => {
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '15:00:00', 'Asia/Kolkata', { wa_from: '919000000098', email: 'other@example.com' }) });
+    assert.strictEqual(r.status, 409, JSON.stringify(r.json));
+    assert.deepStrictEqual(r.json, { ok: false, reason: 'slot_taken', message: 'That time slot is no longer available. Please pick another.' });
+    assert.strictEqual(await Meeting.countDocuments({}), 1);
+  });
+
+  await test('a slot taken on the website is taken for WhatsApp too (one calendar, both channels)', async () => {
+    await call('POST', '/api/contact/free-consultation', { body: WEB_BOOK(tuesday, '18:00:00', 'Asia/Kolkata') });
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '18:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 409);
+    assert.strictEqual(r.json.reason, 'slot_taken');
+    await waitFor(() => sent.length >= 4 && crmCalls.length >= 2);
+  });
+
+  await test('closed day (Sunday) → 400 slot_not_offered with the schedule message', async () => {
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(sunday, '15:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 400, JSON.stringify(r.json));
+    assert.deepStrictEqual(r.json, { ok: false, reason: 'slot_not_offered', message: CLOSED_DAY_MESSAGE });
+  });
+
+  await test('off-grid time (10:07) → 400 slot_not_offered', async () => {
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '10:07:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 400);
+    assert.deepStrictEqual(r.json, { ok: false, reason: 'slot_not_offered', message: OUT_OF_HOURS_MESSAGE });
+  });
+
+  await test('outside hours (09:00 IST) → 400 slot_not_offered', async () => {
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '09:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 400);
+    assert.strictEqual(r.json.reason, 'slot_not_offered');
+  });
+
+  await test('America/New_York 02:30 = 12:00 IST → 201; when in EDT; stored UTC, zone and wall-clock are the sender\'s', async () => {
+    await resetBookings();
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '02:30:00', 'America/New_York', { wa_from: '12125550123' }) });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    assert.strictEqual(r.json.when, expectedWhen(tuesday, '02:30:00', 'America/New_York', 'EDT'));
+    const d = await Meeting.findOne({}).lean();
+    assert.strictEqual(d.meeting_start_utc.toISOString(), `${tuesday}T06:30:00.000Z`);
+    assert.strictEqual(d.slot_key, `${tuesday}T06:30`);
+    assert.strictEqual(d.meetingTimezone, 'America/New_York');
+    assert.strictEqual(d.meetingDate, tuesday);
+    assert.strictEqual(d.meetingTime, '02:30:00');
+    await waitFor(() => sent.length >= 2);
+    const owner = sent.find((m) => toList(m).includes('owner@studio.test'));
+    const visitor = sent.find((m) => toList(m).includes('test.sender@example.com'));
+    assert.ok(owner.text.includes('12:00 PM'), 'owner email shows the slot in IST');
+    assert.ok(visitor.html.includes('2:30 AM'), 'visitor email shows the slot in their zone');
+  });
+
+  await test('America/New_York 02:37 → off the studio grid → 400', async () => {
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '02:37:00', 'America/New_York') });
+    assert.strictEqual(r.status, 400);
+    assert.strictEqual(r.json.reason, 'slot_not_offered');
+  });
+
+  await test('a booking without a message stores just the prefix in notes', async () => {
+    await resetBookings();
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '15:00:00', 'Asia/Kolkata', { message: undefined }) });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    const d = await Meeting.findOne({}).lean();
+    assert.strictEqual(d.notes, `[via WhatsApp · ref ${r.json.booking_ref}]`);
+    await waitFor(() => sent.length >= 2 && crmCalls.length >= 1);
+  });
+
+  await test('race: two callers pass the taken-check together → the slot_hold index turns the loser into 409', async () => {
+    // A pending meeting already holds 15:00. Make the pre-check miss it so the
+    // insert itself is what collides.
+    const original = Meeting.findOne;
+    Meeting.findOne = () => ({ lean: async () => null });
+    try {
+      const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '15:00:00', 'Asia/Kolkata', { wa_from: '919000000097' }) });
+      assert.strictEqual(r.status, 409, JSON.stringify(r.json));
+      assert.deepStrictEqual(r.json, { ok: false, reason: 'slot_taken', message: 'That time slot was just booked. Please pick another.' });
+      assert.ok(!r.text.includes('E11000') && !r.text.includes('slot_hold'));
+    } finally {
+      Meeting.findOne = original;
+    }
+    assert.strictEqual(await Meeting.countDocuments({}), 1);
+  });
+
+  await test('a failing lookup → 500 in the gateway shape, no internals', async () => {
+    const original = Meeting.findOne;
+    Meeting.findOne = () => ({ lean: async () => { throw new Error('MongoServerSelectionError: connect ECONNREFUSED'); } });
+    try {
+      const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '16:00:00', 'Asia/Kolkata') });
+      assert.strictEqual(r.status, 500);
+      assert.deepStrictEqual(r.json, { ok: false, reason: 'server_error', message: 'Something went wrong. Please try again shortly.' });
+      assert.ok(!r.text.includes('ECONNREFUSED'));
+    } finally {
+      Meeting.findOne = original;
+    }
+  });
+
+  await test('a WhatsApp booking can be confirmed through the existing admin path (same document, same flow)', async () => {
+    // Prove the record is a normal meeting: the admin controller's confirm
+    // runs on it unchanged. Mount the admin router for this one test, with
+    // the admin already authenticated the way production's gate does it.
+    const adminApp = express();
+    adminApp.use(express.json());
+    adminApp.use('/admin/api/meetings', (req, _res, next) => { req.user = { _id: 'admin-test' }; next(); }, require('../src/routes/admin/meeting'));
+    adminApp.use(require('../src/middleware/errorHandler'));
+    const srv = http.createServer(adminApp);
+    await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+    try {
+      const d = await Meeting.findOne({ status: 'pending' }).lean();
+      const res = await fetch(`http://127.0.0.1:${srv.address().port}/admin/api/meetings/${d._id}/confirm`, { method: 'PUT', headers: { 'content-type': 'application/json' } });
+      assert.strictEqual(res.status, 200, await res.text());
+      const after = await Meeting.findById(d._id).lean();
+      assert.strictEqual(after.status, 'confirmed');
+      assert.strictEqual(calendarCalls.length, 1, 'the Meet link is created here, and only here');
+    } finally {
+      srv.close();
+    }
   });
 
   server.close();
