@@ -76,6 +76,7 @@ const mongoose = require('mongoose');
 const ContactUs = require('../src/models/ContactUs');
 const Meeting = require('../src/models/Meeting');
 const MeetingAvailability = require('../src/models/MeetingAvailability');
+const WaAgentQuota = require('../src/models/WaAgentQuota');
 const { invalidateAvailabilityCache, weekdayOf, addDays, CLOSED_DAY_MESSAGE, OUT_OF_HOURS_MESSAGE } = require('../src/utils/bookingWindow');
 const { zonedTimeToUtc } = require('../src/utils/timezone');
 
@@ -453,7 +454,9 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
   // ── step 4: /enquiry, and the website contact form it shares code with ──
   console.log('\nstep 4: enquiry\n');
 
-  const reset = async () => { sent.length = 0; crmCalls.length = 0; await ContactUs.deleteMany({}); };
+  // Every reset also clears the quota/idempotency records: a sender re-used
+  // across tests would otherwise hit a replay or a 429 by design.
+  const reset = async () => { sent.length = 0; crmCalls.length = 0; await ContactUs.deleteMany({}); await WaAgentQuota.deleteMany({}); };
   const toList = (m) => [].concat(m.to).map((x) => String(x).toLowerCase());
 
   await test('REGRESSION website POST /api/contact: response, record, owner email and CRM call unchanged', async () => {
@@ -619,7 +622,7 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     meeting_start_utc: zonedTimeToUtc(date, time, tz === 'Nowhere/Invalid' ? 'Asia/Kolkata' : tz).toISOString(),
     notes: `Slot: ${date} ${time} (${tz})\n\nMessage: from the website`,
   });
-  const resetBookings = async () => { sent.length = 0; crmCalls.length = 0; calendarCalls.length = 0; await Meeting.deleteMany({}); };
+  const resetBookings = async () => { sent.length = 0; crmCalls.length = 0; calendarCalls.length = 0; await Meeting.deleteMany({}); await WaAgentQuota.deleteMany({}); };
 
   await test('REGRESSION website booking POST /api/contact/free-consultation: response, record, 2 emails, CRM call unchanged', async () => {
     await resetBookings();
@@ -869,6 +872,117 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     }
   });
 
+  // ── step 6: rate limits + idempotency ───────────────────────────────────
+  console.log('\nstep 6: rate limits + idempotency\n');
+
+  const { globalLimiter, GLOBAL_KEY, GLOBAL_PER_HOUR, PER_SENDER } = require('../src/middleware/waAgentRateLimit');
+  await WaAgentQuota.syncIndexes();
+  const resetQuotas = async () => { await resetBookings(); await ContactUs.deleteMany({}); await WaAgentQuota.deleteMany({}); };
+  const RL_MSG = (kind) => `You have reached the limit of ${kind === 'book' ? 'booking requests' : 'enquiries'} for today. Please try again tomorrow, or contact us another way.`;
+
+  await test('wa_agent_quotas has a 24-hour TTL index and a sender/kind index', async () => {
+    const idx = await WaAgentQuota.collection.indexes();
+    const ttl = idx.find((i) => i.key && i.key.createdAt === 1 && i.expireAfterSeconds !== undefined);
+    assert.ok(ttl, JSON.stringify(idx));
+    assert.strictEqual(ttl.expireAfterSeconds, 86400);
+    assert.ok(idx.some((i) => i.key && i.key.wa_from === 1 && i.key.kind === 1));
+  });
+
+  await test('the 4th booking from one sender within 24 h → 429 rate_limited; the first 3 exist', async () => {
+    await resetQuotas();
+    const times = ['10:00:00', '10:15:00', '10:30:00', '10:45:00'];
+    const results = [];
+    for (const t of times) results.push(await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, t, 'Asia/Kolkata') }));
+    assert.deepStrictEqual(results.map((r) => r.status), [201, 201, 201, 429], JSON.stringify(results.map((r) => r.json)));
+    assert.deepStrictEqual(results[3].json, { ok: false, reason: 'rate_limited', message: RL_MSG('book') });
+    assert.strictEqual(await Meeting.countDocuments({}), 3);
+    assert.strictEqual(PER_SENDER.book, 3);
+    await waitFor(() => sent.length >= 6 && crmCalls.length >= 3);
+  });
+
+  await test('another sender is unaffected by the first sender\'s quota', async () => {
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '11:00:00', 'Asia/Kolkata', { wa_from: '919000000001', email: 'other@example.com' }) });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    await waitFor(() => sent.length >= 8 && crmCalls.length >= 4);
+  });
+
+  await test('a 409 (slot taken) does not use up the sender\'s allowance', async () => {
+    await resetQuotas();
+    await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '10:00:00', 'Asia/Kolkata', { wa_from: '919000000002', email: 'a@example.com' }) });
+    for (let i = 0; i < 4; i++) {
+      const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '10:00:00', 'Asia/Kolkata') });
+      assert.strictEqual(r.status, 409);
+    }
+    const ok = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '10:15:00', 'Asia/Kolkata') });
+    assert.strictEqual(ok.status, 201, 'four 409s later the sender can still book');
+    assert.strictEqual(await WaAgentQuota.countDocuments({ wa_from: '919000000099' }), 1);
+    await waitFor(() => sent.length >= 4 && crmCalls.length >= 2);
+  });
+
+  await test('the quota is rolling: a booking older than 24 h no longer counts', async () => {
+    await resetQuotas();
+    const old = new Date(Date.now() - 25 * 60 * 60 * 1000);
+    for (let i = 0; i < 3; i++) await WaAgentQuota.create({ kind: 'book', wa_from: '919000000099', ref: `OLDREF0${i}`, createdAt: old });
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '10:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 201, JSON.stringify(r.json));
+    await waitFor(() => sent.length >= 2 && crmCalls.length >= 1);
+  });
+
+  await test('the 6th enquiry from one sender within 24 h → 429; the first 5 exist', async () => {
+    await resetQuotas();
+    const results = [];
+    for (let i = 0; i < 6; i++) results.push(await call('POST', '/api/wa-agent/enquiry', { key: 'testkey1', body: { ...ENQUIRY, message: `enquiry ${i}` } }));
+    assert.deepStrictEqual(results.map((r) => r.status), [201, 201, 201, 201, 201, 429]);
+    assert.deepStrictEqual(results[5].json, { ok: false, reason: 'rate_limited', message: RL_MSG('enquiry') });
+    assert.strictEqual(await ContactUs.countDocuments({}), 5);
+    assert.strictEqual(PER_SENDER.enquiry, 5);
+    await waitFor(() => sent.length >= 5 && crmCalls.length >= 5);
+  });
+
+  await test('bookings and enquiries have separate allowances', async () => {
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '10:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 201, 'five enquiries do not block a booking');
+    await waitFor(() => sent.length >= 7 && crmCalls.length >= 6);
+  });
+
+  await test('idempotency: the same booking twice within 2 min → same booking_ref, one record, one set of emails', async () => {
+    await resetQuotas();
+    const body = GW_BOOK(tuesday, '15:00:00', 'Asia/Kolkata');
+    const a = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body });
+    const b = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body });
+    assert.strictEqual(a.status, 201, JSON.stringify(a.json));
+    assert.strictEqual(b.status, 201, JSON.stringify(b.json));
+    assert.deepStrictEqual(b.json, a.json);
+    assert.strictEqual(await Meeting.countDocuments({}), 1);
+    await waitFor(() => sent.length >= 2 && crmCalls.length >= 1);
+    await settle();
+    assert.strictEqual(sent.length, 2, 'the replay sends no emails');
+    assert.strictEqual(crmCalls.length, 1, 'the replay does not touch the CRM');
+    assert.strictEqual(await WaAgentQuota.countDocuments({ wa_from: '919000000099' }), 1, 'the replay does not count against the quota');
+  });
+
+  await test('idempotency: a different time, or a different sender, is a new booking', async () => {
+    const r1 = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '15:15:00', 'Asia/Kolkata') });
+    assert.strictEqual(r1.status, 201);
+    const r2 = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '15:00:00', 'Asia/Kolkata', { wa_from: '919000000003', email: 'c@example.com' }) });
+    assert.strictEqual(r2.status, 409, 'the other sender hits the taken slot, not a replay');
+    await waitFor(() => sent.length >= 4 && crmCalls.length >= 2);
+  });
+
+  await test('idempotency: after the 2-minute window the same request is treated afresh (→ 409, slot now taken)', async () => {
+    await WaAgentQuota.updateMany({ wa_from: '919000000099', meeting_time: '15:00:00' }, { $set: { createdAt: new Date(Date.now() - 3 * 60 * 1000) } });
+    const r = await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: GW_BOOK(tuesday, '15:00:00', 'Asia/Kolkata') });
+    assert.strictEqual(r.status, 409);
+    assert.strictEqual(r.json.reason, 'slot_taken');
+  });
+
+  await test('the quota record stores the ref and never a document id', async () => {
+    const q = await WaAgentQuota.findOne({ wa_from: '919000000099', meeting_time: '15:15:00' }).lean();
+    assert.match(q.ref, /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/);
+    assert.strictEqual(q.result.booking_ref, q.ref);
+    assert.ok(!JSON.stringify(q.result).includes('_id'));
+  });
+
   await test('a WhatsApp booking can be confirmed through the existing admin path (same document, same flow)', async () => {
     // Prove the record is a normal meeting: the admin controller's confirm
     // runs on it unchanged. Mount the admin router for this one test, with
@@ -889,6 +1003,22 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     } finally {
       srv.close();
     }
+  });
+
+  // Last, because it exhausts the gateway's shared hourly cap.
+  await test(`the global cap trips: request ${GLOBAL_PER_HOUR + 1} within the hour → 429, even /health with a valid key`, async () => {
+    globalLimiter.resetKey(GLOBAL_KEY);
+    const before = await WaAgentQuota.countDocuments({});
+    // Spend whatever this process has already used, then the remainder.
+    let status = 200; let n = 0;
+    while (status === 200 && n < GLOBAL_PER_HOUR + 5) { status = (await call('GET', '/api/wa-agent/health', { key: 'testkey1' })).status; n++; }
+    assert.strictEqual(status, 429, `tripped after ${n} requests`);
+    assert.strictEqual(n, GLOBAL_PER_HOUR + 1);
+    const r = await call('POST', '/api/wa-agent/enquiry', { key: 'testkey1', body: ENQUIRY });
+    assert.deepStrictEqual(r.json, { ok: false, reason: 'rate_limited', message: 'The service is busy right now. Please try again in a few minutes.' });
+    assert.strictEqual(await WaAgentQuota.countDocuments({}), before, 'nothing written while capped');
+    globalLimiter.resetKey(GLOBAL_KEY);
+    assert.strictEqual((await call('GET', '/api/wa-agent/health', { key: 'testkey1' })).status, 200);
   });
 
   server.close();

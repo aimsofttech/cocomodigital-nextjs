@@ -1317,6 +1317,317 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Rate limits + idempotency",
+      "description": "Run this folder top to bottom (Collection Runner, 1 iteration) on a day with free 10:00–10:45 IST slots. Uses waFromQuota so it does not interfere with the other folders.",
+      "item": [
+        {
+          "name": "Quota 1/3 — book 10:00 (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFromQuota}}\",\n  \"name\": \"Quota Tester\",\n  \"email\": \"quota.tester@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"10:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Quota 2/3 — book 10:15 (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFromQuota}}\",\n  \"name\": \"Quota Tester\",\n  \"email\": \"quota.tester@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"10:15:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Quota 3/3 — book 10:30 (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFromQuota}}\",\n  \"name\": \"Quota Tester\",\n  \"email\": \"quota.tester@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"10:30:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Quota 4th — book 10:45 (429 rate_limited)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 429\", () => pm.response.to.have.status(429));",
+                  "pm.test(\"reason rate_limited\", () => pm.expect(pm.response.json().reason).to.eql(\"rate_limited\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFromQuota}}\",\n  \"name\": \"Quota Tester\",\n  \"email\": \"quota.tester@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"10:45:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "The 4th booking from the same wa_from within 24 h."
+          },
+          "response": []
+        },
+        {
+          "name": "Idempotent 1/2 — book 11:00 from a fresh sender (201, stores the ref)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idemRef\", pm.response.json().booking_ref);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFromIdem}}\",\n  \"name\": \"Quota Tester\",\n  \"email\": \"quota.tester@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Idempotent 2/2 — same request again (201, SAME booking_ref, no new record)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"same booking_ref as the first call\", () => pm.expect(pm.response.json().booking_ref).to.eql(pm.collectionVariables.get(\"idemRef\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFromIdem}}\",\n  \"name\": \"Quota Tester\",\n  \"email\": \"quota.tester@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Within 2 minutes of the previous request. Check the admin panel: one meeting at 11:00, not two."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [

@@ -22,7 +22,7 @@ Status legend in the tables below: **live** = built and tested; *step N* = plann
 |---|---|---|---|---|---|
 | GET | `/api/wa-agent/health` | Key check only | 200 `{ ok: true }` | 401 | **live** |
 | POST | `/api/wa-agent/enquiry` | Create an enquiry (= website contact form) | 201 `{ ok: true, ref }` | 401, 413, 422, 429 | **live** |
-| POST | `/api/wa-agent/book` | Create a pending booking (= website booking) | 201 `{ ok: true, booking_ref, status: "pending", when }` | 400 `slot_not_offered`, 401, 409 `slot_taken`, 413, 422 `invalid_input`, 429 `rate_limited` | **live** (429: *step 6*) |
+| POST | `/api/wa-agent/book` | Create a pending booking (= website booking) | 201 `{ ok: true, booking_ref, status: "pending", when }` | 400 `slot_not_offered`, 401, 409 `slot_taken`, 413, 422 `invalid_input`, 429 `rate_limited` | **live** |
 
 Reused as-is, public, no key: `GET /api/contact/availability?date=YYYY-MM-DD&tz=<IANA>` (day's slots, each `booked` true/false) and `?month=YYYY-MM&tz=` (open dates).
 
@@ -87,7 +87,30 @@ Same sequence as the website's /ScheduleMeeting submit, through the same code (`
 
 Mapping: `wa_from` → `phone`; `service` = `Discovery Call` (the website's default); `source_page: "whatsapp"`; `notes` = `[via WhatsApp · ref XXXXXXXX]` + the optional message; `meetingDate/Time/Timezone` stored as the sender gave them; `meeting_start_utc` recomputed server-side from them. `when` is the slot on the sender's clock, e.g. `Wed 11 Nov 2026, 3:00 PM IST` / `Wed 11 Nov 2026, 4:30 AM EST` (zone label: IST for India, otherwise the en-US short name such as EST/EDT/GMT/GMT+4).
 
+## Rate limits and idempotency
+
+| Limit | Scope | Store | On breach |
+|---|---|---|---|
+| 200 requests / hour | the whole gateway, every endpoint, every sender | in-process (`express-rate-limit`, one fixed key); a restart loosens at most one hour's window | 429 `rate_limited`, "The service is busy right now. Please try again in a few minutes." |
+| 3 bookings / rolling 24 h | per `wa_from`, **successful** bookings only (a 400 or 409 does not spend the allowance) | Mongo `wa_agent_quotas`, TTL 24 h — survives `pm2 reload` | 429 `rate_limited`, "You have reached the limit of booking requests for today. …" |
+| 5 enquiries / rolling 24 h | per `wa_from`, successful only | same | 429, "You have reached the limit of enquiries for today. …" |
+| 500 requests / 15 min per IP | the existing `/api/` limiter, unchanged | existing | the API's existing plain-text 429 |
+
+**Idempotency:** a repeat `/book` with the same `wa_from`, `meeting_date` and `meeting_time` within **2 minutes** of a successful one is answered with the first 201 body (same `booking_ref`, same `when`): no second record, no second set of emails, no CRM call, and it does not count against the quota. After 2 minutes the same request is handled afresh, which normally means 409 because the slot is now held. Only successes are replayed; a retry after a 400/409 is re-evaluated.
+
+Order inside the router: request log → 16 KB body gate → key → global cap → (per route) validation → idempotency replay → per-sender quota → handler → record the success. The record (`wa_agent_quotas`: kind, `wa_from`, ref, date/time, the 201 body) is written before the response is sent, so an immediate retry already sees it.
+
 ## Changelog (newest first)
+
+### 2026-11-04 — Step 6: rate limits + idempotency
+
+- New `src/models/WaAgentQuota.js` (`wa_agent_quotas`): one document per successful write, TTL 24 h, index on `(wa_from, kind, createdAt)`. Mongo rather than memory because every deploy is a `pm2 reload` (discovery §4: one process, but restarted on each deploy).
+- New `src/middleware/waAgentRateLimit.js`: `globalLimiter` (express-rate-limit, already a dependency, fixed key, IP validations off), `senderQuota(kind)`, `idempotentBooking`, `recordEvent`.
+- `src/routes/api/waAgent.js`: global cap after the key check; per-route `validate → idempotentBooking → senderQuota → handler`.
+- `src/controllers/api/waAgentController.js`: both handlers `await recordEvent(...)` before answering.
+- `tests/waAgent.test.js`: +12 cases (112 total): TTL + sender index exist; 4th booking → 429 with 3 records; another sender unaffected; four 409s do not spend the allowance; a booking older than 24 h no longer counts; 6th enquiry → 429 with 5 records; separate allowances; identical booking twice → same body, one record, 2 emails, 1 CRM call, 1 quota record; different time / different sender are new; after the 2-minute window → 409; quota record holds the ref and no `_id`; global cap trips at request 201 (health included), nothing written while capped, reset restores service. Test resets now also clear `wa_agent_quotas` (the step-5 tests re-used a sender and were, correctly, replayed).
+- Postman: new "Rate limits + idempotency" folder (6 requests) with its own sender variables `waFromQuota`, `waFromIdem`; run top to bottom on a day with free 10:00–11:00 IST slots.
+- Tests: existing suite 84/84, gateway 112/112. Live on `cocoma_dev` via newman: 201, 201, 201, 429; idempotent pair → same `booking_ref`, one meeting at 11:00, 3 meetings for the quota sender, TTL index built by Atlas automatically.
 
 ### 2026-11-04 — Step 5: `/book`
 

@@ -12,6 +12,7 @@
 
 const crypto = require('crypto');
 const { createContactEnquiry, createMeetingRequest } = require('../../services/leadIntake');
+const { recordEvent } = require('../../middleware/waAgentRateLimit');
 const { zonedTimeToUtc } = require('../../utils/timezone');
 
 /** Where these records come from — stored on the record and sent to the CRM. */
@@ -59,7 +60,9 @@ const enquiry = async (req, res) => {
     raw: { via: 'whatsapp', wa_ref: ref },
   });
 
-  res.status(201).json({ ok: true, ref });
+  const result = { ok: true, ref };
+  await recordEvent({ kind: 'enquiry', wa_from, ref, result });
+  res.status(201).json(result);
 };
 
 /**
@@ -121,12 +124,15 @@ const book = async (req, res) => {
     return res.status(409).json({ ok: false, reason: 'slot_taken', message: result.message });
   }
 
-  return res.status(201).json({
+  const body = {
     ok: true,
     booking_ref: ref,
     status: 'pending',
     when: formatWhen(result.doc.meeting_start_utc, meeting_timezone),
-  });
+  };
+  // Recorded before answering, so an immediate repeat is already an idempotent replay.
+  await recordEvent({ kind: 'book', wa_from, ref, meeting_date, meeting_time, result: body });
+  return res.status(201).json(body);
 };
 
 module.exports = { enquiry, book, newRef, formatWhen, SOURCE_PAGE, CRM_CHANNEL_ENQUIRY, BOOKING_SERVICE };
