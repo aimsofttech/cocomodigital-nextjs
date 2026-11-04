@@ -21,14 +21,31 @@ Status legend in the tables below: **live** = built and tested; *step N* = plann
 | Method | Path | Purpose | Success | Errors | Status |
 |---|---|---|---|---|---|
 | GET | `/api/wa-agent/health` | Key check only | 200 `{ ok: true }` | 401 | **live** |
-| POST | `/api/wa-agent/enquiry` | Create an enquiry (= website contact form) | 201 `{ ok: true, ref }` | 401, 422, 429 | *step 4* |
-| POST | `/api/wa-agent/book` | Create a pending booking (= website booking) | 201 `{ ok: true, booking_ref, status: "pending", when }` | 400 `slot_not_offered`, 401, 409 `slot_taken`, 422 `invalid_input`, 429 `rate_limited` | *step 5* |
+| POST | `/api/wa-agent/enquiry` | Create an enquiry (= website contact form) | 201 `{ ok: true, ref }` | 401, 413, 422, 429 | validation **live**; handler *step 4* (501 until then) |
+| POST | `/api/wa-agent/book` | Create a pending booking (= website booking) | 201 `{ ok: true, booking_ref, status: "pending", when }` | 400 `slot_not_offered`, 401, 409 `slot_taken`, 413, 422 `invalid_input`, 429 `rate_limited` | validation **live**; handler *step 5* (501 until then) |
 
 Reused as-is, public, no key: `GET /api/contact/availability?date=YYYY-MM-DD&tz=<IANA>` (day's slots, each `booked` true/false) and `?month=YYYY-MM&tz=` (open dates).
 
 Every error has the shape `{ ok: false, reason: "<code>", message: "<one plain sentence the agent can relay>" }`. Unknown paths under the prefix return 404 in the same shape. A 401 is always the same bare body whether the key is missing or wrong.
 
-Header: `X-Agent-Key: <key>`. Optional `X-Conversation-Id` is echoed into the log line only (*step 2*).
+Header: `X-Agent-Key: <key>`. Optional `X-Conversation-Id` is echoed into the log line only.
+
+## Request validation
+
+Bodies must be JSON objects under 16 KB (413 `payload_too_large` otherwise). Every field is checked in the order below and the **first** failure is answered 422 `{ ok: false, reason: "invalid_input", field: "<name>", message: "<rule>" }`; the message names the rule, never the submitted value. Unknown fields are rejected (`field` = the unknown key, or `unknown` if the key itself is not a plain identifier).
+
+| Field | `/book` | `/enquiry` | Rule |
+|---|---|---|---|
+| `wa_from` | required | required | 10–15 digits, no `+`, no spaces |
+| `name` | required | required | 2–80 characters after trimming |
+| `email` | required | required | valid address, ≤ 120 characters, stored lowercased |
+| `meeting_timezone` | required | — | valid IANA zone (`Intl.DateTimeFormat` accepts it), e.g. `Asia/Kolkata` |
+| `meeting_date` | required | — | `YYYY-MM-DD`, a real calendar date, today or later in `meeting_timezone` |
+| `meeting_time` | required | — | `HH:MM:SS`, 24-hour |
+| `service` | — | required | 2–80 characters |
+| `message` | optional | required | ≤ 1,000 characters; newlines kept |
+
+Applied to every string: must be a string (objects, arrays, numbers → 422); **any HTML tag → 422** (not stripped and stored under a different value — `<script>alert(1)</script>` must fail, not become the name `alert(1)`); stray `<`/`>` without a tag shape are removed; control characters removed (newline/tab kept in `message`); a value starting with `$` followed by a letter → 422; strings are hard-capped at 4 KB before any rule runs. Handlers only ever see the cleaned copy.
 
 ## Environment variables
 
@@ -61,6 +78,15 @@ Everything runs against a development database and a local mail sink. Production
 *Completed in step 7: cURL for each action with `REPLACE_ME`, Request-field descriptions, "When should the agent call it" wording.*
 
 ## Changelog (newest first)
+
+### 2026-11-04 — Step 3: validation layer
+
+- New `src/validation/waAgent.js`: hand-written strict schemas for `/book` and `/enquiry` (no validation library in the API; none added). Rules as in the table above; first failing field reported; cleaned copy replaces `req.body`. Decision taken while testing: an HTML tag **rejects** the field rather than being stripped — stripping `<script>alert(1)</script>` yields the valid name `alert(1)`, which would have made the brief's injection test 5 pass silently.
+- New `src/middleware/waAgentBodyLimit.js`: 16 KB ceiling via `Content-Length` and a re-serialised-body backstop (the app parses bodies globally at 50 MB before any router, so a router-level parser limit cannot work).
+- `src/routes/api/waAgent.js`: middleware order is now log → body limit → key → (rate limits, step 6) → per-route validation. `POST /enquiry` and `POST /book` are mounted with validation and answer 501 `not_implemented` after passing it, until their handlers land in steps 4–5. Nothing is written.
+- `tests/waAgent.test.js`: +49 cases (69 total): one per rule in the table, both bounds where there are two; `$`-operator as object and as string; array/number/object in string fields; unknown field; hostile unknown field name reported as `unknown`; HTML in required and optional fields; missing/null/empty required fields; array body; schema-order reporting; cleaning (lowercase, trim, control chars, newlines kept, stray `<` allowed); "today" accepted; 4 KB cap; 20 KB → 413 before the key check; 15 KB passes the gate; `/health` unaffected.
+- Postman: the 16-request "Bad inputs" folder now runs green (newman: 16 requests, 32 assertions, 0 failed). Note on "HTML in name" corrected.
+- Tests: existing suite 84/84, gateway 69/69.
 
 ### 2026-11-04 — Step 2: key middleware + logging
 
