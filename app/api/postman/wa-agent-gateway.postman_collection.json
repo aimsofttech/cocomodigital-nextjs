@@ -1,0 +1,1322 @@
+{
+  "info": {
+    "name": "WhatsApp Agent Gateway (cocomadigital.com)",
+    "description": "Requests for /api/wa-agent. Set baseUrl and agentKey in the \"wa-agent local\" environment. The key is never stored here (REPLACE_ME).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health — with key (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"body is { ok: true }\", () => pm.expect(pm.response.json()).to.eql({ ok: true }));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health — without key (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"bare unauthorized\", () => pm.expect(pm.response.json().reason).to.eql(\"unauthorized\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health — wrong key (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Agent-Key",
+                "value": "wrong-key",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Availability (public, reused as-is)",
+      "item": [
+        {
+          "name": "Day slots",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contact/availability?date={{meetingDate}}&tz=Asia/Kolkata",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contact",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{meetingDate}}"
+                },
+                {
+                  "key": "tz",
+                  "value": "Asia/Kolkata"
+                }
+              ]
+            },
+            "description": "Existing website endpoint. The agent offers only slots from this list."
+          },
+          "response": []
+        },
+        {
+          "name": "Month open dates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contact/availability?month=2026-11&tz=Asia/Kolkata",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contact",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-11"
+                },
+                {
+                  "key": "tz",
+                  "value": "Asia/Kolkata"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Book",
+      "item": [
+        {
+          "name": "Book — open slot (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"pending + booking_ref + when\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(true); pm.expect(j.status).to.eql(\"pending\"); pm.expect(j.booking_ref).to.have.lengthOf(8); pm.expect(j.when).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Book — same slot again (409 slot_taken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"919000000098\",\n  \"name\": \"Test Sender\",\n  \"email\": \"second.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Book — closed day, Sunday (400 slot_not_offered)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"2026-11-08\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Book — New York timezone (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"12125550123\",\n  \"name\": \"Test Sender\",\n  \"email\": \"ny.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"02:30:00\",\n  \"meeting_timezone\": \"America/New_York\",\n  \"message\": \"02:30 New York = 13:00 IST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Enquiry",
+      "item": [
+        {
+          "name": "Enquiry (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"ref returned\", () => pm.expect(pm.response.json().ref).to.have.lengthOf(8));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/enquiry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "enquiry"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"service\": \"Podcast Editing\",\n  \"message\": \"Enquiry from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bad inputs (all 422, field name only)",
+      "item": [
+        {
+          "name": "invalid email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"not-an-email\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "$gt operator in name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": {\n    \"$gt\": \"\"\n  },\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Object where a string is expected, and a Mongo operator."
+          },
+          "response": []
+        },
+        {
+          "name": "$-prefixed string in name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"$where sleep(1000)\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2,000-char message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Limit is 1,000."
+          },
+          "response": []
+        },
+        {
+          "name": "extra unknown field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\",\n  \"status\": \"confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Unknown fields are rejected, not ignored — status is the obvious one to try."
+          },
+          "response": []
+        },
+        {
+          "name": "array in a string field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": [\n    \"a\",\n    \"b\"\n  ],\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "invalid IANA timezone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Mars/Olympus\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "date in the past",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"2020-01-01\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "not a real date",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"2026-02-30\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "time without seconds",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Format is HH:MM:SS."
+          },
+          "response": []
+        },
+        {
+          "name": "wa_from with +",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"+919000000099\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "wa_from too short",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"12345\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "name too short",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"A\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "HTML in name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "book"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"<script>alert(1)</script>\",\n  \"email\": \"test.sender@example.com\",\n  \"meeting_date\": \"{{meetingDate}}\",\n  \"meeting_time\": \"11:00:00\",\n  \"meeting_timezone\": \"Asia/Kolkata\",\n  \"message\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Tags are stripped; what is left (\"\") is too short → 422."
+          },
+          "response": []
+        },
+        {
+          "name": "enquiry — missing service",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/enquiry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "enquiry"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"test.sender@example.com\",\n  \"message\": \"no service\",\n  \"service\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "enquiry — missing email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"422 shape: ok=false, reason=invalid_input, field named, no stack\", () => { const j = pm.response.json(); pm.expect(j.ok).to.eql(false); pm.expect(j.reason).to.eql(\"invalid_input\"); pm.expect(j).to.have.property(\"field\"); pm.expect(pm.response.text()).to.not.match(/at .*\\.js:\\d+/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Agent-Key",
+                "value": "{{agentKey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wa-agent/enquiry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "wa-agent",
+                "enquiry"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wa_from\": \"{{waFrom}}\",\n  \"name\": \"Test Sender\",\n  \"email\": \"\",\n  \"service\": \"Podcast Editing\",\n  \"message\": \"Enquiry from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Email is required on /enquiry in phase 1."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    }
+  ]
+}
