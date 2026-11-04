@@ -41,6 +41,7 @@ const { waAgentAuth } = require('../../middleware/waAgentAuth');
 const { waAgentRequestLog } = require('../../middleware/waAgentRequestLog');
 const { waAgentBodyLimit } = require('../../middleware/waAgentBodyLimit');
 const { validateBody } = require('../../validation/waAgent');
+const { globalLimiter, senderQuota, idempotentBooking } = require('../../middleware/waAgentRateLimit');
 const ctrl = require('../../controllers/api/waAgentController');
 
 // ── request log line (installed first so every outcome, 401 included, is logged)
@@ -52,7 +53,12 @@ router.use(waAgentBodyLimit);
 // ── key check ───────────────────────────────────────────────────────────────
 router.use(waAgentAuth);
 
+// ── global cap: 200 requests / hour for the whole gateway ───────────────────
+router.use(globalLimiter);
+
 // ── endpoints ───────────────────────────────────────────────────────────────
+// Per-sender quota and the duplicate-booking guard sit after validation (they
+// need a clean wa_from) and before the handler.
 
 /** GET /api/wa-agent/health — key check only. */
 router.get('/health', (req, res) => {
@@ -60,10 +66,10 @@ router.get('/health', (req, res) => {
 });
 
 /** POST /api/wa-agent/enquiry — create an enquiry (= website contact form). */
-router.post('/enquiry', validateBody('enquiry'), ctrl.enquiry);
+router.post('/enquiry', validateBody('enquiry'), senderQuota('enquiry'), ctrl.enquiry);
 
 /** POST /api/wa-agent/book — create a PENDING booking (= website booking). */
-router.post('/book', validateBody('book'), ctrl.book);
+router.post('/book', validateBody('book'), idempotentBooking, senderQuota('book'), ctrl.book);
 
 // ── anything else under this prefix ────────────────────────────────────────
 // Express's default 404 is an HTML page; the agent expects the gateway's JSON
