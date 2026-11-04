@@ -62,15 +62,8 @@ router.get('/health', (req, res) => {
 /** POST /api/wa-agent/enquiry — create an enquiry (= website contact form). */
 router.post('/enquiry', validateBody('enquiry'), ctrl.enquiry);
 
-// The /book handler lands in step 5. Until then a request that passes
-// validation is answered 501 so the validation layer stays testable end to
-// end and nothing is written.
-const notImplemented = (req, res) => {
-  res.status(501).json({ ok: false, reason: 'not_implemented', message: 'This action is not available yet.' });
-};
-
-/** POST /api/wa-agent/book — validated; handler lands in step 5. */
-router.post('/book', validateBody('book'), notImplemented);
+/** POST /api/wa-agent/book — create a PENDING booking (= website booking). */
+router.post('/book', validateBody('book'), ctrl.book);
 
 // ── anything else under this prefix ────────────────────────────────────────
 // Express's default 404 is an HTML page; the agent expects the gateway's JSON

@@ -22,7 +22,7 @@ Status legend in the tables below: **live** = built and tested; *step N* = plann
 |---|---|---|---|---|---|
 | GET | `/api/wa-agent/health` | Key check only | 200 `{ ok: true }` | 401 | **live** |
 | POST | `/api/wa-agent/enquiry` | Create an enquiry (= website contact form) | 201 `{ ok: true, ref }` | 401, 413, 422, 429 | **live** |
-| POST | `/api/wa-agent/book` | Create a pending booking (= website booking) | 201 `{ ok: true, booking_ref, status: "pending", when }` | 400 `slot_not_offered`, 401, 409 `slot_taken`, 413, 422 `invalid_input`, 429 `rate_limited` | validation **live**; handler *step 5* (501 until then) |
+| POST | `/api/wa-agent/book` | Create a pending booking (= website booking) | 201 `{ ok: true, booking_ref, status: "pending", when }` | 400 `slot_not_offered`, 401, 409 `slot_taken`, 413, 422 `invalid_input`, 429 `rate_limited` | **live** (429: *step 6*) |
 
 Reused as-is, public, no key: `GET /api/contact/availability?date=YYYY-MM-DD&tz=<IANA>` (day's slots, each `booked` true/false) and `?month=YYYY-MM&tz=` (open dates).
 
@@ -81,7 +81,23 @@ Everything runs against a development database and a local mail sink. Production
 
 Same three steps as the website's Contact Us form, through the same code (`services/leadIntake.js`): one `contact_us` record, one owner email (none to the sender), one CRM lead. Mapping: `wa_from` → `phone`; `service` → `subject` (and CRM `serviceInterest`); `message` stored as `[via WhatsApp · ref XXXXXXXX]\n\n<message>` so the origin and the reference are visible in the admin panel and the email, the way the website prefixes `[Type: …]`; `source_page: "whatsapp"` on the record; CRM channel `whatsapp_inbound`, `source.sourcePage: "whatsapp"`, `source.raw: { subject, via: "whatsapp", wa_ref }`. The `ref` is 8 characters from an alphabet without look-alikes, random, not derived from any id. The CRM's existing phone dedupe applies: a sender already known as a lead gets a "re-enquired" entry on that lead instead of a duplicate.
 
+## What `/book` does
+
+Same sequence as the website's /ScheduleMeeting submit, through the same code (`services/leadIntake.js`, `createMeetingRequest`): the admin-schedule gate on the UTC instant (closed day, blocked date, off-grid time, past) → 400 `slot_not_offered` with the schedule's own sentence; slot already pending/confirmed → 409 `slot_taken`; one `meetings` record with **`status: "pending"`**; the duplicate-key race guard on `slot_hold` → 409; owner + visitor "request received" emails; CRM lead with **channel `meeting`** (so the CRM schedules the discovery call and its reminder exactly as for a website booking), `source.sourcePage: "whatsapp"`, `raw: { meeting_date, meeting_time, meeting_timezone, via: "whatsapp", wa_ref }`. No calendar call: the Meet link is created only when the founder confirms in the admin panel, and that path is unchanged (covered by a test that confirms a WhatsApp booking through the real admin route).
+
+Mapping: `wa_from` → `phone`; `service` = `Discovery Call` (the website's default); `source_page: "whatsapp"`; `notes` = `[via WhatsApp · ref XXXXXXXX]` + the optional message; `meetingDate/Time/Timezone` stored as the sender gave them; `meeting_start_utc` recomputed server-side from them. `when` is the slot on the sender's clock, e.g. `Wed 11 Nov 2026, 3:00 PM IST` / `Wed 11 Nov 2026, 4:30 AM EST` (zone label: IST for India, otherwise the en-US short name such as EST/EDT/GMT/GMT+4).
+
 ## Changelog (newest first)
+
+### 2026-11-04 — Step 5: `/book`
+
+- **Existing file edited (option A):** `src/controllers/api/contactController.js` — the meeting branch of `freeConsultation` (slot gate → taken check → pending create → race guard → emails → CRM) moved verbatim into `createMeetingRequest` in `src/services/leadIntake.js`. The handler keeps its UTC resolution (including the client `meeting_start_utc` fallback), its `if (slot_key)` branch, its status codes and its exact messages. Three imports that moved with the code removed. Net −61 / +15 lines in the controller.
+- `src/controllers/api/waAgentController.js`: `book` handler and `formatWhen`.
+- `src/routes/api/waAgent.js`: `/book` wired; the 501 stub is gone.
+- `tests/waAgent.test.js`: +21 cases (100 total). **Regression** on the website route: 201 shape, every record field, 2 emails, CRM call with the exact `raw`; closed day 400 and taken 409 with the unchanged messages; unusable-timezone fallback still books in studio time. **Gateway:** 201 with exactly `{ ok, booking_ref, status, when }`; `when` for `Asia/Kolkata` (IST) and `America/New_York` (EDT) checked against an independent formatter; record fields incl. `slot_hold`, `status: pending`, `source_page: whatsapp`, prefixed notes, no Meet fields; same key set as a website record; owner email in IST naming WhatsApp and the ref, visitor email in their zone; CRM channel `meeting` + `sourcePage` + `raw`; **zero calendar calls**; 409 from another sender, 409 when the website took the slot first; 400 Sunday / off-grid / outside hours / New York off-grid; race (pre-check bypassed, unique index wins) → 409 with no index name leaked; 500 shape; and a WhatsApp booking **confirmed through the real admin route** → `confirmed`, exactly one calendar call.
+- Tests: existing suite 84/84 (meetingFlow 16/16 over the edited controller), gateway 100/100.
+- Live check against `cocoma_dev` (real CRM ingest, Mailpit): open slot → 201 `when: "Tue 10 Nov 2026, 4:00 PM IST"`, pending record with `source_page: whatsapp`; slot held by the seed's confirmed meeting → 409; seeded occupied Monday 11:00 → 409; Sunday → 400 with the schedule's sentence; `America/New_York 02:30` → 201 `when: "… 2:30 AM EST"`, stored `07:30Z` (13:00 IST), owner email "… 1:00 PM (IST)", visitor email in their zone; CRM lead channel `meeting`, score 40 / warm, `raw.wa_ref` set.
+- **Pre-existing CRM issue found (not introduced here, not fixed here — CRM is out of scope):** `leadIngest` logs `CrmCall validation failed: ownerId: Path 'ownerId' is required` for every `meeting`-channel lead, website bookings included (verified side by side on the dev DB). The lead is created; the auto-scheduled discovery call, its reminder job, the "new lead" notification and the automation event after it are skipped. Likely the same on production unless leads get an owner before ingest. Worth a separate ticket for the CRM.
 
 ### 2026-11-04 — Step 4: `/enquiry`
 

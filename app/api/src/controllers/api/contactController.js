@@ -1,13 +1,12 @@
 const FreeConsultationItem = require('../../models/FreeConsultationItem');
 const Meeting = require('../../models/Meeting');
-const { sendBookingEmails, sendMeetingRequestEmails } = require('../../services/bookingMailer');
-const { createContactEnquiry } = require('../../services/leadIntake');
-const { zonedTimeToUtc, wallClockInZone, isValidTimeZone } = require('../../utils/timezone');
+const { sendBookingEmails } = require('../../services/bookingMailer');
+const { createContactEnquiry, createMeetingRequest } = require('../../services/leadIntake');
+const { zonedTimeToUtc, isValidTimeZone } = require('../../utils/timezone');
 const {
   getAvailabilityConfig,
   slotsForViewerDate,
   openViewerDatesInRange,
-  validateBookingInstant,
   addDays,
 } = require('../../utils/bookingWindow');
 const { ingestSafe: crmIngest } = require('../../crm/services/leadIngest');
@@ -152,76 +151,24 @@ const freeConsultation = async (req, res) => {
 
   // ── Meeting booking (from /ScheduleMeeting) ──────────────────────────────
   if (slot_key) {
-    /* Enforce the admin's availability server-side. The picker already hides
-       disabled days and slots, but this endpoint is reachable directly, so the
-       UI's rule cannot be the only one.
-
-       The check runs on the resolved UTC instant, not on the wall-clock fields:
-       a direct caller can omit meeting_date/meeting_time, or state a timezone
-       they aren't in, and the instant they actually asked for is still the one
-       measured against the studio's schedule. */
-    const slotCheck = await validateBookingInstant(resolvedStartUtc);
-    if (!slotCheck.ok) {
-      return res.status(400).json({ status: 'error', message: slotCheck.message });
-    }
-
-    const taken = await Meeting.findOne({ slot_key, status: { $in: ['pending', 'confirmed'] } }).lean();
-    if (taken) {
-      return res.status(409).json({ status: 'error', message: 'That time slot is no longer available. Please pick another.' });
-    }
-
-    /* Without a usable visitor zone, the stored wall-clock is re-derived in the
-       studio's zone so date, time and zone always describe the same instant —
-       the visitor's emails then show the slot in studio time, labelled as such. */
-    const storedTz = visitorTz || slotCheck.config.timezone;
-    const wall = visitorTz ? null : wallClockInZone(resolvedStartUtc, storedTz);
-
-    let doc;
-    try {
-      doc = await Meeting.create({
-        userName: name,
-        email,
-        phone,
-        companyName: company,
-        meetingDate: wall ? wall.date : meeting_date,
-        meetingTime: wall ? wall.time : meeting_time,
-        meetingTimezone: storedTz,
-        meeting_start_utc: resolvedStartUtc,
-        slot_key,
-        duration: 15,
-        notes: notes || message,
-        service,
-        source_page,
-        status: 'pending',
-      });
-    } catch (err) {
-      if (err && err.code === 11000) {
-        return res.status(409).json({ status: 'error', message: 'That time slot was just booked. Please pick another.' });
-      }
-      throw err;
-    }
-
-    // Not awaited — the slot is already reserved; sendMail logs its own
-    // delivery result, this catch only covers a failure building the message.
-    sendMeetingRequestEmails({
-      name, email: doc.email, phone, companyName: company, service, notes: doc.notes,
-      meeting_date: doc.meetingDate,
-      meeting_time: doc.meetingTime,
-      meeting_timezone: doc.meetingTimezone,
-      meeting_start_utc: doc.meeting_start_utc,
-      createdAt: doc.createdAt,
-      meetingId: doc._id.toString(),
-    }).catch((err) => logger.error(`Meeting request emails failed for meeting ${doc._id}: ${err.message}`));
-
-    crmIngest({
-      channel: 'meeting', externalCollection: 'meetings', externalId: doc._id,
-      name, email, phone, company, message: notes || message,
-      serviceInterest: service, sourcePage: source_page,
-      meetingStartUtc: doc.meeting_start_utc,
-      raw: { meeting_date, meeting_time, meeting_timezone },
+    /* Slot gate, taken check, pending create, race guard, emails, CRM mirror —
+       the shared sequence in services/leadIntake.js, also used by the WhatsApp
+       agent gateway. The check runs on the resolved UTC instant, not on the
+       wall-clock fields: a direct caller can omit meeting_date/meeting_time,
+       or state a timezone they aren't in, and the instant they actually asked
+       for is still the one measured against the studio's schedule. */
+    const result = await createMeetingRequest({
+      startUtc: resolvedStartUtc, visitorTz, meeting_date, meeting_time, meeting_timezone,
+      name, email, phone, company, service, source_page, notes, message,
     });
+    if (result.status === 'not_offered') {
+      return res.status(400).json({ status: 'error', message: result.message });
+    }
+    if (result.status === 'taken') {
+      return res.status(409).json({ status: 'error', message: result.message });
+    }
 
-    return res.status(201).json({ status: 'success', message: 'Meeting request submitted. You will receive a confirmation email once your meeting is approved.', data: doc });
+    return res.status(201).json({ status: 'success', message: 'Meeting request submitted. You will receive a confirmation email once your meeting is approved.', data: result.doc });
   }
 
   // ── General consultation lead (no meeting slot) ───────────────────────────
