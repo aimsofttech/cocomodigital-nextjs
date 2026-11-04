@@ -62,6 +62,14 @@ Everything runs against a development database and a local mail sink. Production
 
 ## Changelog (newest first)
 
+### 2026-11-04 — Step 2: key middleware + logging
+
+- Key middleware was already complete from step 1 (multi-key, timing-safe, bare 401, 401 logged with IP + 4-char prefix). No change to `waAgentAuth.js`.
+- New `src/middleware/waAgentRequestLog.js`, mounted first in the router: one `info` line per request, `[wa-agent] <METHOD> <path> status=<code> reason=<ok|code> wa_from=<digits|-> conv=<X-Conversation-Id|->`. `reason` is read from the JSON actually sent (res.json wrapped per request), so a handler cannot forget it. `wa_from` is logged only when it is 10–15 digits, otherwise `-`; the conversation id is reduced to `[A-Za-z0-9_.:-]` and capped at 64 chars. Never the body, an email or the key.
+- `tests/waAgent.test.js`: +6 cases (20 total) — one line per request with exact format; 401 line carries no key; body fields (name, email, message) never appear; non-numeric `wa_from` logged as `-`; conversation id sanitised and capped; line written even when the key is missing.
+- Postman: `X-Conversation-Id` example header on "Health — with key".
+- Tests: existing suite 84/84, gateway 20/20. Live boot: three requests produced three `[wa-agent]` lines; grep for the key, the name and the email in the log → 0 hits.
+
 ### 2026-11-04 — Step 1: scaffold + health
 
 - New `src/routes/api/waAgent.js`: rules comment block, `GET /health`, JSON 404 for unknown paths, router-local error handler so nothing reaches the app's shared `errorHandler` (which returns raw error messages and duplicate-key field names).

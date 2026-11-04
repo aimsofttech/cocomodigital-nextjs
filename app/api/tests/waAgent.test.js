@@ -3,8 +3,9 @@
 // Same style as tests/meetingFlow.test.js: plain Node + assert, the real
 // router mounted on a throwaway Express app, no test framework.
 //
-// Step 1 scope: key check and the health endpoint. No database needed yet;
-// later steps add the booking/enquiry cases against a local MongoDB.
+// Steps 1–2 scope: key check, the health endpoint, and the per-request log
+// line. No database needed yet; later steps add the booking/enquiry cases
+// against a local MongoDB.
 //
 //   node tests/waAgent.test.js
 
@@ -151,6 +152,81 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     logged.length = 0;
     await call('GET', '/api/wa-agent/health', { key: 'testkey1' });
     assert.ok(!logged.some((m) => String(m).includes('testkey1')));
+  });
+
+  // ── step 2: one [wa-agent] request line per call ─────────────────────────
+  const requestLine = () => logged.map(String).find((m) => /^\[wa-agent\] (GET|POST) /.test(m));
+  // Give the 'finish' hook a tick to run after the response body arrives.
+  const settle = () => new Promise((r) => setTimeout(r, 20));
+
+  await test('every request logs exactly one [wa-agent] line with endpoint, status and reason', async () => {
+    logged.length = 0;
+    await call('GET', '/api/wa-agent/health', { key: 'testkey1' });
+    await settle();
+    const lines = logged.map(String).filter((m) => /^\[wa-agent\] GET /.test(m));
+    assert.strictEqual(lines.length, 1, JSON.stringify(logged));
+    assert.strictEqual(lines[0], '[wa-agent] GET /health status=200 reason=ok wa_from=- conv=-');
+  });
+
+  await test('a 401 is logged with reason=unauthorized and no key', async () => {
+    logged.length = 0;
+    await call('GET', '/api/wa-agent/health', { key: 'supersecretguess' });
+    await settle();
+    const line = requestLine();
+    assert.ok(line, 'expected a request line');
+    assert.ok(line.includes('status=401 reason=unauthorized'), line);
+    assert.ok(!logged.some((m) => String(m).includes('supersecretguess')));
+  });
+
+  await test('wa_from and X-Conversation-Id appear in the line; nothing else from the body does', async () => {
+    logged.length = 0;
+    await call('POST', '/api/wa-agent/book', {
+      key: 'testkey1',
+      body: { wa_from: '919000000099', name: 'Secret Person', email: 'secret@example.com', message: 'confidential' },
+      rawHeaders: { 'X-Conversation-Id': 'conv_ABC-123' },
+    });
+    await settle();
+    const line = requestLine();
+    assert.ok(line, 'expected a request line');
+    assert.strictEqual(line, '[wa-agent] POST /book status=404 reason=not_found wa_from=919000000099 conv=conv_ABC-123');
+    const all = logged.join('\n');
+    for (const leak of ['Secret Person', 'secret@example.com', 'confidential', 'testkey1']) {
+      assert.ok(!all.includes(leak), `log must not contain "${leak}"`);
+    }
+  });
+
+  await test('a wa_from that is not 10–15 digits is logged as "-", never verbatim', async () => {
+    logged.length = 0;
+    await call('POST', '/api/wa-agent/enquiry', {
+      key: 'testkey1',
+      body: { wa_from: '<script>alert(1)</script>', name: 'x' },
+    });
+    await settle();
+    const line = requestLine();
+    assert.ok(line.includes('wa_from=-'), line);
+    assert.ok(!logged.join('\n').includes('<script>'));
+  });
+
+  await test('a conversation id is sanitised and capped at 64 characters', async () => {
+    logged.length = 0;
+    await call('GET', '/api/wa-agent/health', {
+      key: 'testkey1',
+      // (a newline cannot be sent at all — fetch rejects it client-side)
+      rawHeaders: { 'X-Conversation-Id': 'a b<c>' + 'x'.repeat(200) },
+    });
+    await settle();
+    const line = requestLine();
+    const conv = /conv=(\S+)/.exec(line)[1];
+    assert.ok(conv.startsWith('abcx'), conv);
+    assert.strictEqual(conv.length, 64);
+    assert.ok(!line.includes('<'));
+  });
+
+  await test('the request line is still written when the key is missing entirely', async () => {
+    logged.length = 0;
+    await call('GET', '/api/wa-agent/health');
+    await settle();
+    assert.ok(requestLine().includes('status=401 reason=unauthorized wa_from=- conv=-'));
   });
 
   server.close();

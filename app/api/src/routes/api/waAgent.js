@@ -38,6 +38,10 @@
 const router = require('express').Router();
 const logger = require('../../utils/logger');
 const { waAgentAuth } = require('../../middleware/waAgentAuth');
+const { waAgentRequestLog } = require('../../middleware/waAgentRequestLog');
+
+// ── request log line (installed first so every outcome, 401 included, is logged)
+router.use(waAgentRequestLog);
 
 // ── key check ───────────────────────────────────────────────────────────────
 router.use(waAgentAuth);
