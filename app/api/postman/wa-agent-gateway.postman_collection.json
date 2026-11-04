@@ -1209,7 +1209,7 @@
                 }
               }
             },
-            "description": "Tags are stripped; what is left (\"\") is too short → 422."
+            "description": "Any HTML tag in any field is rejected (422), never stripped and stored under a different value."
           },
           "response": []
         },
