@@ -41,6 +41,7 @@ const { waAgentAuth } = require('../../middleware/waAgentAuth');
 const { waAgentRequestLog } = require('../../middleware/waAgentRequestLog');
 const { waAgentBodyLimit } = require('../../middleware/waAgentBodyLimit');
 const { validateBody } = require('../../validation/waAgent');
+const ctrl = require('../../controllers/api/waAgentController');
 
 // ── request log line (installed first so every outcome, 401 included, is logged)
 router.use(waAgentRequestLog);
@@ -58,15 +59,15 @@ router.get('/health', (req, res) => {
   res.json({ ok: true });
 });
 
-// Handlers arrive in steps 4 (enquiry) and 5 (book). Until then a request that
-// passes validation is answered 501 so the validation layer is testable end
-// to end and nothing is written.
+/** POST /api/wa-agent/enquiry — create an enquiry (= website contact form). */
+router.post('/enquiry', validateBody('enquiry'), ctrl.enquiry);
+
+// The /book handler lands in step 5. Until then a request that passes
+// validation is answered 501 so the validation layer stays testable end to
+// end and nothing is written.
 const notImplemented = (req, res) => {
   res.status(501).json({ ok: false, reason: 'not_implemented', message: 'This action is not available yet.' });
 };
-
-/** POST /api/wa-agent/enquiry — validated; handler lands in step 4. */
-router.post('/enquiry', validateBody('enquiry'), notImplemented);
 
 /** POST /api/wa-agent/book — validated; handler lands in step 5. */
 router.post('/book', validateBody('book'), notImplemented);

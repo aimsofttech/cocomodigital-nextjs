@@ -21,7 +21,7 @@ Status legend in the tables below: **live** = built and tested; *step N* = plann
 | Method | Path | Purpose | Success | Errors | Status |
 |---|---|---|---|---|---|
 | GET | `/api/wa-agent/health` | Key check only | 200 `{ ok: true }` | 401 | **live** |
-| POST | `/api/wa-agent/enquiry` | Create an enquiry (= website contact form) | 201 `{ ok: true, ref }` | 401, 413, 422, 429 | validation **live**; handler *step 4* (501 until then) |
+| POST | `/api/wa-agent/enquiry` | Create an enquiry (= website contact form) | 201 `{ ok: true, ref }` | 401, 413, 422, 429 | **live** |
 | POST | `/api/wa-agent/book` | Create a pending booking (= website booking) | 201 `{ ok: true, booking_ref, status: "pending", when }` | 400 `slot_not_offered`, 401, 409 `slot_taken`, 413, 422 `invalid_input`, 429 `rate_limited` | validation **live**; handler *step 5* (501 until then) |
 
 Reused as-is, public, no key: `GET /api/contact/availability?date=YYYY-MM-DD&tz=<IANA>` (day's slots, each `booked` true/false) and `?month=YYYY-MM&tz=` (open dates).
@@ -77,7 +77,21 @@ Everything runs against a development database and a local mail sink. Production
 
 *Completed in step 7: cURL for each action with `REPLACE_ME`, Request-field descriptions, "When should the agent call it" wording.*
 
+## What `/enquiry` does
+
+Same three steps as the website's Contact Us form, through the same code (`services/leadIntake.js`): one `contact_us` record, one owner email (none to the sender), one CRM lead. Mapping: `wa_from` → `phone`; `service` → `subject` (and CRM `serviceInterest`); `message` stored as `[via WhatsApp · ref XXXXXXXX]\n\n<message>` so the origin and the reference are visible in the admin panel and the email, the way the website prefixes `[Type: …]`; `source_page: "whatsapp"` on the record; CRM channel `whatsapp_inbound`, `source.sourcePage: "whatsapp"`, `source.raw: { subject, via: "whatsapp", wa_ref }`. The `ref` is 8 characters from an alphabet without look-alikes, random, not derived from any id. The CRM's existing phone dedupe applies: a sender already known as a lead gets a "re-enquired" entry on that lead instead of a duplicate.
+
 ## Changelog (newest first)
+
+### 2026-11-04 — Step 4: `/enquiry`
+
+- **Existing file edited (option A, agreed in step 0):** `src/controllers/api/contactController.js` — the `contact` handler's three calls (`ContactUs.create` → `sendContactEnquiryEmail` → `crmIngest`) moved verbatim into new `src/services/leadIntake.js` (`createContactEnquiry`); the handler keeps its parsing, 400 check and response. Two imports that moved with the calls removed. Net: −23 / +5 lines in the controller.
+- New `src/services/leadIntake.js`: optional `source_page`, `channel`, `raw` with defaults chosen so an unchanged caller yields an unchanged record, email and CRM call (`source_page` is only written when given — website records gain no field).
+- New `src/controllers/api/waAgentController.js`: `enquiry` handler and `newRef()`.
+- `src/routes/api/waAgent.js`: `/enquiry` wired to the handler; `/book` still 501 until step 5.
+- `tests/waAgent.test.js` now needs the local test MongoDB (`wa_agent_test`, refuses non-local URIs) and fakes SMTP + CRM ingest like `meetingFlow.test.js`. +10 cases (79 total): **regression** — website `POST /api/contact` response shape, record fields (no `source_page`), one owner email with reply-to, CRM call (`contact_form`, `raw: { subject }`, no `sourcePage`), 400 wording; **gateway** — 201 `{ ok, ref }` only, no `_id` in the response; record phone/subject/source_page/message prefix; same key set as a website record apart from `source_page`; one owner email naming the service and the ref, none to the sender; CRM call with `whatsapp_inbound`, `sourcePage`, `raw`; distinct refs; a failing write → 500 in the gateway shape with the error text kept out of the response.
+- Tests: existing suite 84/84 (meetingFlow 16/16 over the edited controller), gateway 79/79.
+- Live check against `cocoma_dev` (real CRM ingest, Mailpit): `POST /enquiry` → 201 `{ ok, ref }`; `contact_us` record with `phone = wa_from`, `subject = service`, `source_page: whatsapp`, prefixed message; `crm_leads` record `source.channel: whatsapp_inbound`, `sourcePage: whatsapp`, `raw.wa_ref` = the ref, score 10 / cold (phone +10; the channel itself scores 0 in the CRM's table); one email to `OWNER_EMAIL` "New enquiry: Live Check — Podcast Editing", none to the sender; log `[wa-agent] POST /enquiry status=201 reason=ok wa_from=… conv=live-check-4`.
 
 ### 2026-11-04 — Step 3: validation layer
 
