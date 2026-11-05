@@ -259,11 +259,51 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     await settle();
     const line = requestLine();
     assert.ok(line, 'expected a request line');
-    assert.strictEqual(line, '[wa-agent] POST /book status=422 reason=invalid_input wa_from=919000000099 conv=conv_ABC-123');
+    // (first missing required field in schema order is meeting_timezone)
+    assert.strictEqual(line, '[wa-agent] POST /book status=422 reason=invalid_input field=meeting_timezone wa_from=919000000099 conv=conv_ABC-123');
     const all = logged.join('\n');
     for (const leak of ['Secret Person', 'secret@example.com', 'confidential', 'testkey1']) {
       assert.ok(!all.includes(leak), `log must not contain "${leak}"`);
     }
+  });
+
+  await test('a 422 on wa_from names the field but still logs wa_from=- (the value never appears)', async () => {
+    // The real-chat failure of 2026-11-05: the platform sent a sender number
+    // the schema rejects. Before this line carried `field=`, that was
+    // indistinguishable from any other 422.
+    logged.length = 0;
+    await call('POST', '/api/wa-agent/book', {
+      key: 'testkey1',
+      body: { wa_from: '+31 6 12345678', name: 'Dave', email: 'dave@example.com', meeting_timezone: 'Asia/Kolkata', meeting_date: '2099-11-09', meeting_time: '16:00:00' },
+    });
+    await settle();
+    const line = requestLine();
+    assert.strictEqual(line, '[wa-agent] POST /book status=422 reason=invalid_input field=wa_from wa_from=- conv=-');
+    assert.ok(!logged.join('\n').includes('+31'), 'the rejected value must not be logged');
+  });
+
+  await test('a 422 for an unknown field with a hostile name logs field=unknown, never the raw name', async () => {
+    logged.length = 0;
+    await call('POST', '/api/wa-agent/enquiry', {
+      key: 'testkey1',
+      body: { wa_from: '919000000099', name: 'x', '<img src=x onerror=alert(1)>': 1 },
+    });
+    await settle();
+    const line = requestLine();
+    assert.ok(line.includes('reason=invalid_input field=unknown wa_from=919000000099'), line);
+    assert.ok(!logged.join('\n').includes('onerror'));
+  });
+
+  await test('field= appears on a 422 only: a 401 and a 404 line carry no field', async () => {
+    logged.length = 0;
+    await call('POST', '/api/wa-agent/book', { key: 'nope', body: { wa_from: 'x' } });
+    await settle();
+    assert.ok(!requestLine().includes('field='), requestLine());
+    logged.length = 0;
+    await call('GET', '/api/wa-agent/nothing-here', { key: 'testkey1' });
+    await settle();
+    assert.ok(requestLine().includes('status=404 reason=not_found wa_from=- conv=-'), requestLine());
+    assert.ok(!requestLine().includes('field='));
   });
 
   await test('a wa_from that is not 10–15 digits is logged as "-", never verbatim', async () => {
