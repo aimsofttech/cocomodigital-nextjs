@@ -30,6 +30,8 @@ Every error has the shape `{ ok: false, reason: "<code>", message: "<one plain s
 
 Header: `X-Agent-Key: <key>`. Optional `X-Conversation-Id` is echoed into the log line only.
 
+Log line, one per request (`logs/combined.log`): `[wa-agent] <METHOD> <path> status=<code> reason=<ok|code> wa_from=<digits|-> conv=<id|->`. A 422 adds `field=<schema key>` after the reason (the key only, never the value), so a malformed call from AiSensy can be diagnosed from the log alone. Nothing else from the request is ever logged.
+
 ## Request validation
 
 Bodies must be JSON objects under 16 KB (413 `payload_too_large` otherwise). Every field is checked in the order below and the **first** failure is answered 422 `{ ok: false, reason: "invalid_input", field: "<name>", message: "<rule>" }`; the message names the rule, never the submitted value. Unknown fields are rejected (`field` = the unknown key, or `unknown` if the key itself is not a plain identifier).
@@ -228,6 +230,12 @@ Mapping: `wa_from` → `phone`; `service` = `Discovery Call` (the website's defa
 Order inside the router: request log → 16 KB body gate → key → global cap → (per route) validation → idempotency replay → per-sender quota → handler → record the success. The record (`wa_agent_quotas`: kind, `wa_from`, ref, date/time, the 201 body) is written before the response is sent, so an immediate retry already sees it.
 
 ## Changelog (newest first)
+
+### 2026-11-05 — Log the failing field on 422 (handover item 3)
+
+- `src/middleware/waAgentRequestLog.js`: when the response is `invalid_input`, the request line now carries `field=<schema key>` after `reason=`, e.g. `[wa-agent] POST /book status=422 reason=invalid_input field=wa_from wa_from=- conv=-`. The name is re-checked in the middleware against the same `[A-Za-z0-9_]{1,40}` shape validation uses; the value is still never logged (a rejected `wa_from` stays `wa_from=-`). No other outcome's line changes.
+- Why: the first real-chat booking (2026-11-05 07:30Z) was logged as `422 invalid_input wa_from=-` and AiSensy keeps no action log, so which field the platform sent wrong could not be told. Next time the line says so.
+- `tests/waAgent.test.js`: +3 cases (115 total): a 422 on `wa_from` logs `field=wa_from` and not the value; an unknown field with a hostile name logs `field=unknown`; 401 and 404 lines carry no `field=`. The exact-format 422 assertion from step 2 updated for the new token. Existing suite 84/84.
 
 ### 2026-11-04 — Step 7: AiSensy connection, lint, diff review
 
