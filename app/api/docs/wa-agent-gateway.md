@@ -246,14 +246,14 @@ Paste the HTTPS URL as the base URL of the three actions in AiSensy, set `X-Agen
 3. In AiSensy, switch the three actions' base URL to `https://cocomadigital.com` and the header to the new key. Run each action's Test.
 4. Watch `pm2 logs cocoma-api | grep wa-agent` during the first real conversations.
 
-## Phase 2 (planned, not built): WhatsApp confirmation when the team confirms
+## Phase 2: WhatsApp confirmation when the team confirms
 
-Decided with Kirk on 2026-11-06. Separate branch and PR, after the gateway PR.
+Decided with Kirk on 2026-11-06, built and tested the same day on branch `feature/kd/whatsapp-confirm` (own PR, after this one; not yet exercised against AiSensy itself). Full doc: `docs/wa-agent-whatsapp-confirm.md`. The decisions, kept here for the record:
 
 - **What**: when an admin clicks Confirm on a meeting whose `source_page` is `whatsapp`, the person gets a WhatsApp message in the same chat with the bot: name, confirmed time in their timezone, booking ref and the Google Meet link. Email keeps going out exactly as today.
 - **Who**: strictly meetings created by the WhatsApp agent. Never website bookings or other leads, they did not opt in to WhatsApp.
 - **Transport**: AiSensy's API, because the bot number is a WhatsApp Business API number managed by AiSensy; nothing else can send from it. The CRM's Twilio / Meta Cloud sender cannot. Two options: the documented Campaign API (`POST https://backend.aisensy.com/campaign/t1/api/v2`, body `apiKey`, `campaignName`, `destination`, `userName`, `templateParams[]`, docs: https://wiki.aisensy.com/en/articles/11501889-api-reference-docs) or the newer Project API (`POST https://apis.aisensy.com/project-apis/v1/project/{project_id}/messages`, header `X-AiSensy-Project-API-Pwd`, Meta-style `template` object, docs: https://aisensy.stoplight.io/docs/project-api, browser only). Start with the Campaign API.
-- **Template**: confirmations arrive hours after the chat, outside WhatsApp's 24-hour free-text window, so a Meta-approved Utility template is required from day one. Suggested `meeting_confirmed_v1`: "Hi {{1}}, your Cocoma Digital discovery call is confirmed for {{2}}. Reference {{3}}. Join here: {{4}}". AiSensy rejects the call unless `templateParams` has exactly as many entries as the template; when there is no Meet link, send "the link will follow by email" as the fourth value.
+- **Template**: confirmations arrive hours after the chat, outside WhatsApp's 24-hour free-text window, so a Meta-approved Utility template is required from day one. Template `meeting_confirmed_v1` (body in `docs/wa-agent-whatsapp-confirm.md`; it must not end with a variable, Meta rejects "trailing parameters"). AiSensy rejects the call unless `templateParams` has exactly as many entries as the template; when there is no Meet link, the fourth value is "link to follow by email".
 - **AiSensy setup**: create and get the template approved; Campaigns → Launch campaign → API campaign on that template, set Live; Developer → generate the API Campaign key; share the key via 1Password only.
 - **Code sketch**: new `src/services/aisensyNotify.js` with `sendMeetingConfirmedWhatsapp(meeting)`; disabled unless `AISENSY_API_KEY` and `AISENSY_CONFIRM_CAMPAIGN` are set (so dev and tests never send); destination `+` + stored digits; one log line, never the key. One fire-and-forget call in `confirm` in `src/controllers/admin/meetingController.js`, next to `sendMeetingConfirmedEmails`, guarded by `source_page === 'whatsapp'`. Reject and reschedule templates can follow.
 - **Accepted risk**: while `wa_from` can be typed by the person (see the mapping note above), the message goes to whatever number they gave.
@@ -282,6 +282,12 @@ Mapping: `wa_from` → `phone`; `service` = `Discovery Call` (the website's defa
 Order inside the router: request log → 16 KB body gate → key → global cap → (per route) validation → idempotency replay → per-sender quota → handler → record the success. The record (`wa_agent_quotas`: kind, `wa_from`, ref, date/time, the 201 body) is written before the response is sent, so an immediate retry already sees it.
 
 ## Changelog (newest first)
+
+### 2026-11-06 (evening) — First real end-to-end run, `$MobileNumber` verdict
+
+- Real chat from a second test number through the tunnel: 14:01:17Z `POST /book 422 invalid_input field=wa_from shape=missing` **with `$MobileNumber` typed into "Fill from an existing attribute"**, so that attribute does not reach the action (handover §5 item 1, outcome 2). The agent asked for the number as the prompt instructs, the person typed it, 14:03:21Z `201` ref `VMWP83E4`, `wa_from=918655451464`. Record, quota entry, CRM lead (`meeting`, `sourcePage: whatsapp`, score 40), owner + visitor request mails in Mailpit all correct. Admin confirm at 14:04:15Z → confirmed, both confirmed mails, and the phase 2 WhatsApp confirmation delivered (`[aisensy] confirm status=sent http=200`).
+- Next for AiSensy (Kirk): set the `wa_from` field on both actions to "Ask the user" and change prompt bullet 4 to ask once, before the first action; raise the empty attribute with AiSensy support. No validator change: the platform sent nothing, not a `+`.
+- No code change. The only error line was the parked CRM `ownerId` one.
 
 ### 2026-11-06 — First real-number chat, `$MobileNumber`, phase 2 decided
 

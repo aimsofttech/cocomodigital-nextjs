@@ -5,6 +5,7 @@ const GroupServiceItem = require('../../models/GroupServiceItem');
 const GroupServiceCategory = require('../../models/GroupServiceCategory');
 const { createMeetingEvent, updateMeetingEvent, cancelMeetingEvent } = require('../../services/calendarService');
 const { sendMeetingConfirmedEmails, sendMeetingRejectedEmail, sendMeetingRescheduledEmails, sendMeetingAssignedEmails } = require('../../services/bookingMailer');
+const { sendMeetingConfirmedWhatsapp } = require('../../services/aisensyNotify');
 const logger = require('../../utils/logger');
 // The slot grid and open/closed rule are the admin's own configuration, read
 // through the one module the public booking path also uses.
@@ -133,6 +134,7 @@ const meetingFields = (doc) => ({
   meeting_time: doc.meetingTime,
   meeting_timezone: doc.meetingTimezone,
   meeting_start_utc: doc.meeting_start_utc,
+  source_page: doc.source_page,
   createdAt: doc.createdAt,
   meetingId: doc._id.toString(),
   assigneeEmail: doc.assignedTo?.email,
@@ -202,6 +204,13 @@ const confirm = async (req, res) => {
 
   sendMeetingConfirmedEmails(meetingFields(doc))
     .catch((e) => logger.error(`confirm email error for meeting ${doc._id}: ${e.message}`));
+  /* Bookings made through the WhatsApp agent also get the confirmation in
+     their WhatsApp chat. Website bookings never do (they did not opt in).
+     The service is a no-op unless AiSensy is configured, and never throws. */
+  if (doc.source_page === 'whatsapp') {
+    sendMeetingConfirmedWhatsapp(meetingFields(doc))
+      .catch((e) => logger.error(`confirm WhatsApp error for meeting ${doc._id}: ${e.message}`));
+  }
 
   res.json({ status: 'success', message: 'Meeting confirmed and emails sent', data: doc });
 };
