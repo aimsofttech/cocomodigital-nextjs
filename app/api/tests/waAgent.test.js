@@ -278,8 +278,41 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     });
     await settle();
     const line = requestLine();
-    assert.strictEqual(line, '[wa-agent] POST /book status=422 reason=invalid_input field=wa_from wa_from=- conv=-');
+    assert.strictEqual(line, '[wa-agent] POST /book status=422 reason=invalid_input field=wa_from shape=+dd d dddddddd wa_from=- conv=-');
     assert.ok(!logged.join('\n').includes('+31'), 'the rejected value must not be logged');
+  });
+
+  await test('shape= says what kind of wa_from arrived: missing, empty, null, number, masked string; never a digit', async () => {
+    // The two real-chat failures of 2026-11-05 were "wa_from is required" —
+    // the platform sent nothing. shape= now distinguishes that from a format problem.
+    const cases = [
+      [{}, 'shape=missing'],
+      [{ wa_from: '' }, 'shape=empty'],
+      [{ wa_from: '   ' }, 'shape=empty'],
+      [{ wa_from: null }, 'shape=null'],
+      [{ wa_from: 917506289633 }, 'shape=number'],
+      [{ wa_from: ['917506289633'] }, 'shape=array'],
+      [{ wa_from: '+91-75062 89633' }, 'shape=+dd-ddddd ddddd'],
+      [{ wa_from: 'tel:917506289633' }, 'shape=????dddddddddddd'],
+      [{ wa_from: '+' + '9'.repeat(40) }, 'shape=+' + 'd'.repeat(23) + '…'],
+    ];
+    for (const [partial, expected] of cases) {
+      logged.length = 0;
+      await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: { ...partial, name: 'Dave', email: 'dave@example.com', meeting_timezone: 'Asia/Kolkata', meeting_date: '2099-11-09', meeting_time: '16:00:00' } });
+      await settle();
+      const line = requestLine();
+      assert.ok(line.includes(`field=wa_from ${expected} wa_from=- conv=-`), `${JSON.stringify(partial)} → ${line}`);
+      assert.ok(!/shape=\S*[0-9]/.test(line), `no digit may survive masking: ${line}`);
+    }
+  });
+
+  await test('shape= appears only when the failing field is wa_from', async () => {
+    logged.length = 0;
+    await call('POST', '/api/wa-agent/book', { key: 'testkey1', body: { wa_from: '919000000099', name: 'D', email: 'dave@example.com', meeting_timezone: 'Asia/Kolkata', meeting_date: '2099-11-09', meeting_time: '16:00:00' } });
+    await settle();
+    const line = requestLine();
+    assert.ok(line.includes('field=name wa_from=919000000099'), line);
+    assert.ok(!line.includes('shape='), line);
   });
 
   await test('a 422 for an unknown field with a hostile name logs field=unknown, never the raw name', async () => {
