@@ -115,7 +115,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
             This time isn&apos;t confirmed yet. Anil checks every request
             personally, usually within one working day. We&apos;ve emailed{" "}
             <strong>{email || "your inbox"}</strong> to say we received it, and a
-            second email with your Google Meet link follows once he confirms.
+            second email with your Google Meet link follows once we confirm.
           </p>
         </section>
 

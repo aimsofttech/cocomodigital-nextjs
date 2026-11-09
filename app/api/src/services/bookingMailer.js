@@ -231,7 +231,7 @@ const sendMeetingRequestEmails = async (booking = {}) => {
   const requestIntroFor = (name, slot) =>
     `Hi ${name}, thanks for requesting a discovery call${slot ? ` for ${slot}` : ''}. ` +
     `It isn't confirmed yet: Anil checks each request so he can make sure the time works and read your brief first. ` +
-    `You'll hear from us within one working day. Once he confirms, a second email brings your Google Meet link. ` +
+    `You'll hear from us within one working day. Once we confirm, a second email brings your Google Meet link. ` +
     `If you don't hear from us by then, just reply to this email.`;
   const requestIntro = requestIntroFor(esc(firstName), esc(userSlot));
   const requestIntroText = requestIntroFor(firstName, userSlot);
