@@ -225,6 +225,17 @@ const sendMeetingRequestEmails = async (booking = {}) => {
   const ownerSlot = ownerSlotLine(booking.meeting_start_utc);
   const bookedOnOwner = slotLine(booking.createdAt, IST_TIMEZONE, 'IST');
   const bookedOnUser = slotLine(booking.createdAt, booking.meeting_timezone, booking.meeting_timezone);
+  // The visitor's copy must read as a request awaiting confirmation, never as
+  // a booking: leads used to take "request received" for "meeting booked".
+  const firstName = String(visitorName).split(' ')[0];
+  const requestIntroFor = (name, slot) =>
+    `Hi ${name}, thanks for requesting a discovery call${slot ? ` for ${slot}` : ''}. ` +
+    `It isn't confirmed yet: Anil checks each request so he can make sure the time works and read your brief first. ` +
+    `You'll hear from us within one working day. Once he confirms, a second email brings your Google Meet link. ` +
+    `If you don't hear from us by then, just reply to this email.`;
+  const requestIntro = requestIntroFor(esc(firstName), esc(userSlot));
+  const requestIntroText = requestIntroFor(firstName, userSlot);
+  const requestSubject = `Your discovery call request${userSlot ? ` for ${userSlot}` : ''}, awaiting confirmation`;
 
   const ownerHtml = shell(
     'New Meeting Request',
@@ -244,10 +255,10 @@ const sendMeetingRequestEmails = async (booking = {}) => {
   const userHtml = shell(
     'Meeting Request Received',
     row('Name', visitorName) +
-    row('Booked On', bookedOnUser) +
+    row('Requested on', bookedOnUser) +
     row('Requested Slot', userSlot) +
     row('Duration', '15 Minutes'),
-    `Thank you for booking a meeting. Your request has been submitted successfully. Please wait for admin confirmation. You will receive a meeting link once your meeting is approved.`
+    requestIntro
   );
 
   const [owner, user] = await Promise.allSettled([
@@ -272,9 +283,9 @@ const sendMeetingRequestEmails = async (booking = {}) => {
         : sendMail({
           to: booking.email,
           replyTo: ownerEmail(),
-          subject: 'Meeting Request Received',
+          subject: requestSubject,
           html: userHtml,
-          text: `Thank you for booking a meeting. Your request has been submitted successfully. Please wait for admin confirmation. You will receive a meeting link once your meeting is approved.`,
+          text: requestIntroText,
         }),
   ]);
 
@@ -303,7 +314,7 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
     row('Time Zone', booking.meeting_timezone) +
     row('Duration', '15 Minutes') +
     row('Your Host', booking.assigneeName),
-    `Your meeting request has been approved. ` +
+    `Your discovery call is confirmed. Here are the details. ` +
     (meetLink
       ? `Please join the meeting using the link below.`
       : `We'll send the joining link separately before the call.`)
@@ -339,9 +350,9 @@ const sendMeetingConfirmedEmails = async (booking = {}) => {
         : sendMail({
           to: booking.email,
           replyTo: ownerEmail(),
-          subject: 'Meeting Confirmed',
+          subject: `Your discovery call is confirmed${userSlotText ? ` — ${userSlotText}` : ''}`,
           html: userHtml,
-          text: `Your meeting request has been approved.\nDate: ${userSlot?.date || 'n/a'}\nTime: ${userSlot?.time || 'n/a'}\nTime Zone: ${booking.meeting_timezone || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
+          text: `Your discovery call is confirmed. Here are the details.\nDate: ${userSlot?.date || 'n/a'}\nTime: ${userSlot?.time || 'n/a'}\nTime Zone: ${booking.meeting_timezone || 'n/a'}\nDuration: 15 Minutes\nGoogle Meet: ${meetLink || 'n/a'}`,
         }),
   ]);
 

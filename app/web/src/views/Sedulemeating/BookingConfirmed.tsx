@@ -108,13 +108,14 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
           </div>
           <p className="booking-confirmed-eyebrow">Request received</p>
           <h1 className="booking-confirmed-headline">
-            You're <span className="bg-highlight-yellow bg-[length:100%_100%] bg-no-repeat px-[0.15em] box-decoration-clone">locked in</span>
-            {fullName ? `, ${fullName.split(" ")[0]}` : ""}.
+            Thanks{fullName ? `, ${fullName.split(" ")[0]}` : ""}. Your{" "}
+            <span className="bg-highlight-yellow bg-[length:100%_100%] bg-no-repeat px-[0.15em] box-decoration-clone">request is in</span>.
           </h1>
           <p className="booking-confirmed-sub">
-            Your slot is held. We&apos;ve emailed{" "}
-            <strong>{email || "your inbox"}</strong> — your Google Meet link
-            follows as soon as we confirm the call.
+            This time isn&apos;t confirmed yet. Anil checks every request
+            personally, usually within one working day. We&apos;ve emailed{" "}
+            <strong>{email || "your inbox"}</strong> to say we received it, and a
+            second email with your Google Meet link follows once he confirms.
           </p>
         </section>
 
@@ -147,6 +148,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
                   <strong>{formatLongDate(date)}</strong> at{" "}
                   <strong>{time}</strong> · 15 min
                 </span>
+                <span className="booking-confirmed-status-pill">Awaiting confirmation</span>
               </li>
               <li>
                 <FaGlobeAsia aria-hidden="true" />
@@ -326,7 +328,7 @@ const BookingConfirmed = ({ date: dateProp, time: timeProp, timeZone: tzProp, fu
         </section>
 
         <p className="booking-confirmed-fineprint">
-          Need to reschedule? Email Anil directly — he replies within a day.
+          Need a different time? Email Anil directly — he replies within a day.
         </p>
       </div>
     </main>

@@ -311,7 +311,7 @@ const ScheduleMeetingDetails = () => {
           {/* Booking summary */}
           <div className="schedule-detail-summary" role="status">
             <div className="schedule-detail-summary-head">
-              <p className="schedule-detail-summary-eyebrow">You're booking</p>
+              <p className="schedule-detail-summary-eyebrow">You're requesting</p>
               <button
                 type="button"
                 className="schedule-detail-change-link"
@@ -464,7 +464,7 @@ const ScheduleMeetingDetails = () => {
                   ← Back
                 </button>
                 <button type="submit" className="schedule-confirm-btn" disabled={submitting}>
-                  {submitting ? "Locking your slot…" : "Lock my slot →"}
+                  {submitting ? "Sending your request…" : "Request time slot →"}
                 </button>
               </div>
 

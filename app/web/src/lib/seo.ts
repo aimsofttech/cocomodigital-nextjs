@@ -205,9 +205,9 @@ export const staticPageSeo: Record<string, PageSeo> = {
     noIndex: true,
   },
   "/booking-confirmed": {
-    title: "Booking Confirmed",
+    title: "Request Received",
     description:
-      "Your Cocoma Digital meeting has been confirmed.",
+      "We've received your discovery call request.",
     path: "/booking-confirmed",
     category: "Contact",
     noIndex: true,
