@@ -47262,6 +47262,33 @@
 
   }
 
+  /* "Awaiting confirmation" pill on the summary card: the request is not a
+     booking until Anil confirms it, and the card must say so at a glance. */
+
+  .booking-confirmed-status-pill {
+
+    margin-left: auto;
+
+    flex-shrink: 0;
+
+    padding: 0.2em 0.65em;
+
+    border-radius: 999px;
+
+    border: 1px solid var(--brand-dark, #b89c00);
+
+    color: var(--brand-dark, #b89c00);
+
+    font-size: 0.75rem;
+
+    font-weight: var(--fw-bold);
+
+    letter-spacing: 0.02em;
+
+    white-space: nowrap;
+
+  }
+
   /* ----------------------------------------------------------
   
      Section heading utility (reused)
