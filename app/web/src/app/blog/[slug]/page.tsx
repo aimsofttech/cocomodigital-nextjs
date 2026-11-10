@@ -1,4 +1,5 @@
 import BlogDetails from "@/src/views/BlogDetails/BlogDetails";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import StructuredData from "@/src/components/common/StructuredData/StructuredData";
 import {
@@ -75,9 +76,10 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const article = await getBlogArticle(slug);
+  if (!article) notFound();
 
   return buildMetadata({
-    title: article?.title || "Cocoma Digital Blog",
+    title: article?.title || "Blog",
     description: truncate(
       article?.excerpt || article?.description || "Read Cocoma Digital insights on video, growth, content, and marketing."
     ),
@@ -98,6 +100,7 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
   const article = await getBlogArticle(slug);
+  if (!article) notFound();
 
   const subcategorySlug =
     article?.subcategory || article?.category_slug || article?.category?.slug || "";

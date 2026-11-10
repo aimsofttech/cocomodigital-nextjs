@@ -949,7 +949,7 @@ export default function PodcastGrowthPage({ data }: { data: PodcastPageData }) {
                   <span className="pod-final-signoff-name">{founder.name}</span>
                   <span className="pod-final-signoff-role">{founder.role}</span>
                   <span className="pod-final-signoff-note">
-                    Reads every audit request himself.
+                    A senior producer reviews every show.
                   </span>
                 </p>
               </div>

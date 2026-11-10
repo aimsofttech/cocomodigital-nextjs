@@ -12,9 +12,8 @@ const titleToSlug = (title: string): string =>
     .replace(/^-|-$/g, "");
 import ServiceCategorySlider from "../../components/Services/ServiceCategorySlider/ServiceCategorySlider";
 import HowItWorksSteps from "../../components/Services/HowItWorksSteps/HowItWorksSteps";
-import { Link, useParams } from "@/src/lib/navigation";
-import { useCartCount } from "@/src/lib/cart";
-import { FaHandshake, FaUsers, FaArrowRight } from "react-icons/fa";
+import { useParams } from "@/src/lib/navigation";
+import { FaHandshake, FaUsers } from "react-icons/fa";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ServiceCategoryHero from "../../components/Services/ServiceCategoryHero/ServiceCategoryHero";
 
@@ -88,17 +87,6 @@ export default function Services({
   const [services, setServices] = useState(
     initialServicesData?.group_service_category || []
   );
-  // Cart UI hooks
-  const cartItemCount = useCartCount();
-  // SSR-safe: start false (matches server), then sync to real value after hydration.
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 500px)");
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
 
 
   const [showFloatingTitle, setShowFloatingTitle] = useState(false);
@@ -351,13 +339,6 @@ export default function Services({
   }, [slug, initialSlug, initialServicesData]);
 
 
-  useEffect(() => {
-    const cartBarVisible = isMobile && cartItemCount > 0;
-    document.body.classList.toggle("services-cart-bar-visible", cartBarVisible);
-    return () => {
-      document.body.classList.remove("services-cart-bar-visible");
-    };
-  }, [isMobile, cartItemCount]);
 
   if (error) {
     return <p className="text-danger">Error: {error}</p>;
@@ -366,7 +347,7 @@ export default function Services({
 
   const categoryTitle = banner?.[0]?.heading || "YouTube & Social Media Services";
   const serviceMetaTitle = `${categoryTitle} — Cocoma Digital`;
-  const serviceMetaDesc = `${categoryTitle} from India's leading YouTube & social media growth studio. 60-person in-house team, 70% recurring partnerships, founder-led discovery calls.`;
+  const serviceMetaDesc = `${categoryTitle} from Cocoma Digital & Studios, a 60-person Mumbai studio with 70% recurring partnerships.`;
 
 
   const categoryServiceSchema = {
@@ -598,23 +579,6 @@ export default function Services({
 
           <HireOrJoin cards={SERVICES_HIRE_OR_JOIN_CARDS} />
 
-          {cartItemCount > 0 && isMobile && (
-            <div className="mobile-add-to-cart-wrapper">
-              <p className="mobile-add-to-cart-count-icon">
-                <span className="mobile-cart-badge" aria-hidden="true">
-                  {cartItemCount}
-                </span>
-                <span className="mobile-cart-label">on your call</span>
-              </p>
-              <Link
-                className="mobile-add-to-cart-link"
-                to="/cart"
-                aria-label={`Your call agenda — ${cartItemCount} ${cartItemCount === 1 ? "topic" : "topics"}, schedule with Anil`}
-              >
-                Schedule <FaArrowRight aria-hidden="true" />
-              </Link>
-            </div>
-          )}
 
         </div>
       </div>

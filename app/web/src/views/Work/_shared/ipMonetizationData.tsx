@@ -283,9 +283,9 @@ export const ipMonetizationData = {
   closingCta: {
     heading: "Let's audit your monetization.",
     description:
-      "15-minute discovery call with Anil + a senior strategist. We'll map your current revenue, find the gaps, and show you what compounds.",
-    buttonText: "Book a discovery call",
-    buttonTo: "/ScheduleMeeting",
+      "A 30-minute working session with a senior producer. We'll map your current revenue, find the gaps, and show you what compounds.",
+    buttonText: "Apply to work with us",
+    buttonTo: "/contact-us",
   },
 
   /* Partner testimonial intentionally omitted per

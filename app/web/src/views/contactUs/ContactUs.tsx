@@ -78,7 +78,7 @@ const INQUIRY_TYPES = [
     label: "Something else",
     headingStep2: "One last thing — what should we know?",
     placeholder:
-      "Tell us a bit about it. We read every message and reply within a day.",
+      "Tell us a bit about it. Our partnerships team reviews every message and replies within three working days.",
   },
 ];
 
@@ -183,7 +183,7 @@ export default function ContactUs() {
       }
       navigate("/thank-you", {
         state: {
-          successMessage: "Got it — we'll write back within a day.",
+          successMessage: "Got it — we'll write back within three working days.",
         },
       });
     } catch (err) {
@@ -211,7 +211,7 @@ export default function ContactUs() {
           </h1>
           <p className="contactus-sub">
             Films, web-series, music, channels, campaigns — or something else
-            entirely. We reply within a day.
+            entirely. We reply within three working days.
           </p>
         </section>
 
@@ -230,8 +230,8 @@ export default function ContactUs() {
               <FaCalendarPlus />
             </span>
             <span className="contactus-channel-body">
-              <strong>Book a 15-min call</strong>
-              <small>Pick a slot — Google Meet · zero pressure</small>
+              <strong>Book a discovery call</strong>
+              <small>15 minutes on Google Meet</small>
             </span>
             <span className="contactus-channel-arrow" aria-hidden="true">
               <FaArrowRight />
@@ -465,7 +465,7 @@ export default function ContactUs() {
               </div>
 
               <p className="contactus-fineprint">
-                Anil personally replies within a day. No automated follow-ups.
+                Our partnerships team replies within three working days.
               </p>
             </form>
           )}

@@ -244,8 +244,8 @@ const Blog = ({ initialCategories, initialPosts, initialTotal }: BlogProps) => {
               We do this work too. If something here sparked an idea
               for your channel or your brand, let's talk.
             </p>
-            <Link to="/ScheduleMeeting" className="blog-closer-cta">
-              Book a 15-min call
+            <Link to="/contact-us" className="blog-closer-cta">
+              Apply to work with us
               <FaArrowRight aria-hidden="true" />
             </Link>
           </div>

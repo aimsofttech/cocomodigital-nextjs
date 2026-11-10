@@ -1,9 +1,7 @@
-import { buildMetadata, getStaticSeo } from '@/src/lib/seo';
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = buildMetadata(getStaticSeo('/cart'));
-
-import AddToCart from "@/src/views/cart/AddToCart";
-
+/* The "Add to call" basket is gone. Old links to /cart land on the
+   application instead. */
 export default function Page() {
-  return <AddToCart />;
+  permanentRedirect("/contact-us");
 }

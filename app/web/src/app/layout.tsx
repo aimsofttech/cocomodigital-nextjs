@@ -14,7 +14,7 @@ import {
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "Cocoma Digital - YouTube, creative and social media growth studio",
+    title: "Cocoma Digital & Studios | Content and channel operations for streaming platforms, studios and creators",
     description:
       "Cocoma Digital is a content, creative, marketing, and monetization partner for creators, brands, platforms, and studios.",
     path: "/",

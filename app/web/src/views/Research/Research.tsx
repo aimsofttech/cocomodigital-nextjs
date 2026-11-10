@@ -97,11 +97,10 @@ export default function Research() {
             </h2>
             <p className="research-cta-sub">
               Cocoma's data team can pull custom benchmarks for your
-              category before the public report drops. Anil takes the
-              call himself.
+              category before the public report drops.
             </p>
-            <Link to="/ScheduleMeeting" className="research-cta-button">
-              Book a 15-min discovery call
+            <Link to="/contact-us" className="research-cta-button">
+              Apply to work with us
             </Link>
           </div>
         </section>

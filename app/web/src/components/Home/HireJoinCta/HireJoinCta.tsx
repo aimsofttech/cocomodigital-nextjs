@@ -31,8 +31,8 @@ const BusinessCareerSection = ({ hireUsItems }: BusinessCareerSectionProps) => {
       pitch: item?.user_choice_description,
       ctaText:
         item?.user_choice_button_text ||
-        (isPrimary ? "Book a 15-min call" : "See open roles"),
-      to: isPrimary ? "/ScheduleMeeting" : "/career",
+        (isPrimary ? "Apply to work with us" : "See open roles"),
+      to: isPrimary ? "/contact-us" : "/career",
     };
   });
 

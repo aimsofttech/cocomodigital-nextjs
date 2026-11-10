@@ -103,19 +103,18 @@ const ContactPromo = () => {
         <div className="contact-promo-wrapper">
             <div className="contact-promo-container-wrapper">
                 <h2 className="why-content-main-title font-primary">
-                    Tell us about your title.<br />
-                    We'll send back a{" "}
-                    <span className="bg-highlight-yellow bg-[length:100%_100%] bg-no-repeat px-[0.15em] box-decoration-clone">7-day mini-strategy</span>.
+                    Working on a title<br />
+                    <span className="bg-highlight-yellow bg-[length:100%_100%] bg-no-repeat px-[0.15em] box-decoration-clone">like this?</span>
                 </h2>
                 <p className="why-content-description mt-1 w-full content-center">
-                    Series, film, or music release — share the brief and we'll reply with how we'd launch it. No call required to start.
+                    Tell us about the title. If there is a fit, we come back with a written launch scope and the price. Launch campaigns are scoped per title, from ₹2.5 lakh.
                 </p>
 
                 {/* Alternative low-friction CTAs for power users who want
                     to skip the form. Visible above the form so they're
                     seen first. */}
                 <div className="contact-quick-channels" aria-label="Alternative ways to reach us">
-                    <span className="contact-quick-channels-label">Prefer something faster?</span>
+                    <span className="contact-quick-channels-label">Prefer to write?</span>
                     <div className="contact-quick-channels-row">
                         <Link
                             className="contact-quick-channel"
@@ -126,7 +125,7 @@ const ContactPromo = () => {
                             }}
                         >
                             <HiOutlineMail size={18} />
-                            <span>Email Anil directly</span>
+                            <span>Email us</span>
                         </Link>
                         <Link
                             className="contact-quick-channel"
@@ -230,19 +229,21 @@ const ContactPromo = () => {
 
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <div className="form-field">
-                                            <label className="form-label font-primary">Campaign budget</label>
+                                            <label className="form-label font-primary">Budget for the launch</label>
                                             <select
                                                 name="budget"
                                                 required
                                                 value={formData.budget}
                                                 onChange={handleChange}
                                             >
-                                                <option value="">Select budget range</option>
-                                                <option value="5000-10000">₹5,000 - ₹10,000</option>
-                                                <option value="10000-25000">₹10,000 - ₹25,000</option>
-                                                <option value="25000-50000">₹25,000 - ₹50,000</option>
-                                                <option value="50000-100000">₹50,000 - ₹1,00,000</option>
-                                                <option value="100000+">₹1,00,000+</option>
+                                                <option value="">Select a range</option>
+                                                <option value="inr-2.5-5-lakh">₹2.5 – 5 lakh</option>
+                                                <option value="inr-5-10-lakh">₹5 – 10 lakh</option>
+                                                <option value="inr-10-lakh-plus">₹10 lakh and above</option>
+                                                <option value="usd-3-5k">USD 3,000 – 5,000</option>
+                                                <option value="usd-5-10k">USD 5,000 – 10,000</option>
+                                                <option value="usd-10k-plus">USD 10,000 and above</option>
+                                                <option value="not-sure">Not sure yet</option>
                                             </select>
                                         </div>
                                         <div className="form-field">
