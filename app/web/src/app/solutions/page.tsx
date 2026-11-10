@@ -1,9 +1,8 @@
-import { buildMetadata, getStaticSeo } from '@/src/lib/seo';
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = buildMetadata(getStaticSeo('/solutions'));
-
-import Solution from "@/src/views/Solution/Solution";
-
+/* The /solutions index was a template page (placeholder copy and
+   partner logos that are not clients). The audience pages that
+   matter live at /solutions/<slug>; the overview is the home page. */
 export default function Page() {
-  return <Solution />;
+  permanentRedirect("/");
 }

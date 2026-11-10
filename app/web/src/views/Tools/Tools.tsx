@@ -18,21 +18,21 @@ import { Link } from "@/src/lib/navigation";
 const PLANNED_TOOLS = [
   {
     title: "YouTube Channel Audit",
-    eyebrow: "Free · ~2 min",
+    eyebrow: "~2 min",
     description:
       "Paste your channel URL. Get 5 quick observations from Cocoma's framework — title-thumbnail fit, watch-time signal, monetization gaps, posting cadence, growth trajectory.",
     status: "Building",
   },
   {
     title: "Music Label Revenue Estimator",
-    eyebrow: "Free · ~3 min",
+    eyebrow: "~3 min",
     description:
       "Catalogue size, genre, current views, sync activity → projected annual YouTube revenue range. Built from the actual RPMs Cocoma sees across 60+ music-label channels.",
     status: "Designing",
   },
   {
     title: "OTT Promo Budget Builder",
-    eyebrow: "Free · ~5 min",
+    eyebrow: "~5 min",
     description:
       "Show type, launch window, target market, channel mix → recommended pre-launch + day-of + retention spend split. Based on 400+ campaigns Cocoma has run.",
     status: "Planning",
@@ -48,7 +48,7 @@ export default function Tools() {
           <div className="tools-hero-inner">
             <span className="tools-hero-eyebrow">Tools</span>
             <h1 className="tools-hero-headline font-primary">
-              Free tools built from{" "}
+              Tools built from{" "}
               <em>7 years of running Cocoma.</em>
             </h1>
             <p className="tools-hero-sub">
@@ -89,12 +89,10 @@ export default function Tools() {
               Need a tool we haven't built yet?
             </h2>
             <p className="tools-cta-sub">
-              Tell Anil what answer would actually help your business
-              right now. Custom-built audits run free for partners on
-              the discovery call.
+              Tell us what answer would help your business right now.
             </p>
-            <Link to="/ScheduleMeeting" className="tools-cta-button">
-              Book a 15-min discovery call
+            <Link to="/contact-us" className="tools-cta-button">
+              Apply to work with us
             </Link>
           </div>
         </section>

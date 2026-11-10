@@ -8,9 +8,9 @@ const FALLBACK_CARDS = [
     tag: "For brands & agencies",
     title: "Hire Cocoma",
     pitch:
-      "60-person in-house team. Same-week start. Dedicated PM. From short-form reels to full trailer production.",
-    ctaText: "Book a 15-min call",
-    to: "/ScheduleMeeting",
+      "60-person in-house team. A named producer on every engagement. From short-form to full trailer production.",
+    ctaText: "Apply to work with us",
+    to: "/contact-us",
   },
   {
     variant: "secondary",

@@ -125,7 +125,6 @@ export default function GrowthServicePage({ service }: { service: GrowthService 
     },
     breadcrumbJsonLd([
       { name: "Home", path: "/" },
-      { name: "Services", path: "/solutions" },
       { name: service.name, path: pagePath },
     ]),
     {

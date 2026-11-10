@@ -4,8 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Link } from "@/src/lib/navigation";
 import { FaArrowRight } from "react-icons/fa";
-import { useCartCount } from "@/src/lib/cart";
-import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 import { s3Url } from "@/src/lib/s3";
 
 
@@ -20,19 +18,6 @@ export default function FloatingCallChip() {
   const [visible, setVisible] = useState(false);
   const initialTimerRef = useRef(null);
 
-  // Cart-aware state. cartCount > 0 → render the fulled-cart
-  // variant. We don't gate on a specific page — the chip lives on
-  // multiple routes and reads cart state directly so it always
-  // tells the truth about what the user has queued up.
-  const cartCount = useCartCount();
-  const hasCart = cartCount > 0;
-
-  // On mobile we already render a fixed bottom cart bar when cart
-  // has items (see Services.jsx + SingleService.jsx). The chip
-  // would compete with it visually. Hide on mobile-with-cart so
-  // the cart bar is the single source of truth there.
-  const isMobile = useMediaQuery("(max-width: 600px)");
-  const suppressForMobileCartBar = isMobile && hasCart;
 
   useEffect(() => {
     initialTimerRef.current = setTimeout(() => setVisible(true), 600);
@@ -58,40 +43,11 @@ export default function FloatingCallChip() {
     };
   }, []);
 
-  // Suppress entirely when cart bar is already on screen (mobile-with-cart).
-  if (suppressForMobileCartBar) {
-    return null;
-  }
-
-  /* ---------- FULLED-cart variant ---------- */
-  if (hasCart) {
-    return (
-      <Link
-        to="/cart"
-        className={`floating-call-chip floating-call-chip--cart ${visible ? "is-visible" : "is-hidden"
-          }`}
-        aria-label={`Your call agenda — ${cartCount} ${cartCount === 1 ? "topic" : "topics"
-          }, schedule with Anil`}
-      >
-        <span className="floating-call-chip-count" aria-hidden="true">
-          {cartCount}
-        </span>
-        <span className="floating-call-chip-body">
-          <span className="floating-call-chip-eyebrow">On your call</span>
-          <span className="floating-call-chip-cta">
-            Schedule with Anil <FaArrowRight aria-hidden="true" />
-          </span>
-        </span>
-      </Link>
-    );
-  }
-
-  /* ---------- EMPTY-cart (default) variant ---------- */
   return (
     <Link
-      to="/ScheduleMeeting"
+      to="/contact-us"
       className={`floating-call-chip ${visible ? "is-visible" : "is-hidden"}`}
-      aria-label="Talk to Anil — book a 15 min call"
+      aria-label="Apply to work with us"
     >
       <span className="floating-call-chip-avatar" aria-hidden="true">
         <Image
@@ -102,9 +58,9 @@ export default function FloatingCallChip() {
         />
       </span>
       <span className="floating-call-chip-body">
-        <span className="floating-call-chip-eyebrow">Talk to Anil</span>
+        <span className="floating-call-chip-eyebrow">Work with us</span>
         <span className="floating-call-chip-cta">
-          Book a 15-min call <FaArrowRight aria-hidden="true" />
+          Apply now <FaArrowRight aria-hidden="true" />
         </span>
       </span>
     </Link>

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import CocomaFooter from "../components/Footer/CocomaFooter";
-import CartCelebration from "../components/common/CartCelebration/CartCelebration";
 import Header from "../components/header/header";
 import ScrollTopButton from "../components/common/ScrollTopButton/ScrollTopButton";
 import SiteShellEffects from "../components/common/SiteShellEffects/SiteShellEffects";
@@ -26,7 +25,6 @@ export default async function SiteShell({ children }: { children: ReactNode }) {
         otherServices={shellData.otherServices}
         solutions={shellData.solutions}
       />
-      <CartCelebration />
       {/* Back-to-top arrow. Mounted here rather than per-view so every
           public page gets it; it shares the bottom-right corner with the
           call chip and the edit pill by stacking above them. */}

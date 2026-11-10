@@ -67,15 +67,14 @@ const SuccessStoryViewAll = ({ initialStories = [] }: SuccessStoryViewAllProps) 
                 Let's build yours.
               </h2>
               <p className="success-view-all-closer-sub">
-                Pick a 15-minute slot — Anil takes the call himself.
-                Walk away with a clear shape of what we'd do for you.
+                Apply to work with us and walk away with a clear shape of what we would do for you.
               </p>
             </div>
             <Link
-              to="/ScheduleMeeting"
+              to="/contact-us"
               className="success-view-all-closer-cta"
             >
-              Book a call
+              Apply to work with us
               <FaArrowRight aria-hidden="true" />
             </Link>
           </div>

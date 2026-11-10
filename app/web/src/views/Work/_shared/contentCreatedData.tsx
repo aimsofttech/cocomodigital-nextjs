@@ -53,7 +53,7 @@ export const contentCreatedData = {
     subtitle:
       "60-person Mumbai studio shipping 50,000+ videos for entertainment brands. Editors, designers, motion artists, scriptwriters, sound — all in-house, all on the same project. From script to delivered cut, every step under one roof.",
     stats: [
-      { value: "35K+", label: "videos delivered" },
+      { value: "50,000+", label: "videos delivered" },
       { value: "60", label: "specialists in-house" },
       { value: "70%", label: "recurring partnerships" },
       { value: "7+", label: "years shipping content" },
@@ -156,8 +156,8 @@ export const contentCreatedData = {
   closingCta: {
     heading: "You bring the brief. We make the content.",
     description:
-      "15-minute discovery call with Anil + a senior strategist. We'll review your current creative pipeline, find the gaps, and show you what 60 specialists in-house can do.",
-    buttonText: "Book a discovery call",
-    buttonTo: "/ScheduleMeeting",
+      "A 30-minute working session with a senior producer. We'll review your current creative pipeline, find the gaps, and show you what 60 specialists in-house can do.",
+    buttonText: "Apply to work with us",
+    buttonTo: "/contact-us",
   },
 };

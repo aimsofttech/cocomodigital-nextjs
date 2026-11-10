@@ -3,7 +3,6 @@
 import { useCallback } from "react";
 import Image from "next/image";
 import { useNavigate } from "@/src/lib/navigation";
-import { useCart } from "@/src/lib/cart";
 import EditPencil from "../../common/EditPencil/EditPencil";
 import { adminRoutes } from "../../../lib/adminEditRoutes";
 
@@ -20,32 +19,14 @@ const getPlainText = (value) => {
 };
 
 const ServiceCards = ({ data }) => {
-  const { items: cartItems, addItem, removeItem } = useCart();
   const navigate = useNavigate();
   const description = getPlainText(
     data?.description || data?.featured_description || data?.description
   );
 
-  const isItemInCart = (itemId) => {
-    return cartItems.some((cartItem) => cartItem.id === itemId);
-  }
-
   const serviceDetailsPageRedirect = useCallback((slug) => {
     navigate(`/service/${slug}`)
   }, [navigate]);
-
-  const handleToggleCart = (event, item) => {
-    event.stopPropagation();
-    if (isItemInCart(item?.id)) {
-      removeItem(item?.id);
-    } else {
-      addItem({
-        ...item,
-        groupServiceCategoryId: item?.id,
-        subscriptionType: "One Time Only",
-      });
-    }
-  };
 
   return (
     <div
@@ -104,20 +85,8 @@ const ServiceCards = ({ data }) => {
           </p>
           <div className="add-explore-btn-wrapper">
             <button
-              className={`w-1/2 service-cards-content-explore-btn`}>
+              className={`w-full service-cards-content-explore-btn`}>
               Explore More
-            </button>
-            {/* Card-level CTA — same language pair as the hero
-                CTA on /service/:slug. "Add to call" /
-                "On call" replaces "Add Now" / "Remove" so the
-                conversation-builder framing is consistent
-                everywhere a service can be added. */}
-            <button
-              onClick={(e) => handleToggleCart(e, data)}
-              className={`w-1/2 service-cards-content-btn rounded-xl ${isItemInCart(data?.id) ? "border-black bg-[#fff000] text-black hover:bg-[#f4e600]" : "border-black bg-black text-white hover:bg-neutral-800 "
-                }`}
-            >
-              {isItemInCart(data?.id) ? "On call ✓" : "Add to call"}
             </button>
           </div>
         </div>

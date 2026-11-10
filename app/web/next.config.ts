@@ -151,7 +151,7 @@ const nextConfig: NextConfig = {
          get cleaned up in subsequent Phase 4 commits. */
       {
         source: "/solution",
-        destination: "/solutions",
+        destination: "/",
         permanent: true,
       },
       {
