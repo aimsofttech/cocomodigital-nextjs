@@ -43,10 +43,10 @@ import CountUp from "../../common/CountUp/CountUp";
 const DEFAULT_HEADING = "Why teams keep coming back";
 
 const DEFAULT_STATS = [
-  { number: 6, suffix: "", label: "Years in business" },
+  { number: 7, suffix: "", label: "Years in business" },
   { number: 60, suffix: "+", label: "In-house team" },
   { number: 50000, suffix: "+", label: "Videos shipped" },
-  { number: 1000, suffix: "+", label: "Every month" },
+  { number: 70, suffix: "%", label: "Of revenue recurring" },
 ];
 
 // Default operational scale pills — how this team actually works
@@ -66,9 +66,9 @@ const DEFAULT_STATS = [
 // `pills` prop; their data file imports its own icons and pill
 // text, this component just renders whatever it's handed.
 const DEFAULT_PILLS = [
-  { icon: FaFilm, text: "Reels in 6 hours" },
+  { icon: FaFilm, text: "Delivery to an agreed SLA" },
   { icon: FaUserTie, text: "Dedicated project manager" },
-  { icon: FaComments, text: "WhatsApp + Slack collaboration" },
+  { icon: FaComments, text: "A named producer on every engagement" },
   { icon: FaGlobe, text: "US · EU · Asia time zones" },
   { icon: FaLanguage, text: "Multilingual in-house team" },
 ];

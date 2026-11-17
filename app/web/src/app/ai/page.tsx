@@ -5,9 +5,9 @@ import { getAIShowcases, imageUrl } from "@/src/lib/content";
 import { buildMetadata } from "@/src/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "AI showcases — Cocoma Digital",
+  title: "AI showcases",
   description:
-    "How Cocoma uses AI to ship faster, cheaper, and better. Workflow case studies with the tools, prompts, and outcomes we shipped.",
+    "How Cocoma builds with AI inside a sixty-person studio: the workflows, the tools and what changed in the output.",
   path: "/ai",
   category: "AI",
 });

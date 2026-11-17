@@ -5,7 +5,7 @@ import { getCampaigns, imageUrl } from "@/src/lib/content";
 import { buildMetadata } from "@/src/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Campaigns — Cocoma Digital",
+  title: "Campaigns",
   description:
     "Timeline-based creative + marketing projects in flight at Cocoma. From planning to launch, with milestones along the way.",
   path: "/campaigns",

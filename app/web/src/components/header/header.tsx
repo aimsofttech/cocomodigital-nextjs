@@ -148,8 +148,8 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
     currentPath.startsWith("/job/") ||
     currentPath.startsWith("/job-application/");
 
-  const ctaLabel = isCareerArea ? "Open Roles" : "Book Call";
-  const ctaTo = isCareerArea ? "/career#career-open-roles" : "/ScheduleMeeting";
+  const ctaLabel = isCareerArea ? "Open Roles" : "Work with us";
+  const ctaTo = isCareerArea ? "/career#career-open-roles" : "/contact-us";
 
   /* Phase 8b 2026-05-25: was a hard-coded array; now fed from the
      `solutions-pages` the API collection (filtered to is_active) via
@@ -438,7 +438,7 @@ function Header({ serviceCategories, initialServices, solutions }: HeaderProps) 
                   to="/contact-us"
                   className="header-book-call-btn header-book-call-btn--desktop"
                 >
-                  <span>GET STARTED</span>
+                  <span>WORK WITH US</span>
                   <HiArrowUpRight
                     style={{ color: "#000", fontWeight: "bold", strokeWidth: 1 }}
                   />

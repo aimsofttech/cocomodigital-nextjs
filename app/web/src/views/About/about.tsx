@@ -235,7 +235,7 @@ const AboutUs = ({ brands: brandsProp }: AboutUsProps = {}) => {
                     kept forming.</strong>
                 </p>
                 <p>
-                  Six years later, we're a team in Mumbai. Editors,
+                  Seven years later, we're a team in Mumbai. Editors,
                   designers, marketers — and unofficially, the chai
                   uncle downstairs who knows everyone's order. Most of
                   us aren't from Mumbai. Most aren't from cities you've
@@ -263,8 +263,8 @@ const AboutUs = ({ brands: brandsProp }: AboutUsProps = {}) => {
                 </p>
                 <p className="about-founder-signoff">— Anil</p>
               </div>
-              <Link to="/ScheduleMeeting" className="about-founder-cta">
-                Book a 15-min call with me
+              <Link to="/contact-us" className="about-founder-cta">
+                Apply to work with us
                 <FaArrowRight aria-hidden="true" />
               </Link>
             </div>
@@ -488,7 +488,7 @@ const AboutUs = ({ brands: brandsProp }: AboutUsProps = {}) => {
             <header className="about-section-header">
               <p className="about-section-eyebrow">By the numbers</p>
               <h2 className="about-section-heading font-primary">
-                Six years. 60 people. 50,000+ videos.
+                Seven years. 60 people. 50,000+ videos.
               </h2>
               <p className="about-section-sub">
                 The numbers compound the same way our channels do.
@@ -783,13 +783,12 @@ const AboutUs = ({ brands: brandsProp }: AboutUsProps = {}) => {
                 Let's talk.
               </h2>
               <p className="about-closer-sub">
-                Pick a 15-minute slot — I'll take the call myself.
-                Walk away with a clear shape of what we'd do for you,
-                whether or not we end up working together.
+                Apply to work with us. A senior producer leads the working session and I join the kick-off.
+                We come back with a written scope and price.
               </p>
             </div>
-            <Link to="/ScheduleMeeting" className="about-closer-cta">
-              Book a call
+            <Link to="/contact-us" className="about-closer-cta">
+              Apply to work with us
               <FaArrowRight aria-hidden="true" />
             </Link>
           </div>

@@ -36,3 +36,6 @@ ecosystem.deploy.js
 
 # Local media store (mediaStorage local driver). Never committed.
 app/api/.media-local/
+
+# Working references / handover notes (Refs/, app/web/REFS/, any refs folder). Never committed.
+[Rr][Ee][Ff][Ss]/

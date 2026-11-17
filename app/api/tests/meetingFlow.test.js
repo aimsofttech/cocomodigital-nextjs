@@ -158,7 +158,8 @@ const test = async (name, fn) => {
     const user = find(mails, VISITOR);
     assert.match(owner.subject, /New Meeting Request from Rahul Verma/);
     assert.match(owner.html, new RegExp(`open=${meetingA._id}&amp;action=confirm`));
-    assert.strictEqual(user.subject, 'Meeting Request Received');
+    assert.match(user.subject, /^Your discovery call request for .*10:00 AM \(Asia\/Kolkata\), awaiting confirmation$/);
+    assert.match(user.html, /isn&#39;t confirmed yet|isn't confirmed yet/);
     assert.match(user.html, /10:00 AM \(Asia\/Kolkata\)/);
   });
 
@@ -211,7 +212,7 @@ const test = async (name, fn) => {
     assert.strictEqual(mails.length, 2);
     const owner = find(mails, 'owner@studio.test');
     const user = find(mails, VISITOR);
-    assert.strictEqual(user.subject, 'Meeting Confirmed');
+    assert.match(user.subject, /^Your discovery call is confirmed — /);
     for (const m of [owner, user]) {
       assert.ok(m.html.includes(doc.meetLink), `${m.subject} lacks the Meet link`);
       assert.ok(m.text.includes(doc.meetLink), `${m.subject} text part lacks the Meet link`);

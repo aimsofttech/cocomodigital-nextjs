@@ -20,7 +20,7 @@ export async function generateMetadata({
     title: doc?.title || "AI showcase",
     description: truncate(
       doc?.workflow_description ||
-        "How Cocoma uses AI to ship faster, cheaper, and better.",
+        "How Cocoma builds with AI inside a sixty-person studio.",
       160,
     ),
     path: `/ai/${slug}`,

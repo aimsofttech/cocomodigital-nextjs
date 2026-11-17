@@ -13,7 +13,7 @@ import {
 } from "@/src/lib/content";
 import { getGrowthServices } from "@/src/lib/growthServices";
 import blogManifest from "@/src/content/blog.generated.json";
-import { SITE_URL, staticSeoPaths } from "@/src/lib/seo";
+import { SITE_URL, staticSeoPaths, staticPageSeo } from "@/src/lib/seo";
 
 /**
  * Generic shape used by APIs that return SEO-relevant items.
@@ -233,6 +233,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
    * Static pages
    */
   for (const path of staticSeoPaths) {
+    /* Redirecting or noIndex routes must not be submitted. */
+    if (staticPageSeo[path]?.noIndex) continue;
     entries.push(
       createEntry(
         path,

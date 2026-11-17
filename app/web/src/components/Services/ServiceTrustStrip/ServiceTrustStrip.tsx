@@ -38,8 +38,8 @@ const TRUST_TILES = [
     label: "in-house, no subcontractors",
   },
   {
-    value: "Anil",
-    label: "takes every discovery call",
+    value: "Named",
+    label: "producer on every engagement",
   },
 ];
 

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { FaSearch } from "react-icons/fa";
-import { FiShoppingBag } from "react-icons/fi";
+import { FiUsers } from "react-icons/fi";
 import { BsPersonVideo2 } from "react-icons/bs";
 import { AiOutlinePlayCircle } from "react-icons/ai";
 
@@ -20,22 +20,22 @@ const HowItWorksSteps = () => {
   const steps = [
     {
       number: "01",
-      title: "Explore Our Services",
+      title: "Apply",
       icon: <FaSearch className="how-step-icon" aria-hidden="true" />,
     },
     {
       number: "02",
-      title: "Add Suitable Services",
-      icon: <FiShoppingBag className="how-step-icon" aria-hidden="true" />,
+      title: "Working session with your producer",
+      icon: <FiUsers className="how-step-icon" aria-hidden="true" />,
     },
     {
       number: "03",
-      title: "Schedule Meeting",
+      title: "Written scope and proposal",
       icon: <BsPersonVideo2 className="how-step-icon" aria-hidden="true" />,
     },
     {
       number: "04",
-      title: "Start The Project",
+      title: "Kick-off with your named team",
       icon: <AiOutlinePlayCircle className="how-step-icon" aria-hidden="true" />,
     },
   ];

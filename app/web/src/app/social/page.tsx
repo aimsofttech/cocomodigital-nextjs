@@ -5,7 +5,7 @@ import { getSocialPosts, imageUrl } from "@/src/lib/content";
 import { buildMetadata } from "@/src/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Social — Cocoma Digital",
+  title: "Social",
   description:
     "Cocoma's cross-platform social feed — Instagram, TikTok, LinkedIn, Threads, X, Facebook, YouTube Shorts.",
   path: "/social",

@@ -35,12 +35,12 @@ const DEFAULT_QUESTIONS: ServiceFaqEntry[] = [
   {
     q: "How quickly can we get started?",
     a:
-      "Most engagements kick off within 5–7 business days of the engagement letter. Discovery call → scope → kick-off → first deliverable. If you're on a tight launch window, we've turned around in three.",
+      "Most engagements kick off within 5–7 business days of the engagement letter. Working session → written scope → kick-off → first deliverable.",
   },
   {
     q: "What's the minimum commitment?",
     a:
-      "Recurring services run month-to-month — no annual lock-in. One-time projects are scoped per deliverable. We'd rather you renew because the work is good than because you're stuck.",
+      "Engagements are monthly retainers with 30 days' notice. Title launches are scoped per title.",
   },
   {
     q: "Do you work alongside our existing team?",
@@ -50,17 +50,17 @@ const DEFAULT_QUESTIONS: ServiceFaqEntry[] = [
   {
     q: "Who will I actually work with?",
     a:
-      "A dedicated pod of 3–5 specialists from the relevant departments (editors, designers, marketers), with one PM as your single point of contact. Anil joins the kick-off call himself and stays reachable on Slack.",
+      "A dedicated pod of 3–5 specialists from the relevant departments (editors, designers, marketers), with one PM as your single point of contact. A senior producer leads the working session; Anil joins the kick-off.",
   },
   {
     q: "What if we want to pause or stop?",
     a:
-      "30 days notice on recurring services, then we wrap cleanly — handover docs, raw files, the lot. No penalties, no hidden fees, no awkward extraction.",
+      "30 days notice on recurring services, then we wrap cleanly: handover docs, raw files, the lot.",
   },
   {
     q: "How is this priced?",
     a:
-      "Scope-dependent. After the discovery call we send a written estimate within 48 hours — no surprise quotes, no high-pressure sales, no bait-and-switch. If our number doesn't fit, we'll tell you what does.",
+      "Monthly engagements from ₹2.5 lakh in India and USD 3,000 elsewhere; USD 5,000 for clients in the US, UK, Canada and Europe. After the working session we send one written scope and price.",
   },
 ];
 
@@ -78,12 +78,12 @@ export default function ServiceFAQ({ questions = DEFAULT_QUESTIONS, serviceId = 
       ) : null}
       <div className="service-faq-inner">
         <header className="service-faq-header">
-          <p className="service-faq-eyebrow">Before you book</p>
+          <p className="service-faq-eyebrow">Before you apply</p>
           <h2 id="service-faq-heading" className="service-faq-heading font-primary">
             The questions everyone asks.
           </h2>
           <p className="service-faq-sub">
-            Six things we get asked on every discovery call. If
+            Six things we get asked on every working session. If
             yours isn't here, ask on the call — we don't keep a
             mystery deck.
           </p>

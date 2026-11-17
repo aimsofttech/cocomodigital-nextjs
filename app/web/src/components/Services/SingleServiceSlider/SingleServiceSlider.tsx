@@ -2,7 +2,6 @@
 "use client";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useCart } from "@/src/lib/cart";
 import Slider from "react-slick";
 import Modal from "@/src/components/common/TailwindModal/TailwindModal";
 import PlayBtn from "../../common/PlayBtn/PlayBtn";
@@ -17,38 +16,12 @@ const ReactPlayer = lazy(() => import("react-player"));
 
 const SingleServiceSlider = ({ service }) => {
   const [sliderId, setSliderId] = useState(null);
-  // Default to Recurring — most clients on this page are after
-  // ongoing services (channel ops, content production, ad
-  // management) rather than one-off projects, so pre-selecting
-  // Recurring matches the dominant intent and removes a click.
-  const [selectedOption, setSelectedOption] = useState("Recurring");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const descRef = useRef(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const [viewAllLines, setViewAllLines] = useState(false);
   const [imgErrors, setImgErrors] = useState({});
-  const { items: cartItems, addItem, removeItem } = useCart();
-
-  const isItemInCart = (itemId) => {
-    return cartItems?.some((cartItem) => cartItem?.id === itemId);
-  };
-
-  const handleToggleCart = (item) => {
-    if (isItemInCart(item?.id)) {
-      removeItem(item?.id);
-    } else {
-      addItem({
-        ...item,
-        subscriptionType: selectedOption,
-      });
-    }
-  };
-
-  const handleOptionSelect = (option) => {
-    setSelectedOption(option);
-  };
-
   const handlePlayVideo = (videoUrl) => {
     setVideoUrl(videoUrl);
     setIsModalOpen(true);
@@ -277,51 +250,15 @@ const SingleServiceSlider = ({ service }) => {
                 </div>
               )}
             </div>
-            {/* "Running Time" h3 removed — the label was hardcoded
-                video-deliverable copy that read as nonsense on
-                non-video services (community management, channel
-                ops, advertising, content operations, etc.). The
-                Recurring / One Time Only buttons below are
-                self-labeled, so no section heading is needed. If
-                a more universal label ever feels missing, the
-                cleanest path is to make it API-driven so each
-                service can supply its own (or omit) heading. */}
-            <div className="service-details-banner-content-one-time-reccuring-btn-wrapper">
-              <button
-                className={`inline-flex items-center justify-center rounded-md border border-transparent font-medium transition focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 w-1/2 p-2 service-details-banner-content-one-time-reccuring-btn ${selectedOption === "Recurring"
-                  ? "border-black bg-[#fff000] text-black hover:bg-[#f4e600]"
-                  : "border-neutral-400 bg-transparent text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                onClick={() => handleOptionSelect("Recurring")}
-              >
-                Recurring
-              </button>
-              <button
-                className={`inline-flex items-center justify-center rounded-md border border-transparent font-medium transition focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 w-1/2 p-2 service-details-banner-content-one-time-reccuring-btn ${selectedOption === "One Time Only"
-                  ? "border-black bg-[#fff000] text-black hover:bg-[#f4e600]"
-                  : "border-neutral-400 bg-transparent text-neutral-700 hover:bg-neutral-100"
-                  }`}
-                onClick={() => handleOptionSelect("One Time Only")}
-              >
-                One Time Only
-              </button>
-            </div>
-
-            {/* CTA reframed from "Add Now / Added" (e-commerce idiom)
-                to "Add to call / On your call ✓" (lead-gen idiom).
-                Same toggle mechanic + same cart-builder behaviour
-                under the hood — only the language changed so the
-                user reads it as "I'm queueing this up to discuss
-                with Anil" rather than "I'm checking out". */}
-            <button
-              className={`inline-flex items-center justify-center rounded-md border border-transparent font-medium transition focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 w-full px-4 py-2 service-details-banner-content-add-btn ${isItemInCart(service?.id) ? "border-black bg-[#fff000] text-black hover:bg-[#f4e600]" : "border-black bg-black text-white hover:bg-neutral-800"
-                }`}
-              onClick={() => handleToggleCart(service)}
+            {/* One next step per service. The Recurring / One Time Only
+                toggle and the "Add to call" basket are gone: a buyer
+                applies, and the scope is written with them. */}
+            <Link
+              to="/contact-us"
+              className="inline-flex items-center justify-center rounded-md border border-black bg-black px-4 py-2 font-medium text-white transition hover:bg-neutral-800 service-details-banner-content-add-btn"
             >
-              {isItemInCart(service?.id)
-                ? "On your call ✓"
-                : "Add to call"}
-            </button>
+              Apply to work with us
+            </Link>
           </div>
         </div>
 

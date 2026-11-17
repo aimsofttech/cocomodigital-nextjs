@@ -102,7 +102,7 @@ export const fallbackBlogAuthor: BlogAuthor = {
   author_name: "From the Cocoma desk",
   role_line: "Notes by the team behind every cut, design & launch.",
   author_description:
-    "Most posts here are written by editors, designers and channel ops folks who are mid-cut on real client work. If something here sparked an idea, Anil takes the 15-min call personally.",
+    "Most posts here are written by editors, designers and channel ops folks who are mid-cut on real client work. If something here sparked an idea, apply to work with us.",
   cta_first_name: "Anil",
 };
 
