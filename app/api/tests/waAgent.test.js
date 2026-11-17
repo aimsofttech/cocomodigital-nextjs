@@ -827,7 +827,8 @@ const UNAUTH = { ok: false, reason: 'unauthorized', message: 'Invalid or missing
     assert.ok(owner.text.includes('3:00 PM'), 'owner sees the slot in IST');
     assert.ok(owner.html.includes('via WhatsApp') && owner.html.includes(bookingRef));
     assert.ok(owner.html.includes('919000000099'));
-    assert.strictEqual(visitor.subject, 'Meeting Request Received');
+    // Subject wording merged to main in PR #10 (request awaiting confirmation, slot in the visitor's zone).
+    assert.match(visitor.subject, /^Your discovery call request for .*3:00 PM \(Asia\/Kolkata\), awaiting confirmation$/, visitor.subject);
     assert.ok(visitor.html.includes('3:00 PM'));
   });
 
