@@ -21,14 +21,27 @@ const logger = require('../../utils/logger');
  * caller could set that header to anything, but the result only feeds an
  * informational location — no more trusted than the name or email they type.
  */
-const visitorIpOf = (req) => publicIpOrNull(req.get('x-visitor-ip')) || req.ip;
+const visitorIpOf = (req) => publicIpOrNull(req.get('x-visitor-ip')) || publicIpOrNull(req.ip);
 
 /** Resolve and attach the visitor's location to a just-created meeting.
-    Writes only userLocation, and leaves it empty when the lookup fails. */
-const captureMeetingLocation = async (meetingId, ip) => {
+    Writes only userLocation, and leaves it empty when the lookup fails.
+    Logs the outcome either way, so a missing location can be traced in the
+    server log to its cause: no visitor IP reached the API, or the lookup failed. */
+const captureMeetingLocation = async (meetingId, req) => {
+  const ip = visitorIpOf(req);
+  if (!ip) {
+    logger.info(`Location not captured for meeting ${meetingId}: no public visitor IP `
+      + `(x-visitor-ip: ${req.get('x-visitor-ip') || 'missing'}, req.ip: ${req.ip})`);
+    return;
+  }
   const userLocation = await lookupLocation(ip);
-  if (!userLocation) return;
+  if (!userLocation) {
+    logger.warn(`Location not captured for meeting ${meetingId}: lookup failed for ${ip}`);
+    return;
+  }
   await Meeting.updateOne({ _id: meetingId }, { $set: { userLocation } });
+  logger.info(`Location captured for meeting ${meetingId}: `
+    + `${[userLocation.city, userLocation.country].filter(Boolean).join(', ')} (${userLocation.source})`);
 };
 
 const contact = async (req, res) => {
@@ -237,7 +250,7 @@ const freeConsultation = async (req, res) => {
 
     // Not awaited — the booking must not wait on (or fail because of) a
     // third-party geolocation lookup; the location is filled in moments later.
-    captureMeetingLocation(doc._id, visitorIpOf(req))
+    captureMeetingLocation(doc._id, req)
       .catch((err) => logger.error(`Location capture failed for meeting ${doc._id}: ${err.message}`));
 
     // Not awaited — the slot is already reserved; sendMail logs its own

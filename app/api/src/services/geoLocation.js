@@ -8,13 +8,15 @@
  * private/loopback address, a timeout, a rate limit, a malformed response —
  * resolves to null and is at most logged. Nothing in this module throws.
  *
- * Provider: ipinfo.io. It answers over HTTPS without a key (free tier, rate
- * limited); set IPINFO_TOKEN for the higher quota. IP geolocation is reliable
+ * Providers: ipinfo.io first (HTTPS, works without a key but rate limited; set
+ * IPINFO_TOKEN for the higher quota), then ipwho.is as a keyless fallback.
+ * Diagnose from the server with: node scripts/check-geolocation.js
+ * IP geolocation is reliable
  * at country level and approximate at city level (mobile carriers and VPNs
  * often resolve to a hub city), so treat the city as a hint.
  *
  * Optional .env:
- *   GEOIP_PROVIDER     'ipinfo' (default) | 'none' to switch lookups off
+ *   GEOIP_PROVIDER     'none' switches lookups off (anything else: on)
  *   IPINFO_TOKEN       ipinfo.io access token
  *   GEOIP_TIMEOUT_MS   per-lookup timeout (default 3000)
  */
@@ -88,39 +90,68 @@ const countryNameOf = (code) => {
   }
 };
 
-const lookupIpinfo = async (ip, timeoutMs) => {
-  const token = process.env.IPINFO_TOKEN;
-  const url = `https://ipinfo.io/${encodeURIComponent(ip)}/json${token ? `?token=${encodeURIComponent(token)}` : ''}`;
-
+/** GET a provider URL as JSON; throws with a readable reason on any failure. */
+const getJson = async (url, timeoutMs) => {
   const res = await fetch(url, {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(timeoutMs),
   });
-  if (!res.ok) {
-    logger.warn(`Geolocation lookup failed: ipinfo responded ${res.status}`);
-    return null;
-  }
-
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const body = await res.json().catch(() => null);
-  if (!body || typeof body !== 'object' || body.bogon) return null;
+  if (!body || typeof body !== 'object') throw new Error('invalid JSON response');
+  return body;
+};
 
-  const countryCode = cleanField(body.country);
-  const validCode = countryCode && /^[A-Z]{2}$/.test(countryCode) ? countryCode : null;
-  const city = cleanField(body.city);
-  if (!city && !validCode) return null;
-
+/** Shape a provider's answer, or throw when it carries no usable location. */
+const toLocation = ({ city, region, countryCode }, source) => {
+  const code = cleanField(countryCode);
+  const validCode = code && /^[A-Z]{2}$/.test(code) ? code : null;
+  const cleanCity = cleanField(city);
+  if (!cleanCity && !validCode) throw new Error('no city or country in response');
   return {
-    city,
-    region: cleanField(body.region),
+    city: cleanCity,
+    region: cleanField(region),
     country: countryNameOf(validCode) || validCode,
     countryCode: validCode,
-    source: 'ipinfo',
+    source,
   };
 };
 
+/* Tried in order; the first answer wins. ipinfo is primary. ipwho.is is a
+   keyless fallback, so a rate limit or block on one service (common for
+   requests from hosting/VPS addresses) doesn't leave the location empty. */
+const PROVIDERS = [
+  {
+    name: 'ipinfo',
+    lookup: async (ip, timeoutMs) => {
+      const token = process.env.IPINFO_TOKEN;
+      const body = await getJson(
+        `https://ipinfo.io/${encodeURIComponent(ip)}/json${token ? `?token=${encodeURIComponent(token)}` : ''}`,
+        timeoutMs,
+      );
+      if (body.bogon) throw new Error('not a public IP');
+      return toLocation({ city: body.city, region: body.region, countryCode: body.country }, 'ipinfo');
+    },
+  },
+  {
+    name: 'ipwhois',
+    lookup: async (ip, timeoutMs) => {
+      const body = await getJson(
+        `https://ipwho.is/${encodeURIComponent(ip)}?fields=success,message,city,region,country_code`,
+        timeoutMs,
+      );
+      if (body.success === false) throw new Error(body.message || 'lookup refused');
+      return toLocation({ city: body.city, region: body.region, countryCode: body.country_code }, 'ipwhois');
+    },
+  },
+];
+
+const reasonOf = (err) => (err && err.name === 'TimeoutError' ? 'timed out' : (err && err.message) || String(err));
+
 /**
  * Resolve an IP to { city, region, country, countryCode, source, capturedAt },
- * or null when it can't be (disabled, private IP, provider error/timeout).
+ * or null when it can't be (disabled, private IP, every provider failed).
+ * Each provider failure is logged with its reason.
  */
 const lookupLocation = async (rawIp) => {
   if ((process.env.GEOIP_PROVIDER || '').toLowerCase() === 'none') return null;
@@ -132,13 +163,15 @@ const lookupLocation = async (rawIp) => {
     ? Number(process.env.GEOIP_TIMEOUT_MS)
     : DEFAULT_TIMEOUT_MS;
 
-  try {
-    const loc = await lookupIpinfo(ip, timeoutMs);
-    return loc ? { ...loc, capturedAt: new Date() } : null;
-  } catch (err) {
-    logger.warn(`Geolocation lookup failed: ${err.name === 'TimeoutError' ? 'timed out' : err.message}`);
-    return null;
+  for (const provider of PROVIDERS) {
+    try {
+      const loc = await provider.lookup(ip, timeoutMs);
+      return { ...loc, capturedAt: new Date() };
+    } catch (err) {
+      logger.warn(`Geolocation lookup via ${provider.name} failed for ${ip}: ${reasonOf(err)}`);
+    }
   }
+  return null;
 };
 
 module.exports = { lookupLocation, publicIpOrNull };
