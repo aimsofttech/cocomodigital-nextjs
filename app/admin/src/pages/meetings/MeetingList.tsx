@@ -78,6 +78,13 @@ function formatIST(utcIso?: string | Date | null): string | null {
   return `${date} · ${time} IST`;
 }
 
+// Visitor's approximate location ("Mumbai, India"), resolved from their IP at
+// booking time. Empty for older meetings and failed lookups.
+function formatLocation(loc?: { city?: string; country?: string } | null): string | null {
+  const parts = [loc?.city, loc?.country].filter(Boolean);
+  return parts.length ? parts.join(', ') : null;
+}
+
 // The meeting's start as IST "HH:mm" — the zone the reschedule grid works in.
 function istHHmm(utcIso?: string | Date | null): string {
   if (!utcIso) return '';
@@ -477,6 +484,7 @@ export default function MeetingList() {
     },
     { key: 'email', label: 'Email', sortable: true, render: (row: any) => row.email || 'N/A' },
     { key: 'phone', label: 'Phone', render: (row: any) => row.phone || 'N/A' },
+    { key: 'userLocation', label: 'Location', render: (row: any) => formatLocation(row.userLocation) || 'N/A' },
     {
       key: 'meetingDate', label: 'Meeting Date (IST)', sortable: true,
       render: (row: any) => formatIST(row.meeting_start_utc)
@@ -570,6 +578,8 @@ export default function MeetingList() {
               <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Company</p><p>{selected.companyName || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">City</p><p>{selected.userLocation?.city || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-500">Country</p><p>{selected.userLocation?.country || 'N/A'}</p></div>
               <div>
                 <p className="text-xs text-gray-500">Meeting Date &amp; Time (IST)</p>
                 <p>{formatIST(selected.meeting_start_utc) || `${selected.meetingDate || 'N/A'}${selected.meetingTime ? ` · ${selected.meetingTime}` : ''}`}</p>

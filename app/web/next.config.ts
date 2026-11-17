@@ -21,6 +21,16 @@ const nextConfig: NextConfig = {
      because legacy images (legacyImageUrl fields on docs not yet
      re-uploaded) still resolve from there. */
   images: {
+    /* Dev only: skip the server-side image optimizer.
+       In dev the optimizer downloads every remote image on a page in
+       parallel (~87 S3 images on the homepage) and aborts any download
+       that takes longer than 7s — a hardcoded limit in Next. On a normal
+       office/home connection dozens of them exceed that, flooding the
+       terminal with `TimeoutError: The operation was aborted due to
+       timeout` and leaving those images broken. With `unoptimized` the
+       browser loads the images straight from S3 instead. Production
+       (`next build` / `next start`) is unaffected and still optimizes. */
+    unoptimized: process.env.NODE_ENV === "development",
     remotePatterns: [
       {
         protocol: "https",

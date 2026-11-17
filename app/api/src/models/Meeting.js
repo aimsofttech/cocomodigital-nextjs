@@ -21,6 +21,23 @@ const meetingSchema = new mongoose.Schema({
   service: { type: String, trim: true },
   source_page: { type: String, trim: true },
 
+  // Approximate visitor location, resolved from their IP right after booking
+  // (see services/geoLocation.js). Every meeting carries the key; its values
+  // stay empty ('' / null) when the lookup fails or predates this feature
+  // (scripts/backfill-meeting-user-location.js), so treat empty as unknown.
+  userLocation: {
+    type: {
+      city: { type: String, trim: true },
+      region: { type: String, trim: true },
+      country: { type: String, trim: true },
+      countryCode: { type: String, trim: true },
+      source: { type: String, trim: true },
+      capturedAt: { type: Date },
+    },
+    default: () => ({ city: '', region: '', country: '', countryCode: '', source: '', capturedAt: null }),
+    _id: false,
+  },
+
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'rejected', 'completed'],

@@ -112,6 +112,34 @@ export async function GET(
   return NextResponse.json(result);
 }
 
+/* Loopback / private / link-local / CGNAT — proxy hops, never the visitor. */
+const isPrivateIp = (ip: string): boolean =>
+  /^(10\.|127\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(ip) ||
+  /^(::1?$|f[cd]|fe80)/i.test(ip);
+
+const IP_SHAPE = /^[0-9a-f.:]{2,45}$/i;
+
+/**
+ * The visitor's public IP as seen by the proxies in front of this app.
+ * The live site sits behind Cloudflare, so CF-Connecting-IP is the real
+ * visitor there — X-Forwarded-For's right end would be a Cloudflare edge
+ * server. Without Cloudflare (local, staging), X-Forwarded-For is read
+ * right-to-left (the right end is what our own reverse proxy appended, so it
+ * can't be forged by the client), skipping private proxy hops. The API
+ * re-validates whatever this returns.
+ */
+const visitorIpOf = (req: NextRequest): string | null => {
+  const candidates = [
+    req.headers.get("cf-connecting-ip"),
+    ...(req.headers.get("x-forwarded-for") ?? "").split(",").reverse(),
+  ];
+  for (const raw of candidates) {
+    const ip = (raw ?? "").trim().replace(/^::ffff:(?=\d+\.)/i, "");
+    if (IP_SHAPE.test(ip) && !isPrivateIp(ip)) return ip;
+  }
+  return null;
+};
+
 /* Lead/form submissions → corresponding Express api endpoints. */
 const POST_MAP: Record<string, string> = {
   "contact-leads": "/contact",
@@ -136,14 +164,21 @@ export async function POST(
 
   const contentType = req.headers.get("content-type") ?? "";
   const init: RequestInit = { method: "POST" };
+  const headers: Record<string, string> = {};
   if (contentType.includes("application/json")) {
-    init.headers = { "content-type": "application/json" };
+    headers["content-type"] = "application/json";
     init.body = JSON.stringify(await req.json());
   } else {
     /* multipart/form-data (e.g. résumé upload) — forward as-is. */
-    init.headers = { "content-type": contentType };
+    headers["content-type"] = contentType;
     init.body = Buffer.from(await req.arrayBuffer());
   }
+  /* This server makes the upstream call, so without this the API would only
+     ever see our own address. It uses the visitor's IP for an approximate
+     city/country on meeting bookings. */
+  const visitorIp = visitorIpOf(req);
+  if (visitorIp) headers["x-visitor-ip"] = visitorIp;
+  init.headers = headers;
 
   try {
     const res = await fetch(`${API_BASE}${target}`, init);

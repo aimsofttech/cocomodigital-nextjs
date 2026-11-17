@@ -11,7 +11,25 @@ const {
   addDays,
 } = require('../../utils/bookingWindow');
 const { ingestSafe: crmIngest } = require('../../crm/services/leadIngest');
+const { lookupLocation, publicIpOrNull } = require('../../services/geoLocation');
 const logger = require('../../utils/logger');
+
+/**
+ * The visitor's IP for a booking. Bookings normally arrive via the Next.js
+ * proxy (/content-api/consultation-leads), so req.ip is the web server, not the
+ * visitor; the proxy passes the visitor's address in X-Visitor-Ip. A direct
+ * caller could set that header to anything, but the result only feeds an
+ * informational location — no more trusted than the name or email they type.
+ */
+const visitorIpOf = (req) => publicIpOrNull(req.get('x-visitor-ip')) || req.ip;
+
+/** Resolve and attach the visitor's location to a just-created meeting.
+    Writes only userLocation, and leaves it empty when the lookup fails. */
+const captureMeetingLocation = async (meetingId, ip) => {
+  const userLocation = await lookupLocation(ip);
+  if (!userLocation) return;
+  await Meeting.updateOne({ _id: meetingId }, { $set: { userLocation } });
+};
 
 const contact = async (req, res) => {
   const { name, email, phone, subject, message } = req.body;
@@ -216,6 +234,11 @@ const freeConsultation = async (req, res) => {
       }
       throw err;
     }
+
+    // Not awaited — the booking must not wait on (or fail because of) a
+    // third-party geolocation lookup; the location is filled in moments later.
+    captureMeetingLocation(doc._id, visitorIpOf(req))
+      .catch((err) => logger.error(`Location capture failed for meeting ${doc._id}: ${err.message}`));
 
     // Not awaited — the slot is already reserved; sendMail logs its own
     // delivery result, this catch only covers a failure building the message.
