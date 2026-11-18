@@ -78,10 +78,12 @@ function formatIST(utcIso?: string | Date | null): string | null {
   return `${date} · ${time} IST`;
 }
 
-// Visitor's approximate location ("Mumbai, India"), resolved from their IP at
-// booking time. Empty for older meetings and failed lookups.
-function formatLocation(loc?: { city?: string; country?: string } | null): string | null {
-  const parts = [loc?.city, loc?.country].filter(Boolean);
+// Visitor's approximate location ("Mumbai, Maharashtra, India"), resolved from
+// their IP at booking time. Empty for older meetings and failed lookups. The
+// region is skipped when it just repeats the city (e.g. "Delhi, Delhi").
+function formatLocation(loc?: { city?: string; region?: string; country?: string } | null): string | null {
+  const region = loc?.region && loc.region.toLowerCase() !== (loc?.city || '').toLowerCase() ? loc.region : '';
+  const parts = [loc?.city, region, loc?.country].filter(Boolean);
   return parts.length ? parts.join(', ') : null;
 }
 
@@ -578,8 +580,11 @@ export default function MeetingList() {
               <div><p className="text-xs text-gray-500">Email</p><p>{selected.email || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Phone</p><p>{selected.phone || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-500">Company</p><p>{selected.companyName || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-500">City</p><p>{selected.userLocation?.city || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-500">Country</p><p>{selected.userLocation?.country || 'N/A'}</p></div>
+              <div className="col-span-2 grid grid-cols-3 gap-3">
+                <div><p className="text-xs text-gray-500">City</p><p>{selected.userLocation?.city || 'N/A'}</p></div>
+                <div><p className="text-xs text-gray-500">Region</p><p>{selected.userLocation?.region || 'N/A'}</p></div>
+                <div><p className="text-xs text-gray-500">Country</p><p>{selected.userLocation?.country || 'N/A'}</p></div>
+              </div>
               <div>
                 <p className="text-xs text-gray-500">Meeting Date &amp; Time (IST)</p>
                 <p>{formatIST(selected.meeting_start_utc) || `${selected.meetingDate || 'N/A'}${selected.meetingTime ? ` · ${selected.meetingTime}` : ''}`}</p>
